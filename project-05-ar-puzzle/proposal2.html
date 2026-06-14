@@ -31,111 +31,91 @@ html,body{
    ════════════════════════════════ */
 #left-panel{
   width:680px;min-width:680px;height:1080px;
-  background:var(--cream);display:flex;flex-direction:column;
+  background:#0D0F1C;display:flex;flex-direction:column;
   position:relative;z-index:10;
-  box-shadow:8px 0 40px rgba(0,0,0,0.35);
+  box-shadow:8px 0 60px rgba(0,0,0,0.55);
 }
 
 /* Header */
 .lp-header{
-  background:var(--blue);padding:26px 32px 20px;flex-shrink:0;position:relative;
-  background:linear-gradient(135deg,#003588 0%,#0047AB 60%,#0a5fcc 100%);
+  padding:26px 28px 22px;flex-shrink:0;position:relative;
+  border-bottom:1px solid rgba(255,255,255,0.06);
 }
 .lp-header h1{
-  font-family:'Poppins',sans-serif;font-size:1.75rem;font-weight:800;
-  color:var(--white);line-height:1.15;
+  font-family:'Poppins',sans-serif;font-size:1.3rem;font-weight:700;
+  color:#fff;letter-spacing:-0.01em;line-height:1.2;
 }
-.lp-header .sub{font-size:0.82rem;color:rgba(255,255,255,0.72);margin-top:3px;}
+.lp-header .sub{
+  font-size:0.7rem;color:rgba(255,255,255,0.32);margin-top:3px;letter-spacing:0.02em;
+}
 
-/* Lang toggle — fixed in header */
+/* Lang toggle */
 .lang-toggle{
-  position:absolute;top:20px;right:24px;
-  display:flex;background:rgba(255,255,255,0.15);
+  position:absolute;top:24px;right:24px;
+  display:flex;background:rgba(255,255,255,0.07);
   border-radius:9999px;padding:3px;gap:2px;
+  border:1px solid rgba(255,255,255,0.1);
 }
 .lang-btn{
-  padding:6px 16px;font-family:'Poppins',sans-serif;font-size:0.78rem;font-weight:700;
-  border:none;background:transparent;color:rgba(255,255,255,0.7);
-  cursor:pointer;min-height:34px;border-radius:9999px;transition:all 0.2s;
+  padding:5px 14px;font-family:'Poppins',sans-serif;font-size:0.72rem;font-weight:700;
+  border:none;background:transparent;color:rgba(255,255,255,0.38);
+  cursor:pointer;min-height:30px;border-radius:9999px;transition:all 0.2s;
 }
-.lang-btn.active{background:var(--gold);color:var(--dark);}
+.lang-btn.active{background:#F5A623;color:#0D0F1C;}
 
-/* ── HOW-TO STRIP (compact) ── */
-.how-strip{
-  display:flex;gap:0;flex-shrink:0;
-  border-bottom:1px solid var(--border);
-  background:var(--white);
-}
-.how-step{
-  flex:1;display:flex;flex-direction:column;align-items:center;
-  padding:12px 8px 10px;gap:4px;border-right:1px solid var(--border);
-  position:relative;
-}
-.how-step:last-child{border-right:none;}
-.how-step .sn{
-  width:24px;height:24px;border-radius:50%;background:var(--blue);
-  color:#fff;font-family:'Poppins',sans-serif;font-weight:700;font-size:0.7rem;
-  display:flex;align-items:center;justify-content:center;flex-shrink:0;
-}
-.how-step .st{font-size:0.72rem;color:var(--muted);text-align:center;line-height:1.3;}
+/* ── HOW-TO STRIP — hidden in sleek mode ── */
+.how-strip{display:none;}
 
-/* ── TAB BAR ── */
+/* ── TAB BAR — pill style ── */
 .tab-bar{
-  display:flex;position:relative;flex-shrink:0;
-  background:var(--white);
-  border-bottom:2px solid var(--border);
+  display:flex;gap:10px;padding:16px 20px;flex-shrink:0;
+  border-bottom:1px solid rgba(255,255,255,0.05);
 }
 .tab-btn{
-  flex:1;padding:14px 12px;border:none;background:transparent;
-  font-family:'Poppins',sans-serif;font-weight:700;font-size:0.88rem;
-  color:var(--muted);cursor:pointer;transition:color 0.25s;
-  position:relative;z-index:1;
-  display:flex;flex-direction:column;align-items:center;gap:3px;
+  flex:1;padding:13px 16px;border-radius:12px;
+  border:1px solid rgba(255,255,255,0.08);
+  background:rgba(255,255,255,0.04);
+  font-family:'Poppins',sans-serif;font-weight:600;font-size:0.8rem;
+  color:rgba(255,255,255,0.38);cursor:pointer;
+  transition:all 0.25s cubic-bezier(0.4,0,0.2,1);
+  display:flex;flex-direction:column;align-items:flex-start;gap:2px;
+  text-align:left;
 }
-.tab-btn.active{color:var(--blue);}
+.tab-btn:active{transform:scale(0.98);}
+.tab-btn.active{
+  background:rgba(74,138,255,0.14);
+  border-color:rgba(74,138,255,0.38);
+  color:#fff;
+}
 .tab-btn .tab-num{
-  font-size:0.65rem;font-weight:700;letter-spacing:0.08em;
-  text-transform:uppercase;color:var(--teal);
+  font-size:0.58rem;font-weight:700;letter-spacing:0.12em;
+  text-transform:uppercase;color:rgba(255,255,255,0.28);
+  transition:color 0.25s;
 }
-.tab-btn.active .tab-num{color:var(--teal);}
-/* Sliding indicator */
-.tab-indicator{
-  position:absolute;bottom:-2px;left:0;width:50%;height:3px;
-  background:linear-gradient(90deg,var(--blue),var(--blue-light));
-  border-radius:3px 3px 0 0;
-  transition:left 0.3s cubic-bezier(0.4,0,0.2,1);
-}
+.tab-btn.active .tab-num{color:#4A8AFF;}
+.tab-indicator{display:none;}
 
-/* ── TAB BODY (scrollable) ── */
-.tab-body{
-  flex:1;position:relative;overflow:hidden;
-}
-.tab-body::-webkit-scrollbar{display:none;}
-
-/* Tab content panels */
+/* ── TAB BODY ── */
+.tab-body{flex:1;position:relative;overflow:hidden;}
 .tab-content{
   position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;
-  padding:20px 24px 28px;
-  opacity:0;transform:translateX(30px);
+  padding:22px 20px 32px;
+  opacity:0;transform:translateX(28px);
   pointer-events:none;
   transition:opacity 0.3s cubic-bezier(0.4,0,0.2,1),
              transform 0.3s cubic-bezier(0.4,0,0.2,1);
 }
-.tab-content::-webkit-scrollbar{width:4px;}
+.tab-content::-webkit-scrollbar{width:3px;}
 .tab-content::-webkit-scrollbar-track{background:transparent;}
-.tab-content::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
-.tab-content.active{
-  opacity:1;transform:translateX(0);pointer-events:all;
-}
-.tab-content.exit-left{
-  opacity:0;transform:translateX(-30px);pointer-events:none;
-}
+.tab-content::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.12);border-radius:4px;}
+.tab-content.active{opacity:1;transform:translateX(0);pointer-events:all;}
+.tab-content.exit-left{opacity:0;transform:translateX(-28px);pointer-events:none;}
 
-/* ── ARTWORK PREVIEW (big, in tab) ── */
+/* ── ARTWORK PREVIEW ── */
 .art-preview{
-  width:100%;height:240px;border-radius:14px;
-  overflow:hidden;margin-bottom:18px;position:relative;
-  box-shadow:0 8px 32px rgba(0,0,0,0.18);
+  width:100%;height:260px;border-radius:16px;
+  overflow:hidden;margin-bottom:20px;position:relative;
+  box-shadow:0 12px 48px rgba(0,0,0,0.5);
 }
 /* Artwork 1 — fabric strips */
 .preview-art1{
@@ -185,57 +165,54 @@ html,body{
 }
 /* Active glow on selected preview */
 .art-preview.active-glow{
-  box-shadow:0 0 0 3px var(--blue),0 8px 32px rgba(0,71,171,0.3);
+  box-shadow:0 0 0 2px #4A8AFF,0 12px 48px rgba(74,138,255,0.25);
   animation:previewPulse 2.5s ease-in-out infinite;
 }
 @keyframes previewPulse{
-  0%,100%{box-shadow:0 0 0 3px var(--blue),0 8px 32px rgba(0,71,171,0.25);}
-  50%{box-shadow:0 0 0 5px var(--blue-light),0 8px 40px rgba(0,71,171,0.45);}
+  0%,100%{box-shadow:0 0 0 2px #4A8AFF,0 12px 48px rgba(74,138,255,0.2);}
+  50%{box-shadow:0 0 0 3px #4A8AFF,0 12px 60px rgba(74,138,255,0.38);}
 }
 
 /* Art info block */
-.art-num-badge{
-  display:inline-flex;align-items:center;gap:6px;
-  background:rgba(0,180,166,0.12);border:1.5px solid var(--teal);
-  color:var(--teal);border-radius:9999px;
-  padding:4px 14px;font-family:'Poppins',sans-serif;
-  font-size:0.65rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;
-  margin-bottom:10px;
-}
+.art-num-badge{display:none;}
 .art-title{
-  font-family:'Poppins',sans-serif;font-size:1.35rem;font-weight:800;
-  color:var(--dark);line-height:1.2;margin-bottom:4px;
+  font-family:'Poppins',sans-serif;font-size:1.5rem;font-weight:800;
+  color:#fff;line-height:1.2;margin-bottom:6px;
 }
-.art-artist{font-size:0.9rem;color:var(--blue);font-weight:600;margin-bottom:2px;}
-.art-medium{font-size:0.78rem;color:var(--muted);margin-bottom:14px;}
-
-/* Divider */
-.art-divider{height:1px;background:var(--border);margin:14px 0;}
+.art-artist{
+  font-size:0.78rem;color:rgba(255,255,255,0.38);
+  font-weight:500;margin-bottom:16px;
+}
+.art-medium{display:none;}
+.art-divider{display:none;}
 
 /* Description */
 .art-desc{
-  font-size:0.88rem;color:var(--muted);line-height:1.6;margin-bottom:20px;
+  font-size:0.84rem;color:rgba(255,255,255,0.48);line-height:1.68;margin-bottom:28px;
 }
 
 /* CTA button */
 .cta-btn{
   display:flex;align-items:center;justify-content:center;gap:10px;
-  width:100%;padding:18px 24px;border-radius:14px;border:none;
-  background:linear-gradient(135deg,var(--blue) 0%,var(--blue-light) 100%);
-  color:#fff;font-family:'Poppins',sans-serif;font-weight:700;font-size:1rem;
-  cursor:pointer;min-height:64px;
-  box-shadow:0 4px 20px rgba(0,71,171,0.35);
+  width:100%;padding:20px 24px;border-radius:14px;
+  border:none;
+  background:linear-gradient(135deg,#F5A623 0%,#FFCC00 100%);
+  color:#0D0F1C;font-family:'Poppins',sans-serif;font-weight:800;font-size:1rem;
+  cursor:pointer;min-height:68px;
+  box-shadow:0 4px 28px rgba(245,166,35,0.3);
   transition:transform 0.15s,box-shadow 0.15s;
   position:relative;overflow:hidden;
 }
 .cta-btn::after{
   content:'';position:absolute;inset:0;
-  background:linear-gradient(135deg,transparent 40%,rgba(255,255,255,0.12) 100%);
+  background:linear-gradient(135deg,transparent 40%,rgba(255,255,255,0.18) 100%);
 }
-.cta-btn:active{transform:scale(0.97);box-shadow:0 2px 12px rgba(0,71,171,0.3);}
+.cta-btn:active{transform:scale(0.97);box-shadow:0 2px 14px rgba(245,166,35,0.2);}
 .cta-btn.playing{
-  background:linear-gradient(135deg,var(--teal) 0%,#00c9b8 100%);
-  box-shadow:0 4px 20px rgba(0,180,166,0.4);
+  background:rgba(255,255,255,0.07);
+  border:1.5px solid rgba(255,255,255,0.14);
+  color:rgba(255,255,255,0.65);
+  box-shadow:none;
 }
 .cta-btn .cta-icon{font-size:1.2rem;z-index:1;}
 .cta-btn .cta-text{z-index:1;}
@@ -656,30 +633,14 @@ body.lang-en .en-text{display:inline;}
       </div>
     </div>
 
-    <!-- How-to strip -->
-    <div class="how-strip">
-      <div class="how-step">
-        <div class="sn">1</div>
-        <div class="st"><span class="bm-text">Pilih lukisan</span><span class="en-text">Choose artwork</span></div>
-      </div>
-      <div class="how-step">
-        <div class="sn">2</div>
-        <div class="st"><span class="bm-text">Seret kepingan</span><span class="en-text">Drag pieces</span></div>
-      </div>
-      <div class="how-step">
-        <div class="sn">3</div>
-        <div class="st"><span class="bm-text">Lengkapkan semua!</span><span class="en-text">Complete all!</span></div>
-      </div>
-    </div>
-
     <!-- Tab bar -->
     <div class="tab-bar">
       <button class="tab-btn active" id="tabBtn1" onclick="switchTab(1)">
-        <span class="tab-num"><span class="bm-text">Lukisan</span><span class="en-text">Artwork</span> 1</span>
+        <span class="tab-num">No. 1</span>
         <span>Rhythm of Nationality</span>
       </button>
       <button class="tab-btn" id="tabBtn2" onclick="switchTab(2)">
-        <span class="tab-num"><span class="bm-text">Lukisan</span><span class="en-text">Artwork</span> 2</span>
+        <span class="tab-num">No. 2</span>
         <span>Unity in Diversity</span>
       </button>
       <div class="tab-indicator" id="tabIndicator"></div>
@@ -697,19 +658,11 @@ body.lang-en .en-text{display:inline;}
           <div class="strip s5"></div><div class="strip s6"></div>
           <div class="strip s7"></div><div class="strip s8"></div>
         </div>
-        <div class="art-num-badge">
-          &#x1F3A8; <span class="bm-text">Lukisan 1 daripada 2</span><span class="en-text">Artwork 1 of 2</span>
-        </div>
         <div class="art-title">Rhythm of Nationality</div>
-        <div class="art-artist">Kong Kien Choong &middot; 2004</div>
-        <div class="art-medium">
-          <span class="bm-text">Media campuran atas kanvas</span>
-          <span class="en-text">Mixed media on canvas</span>
-        </div>
-        <div class="art-divider"></div>
+        <div class="art-artist">Kong Kien Choong &middot; 2004 &middot; <span class="bm-text">Media campuran</span><span class="en-text">Mixed media</span></div>
         <div class="art-desc">
-          <span class="bm-text">Karya ini merayakan kepelbagaian budaya Malaysia melalui jalur-jalur kain tradisional yang berwarna-warni. Setiap jalur mewakili kaum dan budaya yang berbeza, namun bersatu dalam satu komposisi yang harmoni — mencerminkan semangat kebangsaan Malaysia.</span>
-          <span class="en-text">This work celebrates Malaysia's rich cultural diversity through vibrant traditional fabric strips. Each strip represents a different community and culture, yet they unite in one harmonious composition — reflecting the spirit of the Malaysian nation.</span>
+          <span class="bm-text">Merayakan kepelbagaian budaya Malaysia melalui jalur-jalur kain tradisional yang berwarna-warni. Setiap jalur mewakili kaum dan budaya berbeza, namun bersatu dalam satu komposisi harmoni.</span>
+          <span class="en-text">Celebrates Malaysia's cultural diversity through vibrant traditional fabric strips. Each strip represents a different community, united in one harmonious composition.</span>
         </div>
         <button class="cta-btn" id="cta1" onclick="selectArtwork(1)">
           <span class="cta-icon start-label">&#9654;</span>
@@ -727,19 +680,11 @@ body.lang-en .en-text{display:inline;}
           </div>
           <div class="p2-title">UNITY &middot; PERPADUAN</div>
         </div>
-        <div class="art-num-badge">
-          &#x1F3A8; <span class="bm-text">Lukisan 2 daripada 2</span><span class="en-text">Artwork 2 of 2</span>
-        </div>
         <div class="art-title">Unity in Diversity Series 2</div>
-        <div class="art-artist">ArtJamila &middot; 2017</div>
-        <div class="art-medium">
-          <span class="bm-text">Dakwat di atas kanvas</span>
-          <span class="en-text">Ink on canvas</span>
-        </div>
-        <div class="art-divider"></div>
+        <div class="art-artist">ArtJamila &middot; 2017 &middot; <span class="bm-text">Dakwat atas kanvas</span><span class="en-text">Ink on canvas</span></div>
         <div class="art-desc">
-          <span class="bm-text">Karya ini menggambarkan perpaduan dalam kepelbagaian melalui bulatan-bulatan yang saling bertindih. Setiap bulatan mewakili komuniti yang berbeza, dan di mana mereka bertemu, lahirlah ruang perkongsian dan persefahaman — simbol integrasi masyarakat Malaysia.</span>
-          <span class="en-text">This artwork depicts unity in diversity through overlapping circles. Each circle represents a different community, and where they intersect, a space of sharing and understanding is born — a symbol of Malaysian social integration.</span>
+          <span class="bm-text">Menggambarkan perpaduan dalam kepelbagaian — setiap komuniti diwakili secara tersendiri, namun bertemu dalam ruang perkongsian bersama, simbol integrasi masyarakat Malaysia.</span>
+          <span class="en-text">Depicts unity in diversity — each community represented individually, yet meeting in a shared space, a symbol of Malaysian social integration.</span>
         </div>
         <button class="cta-btn" id="cta2" onclick="selectArtwork(2)">
           <span class="cta-icon start-label">&#9654;</span>
