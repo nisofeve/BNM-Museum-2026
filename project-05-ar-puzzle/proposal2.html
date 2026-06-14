@@ -9,77 +9,144 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
   --blue:#0047AB;--blue-dark:#003588;--blue-light:#1A6AC9;
-  --gold:#F5A623;--teal:#00B4A6;--coral:#FF6B5B;
+  --gold:#F5A623;--teal:#00B4A6;--coral:#FF6B5B;--purple:#7B5EA7;
   --cream:#FFF8F0;--white:#fff;--dark:#1A1A2E;--muted:#4A4A6A;
-  --border:#E8E8F0;--radius:16px;--radius-lg:24px;
+  --border:#E8E8F0;--radius:16px;
   --shadow:0 4px 24px rgba(0,0,0,0.10);
 }
-html,body{width:100%;height:100%;overflow:hidden;background:#0A0E1A;
+html,body{
+  width:100%;height:100%;overflow:hidden;background:#050810;
   font-family:'Nunito',sans-serif;color:var(--dark);
-  -webkit-tap-highlight-color:transparent;touch-action:none;user-select:none;}
+  -webkit-tap-highlight-color:transparent;touch-action:none;user-select:none;
+}
 
-/* ── SCALE ROOT ── */
+/* ── ROOT SCALE CONTAINER ── */
 #root{
   width:1920px;height:1080px;position:absolute;top:0;left:0;
   transform-origin:top left;display:flex;overflow:hidden;
 }
 
-/* ── LEFT PANEL ── */
+/* ════════════════════════════════
+   LEFT PANEL
+   ════════════════════════════════ */
 #left-panel{
-  width:680px;min-width:680px;height:100%;
+  width:680px;min-width:680px;height:1080px;
   background:var(--cream);display:flex;flex-direction:column;
-  position:relative;z-index:2;
-  box-shadow:6px 0 32px rgba(0,0,0,0.25);
+  position:relative;z-index:10;
+  box-shadow:8px 0 40px rgba(0,0,0,0.35);
 }
+
+/* Header */
 .lp-header{
-  background:var(--blue);padding:28px 32px 22px;flex-shrink:0;
+  background:var(--blue);padding:26px 32px 20px;flex-shrink:0;position:relative;
+  background:linear-gradient(135deg,#003588 0%,#0047AB 60%,#0a5fcc 100%);
 }
 .lp-header h1{
-  font-family:'Poppins',sans-serif;font-size:1.9rem;font-weight:800;
+  font-family:'Poppins',sans-serif;font-size:1.75rem;font-weight:800;
   color:var(--white);line-height:1.15;
 }
-.lp-header .sub{font-size:0.9rem;color:rgba(255,255,255,0.75);margin-top:4px;}
-.lp-body{flex:1;overflow-y:auto;overflow-x:hidden;padding:24px 28px;}
-.lp-body::-webkit-scrollbar{width:4px;}
-.lp-body::-webkit-scrollbar-track{background:transparent;}
-.lp-body::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+.lp-header .sub{font-size:0.82rem;color:rgba(255,255,255,0.72);margin-top:3px;}
 
-.section-label{
-  font-family:'Poppins',sans-serif;font-size:0.72rem;font-weight:700;
-  color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;
-  margin-bottom:12px;margin-top:4px;
+/* Lang toggle — fixed in header */
+.lang-toggle{
+  position:absolute;top:20px;right:24px;
+  display:flex;background:rgba(255,255,255,0.15);
+  border-radius:9999px;padding:3px;gap:2px;
+}
+.lang-btn{
+  padding:6px 16px;font-family:'Poppins',sans-serif;font-size:0.78rem;font-weight:700;
+  border:none;background:transparent;color:rgba(255,255,255,0.7);
+  cursor:pointer;min-height:34px;border-radius:9999px;transition:all 0.2s;
+}
+.lang-btn.active{background:var(--gold);color:var(--dark);}
+
+/* ── HOW-TO STRIP (compact) ── */
+.how-strip{
+  display:flex;gap:0;flex-shrink:0;
+  border-bottom:1px solid var(--border);
+  background:var(--white);
+}
+.how-step{
+  flex:1;display:flex;flex-direction:column;align-items:center;
+  padding:12px 8px 10px;gap:4px;border-right:1px solid var(--border);
+  position:relative;
+}
+.how-step:last-child{border-right:none;}
+.how-step .sn{
+  width:24px;height:24px;border-radius:50%;background:var(--blue);
+  color:#fff;font-family:'Poppins',sans-serif;font-weight:700;font-size:0.7rem;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.how-step .st{font-size:0.72rem;color:var(--muted);text-align:center;line-height:1.3;}
+
+/* ── TAB BAR ── */
+.tab-bar{
+  display:flex;position:relative;flex-shrink:0;
+  background:var(--white);
+  border-bottom:2px solid var(--border);
+}
+.tab-btn{
+  flex:1;padding:14px 12px;border:none;background:transparent;
+  font-family:'Poppins',sans-serif;font-weight:700;font-size:0.88rem;
+  color:var(--muted);cursor:pointer;transition:color 0.25s;
+  position:relative;z-index:1;
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+}
+.tab-btn.active{color:var(--blue);}
+.tab-btn .tab-num{
+  font-size:0.65rem;font-weight:700;letter-spacing:0.08em;
+  text-transform:uppercase;color:var(--teal);
+}
+.tab-btn.active .tab-num{color:var(--teal);}
+/* Sliding indicator */
+.tab-indicator{
+  position:absolute;bottom:-2px;left:0;width:50%;height:3px;
+  background:linear-gradient(90deg,var(--blue),var(--blue-light));
+  border-radius:3px 3px 0 0;
+  transition:left 0.3s cubic-bezier(0.4,0,0.2,1);
 }
 
-/* How to play */
-.how-card{
-  background:var(--white);border-radius:var(--radius);padding:20px;
-  border-left:5px solid var(--gold);box-shadow:var(--shadow);margin-bottom:24px;
+/* ── TAB BODY (scrollable) ── */
+.tab-body{
+  flex:1;position:relative;overflow:hidden;
 }
-.how-card h2{
-  font-family:'Poppins',sans-serif;font-size:0.95rem;font-weight:700;
-  color:var(--blue);margin-bottom:12px;display:flex;align-items:center;gap:8px;
-}
-.steps{list-style:none;}
-.steps li{display:flex;gap:10px;align-items:flex-start;margin-bottom:9px;}
-.steps li:last-child{margin-bottom:0;}
-.sn{min-width:26px;height:26px;background:var(--blue);color:#fff;border-radius:50%;
-  font-family:'Poppins',sans-serif;font-weight:700;font-size:0.75rem;
-  display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.st{font-size:0.88rem;line-height:1.5;color:var(--dark);}
+.tab-body::-webkit-scrollbar{display:none;}
 
-/* Artwork selector cards */
-.art-card{
-  background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);
-  margin-bottom:18px;overflow:hidden;border:3px solid transparent;
-  transition:border-color 0.2s,box-shadow 0.2s;cursor:pointer;
+/* Tab content panels */
+.tab-content{
+  position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;
+  padding:20px 24px 28px;
+  opacity:0;transform:translateX(30px);
+  pointer-events:none;
+  transition:opacity 0.3s cubic-bezier(0.4,0,0.2,1),
+             transform 0.3s cubic-bezier(0.4,0,0.2,1);
 }
-.art-card.selected{border-color:var(--blue);box-shadow:0 0 0 4px rgba(0,71,171,0.15);}
-.art-thumb{width:100%;height:150px;position:relative;overflow:hidden;}
+.tab-content::-webkit-scrollbar{width:4px;}
+.tab-content::-webkit-scrollbar-track{background:transparent;}
+.tab-content::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+.tab-content.active{
+  opacity:1;transform:translateX(0);pointer-events:all;
+}
+.tab-content.exit-left{
+  opacity:0;transform:translateX(-30px);pointer-events:none;
+}
 
-/* Artwork 1 CSS art — fabric strips */
-.thumb-art1{background:#1a1a1a;display:flex;align-items:flex-end;justify-content:center;gap:3px;padding-top:16px;}
-.thumb-art1 .rope{position:absolute;top:18px;left:8%;right:8%;height:5px;background:#7B4A1A;border-radius:3px;z-index:2;}
-.thumb-art1 .strip{width:10.5%;height:105px;border-radius:0 0 4px 4px;position:relative;top:5px;}
+/* ── ARTWORK PREVIEW (big, in tab) ── */
+.art-preview{
+  width:100%;height:240px;border-radius:14px;
+  overflow:hidden;margin-bottom:18px;position:relative;
+  box-shadow:0 8px 32px rgba(0,0,0,0.18);
+}
+/* Artwork 1 — fabric strips */
+.preview-art1{
+  background:#111;display:flex;align-items:flex-end;
+  justify-content:center;gap:3px;padding-top:20px;
+}
+.preview-art1 .rope{
+  position:absolute;top:22px;left:6%;right:6%;height:6px;
+  background:#7B4A1A;border-radius:3px;z-index:2;
+}
+.preview-art1 .strip{width:10.5%;height:185px;border-radius:0 0 4px 4px;position:relative;top:6px;}
 .s1{background:repeating-linear-gradient(135deg,#CC2200 0,#CC2200 6px,#fff 6px,#fff 12px);}
 .s2{background:repeating-linear-gradient(60deg,#F5A623 0,#F5A623 8px,#FFD700 8px,#FFD700 16px);}
 .s3{background:radial-gradient(circle,#fff 3px,transparent 3px) 0 0/12px 12px #2E7D32;}
@@ -88,181 +155,292 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0A0E1A;
 .s6{background:repeating-linear-gradient(90deg,#E65100 0,#E65100 4px,#FFB300 4px,#FFB300 8px);}
 .s7{background:repeating-linear-gradient(135deg,#00695C 0,#00695C 5px,#80CBC4 5px,#80CBC4 10px);}
 .s8{background:repeating-linear-gradient(0deg,#E91E63 0,#E91E63 5px,#F8BBD9 5px,#F8BBD9 10px);}
-
-/* Artwork 2 CSS art — Unity composition */
-.thumb-art2{
-  background:linear-gradient(160deg,#001A5C 0%,#003080 40%,#CC0001 70%,#8B0000 100%);
+/* Artwork 2 — Unity circles */
+.preview-art2{
+  background:linear-gradient(160deg,#001A5C 0%,#003080 38%,#CC0001 70%,#8B0000 100%);
   display:flex;align-items:center;justify-content:center;position:relative;
 }
-.thumb-art2 .circles{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:10px;}
-.thumb-art2 .circle{border-radius:50%;border:4px solid rgba(255,204,0,0.8);}
-.thumb-art2 .c1{width:90px;height:90px;background:rgba(255,204,0,0.15);}
-.thumb-art2 .c2{width:60px;height:60px;background:rgba(255,255,255,0.1);margin-top:-30px;}
-.thumb-art2 .c3{width:40px;height:40px;background:rgba(0,180,166,0.3);margin-top:20px;}
-.thumb-art2 .star-bg{position:absolute;font-size:2.5rem;opacity:0.35;top:10px;right:20px;}
-.thumb-art2 .unity-text{position:absolute;bottom:10px;left:0;right:0;text-align:center;
-  font-family:'Poppins',sans-serif;font-size:0.8rem;font-weight:700;
-  color:rgba(255,204,0,0.9);letter-spacing:0.08em;}
-
-.art-info{padding:14px 18px;}
-.art-num{font-family:'Poppins',sans-serif;font-size:0.65rem;font-weight:700;
-  color:var(--teal);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:3px;}
-.art-title{font-family:'Poppins',sans-serif;font-size:1rem;font-weight:700;
-  color:var(--dark);margin-bottom:2px;}
-.art-artist{font-size:0.85rem;color:var(--blue);font-weight:600;margin-bottom:2px;}
-.art-medium{font-size:0.78rem;color:var(--muted);}
-.art-desc{font-size:0.82rem;color:var(--muted);margin-top:8px;line-height:1.5;}
-.art-desc.hidden{display:none;}
-
-.select-btn{
-  display:flex;align-items:center;justify-content:center;gap:8px;
-  width:100%;margin-top:14px;padding:14px;border-radius:12px;border:none;
-  background:var(--blue);color:#fff;font-family:'Poppins',sans-serif;
-  font-weight:700;font-size:0.95rem;cursor:pointer;min-height:56px;
-  transition:background 0.15s,transform 0.1s;
+.preview-art2 .circles{
+  position:absolute;inset:0;display:flex;
+  align-items:center;justify-content:center;gap:-20px;
 }
-.select-btn:active{transform:scale(0.98);background:var(--blue-dark);}
-.select-btn.active-btn{background:var(--teal);}
-.select-btn span.check{display:none;}
-.select-btn.active-btn span.check{display:inline;}
-.select-btn.active-btn span.play{display:none;}
-
-/* Lang toggle */
-.lang-toggle{
-  position:absolute;top:22px;right:28px;display:flex;
-  background:rgba(255,255,255,0.18);border-radius:9999px;overflow:hidden;
+.preview-art2 .ucircle{
+  border-radius:50%;border:5px solid rgba(255,204,0,0.7);
+  position:absolute;
 }
-.lang-btn{
-  padding:7px 16px;font-family:'Poppins',sans-serif;font-size:0.8rem;font-weight:700;
-  border:none;background:transparent;color:rgba(255,255,255,0.75);
-  cursor:pointer;min-height:36px;transition:all 0.2s;
+.preview-art2 .uc1{width:160px;height:160px;background:rgba(0,71,171,0.55);left:60px;}
+.preview-art2 .uc2{width:160px;height:160px;background:rgba(0,180,166,0.5);left:50%;transform:translateX(-50%);}
+.preview-art2 .uc3{width:160px;height:160px;background:rgba(245,166,35,0.5);right:60px;}
+.preview-art2 .star-center{
+  position:absolute;font-size:2.8rem;color:rgba(255,204,0,0.95);z-index:2;
+  text-shadow:0 0 20px rgba(255,204,0,0.8);
 }
-.lang-btn.active{background:var(--gold);color:var(--dark);border-radius:9999px;}
+.preview-art2 .unity-text{
+  position:absolute;bottom:14px;left:0;right:0;text-align:center;
+  font-family:'Poppins',sans-serif;font-size:0.82rem;font-weight:700;
+  color:rgba(255,204,0,0.9);letter-spacing:0.12em;z-index:2;
+}
+.preview-art2 .crescent{
+  position:absolute;top:18px;left:18px;
+  width:54px;height:54px;z-index:2;
+}
+.preview-art2 .crescent::before{
+  content:'';position:absolute;width:54px;height:54px;border-radius:50%;
+  background:rgba(255,204,0,0.8);
+}
+.preview-art2 .crescent::after{
+  content:'';position:absolute;width:44px;height:44px;border-radius:50%;
+  background:#001A5C;top:3px;left:12px;
+}
+/* Active glow on selected preview */
+.art-preview.active-glow{
+  box-shadow:0 0 0 3px var(--blue),0 8px 32px rgba(0,71,171,0.3);
+  animation:previewPulse 2.5s ease-in-out infinite;
+}
+@keyframes previewPulse{
+  0%,100%{box-shadow:0 0 0 3px var(--blue),0 8px 32px rgba(0,71,171,0.25);}
+  50%{box-shadow:0 0 0 5px var(--blue-light),0 8px 40px rgba(0,71,171,0.45);}
+}
 
-/* ── RIGHT PANEL (puzzle area) ── */
+/* Art info block */
+.art-num-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  background:rgba(0,180,166,0.12);border:1.5px solid var(--teal);
+  color:var(--teal);border-radius:9999px;
+  padding:4px 14px;font-family:'Poppins',sans-serif;
+  font-size:0.65rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;
+  margin-bottom:10px;
+}
+.art-title{
+  font-family:'Poppins',sans-serif;font-size:1.35rem;font-weight:800;
+  color:var(--dark);line-height:1.2;margin-bottom:4px;
+}
+.art-artist{font-size:0.9rem;color:var(--blue);font-weight:600;margin-bottom:2px;}
+.art-medium{font-size:0.78rem;color:var(--muted);margin-bottom:14px;}
+
+/* Divider */
+.art-divider{height:1px;background:var(--border);margin:14px 0;}
+
+/* Description */
+.art-desc{
+  font-size:0.88rem;color:var(--muted);line-height:1.6;margin-bottom:20px;
+}
+
+/* CTA button */
+.cta-btn{
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  width:100%;padding:18px 24px;border-radius:14px;border:none;
+  background:linear-gradient(135deg,var(--blue) 0%,var(--blue-light) 100%);
+  color:#fff;font-family:'Poppins',sans-serif;font-weight:700;font-size:1rem;
+  cursor:pointer;min-height:64px;
+  box-shadow:0 4px 20px rgba(0,71,171,0.35);
+  transition:transform 0.15s,box-shadow 0.15s;
+  position:relative;overflow:hidden;
+}
+.cta-btn::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,transparent 40%,rgba(255,255,255,0.12) 100%);
+}
+.cta-btn:active{transform:scale(0.97);box-shadow:0 2px 12px rgba(0,71,171,0.3);}
+.cta-btn.playing{
+  background:linear-gradient(135deg,var(--teal) 0%,#00c9b8 100%);
+  box-shadow:0 4px 20px rgba(0,180,166,0.4);
+}
+.cta-btn .cta-icon{font-size:1.2rem;z-index:1;}
+.cta-btn .cta-text{z-index:1;}
+.cta-btn .playing-label{display:none;z-index:1;}
+.cta-btn.playing .playing-label{display:flex;align-items:center;gap:8px;}
+.cta-btn.playing .start-label{display:none;}
+
+/* ════════════════════════════════
+   RIGHT PANEL — PUZZLE
+   ════════════════════════════════ */
 #right-panel{
   flex:1;height:100%;position:relative;overflow:hidden;
-  background:radial-gradient(ellipse at 30% 40%,#1a2744 0%,#0A0E1A 70%);
+  background:radial-gradient(ellipse at 25% 35%,#1a2744 0%,#0A0E1A 65%);
 }
 
-/* floating stars bg */
+/* Ambient gradient overlay — shifts on artwork change */
+#ambient{
+  position:absolute;inset:0;pointer-events:none;opacity:0;
+  transition:opacity 0.8s;
+}
+#ambient.show{opacity:1;}
+
+/* Stars */
 .star-field{position:absolute;inset:0;pointer-events:none;}
 .star{position:absolute;background:#fff;border-radius:50%;animation:twinkle linear infinite;}
-@keyframes twinkle{0%,100%{opacity:0.2;}50%{opacity:0.8;}}
+@keyframes twinkle{0%,100%{opacity:0.15;}50%{opacity:0.9;}}
 
-/* Puzzle header bar */
+/* Puzzle header */
 #puz-header{
-  position:absolute;top:0;left:0;right:0;height:70px;
+  position:absolute;top:0;left:0;right:0;height:72px;
   display:flex;align-items:center;justify-content:space-between;
-  padding:0 40px;z-index:10;
-  background:linear-gradient(to bottom,rgba(0,0,0,0.5),transparent);
+  padding:0 44px;z-index:20;
+  background:linear-gradient(to bottom,rgba(0,0,0,0.55),transparent);
 }
-#puz-title{font-family:'Poppins',sans-serif;font-size:1.2rem;font-weight:700;color:#fff;}
-#progress-wrap{display:flex;align-items:center;gap:14px;}
-#progress-dots{display:flex;gap:6px;}
-.pdot{width:20px;height:20px;border-radius:50%;background:rgba(255,255,255,0.2);
-  border:2px solid rgba(255,255,255,0.3);transition:all 0.3s;}
-.pdot.placed{background:var(--gold);border-color:var(--gold);
-  box-shadow:0 0 10px rgba(245,166,35,0.6);}
-#progress-text{font-family:'Poppins',sans-serif;font-size:0.9rem;font-weight:700;color:#fff;}
+#puz-art-name{
+  font-family:'Poppins',sans-serif;font-size:1.05rem;font-weight:700;
+  color:rgba(255,255,255,0.9);opacity:0;transition:opacity 0.5s;
+}
+#puz-art-name.show{opacity:1;}
+#progress-wrap{display:flex;align-items:center;gap:12px;}
+#progress-dots{display:flex;gap:7px;}
+.pdot{
+  width:18px;height:18px;border-radius:50%;
+  background:rgba(255,255,255,0.18);border:2px solid rgba(255,255,255,0.25);
+  transition:all 0.35s cubic-bezier(0.34,1.56,0.64,1);
+}
+.pdot.placed{
+  background:var(--gold);border-color:var(--gold);
+  box-shadow:0 0 10px rgba(245,166,35,0.7);
+  transform:scale(1.15);
+}
+#progress-text{
+  font-family:'Poppins',sans-serif;font-size:0.88rem;font-weight:700;
+  color:rgba(255,255,255,0.9);min-width:50px;text-align:right;
+}
 
 /* Empty state */
 #empty-state{
   position:absolute;inset:0;display:flex;flex-direction:column;
-  align-items:center;justify-content:center;gap:24px;z-index:5;
+  align-items:center;justify-content:center;gap:20px;
+  pointer-events:none;
+  transition:opacity 0.4s;
 }
-#empty-state .es-icon{font-size:5rem;opacity:0.4;}
-#empty-state p{font-family:'Poppins',sans-serif;font-size:1.4rem;font-weight:700;
-  color:rgba(255,255,255,0.4);text-align:center;line-height:1.4;}
-
-/* Puzzle board */
-#board-wrap{
-  position:absolute;inset:0;display:none;
-  align-items:center;justify-content:center;
+#empty-state.hidden{opacity:0;}
+.es-icon{font-size:5rem;opacity:0.25;}
+.es-text{
+  font-family:'Poppins',sans-serif;font-size:1.3rem;font-weight:700;
+  color:rgba(255,255,255,0.3);text-align:center;line-height:1.5;
 }
-#board-wrap.active{display:flex;}
+/* Arrow pointing left */
+.es-arrow{
+  font-size:2rem;color:rgba(255,255,255,0.2);
+  animation:arrowPulse 1.8s ease-in-out infinite;
+}
+@keyframes arrowPulse{
+  0%,100%{transform:translateX(0);opacity:0.2;}
+  50%{transform:translateX(-10px);opacity:0.45;}
+}
 
-#puzzle-stage{position:relative;width:100%;height:100%;}
+/* Puzzle stage */
+#board-wrap{position:absolute;inset:0;}
+#puzzle-stage{position:absolute;inset:0;}
 
-/* Assembly zone — the target grid */
+/* Assembly zone */
 #assembly-zone{
-  position:absolute;
-  border-radius:12px;
-  overflow:visible;
+  position:absolute;border-radius:10px;
+  box-shadow:0 0 0 1px rgba(255,255,255,0.08),
+             inset 0 0 60px rgba(0,0,0,0.2);
 }
 .slot{
-  position:absolute;border-radius:8px;
-  border:2px dashed rgba(255,255,255,0.2);
-  background:rgba(255,255,255,0.04);
-  transition:border-color 0.3s,background 0.3s;
+  position:absolute;border-radius:6px;
+  border:2px dashed rgba(255,255,255,0.18);
+  background:rgba(255,255,255,0.03);
+  transition:border-color 0.25s,background 0.25s;
 }
-.slot.highlight{border-color:rgba(245,166,35,0.7);background:rgba(245,166,35,0.08);}
+.slot.highlight{
+  border-color:rgba(245,166,35,0.8);
+  background:rgba(245,166,35,0.1);
+  animation:slotPulse 0.6s ease-in-out infinite alternate;
+}
+@keyframes slotPulse{
+  from{background:rgba(245,166,35,0.06);}
+  to{background:rgba(245,166,35,0.18);}
+}
 .slot.filled{border-color:transparent;background:transparent;}
 
 /* Puzzle pieces */
 .piece{
-  position:absolute;border-radius:8px;cursor:grab;
-  box-shadow:0 4px 20px rgba(0,0,0,0.5);
+  position:absolute;border-radius:6px;cursor:grab;
+  box-shadow:0 6px 24px rgba(0,0,0,0.55),0 0 0 1px rgba(255,255,255,0.1);
+  touch-action:none;z-index:20;
   transition:box-shadow 0.2s;
-  touch-action:none;
-  z-index:20;
-  overflow:hidden;
+  will-change:left,top;
 }
-.piece:active,.piece.dragging{cursor:grabbing;box-shadow:0 12px 40px rgba(0,0,0,0.7);z-index:100;}
+.piece.dragging{
+  cursor:grabbing;z-index:200;
+  box-shadow:0 16px 48px rgba(0,0,0,0.75),0 0 0 2px rgba(255,255,255,0.2);
+  transition:none;
+}
 .piece.placed{
-  cursor:default;z-index:15;
-  transition:left 0.25s cubic-bezier(0.34,1.56,0.64,1),
-             top 0.25s cubic-bezier(0.34,1.56,0.64,1),
-             box-shadow 0.3s;
-  box-shadow:0 0 0 2px rgba(245,166,35,0.6),0 4px 20px rgba(0,0,0,0.4);
+  cursor:default;z-index:15;pointer-events:none;
+  box-shadow:0 0 0 2px rgba(245,166,35,0.55),0 4px 16px rgba(0,0,0,0.4);
 }
-.piece.celebrate{animation:pieceGlow 1s ease-in-out infinite alternate;}
-@keyframes pieceGlow{
-  from{box-shadow:0 0 10px rgba(245,166,35,0.5),0 4px 20px rgba(0,0,0,0.4);}
-  to{box-shadow:0 0 30px rgba(245,166,35,1),0 4px 20px rgba(0,0,0,0.4);}
+/* Snap ring burst */
+@keyframes snapRing{
+  0%{box-shadow:0 0 0 0 rgba(245,166,35,0.9),0 4px 16px rgba(0,0,0,0.4);}
+  60%{box-shadow:0 0 0 22px rgba(245,166,35,0),0 4px 16px rgba(0,0,0,0.4);}
+  100%{box-shadow:0 0 0 2px rgba(245,166,35,0.55),0 4px 16px rgba(0,0,0,0.4);}
 }
+.piece.snap-anim{animation:snapRing 0.5s ease-out forwards;}
 
-/* Artwork inner div (the full artwork clipped to show only this piece's portion) */
-.piece-inner{position:absolute;top:0;left:0;pointer-events:none;}
+/* Celebration state */
+@keyframes artAlive{
+  0%{filter:brightness(1) saturate(1);}
+  25%{filter:brightness(1.35) saturate(1.7);}
+  50%{filter:brightness(1.1) saturate(1.3) hue-rotate(12deg);}
+  75%{filter:brightness(1.45) saturate(1.9) hue-rotate(-8deg);}
+  100%{filter:brightness(1) saturate(1);}
+}
+@keyframes celebGlow{
+  from{box-shadow:0 0 8px rgba(245,166,35,0.4),0 4px 16px rgba(0,0,0,0.4);}
+  to{box-shadow:0 0 28px rgba(245,166,35,1),0 4px 16px rgba(0,0,0,0.4);}
+}
+.piece.celebrate{animation:artAlive 2.2s ease-in-out infinite,celebGlow 1s ease-in-out infinite alternate;}
+
+/* Piece enter animation when puzzle first builds */
+@keyframes pieceAppear{
+  from{opacity:0;transform:scale(0.6);}
+  to{opacity:1;transform:scale(1);}
+}
+.piece.appear{animation:pieceAppear 0.4s cubic-bezier(0.34,1.56,0.64,1) both;}
 
 /* ── WIN OVERLAY ── */
 #win-overlay{
-  position:absolute;inset:0;background:rgba(0,0,0,0.85);
+  position:absolute;inset:0;
+  background:rgba(5,8,16,0.9);backdrop-filter:blur(8px);
   display:flex;flex-direction:column;align-items:center;justify-content:center;
-  z-index:200;opacity:0;pointer-events:none;transition:opacity 0.5s;
+  z-index:300;opacity:0;pointer-events:none;
+  transition:opacity 0.55s;
 }
 #win-overlay.show{opacity:1;pointer-events:all;}
-#win-overlay .win-badge{
-  width:140px;height:140px;border-radius:50%;
-  background:linear-gradient(135deg,var(--gold),#FFD700);
+.win-badge{
+  width:150px;height:150px;border-radius:50%;
+  background:linear-gradient(135deg,#F5A623,#FFD700);
   display:flex;align-items:center;justify-content:center;
-  font-size:4rem;margin-bottom:24px;
-  animation:winBounce 0.6s cubic-bezier(0.34,1.56,0.64,1) both;
+  font-size:4.2rem;margin-bottom:28px;
+  box-shadow:0 0 60px rgba(245,166,35,0.5);
+  animation:winBounce 0.7s cubic-bezier(0.34,1.56,0.64,1) both;
 }
 @keyframes winBounce{from{transform:scale(0);opacity:0;}to{transform:scale(1);opacity:1;}}
-#win-overlay h2{
-  font-family:'Poppins',sans-serif;font-size:2.4rem;font-weight:800;
+.win-title{
+  font-family:'Poppins',sans-serif;font-size:2.8rem;font-weight:800;
   color:#fff;margin-bottom:12px;text-align:center;
+  text-shadow:0 0 40px rgba(245,166,35,0.5);
 }
-#win-overlay p{
-  font-size:1.1rem;color:rgba(255,255,255,0.7);margin-bottom:36px;text-align:center;
-}
+.win-sub{font-size:1.1rem;color:rgba(255,255,255,0.65);margin-bottom:40px;text-align:center;line-height:1.6;}
+.win-actions{display:flex;gap:16px;}
 .win-btn{
   display:flex;align-items:center;justify-content:center;gap:10px;
-  padding:18px 48px;border-radius:9999px;border:none;
+  padding:18px 44px;border-radius:9999px;border:none;
   background:linear-gradient(135deg,var(--blue),var(--blue-light));
-  color:#fff;font-family:'Poppins',sans-serif;font-weight:700;font-size:1.1rem;
-  cursor:pointer;min-height:64px;box-shadow:0 4px 20px rgba(0,71,171,0.5);
-  transition:transform 0.15s;
+  color:#fff;font-family:'Poppins',sans-serif;font-weight:700;font-size:1.05rem;
+  cursor:pointer;min-height:64px;
+  box-shadow:0 4px 24px rgba(0,71,171,0.5);
+  transition:transform 0.15s,box-shadow 0.15s;
 }
 .win-btn:active{transform:scale(0.97);}
-
-/* Confetti canvas */
-#confetti-canvas{
-  position:absolute;inset:0;pointer-events:none;z-index:150;
+.win-btn.secondary{
+  background:transparent;border:2px solid rgba(255,255,255,0.3);
+  color:rgba(255,255,255,0.8);box-shadow:none;
 }
 
-/* Language states */
+/* Confetti canvas */
+#confetti-canvas{position:absolute;inset:0;pointer-events:none;z-index:250;}
+
+/* ── LANGUAGE STATES ── */
 .bm-text{display:inline;}
 .en-text{display:none;}
 body.lang-en .bm-text{display:none;}
@@ -274,6 +452,8 @@ body.lang-en .en-text{display:inline;}
 
   <!-- ════ LEFT PANEL ════ -->
   <div id="left-panel">
+
+    <!-- Header -->
     <div class="lp-header">
       <h1>
         <span class="bm-text">Susun Atur Seni</span>
@@ -286,107 +466,130 @@ body.lang-en .en-text{display:inline;}
       </div>
     </div>
 
-    <div class="lp-body">
-      <!-- HOW TO PLAY -->
-      <div class="how-card">
-        <h2>&#x1F4CB; <span class="bm-text">Cara Bermain</span><span class="en-text">How To Play</span></h2>
-        <ol class="steps">
-          <li><div class="sn">1</div><div class="st"><span class="bm-text">Pilih salah satu lukisan di bawah.</span><span class="en-text">Choose one of the artworks below.</span></div></li>
-          <li><div class="sn">2</div><div class="st"><span class="bm-text">Seret kepingan teka-teki ke kedudukan yang betul.</span><span class="en-text">Drag puzzle pieces to their correct positions.</span></div></li>
-          <li><div class="sn">3</div><div class="st"><span class="bm-text">Lengkapkan kesemua 10 kepingan untuk melihat animasi lukisan.</span><span class="en-text">Complete all 10 pieces to unlock the artwork animation.</span></div></li>
-        </ol>
+    <!-- How-to strip -->
+    <div class="how-strip">
+      <div class="how-step">
+        <div class="sn">1</div>
+        <div class="st"><span class="bm-text">Pilih lukisan</span><span class="en-text">Choose artwork</span></div>
       </div>
-
-      <!-- SECTION LABEL -->
-      <div class="section-label">
-        <span class="bm-text">Pilih Lukisan</span>
-        <span class="en-text">Choose Artwork</span>
+      <div class="how-step">
+        <div class="sn">2</div>
+        <div class="st"><span class="bm-text">Seret kepingan</span><span class="en-text">Drag pieces</span></div>
       </div>
+      <div class="how-step">
+        <div class="sn">3</div>
+        <div class="st"><span class="bm-text">Lengkapkan semua!</span><span class="en-text">Complete all!</span></div>
+      </div>
+    </div>
 
-      <!-- ARTWORK 1 CARD -->
-      <div class="art-card" id="card1" onclick="selectArtwork(1)">
-        <div class="art-thumb thumb-art1">
+    <!-- Tab bar -->
+    <div class="tab-bar">
+      <button class="tab-btn active" id="tabBtn1" onclick="switchTab(1)">
+        <span class="tab-num"><span class="bm-text">Lukisan</span><span class="en-text">Artwork</span> 1</span>
+        <span>Rhythm of Nationality</span>
+      </button>
+      <button class="tab-btn" id="tabBtn2" onclick="switchTab(2)">
+        <span class="tab-num"><span class="bm-text">Lukisan</span><span class="en-text">Artwork</span> 2</span>
+        <span>Unity in Diversity</span>
+      </button>
+      <div class="tab-indicator" id="tabIndicator"></div>
+    </div>
+
+    <!-- Tab body -->
+    <div class="tab-body">
+
+      <!-- TAB 1 CONTENT -->
+      <div class="tab-content active" id="tc1">
+        <div class="art-preview preview-art1" id="preview1">
           <div class="rope"></div>
           <div class="strip s1"></div><div class="strip s2"></div>
           <div class="strip s3"></div><div class="strip s4"></div>
           <div class="strip s5"></div><div class="strip s6"></div>
           <div class="strip s7"></div><div class="strip s8"></div>
         </div>
-        <div class="art-info">
-          <div class="art-num"><span class="bm-text">Lukisan 1</span><span class="en-text">Artwork 1</span></div>
-          <div class="art-title">Rhythm of Nationality</div>
-          <div class="art-artist">Kong Kien Choong · 2004</div>
-          <div class="art-medium"><span class="bm-text">Media campuran atas kanvas</span><span class="en-text">Mixed media on canvas</span></div>
-          <div class="art-desc">
-            <span class="bm-text">Karya ini merayakan kepelbagaian budaya Malaysia melalui jalur-jalur kain tradisional yang berwarna-warni, mencerminkan harmoni dan identiti kebangsaan.</span>
-            <span class="en-text">This work celebrates Malaysia's cultural diversity through colourful traditional fabric strips, reflecting harmony and national identity.</span>
-          </div>
-          <button class="select-btn" id="btn1">
-            <span class="play">&#9654; <span class="bm-text">Mulakan Teka-Teki</span><span class="en-text">Start Puzzle</span></span>
-            <span class="check">&#10003; <span class="bm-text">Sedang Dimainkan</span><span class="en-text">Currently Playing</span></span>
-          </button>
+        <div class="art-num-badge">
+          &#x1F3A8; <span class="bm-text">Lukisan 1 daripada 2</span><span class="en-text">Artwork 1 of 2</span>
         </div>
+        <div class="art-title">Rhythm of Nationality</div>
+        <div class="art-artist">Kong Kien Choong &middot; 2004</div>
+        <div class="art-medium">
+          <span class="bm-text">Media campuran atas kanvas</span>
+          <span class="en-text">Mixed media on canvas</span>
+        </div>
+        <div class="art-divider"></div>
+        <div class="art-desc">
+          <span class="bm-text">Karya ini merayakan kepelbagaian budaya Malaysia melalui jalur-jalur kain tradisional yang berwarna-warni. Setiap jalur mewakili kaum dan budaya yang berbeza, namun bersatu dalam satu komposisi yang harmoni — mencerminkan semangat kebangsaan Malaysia.</span>
+          <span class="en-text">This work celebrates Malaysia's rich cultural diversity through vibrant traditional fabric strips. Each strip represents a different community and culture, yet they unite in one harmonious composition — reflecting the spirit of the Malaysian nation.</span>
+        </div>
+        <button class="cta-btn" id="cta1" onclick="selectArtwork(1)">
+          <span class="cta-icon start-label">&#9654;</span>
+          <span class="cta-text start-label"><span class="bm-text">Mulakan Teka-Teki</span><span class="en-text">Start Puzzle</span></span>
+          <span class="playing-label">&#10003; <span class="bm-text">Sedang Dimainkan</span><span class="en-text">Now Playing</span></span>
+        </button>
       </div>
 
-      <!-- ARTWORK 2 CARD -->
-      <div class="art-card" id="card2" onclick="selectArtwork(2)">
-        <div class="art-thumb thumb-art2">
+      <!-- TAB 2 CONTENT -->
+      <div class="tab-content" id="tc2">
+        <div class="art-preview preview-art2" id="preview2">
+          <div class="crescent"></div>
           <div class="circles">
-            <div class="circle c1"></div>
-            <div class="circle c2"></div>
-            <div class="circle c3"></div>
+            <div class="ucircle uc1"></div>
+            <div class="ucircle uc2"></div>
+            <div class="ucircle uc3"></div>
           </div>
-          <div class="star-bg">✦</div>
-          <div class="unity-text">UNITY · PERPADUAN</div>
+          <div class="star-center">✦</div>
+          <div class="unity-text">UNITY &middot; PERPADUAN</div>
         </div>
-        <div class="art-info">
-          <div class="art-num"><span class="bm-text">Lukisan 2</span><span class="en-text">Artwork 2</span></div>
-          <div class="art-title">Unity in Diversity Series 2</div>
-          <div class="art-artist">ArtJamila · 2017</div>
-          <div class="art-medium"><span class="bm-text">Dakwat di atas kanvas</span><span class="en-text">Ink on canvas</span></div>
-          <div class="art-desc">
-            <span class="bm-text">Karya ini menggambarkan perpaduan dalam kepelbagaian melalui bulatan-bulatan yang saling bertindih, simbol integrasi masyarakat Malaysia yang harmoni.</span>
-            <span class="en-text">This artwork depicts unity in diversity through overlapping circles — a symbol of Malaysia's harmonious social integration.</span>
-          </div>
-          <button class="select-btn" id="btn2">
-            <span class="play">&#9654; <span class="bm-text">Mulakan Teka-Teki</span><span class="en-text">Start Puzzle</span></span>
-            <span class="check">&#10003; <span class="bm-text">Sedang Dimainkan</span><span class="en-text">Currently Playing</span></span>
-          </button>
+        <div class="art-num-badge">
+          &#x1F3A8; <span class="bm-text">Lukisan 2 daripada 2</span><span class="en-text">Artwork 2 of 2</span>
         </div>
+        <div class="art-title">Unity in Diversity Series 2</div>
+        <div class="art-artist">ArtJamila &middot; 2017</div>
+        <div class="art-medium">
+          <span class="bm-text">Dakwat di atas kanvas</span>
+          <span class="en-text">Ink on canvas</span>
+        </div>
+        <div class="art-divider"></div>
+        <div class="art-desc">
+          <span class="bm-text">Karya ini menggambarkan perpaduan dalam kepelbagaian melalui bulatan-bulatan yang saling bertindih. Setiap bulatan mewakili komuniti yang berbeza, dan di mana mereka bertemu, lahirlah ruang perkongsian dan persefahaman — simbol integrasi masyarakat Malaysia.</span>
+          <span class="en-text">This artwork depicts unity in diversity through overlapping circles. Each circle represents a different community, and where they intersect, a space of sharing and understanding is born — a symbol of Malaysian social integration.</span>
+        </div>
+        <button class="cta-btn" id="cta2" onclick="selectArtwork(2)">
+          <span class="cta-icon start-label">&#9654;</span>
+          <span class="cta-text start-label"><span class="bm-text">Mulakan Teka-Teki</span><span class="en-text">Start Puzzle</span></span>
+          <span class="playing-label">&#10003; <span class="bm-text">Sedang Dimainkan</span><span class="en-text">Now Playing</span></span>
+        </button>
       </div>
 
-    </div><!-- /lp-body -->
+    </div><!-- /tab-body -->
   </div><!-- /left-panel -->
 
   <!-- ════ RIGHT PANEL ════ -->
   <div id="right-panel">
     <canvas id="confetti-canvas"></canvas>
-
-    <!-- Star field -->
+    <div id="ambient"></div>
     <div class="star-field" id="starField"></div>
 
     <!-- Puzzle header -->
     <div id="puz-header">
-      <div id="puz-title">
-        <span class="bm-text">Teka-Teki Lukisan</span>
-        <span class="en-text">Artwork Puzzle</span>
-      </div>
+      <div id="puz-art-name"></div>
       <div id="progress-wrap">
         <div id="progress-dots"></div>
-        <div id="progress-text">0 / 10</div>
+        <div id="progress-text"></div>
       </div>
     </div>
 
     <!-- Empty state -->
     <div id="empty-state">
+      <div class="es-arrow">&#x2190;</div>
       <div class="es-icon">&#x1F5BC;</div>
-      <p>
+      <div class="es-text">
         <span class="bm-text">Pilih lukisan di sebelah kiri<br>untuk memulakan teka-teki</span>
         <span class="en-text">Choose an artwork on the left<br>to begin the puzzle</span>
-      </p>
+      </div>
     </div>
 
-    <!-- Board wrap -->
+    <!-- Puzzle stage -->
     <div id="board-wrap">
       <div id="puzzle-stage">
         <div id="assembly-zone"></div>
@@ -396,686 +599,603 @@ body.lang-en .en-text{display:inline;}
     <!-- Win overlay -->
     <div id="win-overlay">
       <div class="win-badge">&#127881;</div>
-      <h2><span class="bm-text">Tahniah!</span><span class="en-text">Congratulations!</span></h2>
-      <p>
+      <div class="win-title">
+        <span class="bm-text">Tahniah!</span>
+        <span class="en-text">Congratulations!</span>
+      </div>
+      <div class="win-sub">
         <span class="bm-text">Anda telah melengkapkan teka-teki!<br>Lukisan ini kini hidup semula.</span>
         <span class="en-text">You completed the puzzle!<br>The artwork has come alive.</span>
-      </p>
-      <button class="win-btn" onclick="resetPuzzle()">
-        &#x21BA; <span class="bm-text">Cuba Lagi</span><span class="en-text">Try Again</span>
-      </button>
+      </div>
+      <div class="win-actions">
+        <button class="win-btn" onclick="resetPuzzle()">
+          &#x21BA; <span class="bm-text">Cuba Lagi</span><span class="en-text">Try Again</span>
+        </button>
+        <button class="win-btn secondary" onclick="switchTabAndReset()">
+          <span class="bm-text">Lukisan Lain</span><span class="en-text">Other Artwork</span>
+        </button>
+      </div>
     </div>
   </div><!-- /right-panel -->
 
 </div><!-- /root -->
 
-<!-- Hidden canvases for artwork rendering -->
-<canvas id="art1-canvas" style="display:none;"></canvas>
-<canvas id="art2-canvas" style="display:none;"></canvas>
-
 <script>
-// ══════════════════════════════
-//  SCALE TO VIEWPORT
-// ══════════════════════════════
-function scaleRoot(){
+// ══════════════════════════════════════════════
+//  SCALE ROOT TO VIEWPORT
+// ══════════════════════════════════════════════
+function scaleRoot() {
   const root = document.getElementById('root');
-  const sx = window.innerWidth / 1920;
-  const sy = window.innerHeight / 1080;
-  const s = Math.min(sx, sy);
+  const s = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
   root.style.transform = `scale(${s})`;
-  root.style.left = ((window.innerWidth - 1920 * s) / 2) + 'px';
+  root.style.left = ((window.innerWidth  - 1920 * s) / 2) + 'px';
   root.style.top  = ((window.innerHeight - 1080 * s) / 2) + 'px';
 }
 window.addEventListener('resize', scaleRoot);
 scaleRoot();
 
-// ══════════════════════════════
-//  FULLSCREEN
-// ══════════════════════════════
-function goFullscreen(){
-  const el = document.documentElement;
-  if (el.requestFullscreen) el.requestFullscreen();
-  else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+function getScale() {
+  const m = document.getElementById('root').style.transform.match(/scale\(([^)]+)\)/);
+  return m ? parseFloat(m[1]) : 1;
 }
-document.addEventListener('click', goFullscreen, {once:true});
+
+// ══════════════════════════════════════════════
+//  FULLSCREEN
+// ══════════════════════════════════════════════
+function goFullscreen() {
+  const el = document.documentElement;
+  (el.requestFullscreen || el.webkitRequestFullscreen || function(){}).call(el);
+}
+document.addEventListener('click',     goFullscreen, {once:true});
 document.addEventListener('touchstart', goFullscreen, {once:true});
 document.addEventListener('contextmenu', e => e.preventDefault());
 
-// ══════════════════════════════
+// ══════════════════════════════════════════════
 //  STAR FIELD
-// ══════════════════════════════
-(function(){
+// ══════════════════════════════════════════════
+(function() {
   const sf = document.getElementById('starField');
-  for(let i=0;i<60;i++){
+  for (let i = 0; i < 70; i++) {
     const s = document.createElement('div');
-    s.className='star';
-    const sz = Math.random()*2.5+0.5;
-    s.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}%;top:${Math.random()*100}%;animation-duration:${2+Math.random()*4}s;animation-delay:${Math.random()*4}s;`;
+    s.className = 'star';
+    const sz = Math.random() * 2.5 + 0.4;
+    s.style.cssText = `width:${sz}px;height:${sz}px;left:${Math.random()*100}%;top:${Math.random()*100}%;animation-duration:${1.8+Math.random()*4}s;animation-delay:${Math.random()*5}s;`;
     sf.appendChild(s);
   }
 })();
 
-// ══════════════════════════════
+// ══════════════════════════════════════════════
 //  LANGUAGE
-// ══════════════════════════════
-function setLang(lang){
-  if(lang==='en'){
-    document.body.classList.add('lang-en');
-    document.getElementById('btnEN').classList.add('active');
-    document.getElementById('btnBM').classList.remove('active');
-    document.documentElement.lang='en';
-    localStorage.setItem('imd_lang','en');
-  } else {
-    document.body.classList.remove('lang-en');
-    document.getElementById('btnBM').classList.add('active');
-    document.getElementById('btnEN').classList.remove('active');
-    document.documentElement.lang='ms';
-    localStorage.setItem('imd_lang','bm');
-  }
+// ══════════════════════════════════════════════
+function setLang(lang) {
+  const isEn = lang === 'en';
+  document.body.classList.toggle('lang-en', isEn);
+  document.getElementById('btnEN').classList.toggle('active', isEn);
+  document.getElementById('btnBM').classList.toggle('active', !isEn);
+  document.documentElement.lang = isEn ? 'en' : 'ms';
+  localStorage.setItem('imd_lang', lang);
 }
-const savedLang = localStorage.getItem('imd_lang');
-if(savedLang==='en') setLang('en');
+if (localStorage.getItem('imd_lang') === 'en') setLang('en');
 
-// ══════════════════════════════
-//  ARTWORK DEFINITIONS
-// ══════════════════════════════
-const ARTWORKS = {
-  1: {
-    title: 'Rhythm of Nationality',
-    draw: drawArt1
-  },
-  2: {
-    title: 'Unity in Diversity Series 2',
-    draw: drawArt2
-  }
-};
+// ══════════════════════════════════════════════
+//  TAB SWITCHING
+// ══════════════════════════════════════════════
+let activeTab = 1;
 
-// Artwork canvas size — full artwork before slicing
+function switchTab(n) {
+  if (n === activeTab) return;
+  const prev = activeTab;
+  activeTab = n;
+
+  // Tab buttons
+  document.getElementById('tabBtn1').classList.toggle('active', n === 1);
+  document.getElementById('tabBtn2').classList.toggle('active', n === 2);
+
+  // Slide indicator
+  document.getElementById('tabIndicator').style.left = (n === 1 ? '0' : '50%');
+
+  // Content transition
+  const outEl = document.getElementById(`tc${prev}`);
+  const inEl  = document.getElementById(`tc${n}`);
+
+  // Exit direction: prev < n → slide left; prev > n → slide right
+  outEl.style.transform = prev < n ? 'translateX(-30px)' : 'translateX(30px)';
+  outEl.style.opacity = '0';
+  outEl.style.pointerEvents = 'none';
+
+  inEl.style.transform = prev < n ? 'translateX(30px)' : 'translateX(-30px)';
+  inEl.style.opacity = '0';
+  inEl.style.transition = 'none';
+  inEl.style.pointerEvents = 'all';
+
+  // Force reflow
+  inEl.offsetHeight;
+  inEl.style.transition = '';
+  inEl.style.transform = 'translateX(0)';
+  inEl.style.opacity = '1';
+
+  setTimeout(() => {
+    outEl.style.transform = '';
+  }, 320);
+}
+
+function switchTabAndReset() {
+  document.getElementById('win-overlay').classList.remove('show');
+  switchTab(currentArtwork === 1 ? 2 : 1);
+}
+
+// ══════════════════════════════════════════════
+//  ARTWORK CANVAS RENDERING
+// ══════════════════════════════════════════════
 const ART_W = 800, ART_H = 400;
-const COLS = 5, ROWS = 2, TOTAL = COLS * ROWS; // 10 pieces
-const PIECE_W = ART_W / COLS;  // 160
-const PIECE_H = ART_H / ROWS;  // 200
+const COLS = 5, ROWS = 2, TOTAL = COLS * ROWS;
+const PIECE_W = ART_W / COLS;   // 160
+const PIECE_H = ART_H / ROWS;   // 200
 
-// ── Draw Artwork 1: Rhythm of Nationality ─────────────
-function drawArt1(ctx) {
-  // Black background
-  ctx.fillStyle = '#111';
-  ctx.fillRect(0, 0, ART_W, ART_H);
+const STAGE_W = 1240;  // right panel width (1920 - 680)
+const STAGE_H = 1080;
+const BOARD_X = (STAGE_W - ART_W) / 2;  // 220
+const BOARD_Y = (STAGE_H - ART_H) / 2;  // 340
+const SNAP_DIST = 58;
 
-  // Rope across top
-  ctx.fillStyle = '#7B4A1A';
-  ctx.beginPath();
-  ctx.roundRect(30, 28, ART_W-60, 8, 4);
-  ctx.fill();
-
-  const stripColors = [
-    {type:'diag', c1:'#CC2200', c2:'#fff'},
-    {type:'diag2', c1:'#F5A623', c2:'#FFD700'},
-    {type:'dots', c1:'#2E7D32', c2:'#fff'},
-    {type:'vert', c1:'#0047AB', c2:'#66B3FF'},
-    {type:'diag', c1:'#7B1FA2', c2:'#CE93D8'},
-    {type:'vert', c1:'#E65100', c2:'#FFB300'},
-    {type:'cross', c1:'#00695C', c2:'#80CBC4'},
-    {type:'diag2', c1:'#E91E63', c2:'#F8BBD9'},
-  ];
-
-  const stripW = (ART_W - 60) / stripColors.length;
-  stripColors.forEach((s, i) => {
-    const x = 30 + i * stripW;
-    const y = 36;
-    const h = ART_H - 60;
-    // Draw patterned strip
-    ctx.save();
-    ctx.beginPath();
-    ctx.rect(x+2, y, stripW-4, h);
-    ctx.clip();
-    // Fill background
-    ctx.fillStyle = s.c1;
-    ctx.fillRect(x+2, y, stripW-4, h);
-    // Overlay pattern
-    ctx.strokeStyle = s.c2;
-    ctx.lineWidth = 6;
-    if(s.type==='diag'){
-      for(let k=-h;k<h+stripW;k+=16){
-        ctx.beginPath();ctx.moveTo(x+k+2,y);ctx.lineTo(x+k+h+2,y+h);ctx.stroke();
-      }
-    } else if(s.type==='diag2'){
-      for(let k=-h;k<h+stripW;k+=18){
-        ctx.beginPath();ctx.moveTo(x+k+2,y+h);ctx.lineTo(x+k+h+2,y);ctx.stroke();
-      }
-    } else if(s.type==='vert'){
-      for(let k=0;k<stripW;k+=12){
-        ctx.beginPath();ctx.moveTo(x+k,y);ctx.lineTo(x+k,y+h);ctx.stroke();
-      }
-    } else if(s.type==='dots'){
-      ctx.fillStyle=s.c2;
-      for(let ky=y+8;ky<y+h;ky+=18){
-        for(let kx=x+8;kx<x+stripW-4;kx+=18){
-          ctx.beginPath();ctx.arc(kx,ky,4,0,Math.PI*2);ctx.fill();
-        }
-      }
-    } else if(s.type==='cross'){
-      for(let ky=y;ky<y+h;ky+=14){
-        ctx.beginPath();ctx.moveTo(x+2,ky);ctx.lineTo(x+stripW-2,ky);ctx.stroke();
-      }
-      for(let kx=x;kx<x+stripW;kx+=14){
-        ctx.beginPath();ctx.moveTo(kx,y);ctx.lineTo(kx,y+h);ctx.stroke();
-      }
-    }
-    // Bottom fringe
-    ctx.fillStyle=s.c2;
-    for(let f=0;f<4;f++){
-      ctx.fillRect(x+4+f*(stripW-8)/4, y+h, (stripW-8)/4-2, 14);
-    }
-    ctx.restore();
-  });
-  // Shadow overlay at bottom for depth
-  const grad = ctx.createLinearGradient(0, ART_H-60, 0, ART_H);
-  grad.addColorStop(0,'transparent');
-  grad.addColorStop(1,'rgba(0,0,0,0.5)');
-  ctx.fillStyle=grad;
-  ctx.fillRect(0, ART_H-60, ART_W, 60);
-}
-
-// ── Draw Artwork 2: Unity in Diversity ───────────────
-function drawArt2(ctx) {
-  // Gradient bg
-  const bg = ctx.createLinearGradient(0,0,ART_W,ART_H);
-  bg.addColorStop(0,'#001A5C');
-  bg.addColorStop(0.4,'#003080');
-  bg.addColorStop(0.7,'#CC0001');
-  bg.addColorStop(1,'#8B0000');
-  ctx.fillStyle=bg;
-  ctx.fillRect(0,0,ART_W,ART_H);
-
-  // Stars scattered
-  ctx.fillStyle='rgba(255,204,0,0.6)';
-  const stars=[[80,60],[720,80],[200,320],[650,280],[400,50],[100,350],[760,380]];
-  stars.forEach(([sx,sy])=>{
-    ctx.font=`${20+Math.random()*20}px serif`;
-    ctx.fillText('✦',sx,sy);
-  });
-
-  // Overlapping circles — unity motif
-  const circleData=[
-    {cx:220,cy:200,r:130,color:'rgba(0,71,171,0.7)'},
-    {cx:400,cy:200,r:130,color:'rgba(0,180,166,0.65)'},
-    {cx:580,cy:200,r:130,color:'rgba(245,166,35,0.65)'},
-    {cx:310,cy:200,r:80,color:'rgba(255,255,255,0.12)'},
-    {cx:490,cy:200,r:80,color:'rgba(255,255,255,0.12)'},
-  ];
-  circleData.forEach(c=>{
-    ctx.beginPath();
-    ctx.arc(c.cx,c.cy,c.r,0,Math.PI*2);
-    ctx.fillStyle=c.color;
-    ctx.fill();
-    ctx.strokeStyle='rgba(255,204,0,0.5)';
-    ctx.lineWidth=3;
-    ctx.stroke();
-  });
-
-  // Central star
-  ctx.font='bold 56px serif';
-  ctx.fillStyle='rgba(255,204,0,0.9)';
-  ctx.textAlign='center';
-  ctx.fillText('✦',ART_W/2,ART_H/2+20);
-
-  // Text
-  ctx.font='bold 28px Poppins,sans-serif';
-  ctx.fillStyle='rgba(255,204,0,0.85)';
-  ctx.textAlign='center';
-  ctx.letterSpacing='6px';
-  ctx.fillText('UNITY  ·  PERPADUAN', ART_W/2, ART_H-40);
-
-  // Crescent moon top-left
-  ctx.fillStyle='rgba(255,204,0,0.8)';
-  ctx.beginPath();ctx.arc(90,90,50,0,Math.PI*2);ctx.fill();
-  ctx.fillStyle='#001A5C';
-  ctx.beginPath();ctx.arc(108,80,42,0,Math.PI*2);ctx.fill();
-}
-
-// ══════════════════════════════
-//  ARTWORK → CANVAS → PIECES
-// ══════════════════════════════
 const artCanvases = {};
 
-function renderArtwork(id){
-  const canvasId = `art${id}-canvas`;
-  let c = document.getElementById(canvasId);
-  if(!c){
-    c = document.createElement('canvas');
-    c.id = canvasId;
-    document.body.appendChild(c);
-  }
-  c.width = ART_W;
-  c.height = ART_H;
+function renderArtwork(id) {
+  if (artCanvases[id]) return artCanvases[id];
+  const c = document.createElement('canvas');
+  c.width = ART_W; c.height = ART_H;
   const ctx = c.getContext('2d');
-  ARTWORKS[id].draw(ctx);
+  id === 1 ? drawArt1(ctx) : drawArt2(ctx);
   artCanvases[id] = c;
   return c;
 }
 
-// ══════════════════════════════
+function drawArt1(ctx) {
+  ctx.fillStyle = '#111';
+  ctx.fillRect(0, 0, ART_W, ART_H);
+  // Rope
+  ctx.fillStyle = '#7B4A1A';
+  ctx.beginPath();
+  ctx.roundRect(30, 28, ART_W - 60, 8, 4);
+  ctx.fill();
+
+  const strips = [
+    {type:'diag',  c1:'#CC2200', c2:'#ffffff'},
+    {type:'diag2', c1:'#F5A623', c2:'#FFD700'},
+    {type:'dots',  c1:'#2E7D32', c2:'#ffffff'},
+    {type:'vert',  c1:'#0047AB', c2:'#66B3FF'},
+    {type:'diag',  c1:'#7B1FA2', c2:'#CE93D8'},
+    {type:'vert',  c1:'#E65100', c2:'#FFB300'},
+    {type:'cross', c1:'#00695C', c2:'#80CBC4'},
+    {type:'diag2', c1:'#E91E63', c2:'#F8BBD9'},
+  ];
+  const sw = (ART_W - 60) / strips.length;
+  strips.forEach((s, i) => {
+    const x = 30 + i * sw, y = 36, h = ART_H - 60;
+    ctx.save();
+    ctx.beginPath(); ctx.rect(x + 2, y, sw - 4, h); ctx.clip();
+    ctx.fillStyle = s.c1; ctx.fillRect(x + 2, y, sw - 4, h);
+    ctx.strokeStyle = s.c2; ctx.lineWidth = 6;
+    if (s.type === 'diag') {
+      for (let k = -h; k < h + sw; k += 16) { ctx.beginPath(); ctx.moveTo(x+k+2,y); ctx.lineTo(x+k+h+2,y+h); ctx.stroke(); }
+    } else if (s.type === 'diag2') {
+      for (let k = -h; k < h + sw; k += 18) { ctx.beginPath(); ctx.moveTo(x+k+2,y+h); ctx.lineTo(x+k+h+2,y); ctx.stroke(); }
+    } else if (s.type === 'vert') {
+      for (let k = 0; k < sw; k += 12) { ctx.beginPath(); ctx.moveTo(x+k,y); ctx.lineTo(x+k,y+h); ctx.stroke(); }
+    } else if (s.type === 'dots') {
+      ctx.fillStyle = s.c2;
+      for (let ky = y+8; ky < y+h; ky += 18)
+        for (let kx = x+8; kx < x+sw-4; kx += 18)
+          { ctx.beginPath(); ctx.arc(kx,ky,4,0,Math.PI*2); ctx.fill(); }
+    } else if (s.type === 'cross') {
+      for (let ky = y; ky < y+h; ky += 14) { ctx.beginPath(); ctx.moveTo(x+2,ky); ctx.lineTo(x+sw-2,ky); ctx.stroke(); }
+      for (let kx = x; kx < x+sw; kx += 14) { ctx.beginPath(); ctx.moveTo(kx,y); ctx.lineTo(kx,y+h); ctx.stroke(); }
+    }
+    ctx.fillStyle = s.c2;
+    for (let f = 0; f < 4; f++) ctx.fillRect(x+4+f*(sw-8)/4, y+h, (sw-8)/4-2, 14);
+    ctx.restore();
+  });
+  const g = ctx.createLinearGradient(0, ART_H-60, 0, ART_H);
+  g.addColorStop(0, 'transparent'); g.addColorStop(1, 'rgba(0,0,0,0.5)');
+  ctx.fillStyle = g; ctx.fillRect(0, ART_H-60, ART_W, 60);
+}
+
+function drawArt2(ctx) {
+  const bg = ctx.createLinearGradient(0, 0, ART_W, ART_H);
+  bg.addColorStop(0, '#001A5C'); bg.addColorStop(0.4, '#003080');
+  bg.addColorStop(0.7, '#CC0001'); bg.addColorStop(1, '#8B0000');
+  ctx.fillStyle = bg; ctx.fillRect(0, 0, ART_W, ART_H);
+  // Stars
+  [[80,60],[720,80],[200,320],[650,280],[400,45],[100,350],[760,380]].forEach(([sx,sy]) => {
+    ctx.fillStyle = 'rgba(255,204,0,0.65)'; ctx.font = '22px serif';
+    ctx.fillText('✦', sx, sy);
+  });
+  // Circles
+  [{cx:200,cy:200,r:140,col:'rgba(0,71,171,0.68)'},{cx:400,cy:200,r:140,col:'rgba(0,180,166,0.62)'},{cx:600,cy:200,r:140,col:'rgba(245,166,35,0.62)'}].forEach(c => {
+    ctx.beginPath(); ctx.arc(c.cx, c.cy, c.r, 0, Math.PI*2);
+    ctx.fillStyle = c.col; ctx.fill();
+    ctx.strokeStyle = 'rgba(255,204,0,0.55)'; ctx.lineWidth = 3; ctx.stroke();
+  });
+  // Intersection tints
+  [{cx:300,cy:200,r:75},{cx:500,cy:200,r:75}].forEach(c => {
+    ctx.beginPath(); ctx.arc(c.cx, c.cy, c.r, 0, Math.PI*2);
+    ctx.fillStyle = 'rgba(255,255,255,0.1)'; ctx.fill();
+  });
+  // Central star
+  ctx.font = 'bold 60px serif'; ctx.fillStyle = 'rgba(255,204,0,0.95)';
+  ctx.textAlign = 'center'; ctx.fillText('✦', ART_W/2, ART_H/2 + 22);
+  // Text
+  ctx.font = 'bold 26px sans-serif'; ctx.fillStyle = 'rgba(255,204,0,0.85)';
+  ctx.fillText('UNITY  ·  PERPADUAN', ART_W/2, ART_H - 38);
+  // Crescent
+  ctx.fillStyle = 'rgba(255,204,0,0.85)';
+  ctx.beginPath(); ctx.arc(90, 90, 52, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#001A5C';
+  ctx.beginPath(); ctx.arc(110, 80, 44, 0, Math.PI*2); ctx.fill();
+}
+
+// ══════════════════════════════════════════════
 //  PUZZLE STATE
-// ══════════════════════════════
+// ══════════════════════════════════════════════
 let currentArtwork = null;
 let pieces = [];
 let placedCount = 0;
 let activeDrag = null;
 
-const STAGE_W = 1240; // right panel width
-const STAGE_H = 1080;
-
-// Board position (centered in stage)
-const BOARD_X = (STAGE_W - ART_W) / 2;  // 220
-const BOARD_Y = (STAGE_H - ART_H) / 2;  // 340
-const SNAP_DIST = 55; // px
-
-// ── Select artwork ────────────────────────────────────
-function selectArtwork(id){
-  if(currentArtwork === id) return;
+function selectArtwork(id) {
+  if (currentArtwork === id) return;
   currentArtwork = id;
 
-  // Update card UI
-  [1,2].forEach(n=>{
-    document.getElementById(`card${n}`).classList.toggle('selected', n===id);
-    const btn = document.getElementById(`btn${n}`);
-    btn.classList.toggle('active-btn', n===id);
+  // Update CTA buttons
+  [1, 2].forEach(n => {
+    document.getElementById(`cta${n}`).classList.toggle('playing', n === id);
   });
 
-  // Render artwork
+  // Preview glow
+  [1, 2].forEach(n => {
+    document.getElementById(`preview${n}`).classList.toggle('active-glow', n === id);
+  });
+
+  // Update right panel ambient
+  const amb = document.getElementById('ambient');
+  amb.style.background = id === 1
+    ? 'radial-gradient(ellipse at 60% 50%,rgba(245,166,35,0.06) 0%,transparent 70%)'
+    : 'radial-gradient(ellipse at 40% 50%,rgba(0,71,171,0.08) 0%,transparent 70%)';
+  amb.classList.add('show');
+
+  // Render artwork (cached)
   renderArtwork(id);
+
+  // Show art name in header
+  const names = {1:'Rhythm of Nationality', 2:'Unity in Diversity Series 2'};
+  const nameEl = document.getElementById('puz-art-name');
+  nameEl.textContent = names[id];
+  nameEl.classList.add('show');
 
   // Build puzzle
   buildPuzzle(id);
 }
 
-// ── Build puzzle ──────────────────────────────────────
-function buildPuzzle(id){
+// ── Build puzzle ──────────────────────────────
+function buildPuzzle(id) {
   placedCount = 0;
   pieces = [];
 
   const stage = document.getElementById('puzzle-stage');
-  const assemblyZone = document.getElementById('assembly-zone');
+  const az = document.getElementById('assembly-zone');
 
-  // Clear existing pieces
-  stage.querySelectorAll('.piece').forEach(p=>p.remove());
+  // Clear old pieces
+  stage.querySelectorAll('.piece').forEach(p => p.remove());
 
-  // Show board wrap
-  document.getElementById('empty-state').style.display='none';
-  document.getElementById('board-wrap').classList.add('active');
+  // Hide empty state
+  document.getElementById('empty-state').classList.add('hidden');
+  document.getElementById('win-overlay').classList.remove('show');
 
-  // Position assembly zone
-  assemblyZone.style.left = BOARD_X + 'px';
-  assemblyZone.style.top  = BOARD_Y + 'px';
-  assemblyZone.style.width  = ART_W + 'px';
-  assemblyZone.style.height = ART_H + 'px';
-  assemblyZone.innerHTML = '';
+  // Assembly zone position
+  az.style.left   = BOARD_X + 'px';
+  az.style.top    = BOARD_Y + 'px';
+  az.style.width  = ART_W + 'px';
+  az.style.height = ART_H + 'px';
+  az.innerHTML = '';
 
   // Progress dots
   const dotsEl = document.getElementById('progress-dots');
   dotsEl.innerHTML = '';
-  for(let i=0;i<TOTAL;i++){
+  for (let i = 0; i < TOTAL; i++) {
     const d = document.createElement('div');
-    d.className='pdot';
-    d.id=`dot${i}`;
+    d.className = 'pdot'; d.id = `dot${i}`;
     dotsEl.appendChild(d);
   }
   updateProgress();
 
-  // Create slots and pieces
-  const sourceCanvas = artCanvases[id];
+  const srcCanvas = artCanvases[id];
 
-  for(let row=0;row<ROWS;row++){
-    for(let col=0;col<COLS;col++){
-      const idx = row*COLS+col;
-      const correctX = BOARD_X + col*PIECE_W;
-      const correctY = BOARD_Y + row*PIECE_H;
+  for (let row = 0; row < ROWS; row++) {
+    for (let col = 0; col < COLS; col++) {
+      const idx = row * COLS + col;
+      const correctX = BOARD_X + col * PIECE_W;
+      const correctY = BOARD_Y + row * PIECE_H;
 
       // Slot
       const slot = document.createElement('div');
-      slot.className='slot';
-      slot.style.left=(col*PIECE_W)+'px';
-      slot.style.top=(row*PIECE_H)+'px';
-      slot.style.width=PIECE_W+'px';
-      slot.style.height=PIECE_H+'px';
-      slot.id=`slot${idx}`;
-      assemblyZone.appendChild(slot);
+      slot.className = 'slot';
+      slot.style.cssText = `left:${col*PIECE_W}px;top:${row*PIECE_H}px;width:${PIECE_W}px;height:${PIECE_H}px;`;
+      slot.id = `slot${idx}`;
+      az.appendChild(slot);
 
-      // Piece — extract slice from artwork canvas
-      const pieceCanvas = document.createElement('canvas');
-      pieceCanvas.width = PIECE_W;
-      pieceCanvas.height = PIECE_H;
-      const pc = pieceCanvas.getContext('2d');
-      pc.drawImage(sourceCanvas,
-        col*PIECE_W, row*PIECE_H, PIECE_W, PIECE_H,
-        0, 0, PIECE_W, PIECE_H
-      );
-      const dataURL = pieceCanvas.toDataURL();
+      // Extract piece image
+      const pc = document.createElement('canvas');
+      pc.width = PIECE_W; pc.height = PIECE_H;
+      pc.getContext('2d').drawImage(srcCanvas, col*PIECE_W, row*PIECE_H, PIECE_W, PIECE_H, 0, 0, PIECE_W, PIECE_H);
+      const dataURL = pc.toDataURL();
 
-      // Random scatter position — avoid assembly zone
-      let sx, sy;
+      // Random scatter — away from board
+      let sx, sy, tries = 0;
       do {
-        sx = 20 + Math.random()*(STAGE_W-PIECE_W-40);
-        sy = 80 + Math.random()*(STAGE_H-PIECE_H-100);
-      } while(
-        sx > BOARD_X-PIECE_W-20 && sx < BOARD_X+ART_W+20 &&
-        sy > BOARD_Y-PIECE_H-20 && sy < BOARD_Y+ART_H+20
-      );
+        sx = 20 + Math.random() * (STAGE_W - PIECE_W - 40);
+        sy = 80 + Math.random() * (STAGE_H - PIECE_H - 100);
+        tries++;
+      } while (tries < 50 &&
+        sx > BOARD_X - PIECE_W && sx < BOARD_X + ART_W &&
+        sy > BOARD_Y - PIECE_H && sy < BOARD_Y + ART_H);
 
       // Piece element
-      const pieceEl = document.createElement('div');
-      pieceEl.className='piece';
-      pieceEl.style.width=PIECE_W+'px';
-      pieceEl.style.height=PIECE_H+'px';
-      pieceEl.style.left=sx+'px';
-      pieceEl.style.top=sy+'px';
-      pieceEl.style.backgroundImage=`url(${dataURL})`;
-      pieceEl.style.backgroundSize='cover';
-      pieceEl.dataset.idx=idx;
-      stage.appendChild(pieceEl);
+      const el = document.createElement('div');
+      el.className = 'piece appear';
+      el.style.cssText = `width:${PIECE_W}px;height:${PIECE_H}px;left:${sx}px;top:${sy}px;background:url(${dataURL}) center/cover;animation-delay:${idx*35}ms;`;
+      el.dataset.idx = idx;
+      stage.appendChild(el);
 
-      const pieceData = {
-        idx, el:pieceEl,
-        correctX, correctY,
-        sx, sy,
-        placed:false
-      };
+      const pieceData = { idx, el, correctX, correctY, placed: false };
       pieces.push(pieceData);
 
-      // Touch events
-      pieceEl.addEventListener('touchstart', onTouchStart, {passive:false});
-      pieceEl.addEventListener('mousedown', onMouseDown);
+      el.addEventListener('touchstart', onTouchStart, { passive: false });
+      el.addEventListener('mousedown',  onMouseDown);
     }
   }
-
-  // Hide win overlay
-  document.getElementById('win-overlay').classList.remove('show');
 }
 
-// ══════════════════════════════
-//  DRAG — TOUCH
-// ══════════════════════════════
-function getTouchPos(e){
-  const root = document.getElementById('root');
-  const scale = parseFloat(root.style.transform.replace('scale(','').replace(')','')) || 1;
-  const rootRect = root.getBoundingClientRect();
-  const t = e.touches ? e.touches[0] : e;
+// ══════════════════════════════════════════════
+//  POINTER POSITION — relative to puzzle-stage
+//  getBoundingClientRect already accounts for
+//  the CSS scale transform on #root.
+// ══════════════════════════════════════════════
+function getPointerPos(e) {
+  const stage = document.getElementById('puzzle-stage');
+  const rect  = stage.getBoundingClientRect();
+  const scale = getScale();
+  const touch = e.touches ? e.touches[0] : e;
   return {
-    x: (t.clientX - rootRect.left) / scale,
-    y: (t.clientY - rootRect.top) / scale
+    x: (touch.clientX - rect.left) / scale,
+    y: (touch.clientY - rect.top)  / scale,
   };
 }
 
-function onTouchStart(e){
+// ══════════════════════════════════════════════
+//  DRAG HANDLERS
+// ══════════════════════════════════════════════
+function onTouchStart(e) {
   e.preventDefault();
-  startDrag(e.target, getTouchPos(e));
-  document.addEventListener('touchmove', onTouchMove, {passive:false});
-  document.addEventListener('touchend', onTouchEnd);
+  startDrag(e.currentTarget, getPointerPos(e));
+  document.addEventListener('touchmove', onTouchMove, { passive: false });
+  document.addEventListener('touchend',  onTouchEnd);
 }
 
-function onMouseDown(e){
+function onMouseDown(e) {
   e.preventDefault();
-  startDrag(e.target, {x:0,y:0}); // handled in mousemove
+  startDrag(e.currentTarget, getPointerPos(e));
   document.addEventListener('mousemove', onMouseMove);
-  document.addEventListener('mouseup', onMouseUp);
+  document.addEventListener('mouseup',   onMouseUp);
 }
 
-function startDrag(el, pos){
+function startDrag(el, pos) {
   const idx = parseInt(el.dataset.idx);
-  const p = pieces[idx];
-  if(!p || p.placed) return;
+  const p   = pieces[idx];
+  if (!p || p.placed) return;
   activeDrag = {
-    piece: p,
+    piece:   p,
     offsetX: pos.x - parseFloat(p.el.style.left),
-    offsetY: pos.y - parseFloat(p.el.style.top)
+    offsetY: pos.y - parseFloat(p.el.style.top),
   };
   p.el.classList.add('dragging');
-  p.el.style.zIndex=100;
-  // highlight nearby slots
-  highlightNearSlots(p);
 }
 
-function onTouchMove(e){
+function onTouchMove(e) {
   e.preventDefault();
-  if(!activeDrag) return;
-  const pos = getTouchPos(e);
+  if (!activeDrag) return;
+  const pos = getPointerPos(e);
   movePiece(pos.x, pos.y);
 }
-function onMouseMove(e){
-  if(!activeDrag) return;
-  const root = document.getElementById('root');
-  const scale = parseFloat(root.style.transform.replace('scale(','').replace(')','')) || 1;
-  const rootRect = root.getBoundingClientRect();
-  movePiece(
-    (e.clientX - rootRect.left)/scale,
-    (e.clientY - rootRect.top)/scale
-  );
+
+function onMouseMove(e) {
+  if (!activeDrag) return;
+  const pos = getPointerPos(e);
+  movePiece(pos.x, pos.y);
 }
 
-function movePiece(x, y){
-  const p = activeDrag.piece;
-  const nx = x - activeDrag.offsetX;
-  const ny = y - activeDrag.offsetY;
-  p.el.style.left = nx + 'px';
-  p.el.style.top  = ny + 'px';
-  highlightNearSlots(p);
+function movePiece(x, y) {
+  const p  = activeDrag.piece;
+  p.el.style.left = (x - activeDrag.offsetX) + 'px';
+  p.el.style.top  = (y - activeDrag.offsetY) + 'px';
+  highlightNearSlot(p);
 }
 
-function highlightNearSlots(p){
-  // Clear all highlights
-  document.querySelectorAll('.slot').forEach(s=>s.classList.remove('highlight'));
-  const cx = parseFloat(p.el.style.left)+PIECE_W/2;
-  const cy = parseFloat(p.el.style.top)+PIECE_H/2;
-  const dist = Math.hypot(cx - (p.correctX+PIECE_W/2), cy - (p.correctY+PIECE_H/2));
-  if(dist < SNAP_DIST*1.5){
+function highlightNearSlot(p) {
+  document.querySelectorAll('.slot').forEach(s => s.classList.remove('highlight'));
+  const cx = parseFloat(p.el.style.left) + PIECE_W / 2;
+  const cy = parseFloat(p.el.style.top)  + PIECE_H / 2;
+  const dist = Math.hypot(cx - (p.correctX + PIECE_W/2), cy - (p.correctY + PIECE_H/2));
+  if (dist < SNAP_DIST * 1.6) {
     const slot = document.getElementById(`slot${p.idx}`);
-    if(slot && !slot.classList.contains('filled')) slot.classList.add('highlight');
+    if (slot && !slot.classList.contains('filled')) slot.classList.add('highlight');
   }
 }
 
-function onTouchEnd(e){
+function onTouchEnd() {
   endDrag();
   document.removeEventListener('touchmove', onTouchMove);
-  document.removeEventListener('touchend', onTouchEnd);
+  document.removeEventListener('touchend',  onTouchEnd);
 }
-function onMouseUp(){
+function onMouseUp() {
   endDrag();
   document.removeEventListener('mousemove', onMouseMove);
-  document.removeEventListener('mouseup', onMouseUp);
+  document.removeEventListener('mouseup',   onMouseUp);
 }
 
-function endDrag(){
-  if(!activeDrag) return;
+function endDrag() {
+  if (!activeDrag) return;
   const p = activeDrag.piece;
   p.el.classList.remove('dragging');
-  document.querySelectorAll('.slot').forEach(s=>s.classList.remove('highlight'));
+  document.querySelectorAll('.slot').forEach(s => s.classList.remove('highlight'));
 
-  // Check snap
-  const cx = parseFloat(p.el.style.left)+PIECE_W/2;
-  const cy = parseFloat(p.el.style.top)+PIECE_H/2;
-  const dist = Math.hypot(cx-(p.correctX+PIECE_W/2), cy-(p.correctY+PIECE_H/2));
+  const cx   = parseFloat(p.el.style.left) + PIECE_W / 2;
+  const cy   = parseFloat(p.el.style.top)  + PIECE_H / 2;
+  const dist = Math.hypot(cx - (p.correctX + PIECE_W/2), cy - (p.correctY + PIECE_H/2));
 
-  if(dist < SNAP_DIST && !p.placed){
-    // Snap into place
+  if (dist < SNAP_DIST && !p.placed) {
     p.placed = true;
-    p.el.classList.add('placed');
     p.el.style.left = p.correctX + 'px';
     p.el.style.top  = p.correctY + 'px';
-    p.el.style.zIndex = 15;
+    p.el.style.transition = 'left 0.22s cubic-bezier(0.34,1.56,0.64,1),top 0.22s cubic-bezier(0.34,1.56,0.64,1)';
+    p.el.classList.add('placed', 'snap-anim');
     p.el.removeEventListener('touchstart', onTouchStart);
-    p.el.removeEventListener('mousedown', onMouseDown);
-    // Fill slot
+    p.el.removeEventListener('mousedown',  onMouseDown);
+
     const slot = document.getElementById(`slot${p.idx}`);
-    if(slot) slot.classList.add('filled');
+    if (slot) slot.classList.add('filled');
     placedCount++;
     updateProgress();
     snapSound();
-    if(placedCount >= TOTAL) setTimeout(triggerWin, 400);
-  } else {
-    p.el.style.zIndex = 20;
+    if (placedCount >= TOTAL) setTimeout(triggerWin, 500);
   }
   activeDrag = null;
 }
 
-// ══════════════════════════════
+// ══════════════════════════════════════════════
 //  PROGRESS
-// ══════════════════════════════
-function updateProgress(){
+// ══════════════════════════════════════════════
+function updateProgress() {
   document.getElementById('progress-text').textContent = `${placedCount} / ${TOTAL}`;
-  for(let i=0;i<TOTAL;i++){
+  for (let i = 0; i < TOTAL; i++) {
     const d = document.getElementById(`dot${i}`);
-    if(d) d.classList.toggle('placed', i < placedCount);
+    if (d) d.classList.toggle('placed', i < placedCount);
   }
 }
 
-// ══════════════════════════════
-//  SNAP SOUND (Web Audio)
-// ══════════════════════════════
+// ══════════════════════════════════════════════
+//  AUDIO
+// ══════════════════════════════════════════════
 let audioCtx = null;
-function snapSound(){
-  try{
-    if(!audioCtx) audioCtx = new(window.AudioContext||window.webkitAudioContext)();
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-    osc.frequency.setValueAtTime(880, audioCtx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(440, audioCtx.currentTime+0.12);
-    gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.15);
-    osc.start();
-    osc.stop(audioCtx.currentTime+0.15);
-  }catch(e){}
+function initAudio() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 }
-
-function winSound(){
-  try{
-    if(!audioCtx) audioCtx = new(window.AudioContext||window.webkitAudioContext)();
-    [523,659,784,1047].forEach((freq,i)=>{
-      const osc = audioCtx.createOscillator();
-      const g = audioCtx.createGain();
-      osc.connect(g);g.connect(audioCtx.destination);
-      osc.frequency.value = freq;
-      g.gain.setValueAtTime(0, audioCtx.currentTime+i*0.12);
-      g.gain.linearRampToValueAtTime(0.25, audioCtx.currentTime+i*0.12+0.05);
-      g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+i*0.12+0.4);
-      osc.start(audioCtx.currentTime+i*0.12);
-      osc.stop(audioCtx.currentTime+i*0.12+0.4);
+function snapSound() {
+  try {
+    initAudio();
+    const osc = audioCtx.createOscillator(), g = audioCtx.createGain();
+    osc.connect(g); g.connect(audioCtx.destination);
+    osc.frequency.setValueAtTime(1047, audioCtx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(523, audioCtx.currentTime + 0.1);
+    g.gain.setValueAtTime(0.25, audioCtx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.14);
+    osc.start(); osc.stop(audioCtx.currentTime + 0.14);
+  } catch(e) {}
+}
+function winSound() {
+  try {
+    initAudio();
+    [523, 659, 784, 1047, 1319].forEach((f, i) => {
+      const osc = audioCtx.createOscillator(), g = audioCtx.createGain();
+      osc.connect(g); g.connect(audioCtx.destination);
+      osc.frequency.value = f;
+      const t = audioCtx.currentTime + i * 0.13;
+      g.gain.setValueAtTime(0, t);
+      g.gain.linearRampToValueAtTime(0.22, t + 0.04);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.45);
+      osc.start(t); osc.stop(t + 0.45);
     });
-  }catch(e){}
+  } catch(e) {}
 }
 
-// ══════════════════════════════
+// ══════════════════════════════════════════════
 //  WIN
-// ══════════════════════════════
-function triggerWin(){
-  // Celebrate pieces
-  pieces.forEach(p=>p.el.classList.add('celebrate'));
-
-  // Artwork animation — shimmer overlay
-  animateArtwork();
-
+// ══════════════════════════════════════════════
+function triggerWin() {
   winSound();
   burstConfetti();
-
-  setTimeout(()=>{
-    document.getElementById('win-overlay').classList.add('show');
-  }, 1200);
+  pieces.forEach(p => p.el.classList.add('celebrate'));
+  setTimeout(() => document.getElementById('win-overlay').classList.add('show'), 1400);
 }
 
-function animateArtwork(){
-  // Add shimmer/pulse animation to all placed pieces
-  const style = document.createElement('style');
-  style.textContent=`
-    @keyframes artAlive{
-      0%{filter:brightness(1) saturate(1);}
-      25%{filter:brightness(1.3) saturate(1.6);}
-      50%{filter:brightness(1.1) saturate(1.2) hue-rotate(15deg);}
-      75%{filter:brightness(1.4) saturate(1.8) hue-rotate(-10deg);}
-      100%{filter:brightness(1) saturate(1);}
-    }
-    .piece.celebrate{animation:artAlive 2s ease-in-out infinite,pieceGlow 1s ease-in-out infinite alternate;}
-  `;
-  document.head.appendChild(style);
-}
-
-function resetPuzzle(){
+function resetPuzzle() {
   document.getElementById('win-overlay').classList.remove('show');
-  if(currentArtwork) buildPuzzle(currentArtwork);
+  if (currentArtwork) {
+    // Remove celebrate styles
+    pieces.forEach(p => p.el.classList.remove('celebrate'));
+    buildPuzzle(currentArtwork);
+  }
 }
 
-// ══════════════════════════════
+// ══════════════════════════════════════════════
 //  CONFETTI
-// ══════════════════════════════
-(function(){
+// ══════════════════════════════════════════════
+(function() {
   const canvas = document.getElementById('confetti-canvas');
-  canvas.width = STAGE_W;
+  canvas.width  = STAGE_W;
   canvas.height = STAGE_H;
   const ctx = canvas.getContext('2d');
-  let particles = [];
-  let rafId = null;
+  let particles = [], rafId = null;
+  const COLS_C = ['#0047AB','#F5A623','#00B4A6','#FF6B5B','#7B5EA7','#27AE60','#FFD700','#fff'];
 
-  window.burstConfetti = function(){
-    const colours=['#0047AB','#F5A623','#00B4A6','#FF6B5B','#7B5EA7','#27AE60','#FFCC00'];
-    for(let i=0;i<120;i++){
-      const angle = Math.random()*Math.PI*2;
-      const speed = 8+Math.random()*14;
+  window.burstConfetti = function() {
+    for (let i = 0; i < 140; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = 9 + Math.random() * 14;
       particles.push({
-        x:STAGE_W/2,y:STAGE_H/3,
-        vx:Math.cos(angle)*speed,vy:Math.sin(angle)*speed-6,
-        colour:colours[Math.floor(Math.random()*colours.length)],
-        size:6+Math.random()*9,
-        rotation:Math.random()*360,
-        rotSpeed:(Math.random()-0.5)*15,
-        gravity:0.35,life:1,
-        decay:0.01+Math.random()*0.007,
-        shape:Math.random()>0.5?'rect':'circle'
+        x: STAGE_W/2, y: STAGE_H/3,
+        vx: Math.cos(angle)*speed, vy: Math.sin(angle)*speed - 8,
+        colour: COLS_C[Math.floor(Math.random()*COLS_C.length)],
+        size: 6 + Math.random()*9,
+        rotation: Math.random()*360, rotSpeed: (Math.random()-0.5)*14,
+        gravity: 0.38, life: 1,
+        decay: 0.009 + Math.random()*0.007,
+        shape: Math.random() > 0.5 ? 'rect' : 'circle',
       });
     }
-    if(!rafId) loop();
+    if (!rafId) loop();
   };
 
-  function loop(){
-    ctx.clearRect(0,0,STAGE_W,STAGE_H);
-    particles = particles.filter(p=>p.life>0);
-    particles.forEach(p=>{
-      p.x+=p.vx;p.y+=p.vy;p.vy+=p.gravity;
-      p.rotation+=p.rotSpeed;p.life-=p.decay;
+  function loop() {
+    ctx.clearRect(0, 0, STAGE_W, STAGE_H);
+    particles = particles.filter(p => p.life > 0);
+    particles.forEach(p => {
+      p.x += p.vx; p.y += p.vy; p.vy += p.gravity;
+      p.rotation += p.rotSpeed; p.life -= p.decay;
       ctx.save();
-      ctx.globalAlpha=Math.max(0,p.life);
-      ctx.fillStyle=p.colour;
-      ctx.translate(p.x,p.y);
-      ctx.rotate(p.rotation*Math.PI/180);
-      if(p.shape==='rect'){ctx.fillRect(-p.size/2,-p.size/4,p.size,p.size/2);}
-      else{ctx.beginPath();ctx.arc(0,0,p.size/2,0,Math.PI*2);ctx.fill();}
+      ctx.globalAlpha = Math.max(0, p.life);
+      ctx.fillStyle = p.colour;
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rotation * Math.PI / 180);
+      if (p.shape === 'rect') ctx.fillRect(-p.size/2, -p.size/4, p.size, p.size/2);
+      else { ctx.beginPath(); ctx.arc(0, 0, p.size/2, 0, Math.PI*2); ctx.fill(); }
       ctx.restore();
     });
-    if(particles.length>0){rafId=requestAnimationFrame(loop);}
-    else rafId=null;
+    rafId = particles.length > 0 ? requestAnimationFrame(loop) : null;
   }
 })();
 
-// ══════════════════════════════
+// ══════════════════════════════════════════════
 //  KIOSK HARDENING
-// ══════════════════════════════
-document.addEventListener('keydown',e=>{
-  const blocked=['F5','F11','F12','F1','F2','F3','F4'];
-  if(blocked.includes(e.key)) e.preventDefault();
-  if(e.ctrlKey && ['w','r','t','n','p','a'].includes(e.key.toLowerCase())) e.preventDefault();
+// ══════════════════════════════════════════════
+document.addEventListener('keydown', e => {
+  if (['F5','F11','F12'].includes(e.key)) e.preventDefault();
+  if (e.ctrlKey && 'wrtanp'.includes(e.key.toLowerCase())) e.preventDefault();
 });
 
-// Idle reset — 90s
+// Idle 90s → reset
 let idleTimer;
-function resetIdle(){
-  clearTimeout(idleTimer);
-  idleTimer=setTimeout(()=>{
-    if(currentArtwork) resetPuzzle();
-  }, 90000);
-}
-['touchstart','mousedown','touchmove'].forEach(ev=>
-  document.addEventListener(ev, resetIdle, {passive:true})
-);
+function resetIdle() { clearTimeout(idleTimer); idleTimer = setTimeout(() => { if (currentArtwork) resetPuzzle(); }, 90000); }
+['touchstart','mousedown'].forEach(ev => document.addEventListener(ev, resetIdle, {passive:true}));
 resetIdle();
 </script>
 </body>
