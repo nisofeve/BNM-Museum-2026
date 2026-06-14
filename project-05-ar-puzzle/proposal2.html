@@ -155,42 +155,33 @@ html,body{
 .s6{background:repeating-linear-gradient(90deg,#E65100 0,#E65100 4px,#FFB300 4px,#FFB300 8px);}
 .s7{background:repeating-linear-gradient(135deg,#00695C 0,#00695C 5px,#80CBC4 5px,#80CBC4 10px);}
 .s8{background:repeating-linear-gradient(0deg,#E91E63 0,#E91E63 5px,#F8BBD9 5px,#F8BBD9 10px);}
-/* Artwork 2 — Unity circles */
+/* Artwork 2 preview — flag-style matching puzzle artwork */
 .preview-art2{
-  background:linear-gradient(160deg,#001A5C 0%,#003080 38%,#CC0001 70%,#8B0000 100%);
-  display:flex;align-items:center;justify-content:center;position:relative;
+  background:repeating-linear-gradient(to bottom,#CC0001 0,#CC0001 17px,#FFFFFF 17px,#FFFFFF 34px);
+  position:relative;overflow:hidden;
 }
-.preview-art2 .circles{
-  position:absolute;inset:0;display:flex;
-  align-items:center;justify-content:center;gap:-20px;
+.p2-canton{
+  position:absolute;top:0;left:0;width:50%;height:50%;
+  background:#003893;overflow:hidden;
 }
-.preview-art2 .ucircle{
-  border-radius:50%;border:5px solid rgba(255,204,0,0.7);
-  position:absolute;
+.p2-crescent{
+  position:absolute;top:26px;left:14%;
+  width:40px;height:40px;border-radius:50%;background:#FFCC00;
 }
-.preview-art2 .uc1{width:160px;height:160px;background:rgba(0,71,171,0.55);left:60px;}
-.preview-art2 .uc2{width:160px;height:160px;background:rgba(0,180,166,0.5);left:50%;transform:translateX(-50%);}
-.preview-art2 .uc3{width:160px;height:160px;background:rgba(245,166,35,0.5);right:60px;}
-.preview-art2 .star-center{
-  position:absolute;font-size:2.8rem;color:rgba(255,204,0,0.95);z-index:2;
-  text-shadow:0 0 20px rgba(255,204,0,0.8);
+.p2-crescent::after{
+  content:'';position:absolute;width:32px;height:32px;border-radius:50%;
+  background:#003893;top:4px;left:10px;
 }
-.preview-art2 .unity-text{
-  position:absolute;bottom:14px;left:0;right:0;text-align:center;
-  font-family:'Poppins',sans-serif;font-size:0.82rem;font-weight:700;
-  color:rgba(255,204,0,0.9);letter-spacing:0.12em;z-index:2;
+.p2-star{
+  position:absolute;top:50%;left:60%;
+  transform:translateY(-50%);
+  font-size:2.2rem;color:#FFCC00;line-height:1;
 }
-.preview-art2 .crescent{
-  position:absolute;top:18px;left:18px;
-  width:54px;height:54px;z-index:2;
-}
-.preview-art2 .crescent::before{
-  content:'';position:absolute;width:54px;height:54px;border-radius:50%;
-  background:rgba(255,204,0,0.8);
-}
-.preview-art2 .crescent::after{
-  content:'';position:absolute;width:44px;height:44px;border-radius:50%;
-  background:#001A5C;top:3px;left:12px;
+.p2-title{
+  position:absolute;bottom:12px;left:0;right:0;text-align:center;
+  font-family:'Poppins',sans-serif;font-size:0.78rem;font-weight:700;
+  color:rgba(255,204,0,0.95);letter-spacing:0.08em;z-index:2;
+  text-shadow:0 1px 8px rgba(0,0,0,0.9);
 }
 /* Active glow on selected preview */
 .art-preview.active-glow{
@@ -487,6 +478,158 @@ html,body{
 /* Confetti canvas */
 #confetti-canvas{position:absolute;inset:0;pointer-events:none;z-index:250;}
 
+/* ════════════════════════════════
+   ART ALIVE OVERLAY — post-win AR animation
+   ════════════════════════════════ */
+#art-alive-overlay{
+  position:absolute;
+  left:220px;top:340px;width:800px;height:400px;
+  z-index:55;border-radius:10px;overflow:hidden;
+  opacity:0;display:none;
+  transition:opacity 0.9s ease-out;
+}
+#art-alive-overlay.show{display:block;}
+#art-alive-overlay.fade-in{
+  opacity:1;
+  animation:artBorderGlow 1.1s ease-in-out infinite;
+}
+.aal-art{position:absolute;inset:0;}
+
+/* ── Art 1: Rhythm of Nationality — swaying fabric strips ── */
+.aal-art1{background:#1A1010;overflow:hidden;}
+.aal-rope{
+  position:absolute;top:26px;left:18px;right:18px;height:8px;
+  background:linear-gradient(90deg,#5D2F0A,#8B4513,#A0522D,#8B4513,#5D2F0A);
+  border-radius:4px;box-shadow:0 2px 8px rgba(0,0,0,0.5);z-index:5;
+}
+.aal-strips-container{
+  position:absolute;top:30px;left:16px;right:16px;bottom:14px;
+  display:flex;align-items:flex-start;gap:6px;
+}
+.aal-strip{
+  flex:1;height:100%;border-radius:0 0 8px 8px;
+  transform-origin:top center;position:relative;
+  box-shadow:2px 0 8px rgba(0,0,0,0.4);
+}
+.aal-strip::before{
+  content:'';position:absolute;top:-4px;left:50%;transform:translateX(-50%);
+  width:8px;height:10px;background:#B0B0B0;border-radius:1px;z-index:6;
+}
+.as1{background:repeating-linear-gradient(135deg,#CC2200 0px,#CC2200 10px,#ffffff 10px,#ffffff 20px);}
+.as2{background:repeating-linear-gradient(60deg,#E8960A 0px,#E8960A 12px,#FFD700 12px,#FFD700 24px);}
+.as3{background:radial-gradient(circle,#ffffff 4px,transparent 4px) 0 0/18px 18px #1B6B2E;}
+.as4{background:repeating-linear-gradient(0deg,#0047AB 0px,#0047AB 8px,#66B3FF 8px,#66B3FF 16px);}
+.as5{background:repeating-linear-gradient(45deg,#6A1B99 0px,#6A1B99 10px,#CE93D8 10px,#CE93D8 20px);}
+.as6{background:repeating-linear-gradient(90deg,#BF360C 0px,#BF360C 8px,#FFB300 8px,#FFB300 16px);}
+.as7{background:repeating-linear-gradient(0deg,rgba(0,105,92,.9) 0px,rgba(0,105,92,.9) 10px,rgba(128,203,196,.9) 10px,rgba(128,203,196,.9) 20px);}
+.as8{background:repeating-linear-gradient(135deg,#AD1457 0px,#AD1457 8px,#F8BBD9 8px,#F8BBD9 16px);}
+.aal-glow-overlay{
+  position:absolute;inset:0;pointer-events:none;z-index:3;
+  background:radial-gradient(ellipse 80% 60% at 50% 40%,rgba(245,166,35,0.22) 0%,transparent 70%);
+  opacity:0;
+}
+.aal-poem-overlay{
+  position:absolute;bottom:14px;left:12px;right:12px;z-index:10;pointer-events:none;
+}
+.aal-poem-line{
+  font-family:'Nunito',sans-serif;font-size:1.05rem;font-style:italic;
+  color:rgba(255,255,255,0.95);text-align:center;
+  text-shadow:0 1px 8px rgba(0,0,0,0.9),0 0 16px rgba(245,166,35,0.55);
+  line-height:1.5;opacity:0;transform:translateY(6px);
+  transition:opacity 0.6s,transform 0.6s;display:block;margin-bottom:3px;
+}
+.aal-poem-line.visible{opacity:1;transform:translateY(0);}
+
+/* ── Art 2: Unity in Diversity — flag waves, figures float ── */
+.aal-art2{
+  background:linear-gradient(160deg,#001A5C 0%,#003080 45%,#CC0001 100%);
+  overflow:hidden;
+}
+.aal-malaysia-title{
+  position:absolute;top:14px;left:0;right:0;text-align:center;
+  font-family:'Poppins',sans-serif;font-weight:800;font-size:1.8rem;
+  color:#FFCC00;letter-spacing:0.12em;z-index:10;
+  text-shadow:0 2px 12px rgba(0,0,0,0.5);
+}
+.aal-flag-canton{
+  position:absolute;top:52px;left:0;right:0;height:130px;
+  background:#003893;z-index:2;
+}
+.aal-crescent-wrap{position:absolute;top:62px;left:60px;z-index:8;}
+.aal-crescent{
+  width:110px;height:110px;background:#FFCC00;border-radius:50%;position:relative;
+}
+.aal-crescent::after{
+  content:'';position:absolute;width:88px;height:88px;
+  background:#003893;border-radius:50%;top:10px;left:22px;
+}
+.aal-star-14{
+  position:absolute;top:56px;left:230px;
+  font-size:5.5rem;color:#FFCC00;z-index:8;line-height:1;
+}
+.aal-stripes-container{
+  position:absolute;top:182px;left:0;right:0;bottom:0;
+  display:flex;flex-direction:column;z-index:3;overflow:hidden;
+}
+.aal-stripe{flex:1;}
+.aal-stripe-r{background:#CC0001;}
+.aal-stripe-w{background:#FFFFFF;}
+.aal-figures-row{
+  position:absolute;bottom:16px;left:0;right:0;
+  display:flex;justify-content:space-around;align-items:flex-end;
+  z-index:15;padding:0 50px;
+}
+.aal-fig{display:flex;flex-direction:column;align-items:center;gap:3px;}
+.aal-fig-head{width:36px;height:36px;border-radius:50%;}
+.aal-fig-hair{position:relative;top:-3px;width:44px;height:20px;border-radius:20px 20px 0 0;}
+.aal-fig-body{width:0;height:0;border-left:27px solid transparent;border-right:27px solid transparent;}
+#aal-particles{position:absolute;inset:0;z-index:12;pointer-events:none;}
+
+/* ── Art Alive Sway Keyframes (Art 1) ── */
+@keyframes aalSway1{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(4deg)}}
+@keyframes aalSway2{0%,100%{transform:rotate(4deg)}50%{transform:rotate(-4deg)}}
+@keyframes aalSway3{0%,100%{transform:rotate(-3deg)}50%{transform:rotate(5deg)}}
+@keyframes aalSway4{0%,100%{transform:rotate(2deg)}50%{transform:rotate(-5deg)}}
+@keyframes aalSway5{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(3deg)}}
+@keyframes aalSway6{0%,100%{transform:rotate(3deg)}50%{transform:rotate(-3deg)}}
+@keyframes aalSway7{0%,100%{transform:rotate(-2deg)}50%{transform:rotate(4deg)}}
+@keyframes aalSway8{0%,100%{transform:rotate(4deg)}50%{transform:rotate(-2deg)}}
+.aal-art1.ar-active .as1{animation:aalSway1 2s ease-in-out infinite 0s;}
+.aal-art1.ar-active .as2{animation:aalSway2 2s ease-in-out infinite 0.25s;}
+.aal-art1.ar-active .as3{animation:aalSway3 2.1s ease-in-out infinite 0.5s;}
+.aal-art1.ar-active .as4{animation:aalSway4 1.9s ease-in-out infinite 0.75s;}
+.aal-art1.ar-active .as5{animation:aalSway5 2.2s ease-in-out infinite 1s;}
+.aal-art1.ar-active .as6{animation:aalSway6 2s ease-in-out infinite 1.25s;}
+.aal-art1.ar-active .as7{animation:aalSway7 1.85s ease-in-out infinite 1.5s;}
+.aal-art1.ar-active .as8{animation:aalSway8 2.1s ease-in-out infinite 1.75s;}
+@keyframes aalWarmPulse{0%,100%{opacity:.3;}50%{opacity:.72;}}
+.aal-art1.ar-active .aal-glow-overlay{animation:aalWarmPulse 3s ease-in-out infinite;}
+
+/* ── Art Alive Keyframes (Art 2) ── */
+@keyframes aalWave{0%{transform:translateX(0)}50%{transform:translateX(8px)}100%{transform:translateX(0)}}
+.aal-art2.ar-active .aal-stripe-r:nth-child(odd){animation:aalWave 1.2s ease-in-out infinite;}
+.aal-art2.ar-active .aal-stripe-w:nth-child(even){animation:aalWave 1.2s ease-in-out infinite 0.15s;}
+.aal-art2.ar-active .aal-stripe-r:nth-child(3){animation-delay:.3s;}
+.aal-art2.ar-active .aal-stripe-w:nth-child(4){animation-delay:.45s;}
+.aal-art2.ar-active .aal-stripe-r:nth-child(5){animation-delay:.6s;}
+.aal-art2.ar-active .aal-stripe-w:nth-child(6){animation-delay:.75s;}
+@keyframes aalGoldPulse{
+  0%,100%{filter:drop-shadow(0 0 10px #FFCC00);}
+  50%{filter:drop-shadow(0 0 28px #FFCC00) drop-shadow(0 0 50px rgba(255,204,0,.5));}
+}
+.aal-art2.ar-active .aal-crescent-wrap{animation:aalGoldPulse 2.5s ease-in-out infinite;}
+.aal-art2.ar-active .aal-star-14{animation:aalGoldPulse 2.5s ease-in-out infinite 0.5s;}
+@keyframes aalTextGlow{
+  0%,100%{text-shadow:0 0 10px #F5A623,0 2px 12px rgba(0,0,0,.5);}
+  50%{text-shadow:0 0 40px #F5A623,0 0 70px rgba(245,166,35,.8),0 2px 12px rgba(0,0,0,.5);}
+}
+.aal-art2.ar-active .aal-malaysia-title{animation:aalTextGlow 2s ease-in-out infinite;}
+@keyframes aalFigFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.aal-art2.ar-active .aaf1{animation:aalFigFloat 2s ease-in-out infinite 0s;}
+.aal-art2.ar-active .aaf2{animation:aalFigFloat 2s ease-in-out infinite 0.5s;}
+.aal-art2.ar-active .aaf3{animation:aalFigFloat 2s ease-in-out infinite 1s;}
+.aal-art2.ar-active .aaf4{animation:aalFigFloat 2s ease-in-out infinite 1.5s;}
+
 /* ── LANGUAGE STATES ── */
 .bm-text{display:inline;}
 .en-text{display:none;}
@@ -578,14 +721,11 @@ body.lang-en .en-text{display:inline;}
       <!-- TAB 2 CONTENT -->
       <div class="tab-content" id="tc2">
         <div class="art-preview preview-art2" id="preview2">
-          <div class="crescent"></div>
-          <div class="circles">
-            <div class="ucircle uc1"></div>
-            <div class="ucircle uc2"></div>
-            <div class="ucircle uc3"></div>
+          <div class="p2-canton">
+            <div class="p2-crescent"></div>
+            <div class="p2-star">&#10022;</div>
           </div>
-          <div class="star-center">✦</div>
-          <div class="unity-text">UNITY &middot; PERPADUAN</div>
+          <div class="p2-title">UNITY &middot; PERPADUAN</div>
         </div>
         <div class="art-num-badge">
           &#x1F3A8; <span class="bm-text">Lukisan 2 daripada 2</span><span class="en-text">Artwork 2 of 2</span>
@@ -640,6 +780,72 @@ body.lang-en .en-text{display:inline;}
     <div id="board-wrap">
       <div id="puzzle-stage">
         <div id="assembly-zone"></div>
+
+        <!-- Art Alive Overlay — AR-style animation shown after puzzle complete -->
+        <div id="art-alive-overlay">
+
+          <!-- Art 1: Rhythm of Nationality — swaying fabric strips -->
+          <div id="aal-art1" class="aal-art aal-art1">
+            <div class="aal-glow-overlay"></div>
+            <div class="aal-rope"></div>
+            <div class="aal-strips-container">
+              <div class="aal-strip as1"></div>
+              <div class="aal-strip as2"></div>
+              <div class="aal-strip as3"></div>
+              <div class="aal-strip as4"></div>
+              <div class="aal-strip as5"></div>
+              <div class="aal-strip as6"></div>
+              <div class="aal-strip as7"></div>
+              <div class="aal-strip as8"></div>
+            </div>
+            <div class="aal-poem-overlay">
+              <span class="aal-poem-line" id="aapl0">Dalam kepelbagaian, kami satu...</span>
+              <span class="aal-poem-line" id="aapl1">Warna-warni ragam budaya...</span>
+              <span class="aal-poem-line" id="aapl2">Bersama membina Malaysia.</span>
+            </div>
+          </div>
+
+          <!-- Art 2: Unity in Diversity — waving flag stripes, floating figures -->
+          <div id="aal-art2" class="aal-art aal-art2" style="display:none;">
+            <canvas id="aal-particles"></canvas>
+            <div class="aal-malaysia-title">UNITY &middot; PERPADUAN</div>
+            <div class="aal-flag-canton"></div>
+            <div class="aal-crescent-wrap"><div class="aal-crescent"></div></div>
+            <div class="aal-star-14">&#10022;</div>
+            <div class="aal-stripes-container">
+              <div class="aal-stripe aal-stripe-r"></div>
+              <div class="aal-stripe aal-stripe-w"></div>
+              <div class="aal-stripe aal-stripe-r"></div>
+              <div class="aal-stripe aal-stripe-w"></div>
+              <div class="aal-stripe aal-stripe-r"></div>
+              <div class="aal-stripe aal-stripe-w"></div>
+              <div class="aal-stripe aal-stripe-r"></div>
+            </div>
+            <div class="aal-figures-row">
+              <div class="aal-fig aaf1">
+                <div class="aal-fig-hair" style="background:#1A0A00;"></div>
+                <div class="aal-fig-head" style="background:#C68642;"></div>
+                <div class="aal-fig-body" style="border-bottom:90px solid #E53935;"></div>
+              </div>
+              <div class="aal-fig aaf2">
+                <div class="aal-fig-hair" style="background:#000;"></div>
+                <div class="aal-fig-head" style="background:#FDBCB4;"></div>
+                <div class="aal-fig-body" style="border-bottom:90px solid #F5A623;"></div>
+              </div>
+              <div class="aal-fig aaf3">
+                <div class="aal-fig-hair" style="background:#4A1500;"></div>
+                <div class="aal-fig-head" style="background:#7D4B2A;"></div>
+                <div class="aal-fig-body" style="border-bottom:90px solid #00B4A6;"></div>
+              </div>
+              <div class="aal-fig aaf4">
+                <div class="aal-fig-hair" style="background:#2C1810;"></div>
+                <div class="aal-fig-head" style="background:#F0CFA0;"></div>
+                <div class="aal-fig-body" style="border-bottom:90px solid #0047AB;"></div>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /art-alive-overlay -->
       </div>
     </div>
 
@@ -767,6 +973,7 @@ function switchTab(n) {
 }
 
 function switchTabAndReset() {
+  cleanupArtAlive();
   document.getElementById('win-overlay').classList.remove('show');
   switchTab(currentArtwork === 1 ? 2 : 1);
 }
@@ -848,37 +1055,57 @@ function drawArt1(ctx) {
 }
 
 function drawArt2(ctx) {
-  const bg = ctx.createLinearGradient(0, 0, ART_W, ART_H);
-  bg.addColorStop(0, '#001A5C'); bg.addColorStop(0.4, '#003080');
-  bg.addColorStop(0.7, '#CC0001'); bg.addColorStop(1, '#8B0000');
-  ctx.fillStyle = bg; ctx.fillRect(0, 0, ART_W, ART_H);
-  // Stars
-  [[80,60],[720,80],[200,320],[650,280],[400,45],[100,350],[760,380]].forEach(([sx,sy]) => {
-    ctx.fillStyle = 'rgba(255,204,0,0.65)'; ctx.font = '22px serif';
-    ctx.fillText('✦', sx, sy);
+  // ── Stripes background (14 alternating red/white) ──
+  const stripeH = ART_H / 14;
+  for (let i = 0; i < 14; i++) {
+    ctx.fillStyle = i % 2 === 0 ? '#CC0001' : '#FFFFFF';
+    ctx.fillRect(0, i * stripeH, ART_W, Math.ceil(stripeH) + 1);
+  }
+
+  // ── Navy canton top-left half ──
+  const cW = ART_W / 2, cH = ART_H / 2;  // 400×200
+  ctx.fillStyle = '#003893';
+  ctx.fillRect(0, 0, cW, cH);
+
+  // ── Crescent (gold, in canton) ──
+  const crX = cW * 0.26, crY = cH * 0.50, crR = 52;
+  ctx.fillStyle = '#FFCC00';
+  ctx.beginPath(); ctx.arc(crX, crY, crR, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#003893';
+  ctx.beginPath(); ctx.arc(crX + crR * 0.29, crY - crR * 0.08, crR * 0.82, 0, Math.PI * 2); ctx.fill();
+
+  // ── 14-pointed star (in canton, right of crescent) ──
+  ctx.font = 'bold 90px serif';
+  ctx.fillStyle = '#FFCC00';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('✦', cW * 0.66, cH * 0.50);
+
+  // ── "UNITY · PERPADUAN" title ──
+  ctx.font = 'bold 28px sans-serif';
+  ctx.fillStyle = 'rgba(255,204,0,0.95)';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'alphabetic';
+  ctx.shadowColor = 'rgba(0,0,0,0.7)'; ctx.shadowBlur = 10;
+  ctx.fillText('UNITY  ·  PERPADUAN', ART_W / 2, ART_H - 28);
+  ctx.shadowBlur = 0;
+
+  // ── Figure silhouettes at bottom ──
+  const figCols = ['#E53935', '#F5A623', '#00B4A6', '#0047AB'];
+  [0.15, 0.38, 0.62, 0.85].forEach((xf, i) => {
+    const fx = ART_W * xf, fy = ART_H - 82;
+    ctx.fillStyle = 'rgba(185,120,55,0.95)';
+    ctx.beginPath(); ctx.arc(fx, fy, 13, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = figCols[i];
+    ctx.beginPath();
+    ctx.moveTo(fx - 20, ART_H - 26); ctx.lineTo(fx + 20, ART_H - 26); ctx.lineTo(fx, fy + 15);
+    ctx.closePath(); ctx.fill();
   });
-  // Circles
-  [{cx:200,cy:200,r:140,col:'rgba(0,71,171,0.68)'},{cx:400,cy:200,r:140,col:'rgba(0,180,166,0.62)'},{cx:600,cy:200,r:140,col:'rgba(245,166,35,0.62)'}].forEach(c => {
-    ctx.beginPath(); ctx.arc(c.cx, c.cy, c.r, 0, Math.PI*2);
-    ctx.fillStyle = c.col; ctx.fill();
-    ctx.strokeStyle = 'rgba(255,204,0,0.55)'; ctx.lineWidth = 3; ctx.stroke();
-  });
-  // Intersection tints
-  [{cx:300,cy:200,r:75},{cx:500,cy:200,r:75}].forEach(c => {
-    ctx.beginPath(); ctx.arc(c.cx, c.cy, c.r, 0, Math.PI*2);
-    ctx.fillStyle = 'rgba(255,255,255,0.1)'; ctx.fill();
-  });
-  // Central star
-  ctx.font = 'bold 60px serif'; ctx.fillStyle = 'rgba(255,204,0,0.95)';
-  ctx.textAlign = 'center'; ctx.fillText('✦', ART_W/2, ART_H/2 + 22);
-  // Text
-  ctx.font = 'bold 26px sans-serif'; ctx.fillStyle = 'rgba(255,204,0,0.85)';
-  ctx.fillText('UNITY  ·  PERPADUAN', ART_W/2, ART_H - 38);
-  // Crescent
-  ctx.fillStyle = 'rgba(255,204,0,0.85)';
-  ctx.beginPath(); ctx.arc(90, 90, 52, 0, Math.PI*2); ctx.fill();
-  ctx.fillStyle = '#001A5C';
-  ctx.beginPath(); ctx.arc(110, 80, 44, 0, Math.PI*2); ctx.fill();
+
+  // ── Subtle vignette ──
+  const vg = ctx.createRadialGradient(ART_W/2, ART_H/2, ART_W*0.2, ART_W/2, ART_H/2, ART_W*0.75);
+  vg.addColorStop(0, 'transparent'); vg.addColorStop(1, 'rgba(0,0,0,0.2)');
+  ctx.fillStyle = vg; ctx.fillRect(0, 0, ART_W, ART_H);
 }
 
 // ══════════════════════════════════════════════
@@ -923,8 +1150,30 @@ function selectArtwork(id) {
   buildPuzzle(id);
 }
 
+// ── Art-alive cleanup — called before every new puzzle ──
+function cleanupArtAlive() {
+  const overlay = document.getElementById('art-alive-overlay');
+  overlay.classList.remove('show', 'fade-in');
+  const art1 = document.getElementById('aal-art1');
+  const art2 = document.getElementById('aal-art2');
+  art1.classList.remove('ar-active');
+  art2.classList.remove('ar-active');
+  // Restore sub-panel visibility to initial state
+  art1.style.display = '';
+  art2.style.display = 'none';
+  // Stop particle loop if running
+  const pc = document.getElementById('aal-particles');
+  if (pc && pc._stopParticles) { pc._stopParticles(); pc._stopParticles = null; }
+  // Remove poem line visibility
+  ['aapl0', 'aapl1', 'aapl2'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.remove('visible');
+  });
+}
+
 // ── Build puzzle ──────────────────────────────
 function buildPuzzle(id) {
+  cleanupArtAlive();
   placedCount = 0;
   pieces = [];
 
@@ -1174,14 +1423,25 @@ function triggerWin() {
   // 2. Board shimmer + sparkles
   showBoardCelebration();
 
-  // 3. Confetti at 800ms
-  setTimeout(burstConfetti, 800);
-
-  // 4. Win sound at 500ms (after player has moment to appreciate the art)
+  // 3. Win sound
   setTimeout(winSound, 500);
 
-  // 5. Win overlay at 4.5s — user sees the artwork animation first
-  setTimeout(() => document.getElementById('win-overlay').classList.add('show'), 4500);
+  // 4. Confetti burst
+  setTimeout(burstConfetti, 800);
+
+  // 5. At 1.2s: fade pieces out, reveal AR-style artwork animation
+  setTimeout(() => {
+    pieces.forEach(p => {
+      p.el.style.transition = 'opacity 0.7s ease-out';
+      p.el.style.opacity = '0';
+    });
+    const cel = document.getElementById('board-celebrate');
+    if (cel) cel.classList.remove('show');
+    showArtworkAlive();
+  }, 1200);
+
+  // 6. Win overlay at 5.8s — player enjoys the artwork animation first
+  setTimeout(() => document.getElementById('win-overlay').classList.add('show'), 5800);
 }
 
 function showBoardCelebration() {
@@ -1233,14 +1493,105 @@ function showBoardCelebration() {
   }, 85);
 }
 
+// ══════════════════════════════════════════════
+//  ART ALIVE — AR-style animation on win
+// ══════════════════════════════════════════════
+function showArtworkAlive() {
+  const overlay = document.getElementById('art-alive-overlay');
+  const art1    = document.getElementById('aal-art1');
+  const art2    = document.getElementById('aal-art2');
+
+  // Show correct artwork sub-panel
+  art1.style.display = currentArtwork === 1 ? '' : 'none';
+  art2.style.display = currentArtwork === 2 ? '' : 'none';
+
+  // Make overlay visible (starts opacity:0 from CSS)
+  overlay.classList.add('show');
+
+  // Force reflow, then fade in + add glow border
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      overlay.classList.add('fade-in');
+    });
+  });
+
+  // After fade settles, trigger AR animations
+  setTimeout(() => {
+    if (currentArtwork === 1) {
+      art1.classList.add('ar-active');
+      // Poem lines appear sequentially
+      ['aapl0', 'aapl1', 'aapl2'].forEach((id, i) => {
+        setTimeout(() => {
+          const el = document.getElementById(id);
+          if (el) el.classList.add('visible');
+        }, 600 + i * 700);
+      });
+    } else {
+      art2.classList.add('ar-active');
+      startAalParticles();
+    }
+  }, 500);
+}
+
+function startAalParticles() {
+  const canvas = document.getElementById('aal-particles');
+  if (!canvas) return;
+  canvas.width  = 800;
+  canvas.height = 400;
+  const ctx    = canvas.getContext('2d');
+  const colors = ['#CC0001', '#FFFFFF', '#FFCC00', '#003893'];
+  const dots   = [];
+  for (let i = 0; i < 35; i++) {
+    dots.push({
+      x:   Math.random() * 800,
+      y:   410 + Math.random() * 80,
+      r:   3 + Math.random() * 4,
+      vy:  -(0.7 + Math.random() * 1.5),
+      vx:  (Math.random() - 0.5) * 0.6,
+      col: colors[Math.floor(Math.random() * colors.length)],
+      life: Math.random() * 0.5 + 0.5,
+    });
+  }
+
+  let running = true;
+  function loop() {
+    if (!running) return;
+    ctx.clearRect(0, 0, 800, 400);
+    dots.forEach(d => {
+      d.y   += d.vy;
+      d.x   += d.vx;
+      d.life -= 0.004;
+      if (d.life <= 0 || d.y < -10) {
+        d.x    = Math.random() * 800;
+        d.y    = 410;
+        d.life = 0.5 + Math.random() * 0.5;
+        d.col  = colors[Math.floor(Math.random() * colors.length)];
+      }
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, d.life * 0.85);
+      ctx.fillStyle   = d.col;
+      ctx.beginPath();
+      ctx.arc(d.x, d.y, d.r, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    });
+    requestAnimationFrame(loop);
+  }
+  loop();
+  canvas._stopParticles = () => { running = false; };
+}
+
 function resetPuzzle() {
   document.getElementById('win-overlay').classList.remove('show');
-  // Clean up celebration overlay
   const cel = document.getElementById('board-celebrate');
   if (cel) cel.classList.remove('show');
   if (currentArtwork) {
-    pieces.forEach(p => p.el.classList.remove('celebrate'));
-    buildPuzzle(currentArtwork);
+    pieces.forEach(p => {
+      p.el.classList.remove('celebrate');
+      p.el.style.opacity    = '';
+      p.el.style.transition = '';
+    });
+    buildPuzzle(currentArtwork);  // cleanupArtAlive() is called inside buildPuzzle
   }
 }
 
