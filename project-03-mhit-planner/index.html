@@ -1,0 +1,3218 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Perancang Bajet Penjagaan Kesihatan | Health Budget Planner</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --cream: #FFF8F0;
+    --teal: #00B4A6;
+    --teal-dark: #008F83;
+    --teal-light: #E0F7F5;
+    --blue: #0047AB;
+    --blue-light: #EAF0FB;
+    --gold: #F5A623;
+    --gold-light: #FEF3DC;
+    --red: #E53935;
+    --red-light: #FDECEA;
+    --coral: #FF6B5B;
+    --green: #2E7D32;
+    --green-light: #E8F5E9;
+    --amber: #F57C00;
+    --amber-light: #FFF3E0;
+    --white: #FFFFFF;
+    --text-dark: #1A1A2E;
+    --text-mid: #4A4A6A;
+    --text-light: #8888A8;
+    --shadow-sm: 0 2px 12px rgba(0,0,0,0.08);
+    --shadow-md: 0 8px 32px rgba(0,0,0,0.12);
+    --shadow-lg: 0 16px 48px rgba(0,0,0,0.16);
+    /* Fluid scale unit: 1u == 1px on a 1920x1080 design, scales with viewport.
+       min() keeps both width- and height-bound screens overflow-free (1280x720 to 4K). */
+    --u: min(0.05208vw, 0.09259vh);
+    --radius-sm: calc(12 * var(--u));
+    --radius-md: calc(20 * var(--u));
+    --radius-lg: calc(28 * var(--u));
+    --radius-xl: calc(40 * var(--u));
+    --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+    touch-action: manipulation;
+  }
+
+  html, body {
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    background: #F5F8FF;
+    font-family: 'Nunito', sans-serif;
+    font-size: calc(18 * var(--u));
+    color: var(--text-dark);
+    overscroll-behavior: none;
+  }
+
+  /* ─── HOLO GRID BACKDROP (sci-fi shimmer) ─── */
+  #holo-grid {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background-image:
+      linear-gradient(rgba(0,180,166,0.07) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,180,166,0.07) 1px, transparent 1px);
+    background-size: calc(64 * var(--u)) calc(64 * var(--u));
+    -webkit-mask-image: radial-gradient(ellipse at 50% 58%, rgba(0,0,0,0.9), transparent 78%);
+    mask-image: radial-gradient(ellipse at 50% 58%, rgba(0,0,0,0.9), transparent 78%);
+  }
+
+  #holo-grid::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(115deg, transparent 40%, rgba(0,180,166,0.06) 50%, transparent 60%);
+    background-size: 220% 220%;
+    animation: grid-shimmer 9s ease-in-out infinite;
+  }
+
+  @keyframes grid-shimmer {
+    0%   { background-position: 0% 0%; }
+    100% { background-position: 200% 200%; }
+  }
+
+  /* ─── SCANLINE SWEEP (fires on every screen change) ─── */
+  #scan-sweep {
+    position: fixed;
+    left: 0; right: 0;
+    top: -14vh;
+    height: 12vh;
+    z-index: 1200;
+    pointer-events: none;
+    opacity: 0;
+    background: linear-gradient(180deg,
+      transparent,
+      rgba(0,180,166,0.10) 42%,
+      rgba(0,71,171,0.25) 50%,
+      rgba(0,180,166,0.10) 58%,
+      transparent);
+  }
+
+  #scan-sweep.run { animation: sweep-down 0.7s ease-in both; }
+
+  @keyframes sweep-down {
+    0%   { top: -14vh; opacity: 1; }
+    100% { top: 110vh; opacity: 0; }
+  }
+
+  /* ─── GLITCH-IN TEXT ─── */
+  .glitch-in {
+    animation: glitch-in 0.55s steps(2, end) both;
+  }
+
+  @keyframes glitch-in {
+    0%   { opacity: 0; transform: translateX(calc(-10 * var(--u))); text-shadow: 3px 0 var(--teal), -3px 0 var(--blue); clip-path: inset(0 0 55% 0); }
+    20%  { opacity: 1; transform: translateX(calc(7 * var(--u)));  clip-path: inset(40% 0 8% 0); }
+    40%  { transform: translateX(calc(-5 * var(--u))); text-shadow: 2px 0 var(--blue), -2px 0 var(--teal); clip-path: inset(8% 0 42% 0); }
+    65%  { transform: translateX(calc(2 * var(--u))); clip-path: inset(0); }
+    100% { opacity: 1; transform: none; text-shadow: none; clip-path: inset(0); }
+  }
+
+  /* ─── NEON HOLO PANEL ─── */
+  .holo-panel {
+    background: rgba(255,255,255,0.85);
+    backdrop-filter: blur(calc(8 * var(--u)));
+    -webkit-backdrop-filter: blur(calc(8 * var(--u)));
+    border: 1px solid rgba(0,180,166,0.25);
+    box-shadow: var(--shadow-md);
+    animation: neon-pulse 3.4s ease-in-out infinite;
+  }
+
+  @keyframes neon-pulse {
+    0%, 100% { box-shadow: var(--shadow-sm); }
+    50%      { box-shadow: var(--shadow-md); }
+  }
+
+  /* ─── LANG TOGGLE ─── */
+  #lang-toggle {
+    position: fixed;
+    top: calc(24 * var(--u));
+    right: calc(32 * var(--u));
+    z-index: 1000;
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(calc(6 * var(--u)));
+    border: 2px solid rgba(0,180,166,0.35);
+    border-radius: calc(50 * var(--u));
+    display: flex;
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+  }
+
+  #lang-toggle button {
+    padding: calc(10 * var(--u)) calc(24 * var(--u));
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    font-size: calc(16 * var(--u));
+    color: var(--text-mid);
+    transition: all 0.2s;
+    min-width: calc(70 * var(--u));
+  }
+
+  #lang-toggle button.active {
+    background: var(--teal);
+    color: var(--white);
+    border-radius: calc(50 * var(--u));
+  }
+
+  /* ─── SCREEN BASE (holographic transition) ─── */
+  .screen {
+    width: 100vw;
+    height: 100vh;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(1.02);
+    filter: blur(calc(8 * var(--u))) saturate(1.4);
+    transition: opacity 0.5s ease, transform 0.55s ease, filter 0.5s ease;
+  }
+
+  .screen.active {
+    opacity: 1;
+    pointer-events: all;
+    transform: none;
+    filter: none;
+  }
+
+  /* ─── BUTTONS ─── */
+  .btn-primary {
+    background: linear-gradient(135deg, var(--teal) 0%, var(--blue) 100%);
+    color: var(--white);
+    border: none;
+    border-radius: calc(50 * var(--u));
+    padding: calc(22 * var(--u)) calc(56 * var(--u));
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    font-size: calc(22 * var(--u));
+    cursor: pointer;
+    box-shadow: var(--shadow-md);
+    transition: transform 0.15s, box-shadow 0.15s;
+    min-width: calc(260 * var(--u));
+    min-height: calc(64 * var(--u));
+  }
+
+  .btn-primary:hover {
+    background: linear-gradient(135deg, var(--teal-dark) 0%, var(--blue) 100%);
+    transform: translateY(calc(-2 * var(--u)));
+    box-shadow: var(--shadow-lg);
+  }
+
+  .btn-primary:active { transform: translateY(0) scale(0.97); }
+
+  .btn-secondary {
+    background: var(--white);
+    color: var(--teal);
+    border: 2px solid var(--teal);
+    border-radius: calc(50 * var(--u));
+    padding: calc(20 * var(--u)) calc(48 * var(--u));
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    font-size: calc(20 * var(--u));
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+    min-width: calc(220 * var(--u));
+    min-height: calc(64 * var(--u));
+  }
+
+  .btn-secondary:hover {
+    background: var(--teal-light);
+    transform: translateY(calc(-2 * var(--u)));
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* ─── SCREEN 1: WELCOME ─── */
+  #screen-welcome {
+    background: linear-gradient(160deg, #FFF8F0 0%, #E0F7F5 50%, #EAF0FB 100%);
+    overflow: hidden;
+  }
+
+  .floating-emoji {
+    position: absolute;
+    font-size: calc(80 * var(--u));
+    animation: float-emoji 6s ease-in-out infinite;
+    opacity: 0.25;
+    pointer-events: none;
+    filter: drop-shadow(0 0 calc(14 * var(--u)) rgba(0,180,166,0.25));
+  }
+
+  .fe-1 { top: 8%; left: 5%; animation-delay: 0s; font-size: calc(90 * var(--u)); }
+  .fe-2 { top: 15%; right: 8%; animation-delay: 1.2s; font-size: calc(70 * var(--u)); }
+  .fe-3 { bottom: 15%; left: 8%; animation-delay: 2.4s; font-size: calc(85 * var(--u)); }
+  .fe-4 { bottom: 10%; right: 6%; animation-delay: 0.8s; font-size: calc(75 * var(--u)); }
+  .fe-5 { top: 50%; left: 2%; animation-delay: 1.8s; font-size: calc(65 * var(--u)); }
+  .fe-6 { top: 40%; right: 3%; animation-delay: 3.0s; font-size: calc(72 * var(--u)); }
+
+  @keyframes float-emoji {
+    0%, 100% { transform: translateY(0) rotate(-5deg); }
+    33% { transform: translateY(calc(-20 * var(--u))) rotate(3deg); }
+    66% { transform: translateY(calc(-10 * var(--u))) rotate(-8deg); }
+  }
+
+  .welcome-content {
+    text-align: center;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: calc(22 * var(--u));
+  }
+
+  .welcome-logo {
+    width: calc(140 * var(--u));
+    height: calc(140 * var(--u));
+    background: linear-gradient(135deg, var(--teal-light), var(--blue-light));
+    border-radius: calc(40 * var(--u));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: calc(72 * var(--u));
+    border: 2px solid rgba(0,180,166,0.35);
+    box-shadow: var(--shadow-md);
+    margin-bottom: calc(8 * var(--u));
+    animation: pulse-logo 3s ease-in-out infinite;
+  }
+
+  @keyframes pulse-logo {
+    0%, 100% { box-shadow: var(--shadow-sm); }
+    50% { box-shadow: var(--shadow-lg); }
+  }
+
+  .welcome-subtitle {
+    font-family: 'Poppins', sans-serif;
+    font-size: calc(18 * var(--u));
+    font-weight: 600;
+    color: var(--text-mid);
+    letter-spacing: calc(3 * var(--u));
+    text-transform: uppercase;
+  }
+
+  .welcome-title-bm {
+    font-family: 'Poppins', sans-serif;
+    font-size: calc(64 * var(--u));
+    font-weight: 900;
+    color: var(--text-dark);
+    line-height: 1.1;
+    max-width: calc(900 * var(--u));
+  }
+
+  .welcome-title-en {
+    font-family: 'Poppins', sans-serif;
+    font-size: calc(36 * var(--u));
+    font-weight: 700;
+    color: var(--text-dark);
+    max-width: calc(700 * var(--u));
+    display: none; /* hidden until EN is selected */
+  }
+
+  /* Language visibility — BM default, EN switches via body.lang-en */
+  body.lang-en .welcome-title-bm { display: none; }
+  body.lang-en .welcome-title-en { display: block; }
+
+  .welcome-tagline {
+    font-size: calc(22 * var(--u));
+    color: var(--text-mid);
+    font-weight: 500;
+    max-width: calc(700 * var(--u));
+    line-height: 1.6;
+  }
+
+  .welcome-divider {
+    width: calc(80 * var(--u));
+    height: calc(4 * var(--u));
+    background: linear-gradient(90deg, transparent, var(--teal), transparent);
+    border-radius: calc(2 * var(--u));
+    box-shadow: none;
+  }
+
+  .bnm-badge {
+    display: flex;
+    align-items: center;
+    gap: calc(12 * var(--u));
+    background: rgba(0,180,166,0.10);
+    border: 1px solid rgba(0,180,166,0.25);
+    border-radius: calc(50 * var(--u));
+    padding: calc(10 * var(--u)) calc(24 * var(--u));
+    font-size: calc(15 * var(--u));
+    font-weight: 600;
+    color: var(--text-mid);
+    margin-top: calc(8 * var(--u));
+  }
+
+  .bnm-dot {
+    width: calc(16 * var(--u));
+    height: calc(16 * var(--u));
+    background: var(--teal);
+    border-radius: 50%;
+    box-shadow: none;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════
+     ===== CHARACTER PRESENTER THEME (shared P3/P4/P6) =====
+     Flat-design Malaysian advisor character + holographic speech-bubble
+     system + chips. Lift this whole block (plus the SVG template and the
+     Presenter JS module) into Projects 4 and 6.
+  ═══════════════════════════════════════════════════════════════════ */
+  .presenter-stage {
+    position: relative;
+    width: 100%;
+    flex: 1;
+    min-height: 0;
+    --char-h: 36vh;
+  }
+
+  .presenter-char {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    height: var(--char-h);
+    aspect-ratio: 360 / 520;
+    z-index: 2;
+    pointer-events: none;
+    filter: drop-shadow(0 calc(8 * var(--u)) calc(22 * var(--u)) rgba(0,71,171,0.15));
+    animation: char-arrive 0.7s var(--ease-bounce) both;
+  }
+
+  @keyframes char-arrive {
+    0%   { opacity: 0; transform: translateX(-50%) translateY(4vh) scale(0.9); }
+    100% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+  }
+
+  .presenter-svg { width: 100%; height: 100%; display: block; }
+
+  /* idle breathing + head sway */
+  .presenter-svg #ch-torso {
+    transform-origin: 50% 95%;
+    animation: ch-breathe 3.6s ease-in-out infinite;
+  }
+
+  @keyframes ch-breathe {
+    0%, 100% { transform: scale(1, 1); }
+    50%      { transform: scale(1.012, 1.018); }
+  }
+
+  .presenter-svg #ch-head {
+    transform-origin: 50% 46%;
+    animation: ch-sway 5.4s ease-in-out infinite;
+  }
+
+  @keyframes ch-sway {
+    0%, 100% { transform: rotate(0deg) translateY(0); }
+    35%      { transform: rotate(-1.4deg) translateY(calc(1.5 * var(--u))); }
+    70%      { transform: rotate(1.2deg) translateY(0); }
+  }
+
+  /* idle blinking */
+  .presenter-svg .ch-eye {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: ch-blink 4.4s infinite;
+  }
+
+  @keyframes ch-blink {
+    0%, 92%, 100% { transform: scaleY(1); }
+    95%           { transform: scaleY(0.06); }
+    98%           { transform: scaleY(1); }
+  }
+
+  /* speaking gesture: mouth opens + hand raises (SVG group swap) */
+  .presenter-svg #mouth-open,
+  .presenter-svg #arm-right-up { opacity: 0; transition: opacity 0.22s ease; }
+  .presenter-svg #mouth-smile,
+  .presenter-svg #arm-right-rest { opacity: 1; transition: opacity 0.22s ease; }
+
+  .presenter-svg.is-talking #mouth-smile { opacity: 0; }
+  .presenter-svg.is-talking #arm-right-rest { opacity: 0; }
+  .presenter-svg.is-talking #arm-right-up { opacity: 1; }
+
+  .presenter-svg.is-talking #mouth-open {
+    opacity: 1;
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: ch-talk 0.26s ease-in-out infinite alternate;
+  }
+
+  @keyframes ch-talk {
+    0%   { transform: scaleY(0.35); }
+    100% { transform: scaleY(1); }
+  }
+
+  /* character name tag */
+  .presenter-tag {
+    position: absolute;
+    bottom: calc(6 * var(--u));
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 3;
+    background: linear-gradient(135deg, var(--teal-light), var(--blue-light));
+    color: var(--teal-dark);
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    font-size: calc(15 * var(--u));
+    padding: calc(7 * var(--u)) calc(22 * var(--u));
+    border-radius: calc(50 * var(--u));
+    border: 1px solid rgba(0,180,166,0.35);
+    box-shadow: var(--shadow-sm);
+    white-space: nowrap;
+    pointer-events: none;
+  }
+
+  /* ── HOLOGRAPHIC SPEECH BUBBLES ── */
+  .bubble {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 4;
+  }
+
+  .bubble-main {
+    left: 50%;
+    bottom: calc(var(--char-h) - 1.5vh);
+    transform: translateX(-50%);
+    width: min(74vw, calc(1280 * var(--u)));
+    border-radius: calc(26 * var(--u));
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(calc(12 * var(--u)));
+    -webkit-backdrop-filter: blur(calc(12 * var(--u)));
+    border: 1px solid rgba(0,180,166,0.25);
+    box-shadow: var(--shadow-md);
+    animation: neon-pulse 3.4s ease-in-out infinite;
+  }
+
+  /* faint scanlines inside the glass */
+  .bubble-main::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background: none;
+  }
+
+  /* tail pointing down to the character's mouth */
+  .bubble-main::after {
+    content: '';
+    position: absolute;
+    bottom: calc(-19 * var(--u));
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(40 * var(--u));
+    height: calc(20 * var(--u));
+    background: rgba(255,255,255,0.95);
+    clip-path: polygon(0 0, 100% 0, 50% 100%);
+    filter: drop-shadow(0 calc(3 * var(--u)) calc(4 * var(--u)) rgba(0,71,171,0.10));
+  }
+
+  .bubble-main.visible {
+    opacity: 1;
+    pointer-events: auto;
+    animation: bubble-pop 0.45s var(--ease-bounce) both, neon-pulse 3.4s ease-in-out 0.45s infinite;
+  }
+
+  @keyframes bubble-pop {
+    0%   { opacity: 0; transform: translateX(-50%) scale(0.55) translateY(calc(30 * var(--u))); filter: blur(calc(7 * var(--u))); }
+    60%  { opacity: 1; transform: translateX(-50%) scale(1.04) translateY(calc(-5 * var(--u))); filter: blur(0); }
+    100% { opacity: 1; transform: translateX(-50%) scale(1) translateY(0); }
+  }
+
+  .bubble-main .bubble-content {
+    position: relative;
+    padding: calc(30 * var(--u)) calc(36 * var(--u));
+    max-height: 44vh;
+    overflow-y: auto;
+    font-size: calc(20 * var(--u));
+    color: var(--text-dark);
+    line-height: 1.55;
+  }
+
+  .bubble-main .bubble-content::-webkit-scrollbar { width: calc(6 * var(--u)); }
+  .bubble-main .bubble-content::-webkit-scrollbar-track { background: transparent; }
+  .bubble-main .bubble-content::-webkit-scrollbar-thumb { background: rgba(0,180,166,0.4); border-radius: calc(3 * var(--u)); }
+
+  .bubble-line {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    font-size: calc(26 * var(--u));
+    color: var(--text-dark);
+    text-align: center;
+  }
+
+  /* visitor question bubble (pops from the bottom, as if the user asked) */
+  .bubble-user {
+    bottom: 3vh;
+    right: 6vw;
+    background: linear-gradient(135deg, var(--teal-light), var(--blue-light));
+    color: var(--text-dark);
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    font-size: calc(19 * var(--u));
+    padding: calc(14 * var(--u)) calc(28 * var(--u));
+    border-radius: calc(24 * var(--u)) calc(24 * var(--u)) calc(6 * var(--u)) calc(24 * var(--u));
+    border: 1px solid rgba(0,180,166,0.25);
+    box-shadow: var(--shadow-sm);
+    max-width: 36vw;
+    z-index: 5;
+  }
+
+  .bubble-user.visible {
+    opacity: 1;
+    animation: user-pop 0.35s var(--ease-bounce) both;
+  }
+
+  @keyframes user-pop {
+    0%   { opacity: 0; transform: translateY(calc(50 * var(--u))) scale(0.6); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  /* ── QUESTION CHIPS ── */
+  .chip {
+    border: 1px solid rgba(0,180,166,0.30);
+    background: rgba(255,255,255,0.88);
+    backdrop-filter: blur(calc(6 * var(--u)));
+    color: var(--text-dark);
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    font-size: calc(18 * var(--u));
+    padding: calc(16 * var(--u)) calc(30 * var(--u));
+    border-radius: calc(50 * var(--u));
+    cursor: pointer;
+    min-height: calc(60 * var(--u));
+    box-shadow: var(--shadow-sm);
+    transition: all 0.22s ease;
+    white-space: nowrap;
+  }
+
+  .chip:hover {
+    transform: translateY(calc(-3 * var(--u)));
+    box-shadow: var(--shadow-md);
+  }
+
+  .chip.active {
+    background: linear-gradient(135deg, var(--teal-light), var(--blue-light));
+    color: var(--teal-dark);
+    border-color: var(--teal);
+    box-shadow: var(--shadow-sm);
+  }
+  /* ===== END CHARACTER PRESENTER THEME ===== */
+
+  /* ─── SCREEN 2: INFO ("ask the advisor") ─── */
+  #screen-info {
+    background: transparent;
+    padding: calc(20 * var(--u)) 4vw calc(16 * var(--u));
+    gap: calc(6 * var(--u));
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+  }
+
+  #screen-info .info-header {
+    text-align: center;
+    flex-shrink: 0;
+  }
+  #screen-info .info-header h2 {
+    font-family: 'Poppins', sans-serif;
+    font-size: calc(34 * var(--u));
+    font-weight: 800;
+    color: var(--text-dark);
+  }
+  #screen-info .info-header p {
+    font-size: calc(17 * var(--u));
+    color: var(--text-mid);
+    margin-top: calc(2 * var(--u));
+  }
+
+  /* Aisyah stage — same sizing as planner */
+  #stage-info { --char-h: 30vh; }
+  #stage-info .bubble-main { width: min(62vw, calc(1060 * var(--u))); }
+
+  /* ── Two-bubble mode: activated when a tarot card is tapped ── */
+  /* Left bubble: move main bubble to left of Aisyah */
+  #stage-info.two-bubbles .bubble-main {
+    left: auto;
+    right: calc(50% + calc(28 * var(--u)));
+    transform: none;
+    width: min(40vw, calc(700 * var(--u)));
+  }
+  /* Override animation to remove the translateX(-50%) that bubble-pop uses */
+  #stage-info.two-bubbles .bubble-main.visible {
+    animation: bubble-pop-side 0.45s var(--ease-bounce) both, neon-pulse 3.4s ease-in-out 0.45s infinite;
+  }
+  /* Bubble tail for left bubble: bottom-right area, pointing down toward Aisyah */
+  #stage-info.two-bubbles .bubble-main::after {
+    left: auto;
+    right: calc(70 * var(--u));
+    transform: none;
+  }
+  /* Scale info content to auto-fit without scrolling — overrides --u to 70%
+     so every calc(N * var(--u)) inside the card shrinks proportionally */
+  #stage-info .bubble-main .bubble-content {
+    --u: min(0.03646vw, 0.06481vh);
+    max-height: 34vh;
+    overflow-y: hidden;
+  }
+
+  /* Right bubble */
+  #stage-info .bubble-secondary {
+    position: absolute;
+    left: calc(50% + calc(28 * var(--u)));
+    bottom: calc(var(--char-h) - 1.5vh);
+    width: min(40vw, calc(700 * var(--u)));
+    border-radius: calc(26 * var(--u));
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(calc(12 * var(--u)));
+    -webkit-backdrop-filter: blur(calc(12 * var(--u)));
+    border: 1px solid rgba(0,180,166,0.25);
+    box-shadow: var(--shadow-md);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 4;
+  }
+  #stage-info .bubble-secondary.visible {
+    opacity: 1;
+    pointer-events: auto;
+    animation: bubble-pop-side 0.55s var(--ease-bounce) 0.1s both, neon-pulse 3.4s ease-in-out 0.65s infinite;
+  }
+  /* Tail for right bubble: bottom-left area, pointing down toward Aisyah */
+  #stage-info .bubble-secondary::after {
+    content: '';
+    position: absolute;
+    bottom: calc(-19 * var(--u));
+    left: calc(70 * var(--u));
+    width: calc(40 * var(--u));
+    height: calc(20 * var(--u));
+    background: rgba(255,255,255,0.95);
+    clip-path: polygon(0 0, 100% 0, 50% 100%);
+    filter: drop-shadow(0 calc(3 * var(--u)) calc(4 * var(--u)) rgba(0,71,171,0.10));
+  }
+  #stage-info .bubble-secondary .bubble-content {
+    position: relative;
+    --u: min(0.03646vw, 0.06481vh);
+    padding: calc(28 * var(--u)) calc(32 * var(--u));
+    max-height: 34vh;
+    overflow-y: hidden;
+    font-size: calc(18 * var(--u));
+    color: var(--text-dark);
+    line-height: 1.5;
+  }
+  #stage-info .bubble-secondary .bubble-content::-webkit-scrollbar { width: calc(6 * var(--u)); }
+  #stage-info .bubble-secondary .bubble-content::-webkit-scrollbar-track { background: transparent; }
+  #stage-info .bubble-secondary .bubble-content::-webkit-scrollbar-thumb { background: rgba(0,180,166,0.4); border-radius: calc(3 * var(--u)); }
+
+  /* Keyframes for side bubbles (no translateX, just scale-in from bottom) */
+  @keyframes bubble-pop-side {
+    0%   { opacity: 0; transform: scale(0.55) translateY(calc(30 * var(--u))); filter: blur(calc(7 * var(--u))); }
+    60%  { opacity: 1; transform: scale(1.04) translateY(calc(-5 * var(--u))); filter: blur(0); }
+    100% { opacity: 1; transform: none; }
+  }
+
+  /* ── Tarot card row ── */
+  .tarot-row {
+    flex-shrink: 0;
+    display: flex;
+    justify-content: center;
+    gap: calc(22 * var(--u));
+    width: 100%;
+    padding: calc(4 * var(--u)) 0;
+  }
+
+  .tarot-card {
+    position: relative;
+    width: calc(160 * var(--u));
+    aspect-ratio: 2 / 3;
+    background: linear-gradient(160deg, var(--teal-light) 0%, var(--blue-light) 100%);
+    border-radius: calc(14 * var(--u));
+    border: calc(2 * var(--u)) solid rgba(0,180,166,0.35);
+    box-shadow:
+      0 0 0 calc(1 * var(--u)) rgba(0,180,166,0.15) inset,
+      var(--shadow-sm);
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: calc(10 * var(--u)) calc(8 * var(--u)) calc(14 * var(--u));
+    transition: transform 0.22s var(--ease-bounce), box-shadow 0.22s ease;
+    user-select: none;
+    overflow: hidden;
+  }
+
+  /* inner ornamental frame line */
+  .tarot-card::before {
+    content: '';
+    position: absolute;
+    inset: calc(6 * var(--u));
+    border: calc(1 * var(--u)) solid rgba(0,180,166,0.25);
+    border-radius: calc(9 * var(--u));
+    pointer-events: none;
+  }
+
+  /* shimmer sweep on hover */
+  .tarot-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(120deg,
+      transparent 30%, rgba(255,255,255,0.07) 50%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    border-radius: inherit;
+    pointer-events: none;
+  }
+
+  .tarot-card:hover {
+    transform: translateY(calc(-8 * var(--u))) rotate(-1deg);
+    box-shadow:
+      0 0 0 calc(1 * var(--u)) rgba(0,180,166,0.35) inset,
+      var(--shadow-lg);
+  }
+  .tarot-card:hover::after { opacity: 1; }
+
+  .tarot-card.active {
+    transform: translateY(calc(-6 * var(--u)));
+    border-color: var(--teal);
+    box-shadow:
+      0 0 0 calc(1.5 * var(--u)) rgba(0,180,166,0.35) inset,
+      var(--shadow-lg);
+  }
+
+  /* corner flourishes */
+  .tarot-corner {
+    position: absolute;
+    font-size: calc(13 * var(--u));
+    color: rgba(0,180,166,0.50);
+    line-height: 1;
+    pointer-events: none;
+  }
+  .tarot-corner.tl { top: calc(9 * var(--u));  left:  calc(9 * var(--u)); }
+  .tarot-corner.tr { top: calc(9 * var(--u));  right: calc(9 * var(--u)); }
+  .tarot-corner.bl { bottom: calc(9 * var(--u)); left:  calc(9 * var(--u)); }
+  .tarot-corner.br { bottom: calc(9 * var(--u)); right: calc(9 * var(--u)); }
+  .tarot-card.active .tarot-corner { color: var(--teal); }
+
+  .tarot-icon {
+    font-size: calc(54 * var(--u));
+    line-height: 1;
+    margin-top: calc(18 * var(--u));
+    filter: drop-shadow(0 0 calc(10 * var(--u)) rgba(0,180,166,0.30));
+  }
+
+  .tarot-divider {
+    width: 70%;
+    height: calc(1 * var(--u));
+    background: linear-gradient(90deg, transparent, rgba(0,180,166,0.4), transparent);
+    margin: calc(4 * var(--u)) 0;
+  }
+
+  .tarot-label {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    font-size: calc(13.5 * var(--u));
+    color: var(--teal-dark);
+    text-align: center;
+    line-height: 1.3;
+    padding: 0 calc(4 * var(--u));
+  }
+
+  .tarot-sub {
+    font-size: calc(11 * var(--u));
+    color: var(--text-mid);
+    text-align: center;
+    line-height: 1.25;
+    padding: 0 calc(2 * var(--u));
+    margin-bottom: calc(4 * var(--u));
+  }
+
+  /* hide old two-panel helpers */
+  .info-left, .info-right, .ask-cards-grid, .info-bottom { display: none !important; }
+
+  /* info content cards (shown inside the speech bubble) */
+    /* info content cards (shown inside the speech bubble) */
+  .tab-panel { display: flex; gap: 1.5vw; align-items: stretch; }
+
+  .info-card {
+    background: rgba(255,255,255,0.92);
+    border: 1px solid rgba(0,180,166,0.20);
+    border-radius: var(--radius-lg);
+    padding: calc(28 * var(--u));
+    box-shadow: var(--shadow-sm);
+    color: var(--text-dark);
+    flex: 1;
+  }
+
+  .info-card h3 {
+    font-family: 'Poppins', sans-serif;
+    font-size: calc(25 * var(--u));
+    font-weight: 800;
+    color: var(--teal-dark);
+    margin-bottom: calc(14 * var(--u));
+    display: flex;
+    align-items: center;
+    gap: calc(12 * var(--u));
+  }
+
+  .info-card p {
+    font-size: calc(18 * var(--u));
+    color: var(--text-dark);
+    line-height: 1.7;
+    margin-bottom: calc(14 * var(--u));
+  }
+
+  .info-tag {
+    display: inline-block;
+    background: var(--teal-light);
+    color: var(--teal-dark);
+    border: 1px solid rgba(0,180,166,0.30);
+    padding: calc(6 * var(--u)) calc(16 * var(--u));
+    border-radius: calc(50 * var(--u));
+    font-size: calc(14 * var(--u));
+    font-weight: 700;
+    margin-bottom: calc(14 * var(--u));
+    font-family: 'Poppins', sans-serif;
+  }
+
+  .covers-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: calc(10 * var(--u));
+  }
+
+  .covers-list li {
+    display: flex;
+    align-items: center;
+    gap: calc(12 * var(--u));
+    font-size: calc(17 * var(--u));
+    color: var(--text-dark);
+    font-weight: 500;
+  }
+
+  .covers-list li::before {
+    content: "✓";
+    width: calc(28 * var(--u));
+    height: calc(28 * var(--u));
+    background: var(--teal-light);
+    color: var(--teal-dark);
+    border: 1px solid rgba(0,180,166,0.30);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: calc(14 * var(--u));
+    flex-shrink: 0;
+  }
+
+  .why-point {
+    display: flex;
+    align-items: flex-start;
+    gap: calc(18 * var(--u));
+    padding: calc(16 * var(--u));
+    background: var(--teal-light);
+    border-radius: var(--radius-md);
+    margin-bottom: calc(12 * var(--u));
+  }
+
+  .why-icon { font-size: calc(38 * var(--u)); flex-shrink: 0; }
+
+  .why-text h4 {
+    font-family: 'Poppins', sans-serif;
+    font-size: calc(18 * var(--u));
+    font-weight: 700;
+    color: var(--teal-dark);
+    margin-bottom: calc(4 * var(--u));
+  }
+
+  .why-text p {
+    font-size: calc(16 * var(--u));
+    color: var(--text-mid);
+    margin: 0;
+  }
+
+  .flow-steps {
+    display: flex;
+    align-items: center;
+    gap: calc(14 * var(--u));
+    justify-content: center;
+    margin: calc(16 * var(--u)) 0;
+  }
+
+  .flow-step {
+    flex: 1;
+    text-align: center;
+    background: rgba(255,255,255,0.90);
+    border: 1px solid rgba(0,180,166,0.20);
+    border-radius: var(--radius-md);
+    padding: calc(22 * var(--u)) calc(16 * var(--u));
+  }
+
+  .flow-step .step-icon { font-size: calc(48 * var(--u)); margin-bottom: calc(10 * var(--u)); }
+
+  .flow-step .step-num {
+    font-family: 'Poppins', sans-serif;
+    font-size: calc(13 * var(--u));
+    font-weight: 700;
+    color: var(--teal-dark);
+    letter-spacing: calc(2 * var(--u));
+    text-transform: uppercase;
+    margin-bottom: calc(6 * var(--u));
+  }
+
+  .flow-step p {
+    font-size: calc(16 * var(--u));
+    font-weight: 600;
+    color: var(--text-dark);
+    margin: 0;
+  }
+
+  .flow-arrow {
+    font-size: calc(34 * var(--u));
+    color: var(--gold);
+    font-weight: 900;
+  }
+
+  .flow-label {
+    text-align: center;
+    font-family: 'Poppins', sans-serif;
+    font-size: calc(16 * var(--u));
+    font-weight: 700;
+    color: var(--teal-dark);
+    background: var(--teal-light);
+    border: 1px solid rgba(0,180,166,0.30);
+    padding: calc(10 * var(--u)) calc(24 * var(--u));
+    border-radius: calc(50 * var(--u));
+    display: inline-block;
+    margin-top: calc(10 * var(--u));
+  }
+
+  .abc-row {
+    display: flex;
+    gap: calc(14 * var(--u));
+    margin-bottom: calc(20 * var(--u));
+  }
+
+  .abc-card {
+    flex: 1;
+    padding: calc(20 * var(--u));
+    border-radius: var(--radius-md);
+    text-align: center;
+  }
+
+  .abc-card.a { background: rgba(255,255,255,0.90); border: 1px solid rgba(0,180,166,0.20); }
+  .abc-card.b { background: rgba(255,255,255,0.90); border: 1px solid rgba(0,180,166,0.20); }
+  .abc-card.c { background: rgba(255,255,255,0.90); border: 1px solid rgba(0,180,166,0.20); }
+
+  .abc-letter {
+    font-family: 'Poppins', sans-serif;
+    font-size: calc(48 * var(--u));
+    font-weight: 900;
+    margin-bottom: calc(8 * var(--u));
+  }
+
+  .abc-card.a .abc-letter { color: var(--teal); }
+  .abc-card.b .abc-letter { color: var(--blue); }
+  .abc-card.c .abc-letter { color: var(--teal-dark); }
+
+  .abc-card h4 {
+    font-family: 'Poppins', sans-serif;
+    font-size: calc(16 * var(--u));
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: calc(6 * var(--u));
+  }
+
+  .abc-card p {
+    font-size: calc(14 * var(--u));
+    color: var(--text-mid);
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  .questions-list {
+    background: rgba(255,255,255,0.88);
+    border: 1px solid rgba(0,180,166,0.20);
+    border-radius: var(--radius-md);
+    padding: calc(18 * var(--u)) calc(22 * var(--u));
+  }
+
+  .questions-list h4 {
+    font-family: 'Poppins', sans-serif;
+    font-size: calc(16 * var(--u));
+    font-weight: 700;
+    color: var(--teal-dark);
+    margin-bottom: calc(10 * var(--u));
+  }
+
+  .questions-list ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: calc(8 * var(--u));
+  }
+
+  .questions-list ul li {
+    font-size: calc(15 * var(--u));
+    color: var(--text-dark);
+    padding-left: calc(20 * var(--u));
+    position: relative;
+  }
+
+  .questions-list ul li::before {
+    content: "?";
+    position: absolute;
+    left: 0;
+    color: var(--teal);
+    font-weight: 700;
+  }
+
+  /* ─── SCREEN 3: HEALTH PLANNER (advisor asks, visitor answers) ─── */
+  #screen-input {
+    background: linear-gradient(160deg, #FFF8F0 0%, #E0F7F5 50%, #EAF0FB 100%);
+    padding: calc(28 * var(--u)) 4vw calc(20 * var(--u));
+    gap: calc(8 * var(--u));
+    justify-content: flex-start;
+  }
+
+  #screen-input .info-header h2 {
+    color: var(--text-dark);
+  }
+  #screen-input .info-header p {
+    color: var(--text-mid);
+  }
+
+  #stage-planner { --char-h: 30vh; }
+  #stage-planner .bubble-main { width: min(62vw, calc(1060 * var(--u))); }
+  #stage-planner .bubble-main .bubble-content { max-height: 30vh; }
+
+  #planner-answers {
+    flex-shrink: 0;
+    width: 100%;
+    max-width: calc(1320 * var(--u));
+    min-height: 28vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .answer-panel {
+    display: none;
+    width: 100%;
+    border-radius: var(--radius-lg);
+    padding: calc(24 * var(--u)) calc(36 * var(--u));
+    flex-direction: column;
+    align-items: center;
+    gap: calc(18 * var(--u));
+  }
+
+  .answer-panel.show {
+    display: flex;
+    animation: answer-in 0.4s var(--ease-bounce) both;
+  }
+
+  @keyframes answer-in {
+    0%   { opacity: 0; transform: translateY(calc(30 * var(--u))) scale(0.96); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .age-control {
+    display: flex;
+    align-items: center;
+    gap: calc(30 * var(--u));
+  }
+
+  .age-btn {
+    width: calc(80 * var(--u));
+    height: calc(80 * var(--u));
+    border-radius: 50%;
+    border: 1px solid rgba(0,180,166,0.30);
+    font-size: calc(36 * var(--u));
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.1s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+  }
+
+  .age-btn.minus {
+    background: var(--teal-light);
+    color: var(--teal-dark);
+    border: 1px solid rgba(0,180,166,0.30);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .age-btn.plus {
+    background: var(--teal-light);
+    color: var(--teal-dark);
+    border: 1px solid rgba(0,180,166,0.30);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .age-btn:hover { transform: scale(1.08); background: var(--teal); color: var(--white); }
+  .age-btn:active { transform: scale(0.95); }
+
+  .age-display {
+    font-family: 'Poppins', sans-serif;
+    font-size: calc(80 * var(--u));
+    font-weight: 900;
+    color: var(--teal-dark);
+    min-width: calc(150 * var(--u));
+    text-align: center;
+    line-height: 1;
+  }
+
+  .age-unit {
+    font-family: 'Poppins', sans-serif;
+    font-size: calc(22 * var(--u));
+    font-weight: 600;
+    color: var(--text-mid);
+  }
+
+  .age-bands {
+    display: flex;
+    gap: calc(10 * var(--u));
+    width: 100%;
+    max-width: calc(760 * var(--u));
+  }
+
+  .age-band {
+    flex: 1;
+    text-align: center;
+    padding: calc(10 * var(--u)) calc(8 * var(--u));
+    border-radius: calc(10 * var(--u));
+    font-family: 'Poppins', sans-serif;
+    font-size: calc(13 * var(--u));
+    font-weight: 600;
+    background: rgba(0,180,166,0.08);
+    color: var(--text-light);
+    transition: all 0.3s;
+    border: 1px solid rgba(0,180,166,0.15);
+  }
+
+  .age-band.active {
+    background: var(--teal-light);
+    color: var(--teal-dark);
+    border-color: var(--teal);
+    transform: scale(1.05);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .coverage-cards {
+    display: flex;
+    justify-content: center;
+    gap: calc(28 * var(--u));
+    width: 100%;
+    padding: calc(4 * var(--u)) 0;
+  }
+
+  .coverage-card {
+    position: relative;
+    width: calc(210 * var(--u));
+    aspect-ratio: 2 / 3;
+    background: linear-gradient(160deg, var(--teal-light) 0%, var(--blue-light) 100%);
+    border-radius: calc(14 * var(--u));
+    border: calc(2 * var(--u)) solid rgba(0,180,166,0.35);
+    box-shadow:
+      0 0 0 calc(1 * var(--u)) rgba(0,180,166,0.15) inset,
+      var(--shadow-sm);
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: calc(12 * var(--u)) calc(10 * var(--u)) calc(16 * var(--u));
+    transition: transform 0.22s var(--ease-bounce), box-shadow 0.22s ease;
+    user-select: none;
+    overflow: hidden;
+  }
+
+  .coverage-card::before {
+    content: '';
+    position: absolute;
+    inset: calc(6 * var(--u));
+    border: calc(1 * var(--u)) solid rgba(0,180,166,0.25);
+    border-radius: calc(9 * var(--u));
+    pointer-events: none;
+  }
+
+  .coverage-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(120deg,
+      transparent 30%, rgba(255,255,255,0.07) 50%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    border-radius: inherit;
+    pointer-events: none;
+  }
+
+  .coverage-card:hover {
+    transform: translateY(calc(-8 * var(--u))) rotate(-1deg);
+    box-shadow:
+      0 0 0 calc(1 * var(--u)) rgba(0,180,166,0.35) inset,
+      var(--shadow-lg);
+  }
+  .coverage-card:hover::after { opacity: 1; }
+
+  .coverage-card.selected {
+    transform: translateY(calc(-6 * var(--u)));
+    border-color: var(--teal);
+    box-shadow:
+      0 0 0 calc(1.5 * var(--u)) rgba(0,180,166,0.35) inset,
+      var(--shadow-lg);
+  }
+
+  .coverage-icon {
+    font-size: calc(54 * var(--u));
+    line-height: 1;
+    margin-top: calc(18 * var(--u));
+    filter: drop-shadow(0 0 calc(10 * var(--u)) rgba(0,180,166,0.30));
+  }
+
+  .coverage-name {
+    font-family: 'Poppins', sans-serif;
+    font-size: calc(15 * var(--u));
+    font-weight: 700;
+    color: var(--teal-dark);
+    text-align: center;
+    line-height: 1.3;
+    padding: 0 calc(4 * var(--u));
+  }
+
+  .coverage-en {
+    font-size: calc(12 * var(--u));
+    color: var(--text-mid);
+    text-align: center;
+    line-height: 1.25;
+    padding: 0 calc(2 * var(--u));
+  }
+
+  .coverage-limit {
+    font-family: 'Poppins', sans-serif;
+    font-size: calc(12 * var(--u));
+    font-weight: 700;
+    padding: calc(5 * var(--u)) calc(10 * var(--u));
+    border-radius: calc(50 * var(--u));
+    display: inline-block;
+  }
+
+  .coverage-card.none .coverage-limit { background: var(--teal-light); color: var(--teal-dark); border: 1px solid rgba(0,180,166,0.30); }
+  .coverage-card.basic .coverage-limit { background: var(--blue-light); color: var(--blue); border: 1px solid rgba(0,71,171,0.20); }
+  .coverage-card.comprehensive .coverage-limit { background: var(--green-light); color: var(--green); border: 1px solid rgba(46,125,50,0.20); }
+
+  /* ── Selected card: green glow overrides the default teal ── */
+  .coverage-card.selected {
+    background: linear-gradient(160deg, #e8f5e9 0%, #e0f7f5 100%);
+    border-color: var(--green);
+    box-shadow:
+      0 0 0 calc(1.5 * var(--u)) rgba(46,125,50,0.25) inset,
+      0 0 calc(40 * var(--u)) rgba(46,125,50,0.18),
+      var(--shadow-lg);
+    transform: translateY(calc(-6 * var(--u)));
+  }
+
+  /* Green tick overlay (absolutely positioned inside each card) */
+  .card-tick {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    pointer-events: none;
+    opacity: 0;
+    border-radius: inherit;
+    overflow: hidden;
+  }
+
+  /* Green ripple flash behind the tick (full-card wash) */
+  .card-tick::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(76,175,80,0.18);
+    border-radius: inherit;
+    opacity: 0;
+  }
+
+  .coverage-card.selected .card-tick {
+    opacity: 1;
+    animation: tick-fade-in 0.15s ease both;
+  }
+
+  .coverage-card.selected .card-tick::before {
+    animation: card-flash 0.55s ease-out both;
+  }
+
+  @keyframes tick-fade-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+
+  @keyframes card-flash {
+    0%   { opacity: 0; transform: scale(0.4); }
+    30%  { opacity: 1; transform: scale(1); }
+    100% { opacity: 0; transform: scale(1.6); }
+  }
+
+  /* The green circle badge */
+  .card-tick-circle {
+    width: calc(70 * var(--u));
+    height: calc(70 * var(--u));
+    border-radius: 50%;
+    background: var(--green);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow:
+      0 0 0 calc(6 * var(--u)) rgba(46,125,50,0.20),
+      0 calc(4 * var(--u)) calc(18 * var(--u)) rgba(46,125,50,0.35);
+    animation: tick-circle-pop 0.45s var(--ease-bounce) 0.05s both;
+  }
+
+  @keyframes tick-circle-pop {
+    0%   { opacity: 0; transform: scale(0); }
+    65%  { opacity: 1; transform: scale(1.18); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+
+  /* Pulsing ring that expands outward once */
+  .card-tick-ring {
+    position: absolute;
+    width: calc(70 * var(--u));
+    height: calc(70 * var(--u));
+    border-radius: 50%;
+    border: calc(3 * var(--u)) solid rgba(46,125,50,0.55);
+    animation: tick-ring-expand 0.6s ease-out 0.3s both;
+    pointer-events: none;
+  }
+
+  @keyframes tick-ring-expand {
+    0%   { opacity: 0.9; transform: scale(1); }
+    100% { opacity: 0;   transform: scale(2.4); }
+  }
+
+  /* SVG checkmark path draw */
+  .card-tick-svg {
+    width: calc(38 * var(--u));
+    height: calc(38 * var(--u));
+    overflow: visible;
+    flex-shrink: 0;
+  }
+
+  .card-tick-path {
+    fill: none;
+    stroke: #ffffff;
+    stroke-width: 2.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 62;
+    stroke-dashoffset: 62;
+    animation: tick-draw 0.35s ease-out 0.28s both;
+  }
+
+  @keyframes tick-draw {
+    to { stroke-dashoffset: 0; }
+  }
+
+  /* Corner flourish color change when selected */
+  .coverage-card.selected .tarot-corner { color: var(--green); }
+  .coverage-card.selected .coverage-name { color: var(--green); }
+
+  /* ─── SCREEN 4: CALCULATING ─── */
+  #screen-calculating {
+    background: linear-gradient(160deg, #FFF8F0 0%, #E0F7F5 50%, #EAF0FB 100%);
+    gap: calc(36 * var(--u));
+  }
+
+  .calc-cross {
+    width: calc(160 * var(--u));
+    height: calc(160 * var(--u));
+    position: relative;
+    animation: spin 2s linear infinite;
+    filter: drop-shadow(0 0 calc(26 * var(--u)) rgba(0,180,166,0.5));
+  }
+
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  .calc-cross::before,
+  .calc-cross::after {
+    content: '';
+    position: absolute;
+    background: linear-gradient(135deg, var(--teal), var(--blue));
+    border-radius: calc(8 * var(--u));
+  }
+
+  .calc-cross::before { width: calc(40 * var(--u)); height: calc(160 * var(--u)); left: calc(60 * var(--u)); top: 0; }
+  .calc-cross::after  { width: calc(160 * var(--u)); height: calc(40 * var(--u)); left: 0; top: calc(60 * var(--u)); }
+
+  .calc-title {
+    font-family: 'Poppins', sans-serif;
+    font-size: calc(28 * var(--u));
+    font-weight: 700;
+    color: var(--teal-dark);
+    text-align: center;
+  }
+
+  .calc-subtitle {
+    font-size: calc(18 * var(--u));
+    color: var(--text-mid);
+    text-align: center;
+  }
+
+  .progress-bar-wrap {
+    width: calc(600 * var(--u));
+    height: calc(12 * var(--u));
+    background: rgba(0,180,166,0.12);
+    border-radius: calc(6 * var(--u));
+    overflow: hidden;
+    border: 1px solid rgba(0,180,166,0.25);
+    box-shadow: none;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--teal), var(--blue));
+    border-radius: calc(6 * var(--u));
+    width: 0%;
+    animation: progress-fill 2s ease-in-out forwards;
+  }
+
+  @keyframes progress-fill {
+    0% { width: 0%; }
+    100% { width: 100%; }
+  }
+
+  /* ─── SCREEN 5: RESULTS ─── */
+  #screen-results {
+    background: linear-gradient(160deg, #F5F8FF 0%, #E8FAF9 50%, #EAF0FB 100%);
+    padding: calc(32 * var(--u)) 4vw;
+    gap: 0;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .results-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    max-width: calc(1600 * var(--u));
+    margin-bottom: calc(22 * var(--u));
+  }
+
+  .results-title {
+    font-family: 'Poppins', sans-serif;
+    font-size: calc(34 * var(--u));
+    font-weight: 900;
+    color: var(--text-dark);
+  }
+
+  .profile-badges { display: flex; gap: calc(16 * var(--u)); }
+
+  .badge {
+    padding: calc(10 * var(--u)) calc(24 * var(--u));
+    border-radius: calc(50 * var(--u));
+    font-family: 'Poppins', sans-serif;
+    font-size: calc(16 * var(--u));
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: calc(8 * var(--u));
+  }
+
+  .badge-age { background: var(--teal-light); border: 1px solid rgba(0,180,166,0.25); color: var(--teal-dark); }
+  .badge-plan-none { background: var(--teal-light); border: 1px solid rgba(0,180,166,0.25); color: var(--teal-dark); }
+  .badge-plan-basic { background: var(--blue-light); border: 1px solid rgba(0,71,171,0.20); color: var(--blue); }
+  .badge-plan-comprehensive { background: var(--green-light); border: 1px solid rgba(46,125,50,0.20); color: var(--green); }
+
+  .results-body {
+    display: flex;
+    gap: calc(32 * var(--u));
+    width: 100%;
+    max-width: calc(1600 * var(--u));
+    flex: 1;
+    min-height: 0;
+  }
+
+  .results-left {
+    flex: 1.2;
+    display: flex;
+    flex-direction: column;
+    gap: calc(20 * var(--u));
+    min-height: 0;
+  }
+
+  .results-right {
+    flex: 0.9;
+    display: grid;
+    grid-template-rows: auto 1fr;
+    gap: calc(14 * var(--u));
+    min-height: 0;
+  }
+
+  .advice-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: calc(14 * var(--u));
+    min-height: 0;
+  }
+
+  .chart-card {
+    border-radius: var(--radius-lg);
+    padding: calc(26 * var(--u)) calc(30 * var(--u));
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .chart-card h3 {
+    font-family: 'Poppins', sans-serif;
+    font-size: calc(20 * var(--u));
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: calc(14 * var(--u));
+    flex-shrink: 0;
+  }
+
+  .chart-wrap { flex: 1; min-height: 0; position: relative; }
+
+  .alert-card {
+    border-radius: var(--radius-md);
+    padding: calc(20 * var(--u)) calc(28 * var(--u));
+    display: flex;
+    align-items: flex-start;
+    gap: calc(16 * var(--u));
+    background: var(--white);
+    border: 1px solid rgba(0,180,166,0.20);
+    box-shadow: var(--shadow-sm);
+    flex-shrink: 0;
+  }
+
+  .alert-card.amber { border-left: calc(5 * var(--u)) solid var(--amber); }
+  .alert-card.blue { border-left: calc(5 * var(--u)) solid var(--blue); }
+  .alert-card.green { border-left: calc(5 * var(--u)) solid var(--green); }
+
+  .alert-icon { font-size: calc(32 * var(--u)); flex-shrink: 0; }
+
+  .alert-text h4 {
+    font-family: 'Poppins', sans-serif;
+    font-size: calc(17 * var(--u));
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: calc(4 * var(--u));
+  }
+
+  .alert-text p {
+    font-size: calc(15 * var(--u));
+    color: var(--text-mid);
+    line-height: 1.6;
+  }
+
+  .advice-card {
+    position: relative;
+    background: linear-gradient(160deg, var(--teal-light) 0%, var(--blue-light) 100%);
+    border-radius: calc(14 * var(--u));
+    border: calc(2 * var(--u)) solid rgba(0,180,166,0.35);
+    box-shadow:
+      0 0 0 calc(1 * var(--u)) rgba(0,180,166,0.15) inset,
+      var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: calc(22 * var(--u)) calc(12 * var(--u)) calc(16 * var(--u));
+    gap: calc(6 * var(--u));
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(calc(12 * var(--u)));
+  }
+
+  .advice-card::before {
+    content: '';
+    position: absolute;
+    inset: calc(6 * var(--u));
+    border: calc(1 * var(--u)) solid rgba(0,180,166,0.22);
+    border-radius: calc(9 * var(--u));
+    pointer-events: none;
+  }
+
+  .advice-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(120deg,
+      transparent 30%, rgba(255,255,255,0.07) 50%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    border-radius: inherit;
+    pointer-events: none;
+  }
+
+  .advice-icon {
+    font-size: calc(36 * var(--u));
+    line-height: 1;
+    filter: drop-shadow(0 0 calc(8 * var(--u)) rgba(0,180,166,0.30));
+  }
+
+  .advice-divider {
+    width: 70%;
+    height: calc(1 * var(--u));
+    background: linear-gradient(90deg, transparent, rgba(0,180,166,0.4), transparent);
+    flex-shrink: 0;
+  }
+
+  .advice-text {
+    font-size: calc(13 * var(--u));
+    color: var(--text-dark);
+    line-height: 1.55;
+    text-align: center;
+    padding: 0 calc(4 * var(--u));
+  }
+
+  .advice-text strong { color: var(--teal-dark); font-weight: 700; display: block; margin-bottom: calc(3 * var(--u)); }
+
+  .results-footer {
+    display: flex;
+    gap: calc(20 * var(--u));
+    justify-content: center;
+    margin-top: calc(20 * var(--u));
+    flex-shrink: 0;
+  }
+
+  /* ─── IDLE TIMER BAR ─── */
+  #idle-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    height: calc(5 * var(--u));
+    background: var(--teal);
+    box-shadow: 0 0 calc(12 * var(--u)) rgba(0,180,166,0.5);
+    transition: width 1s linear;
+    opacity: 0;
+    z-index: 999;
+  }
+
+  #idle-bar.visible { opacity: 1; }
+</style>
+</head>
+<body>
+
+<!-- SCI-FI BACKDROP + SCANLINE SWEEP -->
+<div id="holo-grid"></div>
+<div id="scan-sweep"></div>
+
+<!-- LANG TOGGLE -->
+<div id="lang-toggle">
+  <button id="btn-bm" class="active" onclick="setLang('bm')">BM</button>
+  <button id="btn-en" onclick="setLang('en')">EN</button>
+</div>
+
+<!-- IDLE BAR -->
+<div id="idle-bar"></div>
+
+<!-- ══════════════════════════════════════════════════════
+     ===== CHARACTER PRESENTER SVG (shared P3/P4/P6) =====
+     "Aisyah" — flat-design Malaysian financial advisor.
+     Teal hijab with gold trim, BNM-blue blazer, gold brooch.
+     Groups: #ch-torso (breathing), #ch-head (sway), .ch-eye (blink),
+     #mouth-smile / #mouth-open (talk swap),
+     #arm-right-rest / #arm-right-up (gesture swap).
+     Cloned into each .presenter-char mount by Presenter.mount().
+══════════════════════════════════════════════════════ -->
+<template id="presenter-svg-template">
+<svg class="presenter-svg" viewBox="0 0 360 520" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <!-- ground shadow -->
+  <ellipse cx="180" cy="508" rx="118" ry="11" fill="rgba(0,71,171,0.10)"/>
+  <g id="ch-root">
+    <!-- ── TORSO (breathes) ── -->
+    <g id="ch-torso">
+      <!-- skirt -->
+      <path d="M122 376 L238 376 L254 520 L106 520 Z" fill="#00337A"/>
+      <!-- blazer body -->
+      <path d="M116 252 C116 220 142 202 180 202 C218 202 244 220 244 252 L250 388 L110 388 Z" fill="#0047AB"/>
+      <!-- inner shirt -->
+      <path d="M158 206 L202 206 L197 272 L163 272 Z" fill="#EAF0FB"/>
+      <!-- lapels -->
+      <path d="M158 206 L180 246 L150 284 L140 224 Z" fill="#00337A"/>
+      <path d="M202 206 L180 246 L210 284 L220 224 Z" fill="#00337A"/>
+      <!-- gold brooch -->
+      <circle cx="180" cy="262" r="7.5" fill="#F5A623"/>
+      <circle cx="180" cy="262" r="3" fill="#FFCB6B"/>
+      <!-- teal pocket square -->
+      <rect x="204" y="306" width="24" height="11" rx="3" fill="#00B4A6"/>
+      <!-- blazer buttons -->
+      <circle cx="180" cy="306" r="4" fill="#F5A623"/>
+      <circle cx="180" cy="334" r="4" fill="#F5A623"/>
+
+      <!-- left arm (viewer left) — always resting -->
+      <g id="arm-left-rest">
+        <path d="M126 250 C104 278 98 318 104 354 C106 366 122 366 125 354 C131 322 134 290 144 262 Z" fill="#0047AB"/>
+        <circle cx="111" cy="362" r="11" fill="#C98A5E"/>
+      </g>
+
+      <!-- right arm — resting variant -->
+      <g id="arm-right-rest">
+        <path d="M234 250 C256 278 262 318 256 354 C254 366 238 366 235 354 C229 322 226 290 216 262 Z" fill="#0047AB"/>
+        <circle cx="249" cy="362" r="11" fill="#C98A5E"/>
+      </g>
+
+      <!-- right arm — raised "presenting" variant (shown while talking) -->
+      <g id="arm-right-up">
+        <path d="M232 252 C262 246 292 224 308 196 C315 184 302 172 292 180 C272 198 252 214 226 224 Z" fill="#0047AB"/>
+        <!-- open palm -->
+        <circle cx="305" cy="183" r="13" fill="#C98A5E"/>
+        <path d="M299 170 Q304 162 309 170 M308 168 Q313 161 317 169" stroke="#C98A5E" stroke-width="6" stroke-linecap="round" fill="none"/>
+        <!-- blazer cuff -->
+        <path d="M284 184 L296 200 L286 208 L274 192 Z" fill="#00337A"/>
+      </g>
+    </g>
+
+    <!-- ── HEAD (sways) ── -->
+    <g id="ch-head">
+      <!-- hijab back / shoulders drape -->
+      <path d="M180 56 C120 56 96 106 96 158 C96 210 118 244 142 252 L218 252 C242 244 264 210 264 158 C264 106 240 56 180 56 Z" fill="#00B4A6"/>
+      <!-- hijab chest drape -->
+      <path d="M128 210 C120 252 142 276 180 282 C218 276 240 252 232 210 C224 238 204 250 180 250 C156 250 136 238 128 210 Z" fill="#008F83"/>
+      <!-- face -->
+      <ellipse cx="180" cy="152" rx="45" ry="50" fill="#C98A5E"/>
+      <!-- hijab front band over forehead -->
+      <path d="M180 84 C146 84 130 110 128 142 C138 106 156 97 180 97 C204 97 222 106 232 142 C230 110 214 84 180 84 Z" fill="#008F83"/>
+      <!-- gold trim along the band -->
+      <path d="M132 132 C142 102 158 94 180 94 C202 94 218 102 228 132" stroke="#F5A623" stroke-width="4" fill="none" stroke-linecap="round"/>
+      <!-- under-chin wrap -->
+      <path d="M138 168 C140 202 158 220 180 220 C202 220 220 202 222 168 C222 200 206 230 180 230 C154 230 138 200 138 168 Z" fill="#00B4A6"/>
+      <!-- eyebrows -->
+      <path d="M148 132 Q159 125 170 130" stroke="#7A4A22" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      <path d="M190 130 Q201 125 212 132" stroke="#7A4A22" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      <!-- eyes (blink) -->
+      <g class="ch-eye"><ellipse cx="160" cy="147" rx="5" ry="7" fill="#1A1A2E"/><circle cx="162" cy="144" r="1.8" fill="#FFFFFF"/></g>
+      <g class="ch-eye"><ellipse cx="200" cy="147" rx="5" ry="7" fill="#1A1A2E"/><circle cx="202" cy="144" r="1.8" fill="#FFFFFF"/></g>
+      <!-- blush -->
+      <ellipse cx="146" cy="168" rx="8" ry="4.5" fill="#E07856" opacity="0.32"/>
+      <ellipse cx="214" cy="168" rx="8" ry="4.5" fill="#E07856" opacity="0.32"/>
+      <!-- nose -->
+      <path d="M178 156 Q175 167 181 169" stroke="#A96B3F" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <!-- mouth: friendly smile (idle) -->
+      <path id="mouth-smile" d="M163 184 Q180 197 197 184" stroke="#8C4A2F" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+      <!-- mouth: open (talking) -->
+      <g id="mouth-open">
+        <ellipse cx="180" cy="189" rx="12" ry="9" fill="#7C3A28"/>
+        <path d="M170 185 Q180 191 190 185 L190 183 L170 183 Z" fill="#FFFFFF"/>
+      </g>
+    </g>
+  </g>
+</svg>
+</template>
+<!-- ===== END CHARACTER PRESENTER SVG ===== -->
+
+<!-- ══════════════════════════════════════════════════════
+     SCREEN 1: WELCOME
+══════════════════════════════════════════════════════ -->
+<div id="screen-welcome" class="screen active">
+  <span class="floating-emoji fe-1">🏥</span>
+  <span class="floating-emoji fe-2">💊</span>
+  <span class="floating-emoji fe-3">🩺</span>
+  <span class="floating-emoji fe-4">💰</span>
+  <span class="floating-emoji fe-5">❤️</span>
+  <span class="floating-emoji fe-6">🛡️</span>
+
+  <div class="welcome-content">
+    <div class="welcome-logo">🏥</div>
+    <div class="welcome-subtitle">Bank Negara Malaysia Museum &amp; Art Gallery • IMD 2026</div>
+    <div class="welcome-title-bm" data-i18n="welcome_title_bm"></div>
+    <div class="welcome-divider"></div>
+    <div class="welcome-title-en" data-i18n="welcome_title_en"></div>
+    <div class="welcome-tagline" data-i18n="welcome_tagline"></div>
+    <button class="btn-primary" onclick="goToScreen('info')" style="margin-top:calc(16 * var(--u));" data-i18n="welcome_start"></button>
+    <div class="bnm-badge">
+      <div class="bnm-dot"></div>
+      <span>Bank Negara Malaysia — Festival Hari Museum Antarabangsa 2026</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     SCREEN 2: INFO — "ASK THE ADVISOR"
+══════════════════════════════════════════════════════ -->
+<div id="screen-info" class="screen">
+
+  <div class="info-header">
+    <h2 class="glitch" data-i18n="info_header_title"></h2>
+    <p data-i18n="info_header_sub"></p>
+  </div>
+
+  <!-- Aisyah — same stage setup as planner -->
+  <div class="presenter-stage" id="stage-info">
+    <div class="bubble bubble-main"><div class="bubble-content"></div></div>
+    <div class="bubble bubble-secondary" id="info-bubble-b"><div class="bubble-content"></div></div>
+    <div class="bubble bubble-user"><div class="bubble-content"></div></div>
+    <div class="presenter-char"></div>
+    <div class="presenter-tag" data-i18n="presenter_name"></div>
+  </div>
+
+  <!-- Tarot card row -->
+  <div class="tarot-row">
+
+    <div class="tarot-card" id="chip-0" onclick="askInfo(0)">
+      <span class="tarot-corner tl">✦</span><span class="tarot-corner tr">✦</span>
+      <span class="tarot-corner bl">✦</span><span class="tarot-corner br">✦</span>
+      <div class="tarot-icon">🏥</div>
+      <div class="tarot-divider"></div>
+      <div class="tarot-label" data-i18n="tab_a_label"></div>
+      <div class="tarot-sub" data-i18n="tab_a_card_sub"></div>
+    </div>
+
+    <div class="tarot-card" id="chip-1" onclick="askInfo(1)">
+      <span class="tarot-corner tl">✦</span><span class="tarot-corner tr">✦</span>
+      <span class="tarot-corner bl">✦</span><span class="tarot-corner br">✦</span>
+      <div class="tarot-icon">💡</div>
+      <div class="tarot-divider"></div>
+      <div class="tarot-label" data-i18n="tab_b_label"></div>
+      <div class="tarot-sub" data-i18n="tab_b_card_sub"></div>
+    </div>
+
+    <div class="tarot-card" id="chip-2" onclick="askInfo(2)">
+      <span class="tarot-corner tl">✦</span><span class="tarot-corner tr">✦</span>
+      <span class="tarot-corner bl">✦</span><span class="tarot-corner br">✦</span>
+      <div class="tarot-icon">⚙️</div>
+      <div class="tarot-divider"></div>
+      <div class="tarot-label" data-i18n="tab_c_label"></div>
+      <div class="tarot-sub" data-i18n="tab_c_card_sub"></div>
+    </div>
+
+    <div class="tarot-card" id="chip-3" onclick="askInfo(3)">
+      <span class="tarot-corner tl">✦</span><span class="tarot-corner tr">✦</span>
+      <span class="tarot-corner bl">✦</span><span class="tarot-corner br">✦</span>
+      <div class="tarot-icon">📋</div>
+      <div class="tarot-divider"></div>
+      <div class="tarot-label" data-i18n="tab_d_label"></div>
+      <div class="tarot-sub" data-i18n="tab_d_card_sub"></div>
+    </div>
+
+  </div>
+
+  <button class="btn-primary" onclick="goToScreen('input')" data-i18n="info_continue_btn"></button>
+
+  <!-- hidden for JS compat -->
+  <div class="info-bottom" style="display:none"><div class="info-chips"></div></div>
+</div>
+
+<!-- Hidden store for the advisor's answer content (moved into the speech
+     bubble when the matching question chip is tapped) -->
+<div id="info-store" hidden>
+  <!-- TAB A -->
+  <div id="tab-a" class="tab-panel">
+    <div class="info-card" style="max-width:calc(640 * var(--u));">
+      <span class="info-tag">MHIT</span>
+      <h3>🏥 <span data-i18n="tab_a_title"></span></h3>
+      <p data-i18n="tab_a_def"></p>
+      <p style="font-weight:700;color:var(--text-dark);margin-bottom:calc(12 * var(--u));" data-i18n="tab_a_covers_label"></p>
+      <ul class="covers-list">
+        <li data-i18n="tab_a_c1"></li>
+        <li data-i18n="tab_a_c2"></li>
+        <li data-i18n="tab_a_c3"></li>
+        <li data-i18n="tab_a_c4"></li>
+      </ul>
+    </div>
+    <div class="info-card" style="background:linear-gradient(135deg,rgba(224,247,245,0.9),rgba(234,240,251,0.9));border:none;">
+      <h3 style="color:var(--blue);">💡 <span data-i18n="tab_a_side_title"></span></h3>
+      <p data-i18n="tab_a_side_body"></p>
+      <div style="display:flex;flex-direction:column;gap:calc(12 * var(--u));margin-top:calc(8 * var(--u));">
+        <div style="background:white;border-radius:calc(16 * var(--u));padding:calc(18 * var(--u)) calc(20 * var(--u));display:flex;align-items:center;gap:calc(14 * var(--u));">
+          <span style="font-size:calc(32 * var(--u));">🛡️</span>
+          <div>
+            <div style="font-family:'Poppins',sans-serif;font-size:calc(16 * var(--u));font-weight:700;color:var(--text-dark);" data-i18n="tab_a_pill1_title"></div>
+            <div style="font-size:calc(14 * var(--u));color:var(--text-mid);" data-i18n="tab_a_pill1_body"></div>
+          </div>
+        </div>
+        <div style="background:white;border-radius:calc(16 * var(--u));padding:calc(18 * var(--u)) calc(20 * var(--u));display:flex;align-items:center;gap:calc(14 * var(--u));">
+          <span style="font-size:calc(32 * var(--u));">💪</span>
+          <div>
+            <div style="font-family:'Poppins',sans-serif;font-size:calc(16 * var(--u));font-weight:700;color:var(--text-dark);" data-i18n="tab_a_pill2_title"></div>
+            <div style="font-size:calc(14 * var(--u));color:var(--text-mid);" data-i18n="tab_a_pill2_body"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB B -->
+  <div id="tab-b" class="tab-panel">
+    <div class="info-card" style="flex:1;">
+      <h3>⚠️ <span data-i18n="tab_b_title"></span></h3>
+      <div class="why-point">
+        <div class="why-icon">💰</div>
+        <div class="why-text">
+          <h4 data-i18n="tab_b_p1_title"></h4>
+          <p data-i18n="tab_b_p1_body"></p>
+        </div>
+      </div>
+      <div class="why-point">
+        <div class="why-icon">🏦</div>
+        <div class="why-text">
+          <h4 data-i18n="tab_b_p2_title"></h4>
+          <p data-i18n="tab_b_p2_body"></p>
+        </div>
+      </div>
+      <div class="why-point">
+        <div class="why-icon">😌</div>
+        <div class="why-text">
+          <h4 data-i18n="tab_b_p3_title"></h4>
+          <p data-i18n="tab_b_p3_body"></p>
+        </div>
+      </div>
+    </div>
+    <div class="info-card" style="flex:0.7;background:linear-gradient(135deg,rgba(254,243,220,0.92),rgba(255,248,240,0.92));">
+      <h3 style="color:var(--amber);">📊 <span data-i18n="tab_b_stat_title"></span></h3>
+      <div style="display:flex;flex-direction:column;gap:calc(16 * var(--u));margin-top:calc(8 * var(--u));">
+        <div style="text-align:center;padding:calc(20 * var(--u));background:white;border-radius:calc(16 * var(--u));">
+          <div style="font-family:'Poppins',sans-serif;font-size:calc(52 * var(--u));font-weight:900;color:var(--coral);">10%</div>
+          <div style="font-size:calc(15 * var(--u));color:var(--text-mid);" data-i18n="tab_b_stat1"></div>
+        </div>
+        <div style="text-align:center;padding:calc(20 * var(--u));background:white;border-radius:calc(16 * var(--u));">
+          <div style="font-family:'Poppins',sans-serif;font-size:calc(52 * var(--u));font-weight:900;color:var(--teal);">RM25K+</div>
+          <div style="font-size:calc(15 * var(--u));color:var(--text-mid);" data-i18n="tab_b_stat2"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB C -->
+  <div id="tab-c" class="tab-panel">
+    <div class="info-card" style="flex:1;">
+      <h3>⚙️ <span data-i18n="tab_c_title"></span></h3>
+      <div class="flow-steps">
+        <div class="flow-step">
+          <div class="step-icon">💳</div>
+          <div class="step-num" data-i18n="step_num_1"></div>
+          <p data-i18n="tab_c_step1"></p>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="step-icon">🏦</div>
+          <div class="step-num" data-i18n="step_num_2"></div>
+          <p data-i18n="tab_c_step2"></p>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="step-icon">🏥</div>
+          <div class="step-num" data-i18n="step_num_3"></div>
+          <p data-i18n="tab_c_step3"></p>
+        </div>
+      </div>
+      <div style="text-align:center;margin-top:calc(12 * var(--u));">
+        <span class="flow-label" data-i18n="tab_c_label"></span>
+      </div>
+    </div>
+    <div class="info-card" style="flex:0.65;background:linear-gradient(135deg,rgba(224,247,245,0.92),rgba(234,240,251,0.92));">
+      <h3 style="color:var(--blue);">🤝 <span data-i18n="tab_c_side_title"></span></h3>
+      <p data-i18n="tab_c_side_body"></p>
+      <div style="margin-top:calc(16 * var(--u));background:white;border-radius:calc(16 * var(--u));padding:calc(20 * var(--u));">
+        <div style="font-family:'Poppins',sans-serif;font-size:calc(14 * var(--u));font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:1px;margin-bottom:calc(10 * var(--u));" data-i18n="tab_c_example_title"></div>
+        <div style="font-size:calc(15 * var(--u));color:var(--text-mid);line-height:1.7;" data-i18n="tab_c_example_body"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB D -->
+  <div id="tab-d" class="tab-panel">
+    <div class="info-card" style="flex:1;">
+      <h3>📋 <span data-i18n="tab_d_title"></span></h3>
+      <div class="abc-row">
+        <div class="abc-card a">
+          <div class="abc-letter">A</div>
+          <h4 data-i18n="tab_d_a_title"></h4>
+          <p data-i18n="tab_d_a_body"></p>
+        </div>
+        <div class="abc-card b">
+          <div class="abc-letter">B</div>
+          <h4 data-i18n="tab_d_b_title"></h4>
+          <p data-i18n="tab_d_b_body"></p>
+        </div>
+        <div class="abc-card c">
+          <div class="abc-letter">C</div>
+          <h4 data-i18n="tab_d_c_title"></h4>
+          <p data-i18n="tab_d_c_body"></p>
+        </div>
+      </div>
+      <div class="questions-list">
+        <h4 data-i18n="tab_d_q_title"></h4>
+        <ul>
+          <li data-i18n="tab_d_q1"></li>
+          <li data-i18n="tab_d_q2"></li>
+          <li data-i18n="tab_d_q3"></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     SCREEN 3: HEALTH PLANNER — ADVISOR INTERVIEW
+══════════════════════════════════════════════════════ -->
+<div id="screen-input" class="screen">
+  <div class="info-header">
+    <h2 class="glitch" data-i18n="input_title"></h2>
+    <p data-i18n="input_subtitle"></p>
+  </div>
+
+  <!-- presenter stage: character asks the planner questions in sequence -->
+  <div class="presenter-stage" id="stage-planner">
+    <div class="bubble bubble-main"><div class="bubble-content"></div></div>
+    <div class="bubble bubble-user"><div class="bubble-content"></div></div>
+    <div class="presenter-char"></div>
+    <div class="presenter-tag" data-i18n="mascot_label"></div>
+  </div>
+
+  <!-- answer area: touch buttons for the current question -->
+  <div id="planner-answers">
+    <!-- Q1: AGE -->
+    <div id="answer-age" class="answer-panel holo-panel">
+      <div class="age-control">
+        <button class="age-btn minus" onclick="changeAge(-1)">−</button>
+        <div class="age-display" id="age-display">30</div>
+        <div class="age-unit" data-i18n="age_unit"></div>
+        <button class="age-btn plus" onclick="changeAge(1)">+</button>
+      </div>
+      <div class="age-bands" id="age-bands">
+        <div class="age-band" data-min="18" data-max="25">18–25</div>
+        <div class="age-band" data-min="26" data-max="35">26–35</div>
+        <div class="age-band" data-min="36" data-max="45">36–45</div>
+        <div class="age-band" data-min="46" data-max="55">46–55</div>
+        <div class="age-band" data-min="56" data-max="70">56–70</div>
+      </div>
+      <button class="btn-primary" onclick="confirmAge()" data-i18n="age_confirm"></button>
+    </div>
+
+    <!-- Q2: COVERAGE -->
+    <div id="answer-coverage" class="answer-panel holo-panel">
+      <div class="coverage-cards">
+        <div class="coverage-card none" onclick="answerCoverage('none')">
+          <span class="tarot-corner tl">✦</span><span class="tarot-corner tr">✦</span>
+          <span class="tarot-corner bl">✦</span><span class="tarot-corner br">✦</span>
+          <div class="card-tick">
+            <div class="card-tick-ring"></div>
+            <div class="card-tick-circle">
+              <svg class="card-tick-svg" viewBox="0 0 24 24"><path class="card-tick-path" d="M4 13l5 5L20 7"/></svg>
+            </div>
+          </div>
+          <div class="coverage-icon">🚫</div>
+          <div class="tarot-divider"></div>
+          <div class="coverage-name" data-i18n="cov_none_name"></div>
+          <span class="coverage-limit" data-i18n="cov_none_limit"></span>
+        </div>
+        <div class="coverage-card basic" onclick="answerCoverage('basic')">
+          <span class="tarot-corner tl">✦</span><span class="tarot-corner tr">✦</span>
+          <span class="tarot-corner bl">✦</span><span class="tarot-corner br">✦</span>
+          <div class="card-tick">
+            <div class="card-tick-ring"></div>
+            <div class="card-tick-circle">
+              <svg class="card-tick-svg" viewBox="0 0 24 24"><path class="card-tick-path" d="M4 13l5 5L20 7"/></svg>
+            </div>
+          </div>
+          <div class="coverage-icon">🛡️</div>
+          <div class="tarot-divider"></div>
+          <div class="coverage-name" data-i18n="cov_basic_name"></div>
+          <span class="coverage-limit" data-i18n="cov_basic_limit"></span>
+        </div>
+        <div class="coverage-card comprehensive" onclick="answerCoverage('comprehensive')">
+          <span class="tarot-corner tl">✦</span><span class="tarot-corner tr">✦</span>
+          <span class="tarot-corner bl">✦</span><span class="tarot-corner br">✦</span>
+          <div class="card-tick">
+            <div class="card-tick-ring"></div>
+            <div class="card-tick-circle">
+              <svg class="card-tick-svg" viewBox="0 0 24 24"><path class="card-tick-path" d="M4 13l5 5L20 7"/></svg>
+            </div>
+          </div>
+          <div class="coverage-icon">⭐</div>
+          <div class="tarot-divider"></div>
+          <div class="coverage-name" data-i18n="cov_comp_name"></div>
+          <span class="coverage-limit" data-i18n="cov_comp_limit"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     SCREEN 4: CALCULATING
+══════════════════════════════════════════════════════ -->
+<div id="screen-calculating" class="screen">
+  <div class="calc-cross"></div>
+  <div class="calc-title" data-i18n="calc_title"></div>
+  <div class="calc-subtitle" data-i18n="calc_subtitle"></div>
+  <div class="progress-bar-wrap">
+    <div class="progress-bar-fill" id="progress-fill"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     SCREEN 5: RESULTS
+══════════════════════════════════════════════════════ -->
+<div id="screen-results" class="screen">
+  <div class="results-header">
+    <div class="results-title glitch" data-i18n="results_title"></div>
+    <div class="profile-badges">
+      <div class="badge badge-age" id="badge-age">👤 30 <span data-i18n="results_years"></span></div>
+      <div class="badge" id="badge-plan">🛡️ <span id="badge-plan-text"></span></div>
+    </div>
+  </div>
+
+  <div class="results-body">
+    <!-- LEFT: Chart + Alert -->
+    <div class="results-left">
+      <div class="chart-card holo-panel">
+        <h3 data-i18n="chart_title"></h3>
+        <div class="chart-wrap">
+          <canvas id="results-chart"></canvas>
+        </div>
+      </div>
+      <div id="alert-card" class="alert-card amber">
+        <div class="alert-icon" id="alert-icon">🚨</div>
+        <div class="alert-text">
+          <h4 id="alert-heading"></h4>
+          <p id="alert-body"></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Advice cards -->
+    <div class="results-right">
+      <div style="font-family:'Poppins',sans-serif;font-size:calc(18 * var(--u));font-weight:700;color:var(--teal-dark);" data-i18n="advice_heading"></div>
+      <div class="advice-grid">
+        <div class="advice-card" id="advice-1">
+          <span class="tarot-corner tl">✦</span><span class="tarot-corner tr">✦</span>
+          <span class="tarot-corner bl">✦</span><span class="tarot-corner br">✦</span>
+          <div class="advice-icon" id="advice-icon-1">💡</div>
+          <div class="advice-divider"></div>
+          <div class="advice-text" id="advice-text-1"></div>
+        </div>
+        <div class="advice-card" id="advice-2">
+          <span class="tarot-corner tl">✦</span><span class="tarot-corner tr">✦</span>
+          <span class="tarot-corner bl">✦</span><span class="tarot-corner br">✦</span>
+          <div class="advice-icon" id="advice-icon-2">📅</div>
+          <div class="advice-divider"></div>
+          <div class="advice-text" id="advice-text-2"></div>
+        </div>
+        <div class="advice-card" id="advice-3">
+          <span class="tarot-corner tl">✦</span><span class="tarot-corner tr">✦</span>
+          <span class="tarot-corner bl">✦</span><span class="tarot-corner br">✦</span>
+          <div class="advice-icon" id="advice-icon-3">🎯</div>
+          <div class="advice-divider"></div>
+          <div class="advice-text" id="advice-text-3"></div>
+        </div>
+        <div class="advice-card" id="advice-4">
+          <span class="tarot-corner tl">✦</span><span class="tarot-corner tr">✦</span>
+          <span class="tarot-corner bl">✦</span><span class="tarot-corner br">✦</span>
+          <div class="advice-icon">⭐</div>
+          <div class="advice-divider"></div>
+          <div class="advice-text" data-i18n="advice_abc"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="results-footer">
+    <button class="btn-secondary" onclick="goToScreen('input')" data-i18n="btn_recalculate"></button>
+    <button class="btn-primary" onclick="goToScreen('welcome')" data-i18n="btn_finish"></button>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════
+// SFX — synthesized high-tech sounds (Web Audio API, no files)
+// tap() every button press · swap() screen/question change ·
+// win() success/completion · lose() wrong/invalid
+// ══════════════════════════════════════════════════════
+const SFX=(()=>{let ctx;const ac=()=>ctx||(ctx=new(window.AudioContext||window.webkitAudioContext)());function tone({freq=440,type='sine',dur=.15,vol=.2,slide=0,delay=0}){try{const c=ac(),t=c.currentTime+delay,o=c.createOscillator(),g=c.createGain();o.type=type;o.frequency.setValueAtTime(freq,t);if(slide)o.frequency.exponentialRampToValueAtTime(Math.max(40,freq+slide),t+dur);g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.connect(g).connect(c.destination);o.start(t);o.stop(t+dur+.05)}catch(e){}}
+return{tap(){tone({freq:1200,type:'square',dur:.06,vol:.1});tone({freq:1800,dur:.08,vol:.07,delay:.02})},confirm(){tone({freq:622,type:'sine',dur:.14,vol:.20,delay:0});tone({freq:830,type:'sine',dur:.18,vol:.22,delay:.12});tone({freq:1046,type:'triangle',dur:.28,vol:.20,delay:.26})},swap(){tone({freq:300,type:'sawtooth',dur:.25,vol:.09,slide:900})},win(){[523,659,784,1047].forEach((f,i)=>tone({freq:f,type:'triangle',dur:.18,vol:.15,delay:i*.09}))},lose(){tone({freq:220,type:'sawtooth',dur:.3,vol:.15,slide:-120});tone({freq:110,type:'square',dur:.35,vol:.1,delay:.05})}};})();
+
+// ══════════════════════════════════════════════════════
+// I18N STRINGS
+// ══════════════════════════════════════════════════════
+const STRINGS = {
+  bm: {
+    welcome_title_bm: "Perancang Bajet Penjagaan Kesihatan",
+    welcome_title_en: "Health Budget Planner",
+    welcome_tagline: "Rancang kesihatan anda hari ini, jimat lebih banyak esok!",
+    welcome_start: "Mulakan",
+
+    info_header_title: "Kenali MHIT",
+    info_header_sub: "Insurans/Takaful Perubatan & Kesihatan — tanya penasihat kami!",
+    tab_a_label: "Apa itu MHIT?",
+    tab_a_card_sub: "Definisi & Skop Perlindungan",
+    tab_b_card_sub: "Kepentingan Insurans Kesihatan",
+    tab_c_card_sub: "Cara Kerja Sistem MHIT",
+    tab_d_card_sub: "Panduan Sebelum Membeli",
+    tab_b_label: "Kenapa Penting?",
+    tab_c_label: "Bagaimana Berfungsi?",
+    tab_d_label: "ABC Sebelum Beli",
+
+    presenter_name: "Aisyah — Penasihat MHIT Anda",
+    info_greet: "Hai! Saya Aisyah 👋 Penasihat kesihatan anda. Tanya saya tentang MHIT — sentuh soalan di bawah!",
+
+    tab_a_title: "Apa itu MHIT?",
+    tab_a_def: "MHIT = Insurans/Takaful Perubatan & Kesihatan. Pelan perlindungan yang membantu bayar kos rawatan bila anda sakit atau masuk hospital.",
+    tab_a_covers_label: "Melindungi:",
+    tab_a_c1: "Bil hospital",
+    tab_a_c2: "Kos rawatan",
+    tab_a_c3: "Ubat-ubatan",
+    tab_a_c4: "Pembedahan & penyakit serius",
+    tab_a_side_title: "Perlindungan Menyeluruh",
+    tab_a_side_body: "Anda tidak perlu tanggung kos perubatan seorang diri.",
+    tab_a_pill1_title: "Ketenangan Fikiran",
+    tab_a_pill1_body: "Fokus untuk sembuh, bukan risau bil",
+    tab_a_pill2_title: "Perlindungan Kewangan",
+    tab_a_pill2_body: "Simpanan anda kekal selamat",
+
+    tab_b_title: "Kenapa MHIT Penting?",
+    tab_b_p1_title: "Kos Perubatan Mahal",
+    tab_b_p1_body: "Kos perubatan semakin mahal — satu rawatan boleh mencecah ribuan ringgit.",
+    tab_b_p2_title: "Simpanan Boleh Habis",
+    tab_b_p2_body: "Tanpa perlindungan, duit simpanan boleh habis atau terpaksa berhutang.",
+    tab_b_p3_title: "Ketenangan Fikiran",
+    tab_b_p3_body: "Ketenangan fikiran — fokus untuk sembuh, bukan risau bil.",
+    tab_b_stat_title: "Tahukah Anda?",
+    tab_b_stat1: "Kos perubatan meningkat setiap tahun",
+    tab_b_stat2: "Kos rawatan serius bagi warga emas",
+
+    tab_c_title: "Bagaimana MHIT Berfungsi?",
+    tab_c_step1: "Bayar premium/caruman",
+    tab_c_step2: "Dikumpul dalam tabung bersama",
+    tab_c_step3: "Bayar tuntutan anda",
+    tab_c_label: "Perkongsian Risiko / Risk Pooling",
+    tab_c_side_title: "Bersama Lebih Kuat",
+    tab_c_side_body: "Apabila ramai orang bergabung, risiko dikongsi bersama. Ini menjadikan perlindungan lebih mampu milik untuk semua.",
+    tab_c_example_title: "Contoh",
+    tab_c_example_body: "1,000 orang bayar RM100/bulan = RM100,000 terkumpul. Jika 10 orang sakit dan perlukan RM8,000 setiap satu = RM80,000 — semua ditanggung!",
+
+    tab_d_title: "ABC Sebelum Beli MHIT",
+    tab_d_a_title: "Anggar keperluan anda",
+    tab_d_a_body: "Termasuk kondisi kesihatan semasa anda",
+    tab_d_b_title: "Bandingkan pilihan",
+    tab_d_b_body: "Lihat semua pilihan yang ada di pasaran",
+    tab_d_c_title: "Cari pelan yang sesuai",
+    tab_d_c_body: "Mengikut bajet dan keperluan anda",
+    tab_d_q_title: "Soalan yang perlu ditanya:",
+    tab_d_q1: "Apa perlindungan yang ditawarkan?",
+    tab_d_q2: "Berapa premium yang perlu dibayar?",
+    tab_d_q3: "Adakah premium akan meningkat dengan usia?",
+    info_continue_btn: "Teruskan ke Perancang →",
+
+    input_title_bm: "Beritahu Kami Tentang Anda",
+    input_title_en: "Tell Us About You",
+    input_title: "Beritahu Kami Tentang Anda",
+    input_subtitle: "Perancang Bajet Penjagaan Kesihatan",
+    mascot_label: "Perancang Kesihatan Anda",
+    age_label: "Berapa umur anda?",
+    age_unit: "tahun",
+    age_confirm: "Sahkan →",
+    ack_age: "Baik, terima kasih! Soalan seterusnya…",
+    coverage_label: "Pelan MHIT anda sekarang:",
+    ack_cov_none: "Baik, jangan risau — mari kita lihat unjuran anda!",
+    ack_cov_basic: "Bagus! Mari kita kira unjuran anda.",
+    ack_cov_comprehensive: "Hebat! Mari kita semak unjuran anda.",
+    cov_none_name: "Tiada Perlindungan",
+    cov_none_en: "No Coverage",
+    cov_none_limit: "Tiada",
+    cov_basic_name: "Perlindungan Asas",
+    cov_basic_en: "Basic Coverage",
+    cov_comp_name: "Perlindungan Komprehensif",
+    cov_comp_en: "Comprehensive Coverage",
+    calculate_btn: "Kira Sekarang!",
+
+    calc_title: "Menganalisa profil kesihatan anda...",
+    calc_subtitle: "Analysing your health profile...",
+
+    results_title: "Unjuran Kos Penjagaan Kesihatan Anda",
+    results_years: "tahun",
+    chart_title: "Unjuran Kos Perubatan (10 Tahun)",
+    advice_heading: "Nasihat Peribadi",
+
+    alert_none_heading: "Amaran: Tiada Perlindungan!",
+    alert_none_body: "Anda menanggung kos perubatan tanpa perlindungan dalam 10 tahun! Pertimbangkan untuk mendapatkan MHIT sekarang.",
+    alert_basic_heading: "Semak Perlindungan Anda",
+    alert_basic_body: "Anda mungkin memerlukan top-up perlindungan dalam beberapa tahun. Semak had pelan anda.",
+    alert_comp_heading: "Perlindungan Baik!",
+    alert_comp_body: "Perlindungan anda agak mencukupi untuk jangka pendek. Tetap semak pelan tahunan.",
+
+    plan_none: "Tiada Perlindungan",
+    plan_basic: "Perlindungan Asas",
+    plan_comp: "Perlindungan Komprehensif",
+
+    advice_abc: "⭐ ABC — Anggar, Bandingkan, Cari pelan yang sesuai untuk anda!",
+
+    btn_recalculate: "← Kira Semula",
+    btn_finish: "Tamat",
+    step_num_1: "LANGKAH 1",  step_num_2: "LANGKAH 2",  step_num_3: "LANGKAH 3",
+    chart_year_1: "Tahun 1",  chart_year_3: "Tahun 3",  chart_year_5: "Tahun 5",  chart_year_10: "Tahun 10",
+    cov_basic_limit: "RM50,000/tahun",  cov_comp_limit: "RM200,000/tahun",
+
+    chart_covered: "Ditanggung MHIT",
+    chart_gap: "Kos Sendiri",
+    tooltip_rm: "RM",
+  },
+  en: {
+    welcome_title_bm: "Health Budget Planner",
+    welcome_title_en: "Health Budget Planner",
+    welcome_tagline: "Plan your health today, save more tomorrow!",
+    welcome_start: "Mula",
+
+    info_header_title: "Know Your MHIT",
+    info_header_sub: "Medical And Health Insurance/Takaful — ask our advisor!",
+    tab_a_label: "What is MHIT?",
+    tab_a_card_sub: "Definition & Coverage Scope",
+    tab_b_card_sub: "Why Health Insurance Matters",
+    tab_c_card_sub: "How the MHIT System Works",
+    tab_d_card_sub: "Guide Before You Buy",
+    tab_b_label: "Why Important?",
+    tab_c_label: "How It Works?",
+    tab_d_label: "ABC Before Buying",
+
+    presenter_name: "Aisyah — Your MHIT Advisor",
+    info_greet: "Hi! I'm Aisyah 👋 Your health advisor. Ask me about MHIT — tap a question below!",
+
+    tab_a_title: "What is MHIT?",
+    tab_a_def: "MHIT = Medical And Health Insurance/Takaful. A protection plan that helps cover treatment costs when sick or hospitalised.",
+    tab_a_covers_label: "Covers:",
+    tab_a_c1: "Hospital bills",
+    tab_a_c2: "Treatment costs",
+    tab_a_c3: "Medications",
+    tab_a_c4: "Surgery & serious illnesses",
+    tab_a_side_title: "Comprehensive Protection",
+    tab_a_side_body: "You don't have to face medical costs alone.",
+    tab_a_pill1_title: "Peace of Mind",
+    tab_a_pill1_body: "Focus on recovery, not bills",
+    tab_a_pill2_title: "Financial Protection",
+    tab_a_pill2_body: "Your savings stay safe",
+
+    tab_b_title: "Why is MHIT Important?",
+    tab_b_p1_title: "Rising Medical Costs",
+    tab_b_p1_body: "Medical costs keep rising — one treatment can cost thousands of ringgit.",
+    tab_b_p2_title: "Savings at Risk",
+    tab_b_p2_body: "Without coverage, your savings could be wiped out or you may need to borrow.",
+    tab_b_p3_title: "Peace of Mind",
+    tab_b_p3_body: "Peace of mind — focus on recovery, not bills.",
+    tab_b_stat_title: "Did You Know?",
+    tab_b_stat1: "Medical costs rise every year",
+    tab_b_stat2: "Serious treatment cost for seniors",
+
+    tab_c_title: "How Does MHIT Work?",
+    tab_c_step1: "Pay your premium/contribution",
+    tab_c_step2: "Pooled with others' contributions",
+    tab_c_step3: "Pays your claims",
+    tab_c_label: "Risk Pooling / Perkongsian Risiko",
+    tab_c_side_title: "Stronger Together",
+    tab_c_side_body: "When many people join, risk is shared. This makes protection more affordable for everyone.",
+    tab_c_example_title: "Example",
+    tab_c_example_body: "1,000 people pay RM100/month = RM100,000 pooled. If 10 people need RM8,000 each = RM80,000 — all covered!",
+
+    tab_d_title: "ABC Before Buying MHIT",
+    tab_d_a_title: "Assess your needs",
+    tab_d_a_body: "Including your current health conditions",
+    tab_d_b_title: "Compare options",
+    tab_d_b_body: "Look at all available options in the market",
+    tab_d_c_title: "Choose a suitable plan",
+    tab_d_c_body: "According to your budget and needs",
+    tab_d_q_title: "Questions to ask:",
+    tab_d_q1: "What coverage is offered?",
+    tab_d_q2: "How much is the premium?",
+    tab_d_q3: "Will the premium increase with age?",
+    info_continue_btn: "Continue to Planner →",
+
+    input_title_bm: "Tell Us About You",
+    input_title_en: "Beritahu Kami Tentang Anda",
+    input_title: "Tell Us About You",
+    input_subtitle: "Healthcare Budget Planner",
+    mascot_label: "Your Health Planner",
+    age_label: "How old are you?",
+    age_unit: "years old",
+    age_confirm: "Confirm →",
+    ack_age: "Great, thank you! Next question…",
+    coverage_label: "Your current MHIT plan:",
+    ack_cov_none: "Okay, don't worry — let's look at your projection!",
+    ack_cov_basic: "Nice! Let's calculate your projection.",
+    ack_cov_comprehensive: "Excellent! Let's check your projection.",
+    cov_none_name: "No Coverage",
+    cov_none_en: "Tiada Perlindungan",
+    cov_none_limit: "None",
+    cov_basic_name: "Basic Coverage",
+    cov_basic_en: "Perlindungan Asas",
+    cov_comp_name: "Comprehensive Coverage",
+    cov_comp_en: "Perlindungan Komprehensif",
+    calculate_btn: "Calculate Now!",
+
+    calc_title: "Analysing your health profile...",
+    calc_subtitle: "Menganalisa profil kesihatan anda...",
+
+    results_title: "Your Healthcare Cost Projection",
+    results_years: "years old",
+    chart_title: "Medical Cost Projection (10 Years)",
+    advice_heading: "Personal Advice",
+
+    alert_none_heading: "Warning: No Coverage!",
+    alert_none_body: "You face uncovered medical costs over 10 years! Consider getting MHIT coverage now.",
+    alert_basic_heading: "Review Your Coverage",
+    alert_basic_body: "You may need additional coverage in a few years. Review your plan limits.",
+    alert_comp_heading: "Good Coverage!",
+    alert_comp_body: "Your coverage is reasonably adequate for the short term. Still review annually.",
+
+    plan_none: "No Coverage",
+    plan_basic: "Basic Coverage",
+    plan_comp: "Comprehensive Coverage",
+
+    advice_abc: "⭐ ABC — Assess, Compare, Choose the right plan for you!",
+
+    btn_recalculate: "← Recalculate",
+    btn_finish: "Finish",
+    step_num_1: "STEP 1",  step_num_2: "STEP 2",  step_num_3: "STEP 3",
+    chart_year_1: "Year 1",  chart_year_3: "Year 3",  chart_year_5: "Year 5",  chart_year_10: "Year 10",
+    cov_basic_limit: "RM50,000/year",  cov_comp_limit: "RM200,000/year",
+
+    chart_covered: "MHIT Covered",
+    chart_gap: "Out-of-Pocket",
+    tooltip_rm: "RM",
+  }
+};
+
+// ══════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════
+let state = {
+  lang: 'bm',
+  screen: 'welcome',
+  age: 30,
+  coverage: 'basic',
+  chartInstance: null,
+  idleTimer: null,
+  idleSeconds: 60,
+  idleRemaining: 60,
+};
+
+// ══════════════════════════════════════════════════════
+// LANG
+// ══════════════════════════════════════════════════════
+function setLang(lang) {
+  state.lang = lang;
+  document.getElementById('btn-bm').classList.toggle('active', lang === 'bm');
+  document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+  document.body.classList.toggle('lang-en', lang === 'en');
+  renderI18n();
+  if (state.screen === 'results') updateResults();
+  // Refresh speech bubble text to match new language
+  if (state.screen === 'info') {
+    Presenter.use('stage-info');
+    Presenter.say(t('info_greet'));
+  } else if (state.screen === 'input') {
+    Presenter.use('stage-planner');
+    const agePanel = document.getElementById('answer-age');
+    const covPanel = document.getElementById('answer-coverage');
+    if (agePanel && agePanel.classList.contains('show')) {
+      Presenter.ask(t('age_label'));
+    } else if (covPanel && covPanel.classList.contains('show')) {
+      Presenter.ask(t('coverage_label'));
+    }
+  }
+}
+
+function t(key) {
+  return STRINGS[state.lang][key] || STRINGS['bm'][key] || key;
+}
+
+function renderI18n() {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    el.textContent = t(key);
+  });
+}
+
+// ══════════════════════════════════════════════════════
+// ===== PRESENTER MODULE (shared P3/P4/P6) =====
+// Drives the SVG advisor character + holographic speech bubbles.
+//   Presenter.mount('stage-id')  — clone the character into a stage
+//   Presenter.use('stage-id')    — make that stage the active one
+//   Presenter.say(htmlOrNode, {talkMs})   — character speaks (bubble pop-in,
+//                                           mouth + raised-hand gesture)
+//   Presenter.ask(htmlOrNode, opts)       — alias of say() for questions
+//   Presenter.userSay(text)               — small visitor bubble from bottom
+//   Presenter.hide()                      — hide the main bubble
+// ══════════════════════════════════════════════════════
+const Presenter = (() => {
+  const stages = {};
+  let activeId = null;
+
+  function mount(stageId) {
+    const stage = document.getElementById(stageId);
+    if (!stage || stages[stageId]) return;
+    const charMount = stage.querySelector('.presenter-char');
+    const tpl = document.getElementById('presenter-svg-template');
+    charMount.appendChild(tpl.content.cloneNode(true));
+    stages[stageId] = {
+      stage,
+      svg: charMount.querySelector('svg'),
+      bubble: stage.querySelector('.bubble-main'),
+      bubbleContent: stage.querySelector('.bubble-main .bubble-content'),
+      userBubble: stage.querySelector('.bubble-user'),
+      userContent: stage.querySelector('.bubble-user .bubble-content'),
+      talkTimer: null,
+      userTimer: null,
+    };
+  }
+
+  function use(stageId) { activeId = stageId; return stages[stageId]; }
+  function get() { return stages[activeId]; }
+
+  function rescueStoredPanels(container) {
+    // Info panels live in #info-store; never destroy them with innerHTML=''
+    const store = document.getElementById('info-store');
+    if (!store) return;
+    container.querySelectorAll('.tab-panel').forEach(p => store.appendChild(p));
+  }
+
+  function say(content, opts) {
+    const s = get();
+    if (!s) return;
+    const o = opts || {};
+    const talkMs = o.talkMs || 2800;
+    // re-trigger pop-in animation
+    s.bubble.classList.remove('visible');
+    void s.bubble.offsetWidth;
+    rescueStoredPanels(s.bubbleContent);
+    if (typeof content === 'string') {
+      s.bubbleContent.innerHTML = '<div class="bubble-line">' + content + '</div>';
+    } else {
+      s.bubbleContent.innerHTML = '';
+      s.bubbleContent.appendChild(content);
+    }
+    s.bubbleContent.scrollTop = 0;
+    s.bubble.classList.add('visible');
+    // speaking gesture: open mouth + raised hand, then settle back to idle
+    s.svg.classList.add('is-talking');
+    clearTimeout(s.talkTimer);
+    s.talkTimer = setTimeout(() => s.svg.classList.remove('is-talking'), talkMs);
+  }
+
+  function ask(content, opts) { say(content, opts); }
+
+  function userSay(text, holdMs) {
+    const s = get();
+    if (!s) return;
+    s.userContent.textContent = text;
+    s.userBubble.classList.remove('visible');
+    void s.userBubble.offsetWidth;
+    s.userBubble.classList.add('visible');
+    clearTimeout(s.userTimer);
+    s.userTimer = setTimeout(() => s.userBubble.classList.remove('visible'), holdMs || 2200);
+  }
+
+  function hide() {
+    const s = get();
+    if (!s) return;
+    rescueStoredPanels(s.bubbleContent);
+    s.bubble.classList.remove('visible');
+    s.svg.classList.remove('is-talking');
+  }
+
+  return { mount, use, say, ask, userSay, hide };
+})();
+// ===== END PRESENTER MODULE =====
+
+// ══════════════════════════════════════════════════════
+// SCREEN NAV (scanline sweep + glitch-in + SFX swap)
+// ══════════════════════════════════════════════════════
+function runScanSweep() {
+  const s = document.getElementById('scan-sweep');
+  s.classList.remove('run');
+  void s.offsetWidth;
+  s.classList.add('run');
+}
+
+function runGlitch(screenEl) {
+  screenEl.querySelectorAll('.glitch').forEach(el => {
+    el.classList.remove('glitch-in');
+    void el.offsetWidth;
+    el.classList.add('glitch-in');
+  });
+}
+
+// ══════════════════════════════════════════════════════
+// IDLE TIMER
+// ══════════════════════════════════════════════════════
+function stopIdleTimer() {
+  clearInterval(state.idleTimer);
+  state.idleTimer = null;
+  const bar = document.getElementById('idle-bar');
+  if (bar) { bar.classList.remove('visible'); bar.style.width = '100%'; }
+}
+
+function startIdleTimer() {
+  stopIdleTimer();
+  const bar = document.getElementById('idle-bar');
+  let elapsed = 0;
+  state.idleTimer = setInterval(() => {
+    elapsed++;
+    const frac = Math.max(0, 1 - elapsed / state.idleSeconds);
+    if (bar) {
+      bar.style.width = (frac * 100) + '%';
+      if (elapsed === 5) bar.classList.add('visible');
+    }
+    if (elapsed >= state.idleSeconds) {
+      stopIdleTimer();
+      goToScreen('welcome');
+    }
+  }, 1000);
+}
+
+function resetIdle() {
+  if (state.screen === 'welcome') return;
+  startIdleTimer();
+}
+
+function goToScreen(name) {
+  const screens = ['welcome','info','input','calculating','results'];
+  screens.forEach(s => {
+    document.getElementById('screen-' + s).classList.remove('active');
+  });
+  const scr = document.getElementById('screen-' + name);
+  scr.classList.add('active');
+  state.screen = name;
+  // Skip transition VFX/SFX on welcome — they feel broken on restart
+  if (name !== 'welcome') {
+    SFX.swap();
+    runScanSweep();
+    runGlitch(scr);
+  }
+  resetIdle();
+  if (name === 'info') {
+    Presenter.use('stage-info');
+    // Reset chip highlights so no stale active state persists across visits
+    document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    // Reset two-bubble mode: back to single centered bubble for the greeting
+    document.getElementById('stage-info').classList.remove('two-bubbles');
+    const secBubble = document.getElementById('info-bubble-b');
+    if (secBubble) secBubble.classList.remove('visible');
+    Presenter.hide();
+    setTimeout(() => Presenter.say(t('info_greet')), 450);
+  }
+  if (name === 'input') {
+    startPlanner();
+  }
+  if (name === 'results') {
+    setTimeout(() => { renderResults(); SFX.win(); }, 100);
+  }
+  if (name !== 'welcome') startIdleTimer();
+  else stopIdleTimer();
+}
+
+function startCalculation() {
+  goToScreen('calculating');
+  // Reset and restart animation
+  const fill = document.getElementById('progress-fill');
+  fill.style.animation = 'none';
+  fill.offsetHeight; // reflow
+  fill.style.animation = 'progress-fill 2s ease-in-out forwards';
+  setTimeout(() => goToScreen('results'), 2200);
+}
+
+// ══════════════════════════════════════════════════════
+// INFO — "ASK THE ADVISOR" (replaces the old tab switcher;
+// same four topics, same content, now answered in a speech bubble)
+// ══════════════════════════════════════════════════════
+const INFO_TABS = ['a','b','c','d'];
+const INFO_CHIP_KEYS = ['tab_a_label','tab_b_label','tab_c_label','tab_d_label'];
+let INFO_PANELS = [];
+
+function askInfo(idx) {
+  Presenter.use('stage-info');
+  // chip highlight
+  INFO_TABS.forEach((_, i) => {
+    document.getElementById('chip-' + i).classList.toggle('active', i === idx);
+  });
+  // visitor's question pops up from the bottom...
+  Presenter.userSay(t(INFO_CHIP_KEYS[idx]));
+  // ...then the advisor answers in the speech bubble(s)
+  setTimeout(() => {
+    SFX.swap();
+    const panel = INFO_PANELS[idx];
+    const cards = Array.from(panel.querySelectorAll(':scope > .info-card'));
+    const stageEl = document.getElementById('stage-info');
+    const secBubble = document.getElementById('info-bubble-b');
+
+    if (cards.length >= 2) {
+      // Two-bubble mode: activate layout class
+      stageEl.classList.add('two-bubbles');
+      // Left bubble via Presenter.say() (handles character talking animation)
+      // Use a clone so originals stay in #info-store
+      Presenter.say(cards[0].cloneNode(true), { talkMs: 3200 });
+      // Right bubble: second card clone
+      if (secBubble) {
+        const secContent = secBubble.querySelector('.bubble-content');
+        secContent.innerHTML = '';
+        secContent.appendChild(cards[1].cloneNode(true));
+        secBubble.classList.remove('visible');
+        void secBubble.offsetWidth;
+        secBubble.classList.add('visible');
+      }
+    } else {
+      // Single card: use centered wide bubble (default layout)
+      stageEl.classList.remove('two-bubbles');
+      if (secBubble) secBubble.classList.remove('visible');
+      Presenter.say(cards[0] ? cards[0].cloneNode(true) : panel.cloneNode(true), { talkMs: 3200 });
+    }
+  }, 450);
+  resetIdle();
+}
+
+// ══════════════════════════════════════════════════════
+// HEALTH PLANNER — ADVISOR INTERVIEW
+// Same two questions (age, current MHIT plan), same data + result logic;
+// the character now asks them in sequence via speech bubbles.
+// ══════════════════════════════════════════════════════
+function showAnswerPanel(id) {
+  // Reset coverage lock whenever panels are reset
+  const covPanel = document.getElementById('answer-coverage');
+  if (covPanel) delete covPanel.dataset.locked;
+  document.querySelectorAll('.answer-panel').forEach(p => p.classList.remove('show'));
+  if (id) {
+    const p = document.getElementById(id);
+    p.classList.remove('show');
+    void p.offsetWidth;
+    p.classList.add('show');
+  }
+}
+
+function startPlanner() {
+  Presenter.use('stage-planner');
+  Presenter.hide();
+  showAnswerPanel(null);
+  setTimeout(() => {
+    Presenter.ask(t('age_label'));
+    showAnswerPanel('answer-age');
+  }, 500);
+}
+
+function confirmAge() {
+  Presenter.use('stage-planner');
+  Presenter.userSay(state.age + ' ' + t('age_unit'));
+  showAnswerPanel(null);
+  setTimeout(() => Presenter.say(t('ack_age'), { talkMs: 1400 }), 450);
+  setTimeout(() => {
+    SFX.swap();
+    Presenter.ask(t('coverage_label'));
+    showAnswerPanel('answer-coverage');
+  }, 1800);
+}
+
+function answerCoverage(type) {
+  // Prevent multiple selections during transition animation
+  const cards = document.getElementById('answer-coverage');
+  if (cards && cards.dataset.locked) return;
+  if (cards) cards.dataset.locked = '1';
+  selectCoverage(type);
+  SFX.confirm();
+  Presenter.use('stage-planner');
+  const nameKey = { none: 'cov_none_name', basic: 'cov_basic_name', comprehensive: 'cov_comp_name' }[type];
+  Presenter.userSay(t(nameKey));
+  setTimeout(() => Presenter.say(t('ack_cov_' + type), { talkMs: 1500 }), 450);
+  setTimeout(() => {
+    showAnswerPanel(null);
+    startCalculation();
+  }, 1900);
+}
+
+// ══════════════════════════════════════════════════════
+// AGE CONTROL
+// ══════════════════════════════════════════════════════
+function changeAge(delta) {
+  const prev = state.age;
+  state.age = Math.max(18, Math.min(70, state.age + delta));
+  if (state.age === prev) SFX.lose(); // invalid: hit the 18–70 boundary
+  document.getElementById('age-display').textContent = state.age;
+  updateAgeBands();
+  resetIdle();
+}
+
+function updateAgeBands() {
+  document.querySelectorAll('.age-band').forEach(band => {
+    const min = parseInt(band.dataset.min);
+    const max = parseInt(band.dataset.max);
+    band.classList.toggle('active', state.age >= min && state.age <= max);
+  });
+}
+
+// ══════════════════════════════════════════════════════
+// COVERAGE
+// ══════════════════════════════════════════════════════
+function selectCoverage(type) {
+  state.coverage = type;
+  document.querySelectorAll('.coverage-card').forEach(c => c.classList.remove('selected'));
+  document.querySelector('.coverage-card.' + type).classList.add('selected');
+  resetIdle();
+}
+
+// ══════════════════════════════════════════════════════
+// CALCULATION
+// ══════════════════════════════════════════════════════
+function getBaseCost(age) {
+  if (age <= 25) return 3000;
+  if (age <= 35) return 5000;
+  if (age <= 45) return 8000;
+  if (age <= 55) return 15000;
+  return 25000;
+}
+
+function getCoveragePct(coverage) {
+  if (coverage === 'none') return 0;
+  if (coverage === 'basic') return 0.6;
+  return 0.9;
+}
+
+function calcYear(baseCost, year, coveragePct) {
+  const yearCost = baseCost * Math.pow(1.10, year);
+  const covered = yearCost * coveragePct;
+  const gap = yearCost * (1 - coveragePct);
+  return { yearCost, covered, gap };
+}
+
+function calcProjections() {
+  const baseCost = getBaseCost(state.age);
+  const pct = getCoveragePct(state.coverage);
+  const years = [1, 3, 5, 10];
+  return years.map(y => ({ year: y, ...calcYear(baseCost, y, pct) }));
+}
+
+function calcTotal10yr() {
+  const baseCost = getBaseCost(state.age);
+  const pct = getCoveragePct(state.coverage);
+  let total = 0;
+  for (let y = 1; y <= 10; y++) {
+    total += baseCost * Math.pow(1.10, y) * (1 - pct);
+  }
+  return Math.round(total);
+}
+
+function fmtRM(val) {
+  return 'RM ' + Math.round(val).toLocaleString('en-MY');
+}
+
+// ══════════════════════════════════════════════════════
+// RESULTS RENDER
+// ══════════════════════════════════════════════════════
+function renderResults() {
+  const projs = calcProjections();
+  const total10 = calcTotal10yr();
+
+  // Badges
+  document.getElementById('badge-age').innerHTML = '👤 ' + state.age + ' <span>' + t('results_years') + '</span>';
+  const planMap = { none: 'plan_none', basic: 'plan_basic', comprehensive: 'plan_comp' };
+  const planClassMap = { none: 'badge-plan-none', basic: 'badge-plan-basic', comprehensive: 'badge-plan-comprehensive' };
+  const badgePlan = document.getElementById('badge-plan');
+  badgePlan.className = 'badge ' + planClassMap[state.coverage];
+  const iconMap = { none: '🚫', basic: '🛡️', comprehensive: '⭐' };
+  document.getElementById('badge-plan-text').textContent = iconMap[state.coverage] + ' ' + t(planMap[state.coverage]);
+
+  // Chart
+  if (state.chartInstance) {
+    state.chartInstance.destroy();
+    state.chartInstance = null;
+  }
+
+  const covData = projs.map(p => Math.round(p.covered));
+  const gapData = projs.map(p => Math.round(p.gap));
+
+  const ctx = document.getElementById('results-chart').getContext('2d');
+  state.chartInstance = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: [t('chart_year_1'), t('chart_year_3'), t('chart_year_5'), t('chart_year_10')],
+      datasets: [
+        {
+          label: t('chart_covered'),
+          data: covData,
+          backgroundColor: 'rgba(0,180,166,0.8)',
+          borderColor: '#00B4A6',
+          borderWidth: 2,
+          borderRadius: 8,
+        },
+        {
+          label: t('chart_gap'),
+          data: gapData,
+          backgroundColor: 'rgba(255,107,91,0.8)',
+          borderColor: '#FF6B5B',
+          borderWidth: 2,
+          borderRadius: 8,
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'top',
+          labels: {
+            font: { family: 'Nunito', size: 14, weight: '700' },
+            padding: 16,
+          }
+        },
+        tooltip: {
+          callbacks: {
+            label: function(ctx) {
+              return ctx.dataset.label + ': ' + fmtRM(ctx.raw);
+            }
+          },
+          titleFont: { family: 'Poppins', size: 14, weight: '700' },
+          bodyFont: { family: 'Nunito', size: 13 },
+          padding: 12,
+        }
+      },
+      scales: {
+        x: {
+          stacked: true,
+          grid: { display: false },
+          ticks: { font: { family: 'Nunito', size: 13, weight: '600' } }
+        },
+        y: {
+          stacked: true,
+          grid: { color: 'rgba(0,0,0,0.05)' },
+          ticks: {
+            font: { family: 'Nunito', size: 12 },
+            callback: v => 'RM ' + v.toLocaleString('en-MY')
+          }
+        }
+      },
+      animation: {
+        duration: 1000,
+        easing: 'easeOutQuart',
+      }
+    }
+  });
+
+  // Alert card
+  const alertCard = document.getElementById('alert-card');
+  const alertIcon = document.getElementById('alert-icon');
+  const alertHeading = document.getElementById('alert-heading');
+  const alertBody = document.getElementById('alert-body');
+
+  if (state.coverage === 'none') {
+    alertCard.className = 'alert-card amber';
+    alertIcon.textContent = '🚨';
+    alertHeading.textContent = t('alert_none_heading');
+    const body = t('alert_none_body');
+    alertBody.textContent = body.replace('{total10yr}', fmtRM(total10));
+    // Insert actual value
+    alertBody.textContent = (state.lang === 'bm'
+      ? 'Anda menanggung ' + fmtRM(total10) + ' kos perubatan tanpa perlindungan dalam 10 tahun! Pertimbangkan untuk mendapatkan MHIT sekarang.'
+      : 'You face ' + fmtRM(total10) + ' in uncovered medical costs over 10 years! Consider getting MHIT coverage now.');
+  } else if (state.coverage === 'basic') {
+    alertCard.className = 'alert-card blue';
+    alertIcon.textContent = '💡';
+    alertHeading.textContent = t('alert_basic_heading');
+    alertBody.textContent = t('alert_basic_body');
+  } else {
+    alertCard.className = 'alert-card green';
+    alertIcon.textContent = '✅';
+    alertHeading.textContent = t('alert_comp_heading');
+    alertBody.textContent = t('alert_comp_body');
+  }
+
+  // Advice cards
+  renderAdvice();
+
+  // Animate advice cards
+  const adviceCards = document.querySelectorAll('.advice-card');
+  adviceCards.forEach((card, i) => {
+    card.style.opacity = '0';
+    card.style.transform = 'translateY(12px)';
+    setTimeout(() => {
+      card.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+      card.style.opacity = '1';
+      card.style.transform = 'translateX(0)';
+    }, 300 + i * 150);
+  });
+}
+
+function renderAdvice() {
+  const isYoung = state.age <= 35;
+  const isMid = state.age > 35 && state.age <= 55;
+  const isSenior = state.age > 55;
+  const cov = state.coverage;
+  const lang = state.lang;
+
+  const advice = getAdvice(isYoung, isMid, isSenior, cov, lang);
+
+  for (let i = 1; i <= 3; i++) {
+    const el = document.getElementById('advice-text-' + i);
+    const icon = document.getElementById('advice-icon-' + i);
+    if (el && advice[i-1]) {
+      el.innerHTML = advice[i-1].text;
+      icon.textContent = advice[i-1].icon;
+    }
+  }
+}
+
+function getAdvice(isYoung, isMid, isSenior, cov, lang) {
+  const bm = lang === 'bm';
+  const advices = [];
+
+  // Age + coverage specific
+  if (isYoung && cov === 'none') {
+    advices.push({
+      icon: '🌱',
+      text: bm
+        ? '<strong>Mulakan MHIT awal!</strong> Premium lebih rendah ketika muda. Semakin awal anda mula, semakin banyak anda jimat.'
+        : '<strong>Start MHIT early!</strong> Premiums are lower when you\'re young. The earlier you start, the more you save.'
+    });
+  } else if (isYoung && cov === 'basic') {
+    advices.push({
+      icon: '📈',
+      text: bm
+        ? '<strong>Semak had perlindungan anda.</strong> Pelan asas mungkin tidak mencukupi 5–10 tahun lagi apabila kos perubatan meningkat.'
+        : '<strong>Check your coverage limits.</strong> A basic plan may not be enough in 5–10 years as medical costs rise.'
+    });
+  } else if (isYoung && cov === 'comprehensive') {
+    advices.push({
+      icon: '🏆',
+      text: bm
+        ? '<strong>Pilihan bijak!</strong> Perlindungan komprehensif pada usia muda memastikan anda dilindungi jangka panjang dengan premium lebih berpatutan.'
+        : '<strong>Smart choice!</strong> Comprehensive coverage at a young age ensures long-term protection at more affordable premiums.'
+    });
+  } else if (isMid && cov === 'none') {
+    advices.push({
+      icon: '⚠️',
+      text: bm
+        ? '<strong>Risiko tinggi!</strong> Usia pertengahan adalah masa kritikal untuk mendapatkan MHIT. Kos perubatan meningkat dengan usia.'
+        : '<strong>High risk!</strong> Middle age is a critical time to get MHIT. Medical costs increase with age.'
+    });
+  } else if (isMid && cov === 'basic') {
+    advices.push({
+      icon: '🔄',
+      text: bm
+        ? '<strong>Pertimbangkan naik taraf.</strong> Pelan asas mungkin tidak mencukupi untuk keperluan perubatan usia pertengahan. Semak had tahunan anda.'
+        : '<strong>Consider upgrading.</strong> A basic plan may be insufficient for middle-age medical needs. Review your annual limits.'
+    });
+  } else if (isMid && cov === 'comprehensive') {
+    advices.push({
+      icon: '✅',
+      text: bm
+        ? '<strong>Perlindungan yang baik!</strong> Teruskan kekalkan pelan komprehensif anda dan semak had perlindungan setiap tahun.'
+        : '<strong>Well covered!</strong> Keep maintaining your comprehensive plan and review coverage limits annually.'
+    });
+  } else if (isSenior && cov === 'none') {
+    advices.push({
+      icon: '🚨',
+      text: bm
+        ? '<strong>Tindakan segera diperlukan!</strong> Tanpa perlindungan di usia ini, kos perubatan boleh menjadi sangat tinggi. Dapatkan MHIT sekarang.'
+        : '<strong>Urgent action needed!</strong> Without coverage at this age, medical costs can be very high. Get MHIT coverage now.'
+    });
+  } else if (isSenior && cov === 'basic') {
+    advices.push({
+      icon: '⬆️',
+      text: bm
+        ? '<strong>Tingkatkan perlindungan anda.</strong> Keperluan perubatan meningkat dengan usia. Pelan asas mungkin tidak mencukupi untuk keperluan anda.'
+        : '<strong>Upgrade your coverage.</strong> Medical needs increase with age. A basic plan may not be sufficient for your needs.'
+    });
+  } else if (isSenior && cov === 'comprehensive') {
+    advices.push({
+      icon: '🛡️',
+      text: bm
+        ? '<strong>Perlindungan terbaik!</strong> Anda membuat pilihan yang tepat. Pastikan pelan anda diperbaharui dan semak manfaat setiap tahun.'
+        : '<strong>Best protection!</strong> You\'ve made the right choice. Ensure your plan is renewed and review benefits annually.'
+    });
+  }
+
+  // General financial planning tip
+  advices.push({
+    icon: '💰',
+    text: bm
+      ? '<strong>Rancang kewangan anda.</strong> Peruntukkan 5–10% daripada pendapatan bulanan untuk premium MHIT bagi memastikan perlindungan berterusan.'
+      : '<strong>Plan your finances.</strong> Allocate 5–10% of monthly income for MHIT premiums to ensure continuous coverage.'
+  });
+
+  // Professional advice (always last)
+  advices.push({
+    icon: '🤝',
+    text: bm
+      ? '<strong>Dapatkan nasihat profesional.</strong> Hubungi ejen atau penasihat MHIT berlesen untuk pilihan pelan yang paling sesuai dengan keperluan anda.'
+      : '<strong>Get professional advice.</strong> Contact a licensed MHIT agent or advisor for the plan options best suited to your needs.'
+  });
+
+  return advices;
+}
+
+// ══════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════
+
+// SFX.tap() on every button-like press (delegated)
+document.addEventListener('pointerdown', e => {
+  if (e.target.closest('button, .chip, .coverage-card, .age-btn')) SFX.tap();
+}, { passive: true });
+
+// Reset idle timer on any interaction
+document.addEventListener('pointerdown', resetIdle, { passive: true });
+
+// Bootstrap the presenter stages and cache info panels
+Presenter.mount('stage-info');
+Presenter.mount('stage-planner');
+INFO_PANELS = INFO_TABS.map(x => document.getElementById('tab-' + x));
+
+// Populate all data-i18n elements and initialise UI state
+setLang('bm');
+updateAgeBands();
+// Do NOT call selectCoverage on init — coverage card tick only appears after player taps
+
+// Start on welcome screen
+goToScreen('welcome');
+
+// Auto fullscreen on load (requires user gesture fallback for browsers that block it)
+function enterFullscreen() {
+  const el = document.documentElement;
+  const req = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen;
+  if (req) req.call(el).catch(() => {});
+}
+enterFullscreen();
+// Fallback: enter fullscreen on first user tap if not already fullscreen
+document.addEventListener('pointerdown', function _fsRetry() {
+  if (!document.fullscreenElement && !document.webkitFullscreenElement) enterFullscreen();
+  document.removeEventListener('pointerdown', _fsRetry);
+}, { once: true });
+
+</script>
+</body>
+</html>

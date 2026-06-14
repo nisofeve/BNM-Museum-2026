@@ -1,0 +1,1960 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kewangan Islam — Pilihan Bijak, Masa Depan Beretika</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<style>
+  :root {
+    --blue: #0047AB;
+    --blue-light: #E8EEFA;
+    --blue-mid: #3366CC;
+    --gold: #D4AF37;
+    --gold-light: #FFF3CC;
+    --gold-bright: #F5A623;
+    --teal: #00B4A6;
+    --teal-dark: #008F83;
+    --teal-light: #E0F7F6;
+    --cream: #FFF8F0;
+    --cream-dark: #F5EDE0;
+    --white: #FFFFFF;
+    --text-dark: #1A1A2E;
+    --text-mid: #4A4A6A;
+    --text-light: #8888AA;
+    --green: #2ECC71;
+    --green-light: #D5F5E3;
+    --red: #E74C3C;
+    --red-light: #FDEDEC;
+    --coral: #FF6B5B;
+    --orange: #F39C12;
+    --orange-light: #FEF9E7;
+    --shadow: 0 8px 32px rgba(0,71,171,0.12);
+    --shadow-lg: 0 16px 48px rgba(0,71,171,0.18);
+    /* Fluid scale — 1u ≈ 1px on 1920×1080, scales 1280×720 → 4K */
+    --u: min(0.05208vw, 0.09259vh);
+    --radius-sm: calc(12 * var(--u));
+    --radius-md: calc(20 * var(--u));
+    --radius-lg: calc(28 * var(--u));
+    --radius-xl: calc(40 * var(--u));
+    --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  /* ── KIOSK HARDENING ── */
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+    touch-action: manipulation;
+  }
+
+  html, body {
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    background: var(--cream);
+    font-family: 'Nunito', sans-serif;
+    font-size: calc(18 * var(--u));
+    color: var(--text-dark);
+    overscroll-behavior: none;
+  }
+
+  /* ── HOLO GRID BACKDROP ── */
+  #holo-grid {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background-image:
+      linear-gradient(rgba(0,71,171,0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,71,171,0.05) 1px, transparent 1px);
+    background-size: calc(64 * var(--u)) calc(64 * var(--u));
+    -webkit-mask-image: radial-gradient(ellipse at 50% 58%, rgba(0,0,0,0.9), transparent 78%);
+    mask-image: radial-gradient(ellipse at 50% 58%, rgba(0,0,0,0.9), transparent 78%);
+  }
+
+  #holo-grid::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(115deg, transparent 40%, rgba(212,175,55,0.07) 50%, transparent 60%);
+    background-size: 220% 220%;
+    animation: grid-shimmer 9s ease-in-out infinite;
+  }
+
+  @keyframes grid-shimmer {
+    0%   { background-position: 0% 0%; }
+    100% { background-position: 200% 200%; }
+  }
+
+  /* ── SCANLINE SWEEP ── */
+  #scan-sweep {
+    position: fixed;
+    left: 0; right: 0;
+    top: -14vh;
+    height: 12vh;
+    z-index: 1200;
+    pointer-events: none;
+    opacity: 0;
+    background: linear-gradient(180deg,
+      transparent,
+      rgba(212,175,55,0.14) 42%,
+      rgba(212,175,55,0.45) 50%,
+      rgba(0,71,171,0.16) 58%,
+      transparent);
+  }
+
+  #scan-sweep.run { animation: sweep-down 0.7s ease-in both; }
+
+  @keyframes sweep-down {
+    0%   { top: -14vh; opacity: 1; }
+    100% { top: 110vh; opacity: 0; }
+  }
+
+  /* ── GLITCH-IN TEXT ── */
+  .glitch-in {
+    animation: glitch-in 0.55s steps(2, end) both;
+  }
+
+  @keyframes glitch-in {
+    0%   { opacity: 0; transform: translateX(calc(-10 * var(--u))); text-shadow: 3px 0 var(--gold), -3px 0 var(--teal); clip-path: inset(0 0 55% 0); }
+    20%  { opacity: 1; transform: translateX(calc(7 * var(--u)));  clip-path: inset(40% 0 8% 0); }
+    40%  { transform: translateX(calc(-5 * var(--u))); text-shadow: 2px 0 var(--blue), -2px 0 var(--gold); clip-path: inset(8% 0 42% 0); }
+    65%  { transform: translateX(calc(2 * var(--u))); clip-path: inset(0); }
+    100% { opacity: 1; transform: none; text-shadow: none; clip-path: inset(0); }
+  }
+
+  /* ── NEON HOLO PANEL ── */
+  .holo-panel {
+    background: rgba(255,255,255,0.84);
+    backdrop-filter: blur(calc(8 * var(--u)));
+    -webkit-backdrop-filter: blur(calc(8 * var(--u)));
+    border: 1px solid rgba(212,175,55,0.35);
+    animation: neon-pulse 3.4s ease-in-out infinite;
+  }
+
+  @keyframes neon-pulse {
+    0%, 100% { box-shadow: 0 0 calc(12 * var(--u)) rgba(212,175,55,0.18), 0 calc(8 * var(--u)) calc(32 * var(--u)) rgba(0,71,171,0.10); }
+    50%      { box-shadow: 0 0 calc(28 * var(--u)) rgba(212,175,55,0.36), 0 calc(8 * var(--u)) calc(32 * var(--u)) rgba(0,71,171,0.12); }
+  }
+
+  /* ── LANG TOGGLE ── */
+  #lang-toggle {
+    position: fixed;
+    top: calc(24 * var(--u));
+    right: calc(32 * var(--u));
+    z-index: 1000;
+    background: rgba(255,255,255,0.9);
+    backdrop-filter: blur(calc(6 * var(--u)));
+    border: 2px solid var(--gold);
+    border-radius: calc(50 * var(--u));
+    display: flex;
+    overflow: hidden;
+    box-shadow: 0 0 calc(16 * var(--u)) rgba(212,175,55,0.25);
+  }
+
+  #lang-toggle button {
+    padding: calc(10 * var(--u)) calc(24 * var(--u));
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    font-size: calc(16 * var(--u));
+    color: var(--text-mid);
+    transition: all 0.2s;
+    min-width: calc(70 * var(--u));
+  }
+
+  #lang-toggle button.active {
+    background: var(--gold);
+    color: var(--white);
+    border-radius: calc(50 * var(--u));
+  }
+
+  /* ── SCREEN BASE (holographic transition) ── */
+  .screen {
+    width: 100vw;
+    height: 100vh;
+    position: absolute;
+    top: 0; left: 0;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(1.02);
+    filter: blur(calc(8 * var(--u))) saturate(1.4);
+    transition: opacity 0.5s ease, transform 0.55s ease, filter 0.5s ease;
+  }
+
+  .screen.active {
+    opacity: 1;
+    pointer-events: all;
+    transform: none;
+    filter: none;
+  }
+
+  /* Islamic Geometric Body Background */
+  body {
+    background-color: var(--cream);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cg fill='none' stroke='%230047AB' stroke-width='0.8' opacity='0.05'%3E%3Cpolygon points='60,10 75,30 95,22 87,44 107,52 87,60 95,82 75,74 60,94 45,74 25,82 33,60 13,52 33,44 25,22 45,30'/%3E%3Cpolygon points='60,22 72,36 88,30 82,47 98,53 82,60 88,77 72,71 60,85 48,71 32,77 38,60 22,53 38,47 32,30 48,36'/%3E%3Ccircle cx='60' cy='60' r='18'/%3E%3C/g%3E%3C/svg%3E");
+    background-size: 120px 120px;
+  }
+
+  /* ===== CHARACTER PRESENTER THEME (shared P3/P4/P6) =====
+     Flat-design Malaysian advisor character + holographic speech-bubble
+     system. Same SVG character as P3 (Aisyah). Gold/teal accent swap for P4.
+  ===== */
+  .presenter-stage {
+    position: relative;
+    width: 100%;
+    flex: 1;
+    min-height: 0;
+    --char-h: 38vh;
+  }
+
+  .presenter-char {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    height: var(--char-h);
+    aspect-ratio: 360 / 520;
+    z-index: 2;
+    pointer-events: none;
+    filter: drop-shadow(0 0 calc(22 * var(--u)) rgba(212,175,55,0.30));
+    animation: char-arrive 0.7s var(--ease-bounce) both;
+  }
+
+  @keyframes char-arrive {
+    0%   { opacity: 0; transform: translateX(-50%) translateY(4vh) scale(0.9); }
+    100% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+  }
+
+  .presenter-svg { width: 100%; height: 100%; display: block; }
+
+  /* idle breathing + head sway */
+  .presenter-svg #ch-torso {
+    transform-origin: 50% 95%;
+    animation: ch-breathe 3.6s ease-in-out infinite;
+  }
+
+  @keyframes ch-breathe {
+    0%, 100% { transform: scale(1, 1); }
+    50%      { transform: scale(1.012, 1.018); }
+  }
+
+  .presenter-svg #ch-head {
+    transform-origin: 50% 46%;
+    animation: ch-sway 5.4s ease-in-out infinite;
+  }
+
+  @keyframes ch-sway {
+    0%, 100% { transform: rotate(0deg) translateY(0); }
+    35%      { transform: rotate(-1.4deg) translateY(calc(1.5 * var(--u))); }
+    70%      { transform: rotate(1.2deg) translateY(0); }
+  }
+
+  /* idle blinking */
+  .presenter-svg .ch-eye {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: ch-blink 4.4s infinite;
+  }
+
+  @keyframes ch-blink {
+    0%, 92%, 100% { transform: scaleY(1); }
+    95%           { transform: scaleY(0.06); }
+    98%           { transform: scaleY(1); }
+  }
+
+  /* speaking gesture */
+  .presenter-svg #mouth-open,
+  .presenter-svg #arm-right-up { opacity: 0; transition: opacity 0.22s ease; }
+  .presenter-svg #mouth-smile,
+  .presenter-svg #arm-right-rest { opacity: 1; transition: opacity 0.22s ease; }
+
+  .presenter-svg.is-talking #mouth-smile { opacity: 0; }
+  .presenter-svg.is-talking #arm-right-rest { opacity: 0; }
+  .presenter-svg.is-talking #arm-right-up { opacity: 1; }
+
+  .presenter-svg.is-talking #mouth-open {
+    opacity: 1;
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: ch-talk 0.26s ease-in-out infinite alternate;
+  }
+
+  @keyframes ch-talk {
+    0%   { transform: scaleY(0.35); }
+    100% { transform: scaleY(1); }
+  }
+
+  /* character name tag */
+  .presenter-tag {
+    position: absolute;
+    bottom: calc(6 * var(--u));
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 3;
+    background: linear-gradient(135deg, rgba(0,71,171,0.92), rgba(212,175,55,0.92));
+    color: var(--white);
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    font-size: calc(15 * var(--u));
+    padding: calc(7 * var(--u)) calc(22 * var(--u));
+    border-radius: calc(50 * var(--u));
+    border: 1px solid rgba(255,255,255,0.5);
+    box-shadow: 0 0 calc(16 * var(--u)) rgba(212,175,55,0.45);
+    white-space: nowrap;
+    pointer-events: none;
+  }
+
+  /* ── HOLOGRAPHIC SPEECH BUBBLES ── */
+  .bubble {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 4;
+  }
+
+  .bubble-main {
+    left: 50%;
+    bottom: calc(var(--char-h) - 1.5vh);
+    transform: translateX(-50%);
+    width: min(80vw, calc(1400 * var(--u)));
+    border-radius: calc(26 * var(--u));
+    background: linear-gradient(135deg, rgba(255,255,255,0.92), rgba(255,248,200,0.82));
+    backdrop-filter: blur(calc(12 * var(--u)));
+    -webkit-backdrop-filter: blur(calc(12 * var(--u)));
+    border: calc(1.5 * var(--u)) solid rgba(212,175,55,0.55);
+    box-shadow:
+      0 0 calc(26 * var(--u)) rgba(212,175,55,0.28),
+      0 0 calc(70 * var(--u)) rgba(0,71,171,0.12),
+      inset 0 0 calc(34 * var(--u)) rgba(255,255,255,0.5);
+    animation: neon-pulse 3.4s ease-in-out infinite;
+  }
+
+  /* faint scanlines */
+  .bubble-main::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background: repeating-linear-gradient(180deg,
+      rgba(212,175,55,0.035) 0,
+      rgba(212,175,55,0.035) calc(2 * var(--u)),
+      transparent calc(2 * var(--u)),
+      transparent calc(7 * var(--u)));
+  }
+
+  /* tail */
+  .bubble-main::after {
+    content: '';
+    position: absolute;
+    bottom: calc(-19 * var(--u));
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(40 * var(--u));
+    height: calc(20 * var(--u));
+    background: rgba(255,248,200,0.92);
+    clip-path: polygon(0 0, 100% 0, 50% 100%);
+    filter: drop-shadow(0 calc(3 * var(--u)) calc(7 * var(--u)) rgba(212,175,55,0.4));
+  }
+
+  .bubble-main.visible {
+    opacity: 1;
+    pointer-events: auto;
+    animation: bubble-pop 0.45s var(--ease-bounce) both, neon-pulse 3.4s ease-in-out 0.45s infinite;
+  }
+
+  @keyframes bubble-pop {
+    0%   { opacity: 0; transform: translateX(-50%) scale(0.55) translateY(calc(30 * var(--u))); filter: blur(calc(7 * var(--u))); }
+    60%  { opacity: 1; transform: translateX(-50%) scale(1.04) translateY(calc(-5 * var(--u))); filter: blur(0); }
+    100% { opacity: 1; transform: translateX(-50%) scale(1) translateY(0); }
+  }
+
+  .bubble-main .bubble-content {
+    position: relative;
+    padding: calc(28 * var(--u)) calc(36 * var(--u)) calc(16 * var(--u));
+    max-height: 40vh;
+    overflow-y: auto;
+    font-size: calc(19 * var(--u));
+    color: var(--text-dark);
+    line-height: 1.55;
+  }
+
+  .bubble-main .bubble-content::-webkit-scrollbar { width: calc(6 * var(--u)); }
+  .bubble-main .bubble-content::-webkit-scrollbar-track { background: transparent; }
+  .bubble-main .bubble-content::-webkit-scrollbar-thumb { background: rgba(212,175,55,0.4); border-radius: calc(3 * var(--u)); }
+
+  .bubble-line {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    font-size: calc(24 * var(--u));
+    color: var(--text-dark);
+    text-align: center;
+    margin-bottom: calc(18 * var(--u));
+  }
+
+  .bubble-line-en {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 500;
+    font-size: calc(18 * var(--u));
+    color: var(--text-mid);
+    text-align: center;
+    margin-top: calc(-10 * var(--u));
+    margin-bottom: calc(18 * var(--u));
+  }
+
+  /* ===== END CHARACTER PRESENTER THEME ===== */
+
+  /* ──────────────────────────────────
+     SCREEN: INTRO
+  ────────────────────────────────── */
+  #intro-screen {
+    background: transparent;
+    overflow: hidden;
+  }
+
+  .floating-emoji {
+    position: absolute;
+    font-size: calc(80 * var(--u));
+    animation: float-emoji 6s ease-in-out infinite;
+    opacity: 0.55;
+    pointer-events: none;
+    filter: drop-shadow(0 0 calc(14 * var(--u)) rgba(212,175,55,0.35));
+  }
+
+  .fe-1 { top: 8%; left: 5%; animation-delay: 0s; font-size: calc(90 * var(--u)); }
+  .fe-2 { top: 15%; right: 8%; animation-delay: 1.2s; font-size: calc(70 * var(--u)); }
+  .fe-3 { bottom: 15%; left: 8%; animation-delay: 2.4s; font-size: calc(85 * var(--u)); }
+  .fe-4 { bottom: 10%; right: 6%; animation-delay: 0.8s; font-size: calc(75 * var(--u)); }
+  .fe-5 { top: 50%; left: 2%; animation-delay: 1.8s; font-size: calc(65 * var(--u)); }
+  .fe-6 { top: 40%; right: 3%; animation-delay: 3.0s; font-size: calc(72 * var(--u)); }
+
+  @keyframes float-emoji {
+    0%, 100% { transform: translateY(0) rotate(-5deg); }
+    33% { transform: translateY(calc(-20 * var(--u))) rotate(3deg); }
+    66% { transform: translateY(calc(-10 * var(--u))) rotate(-8deg); }
+  }
+
+  .intro-content {
+    text-align: center;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: calc(20 * var(--u));
+  }
+
+  .intro-logo {
+    width: calc(130 * var(--u));
+    height: calc(130 * var(--u));
+    background: linear-gradient(135deg, var(--gold) 0%, var(--blue) 100%);
+    border-radius: calc(40 * var(--u));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: calc(68 * var(--u));
+    box-shadow: 0 calc(12 * var(--u)) calc(40 * var(--u)) rgba(212,175,55,0.35);
+    margin-bottom: calc(8 * var(--u));
+    animation: pulse-logo 3s ease-in-out infinite;
+  }
+
+  @keyframes pulse-logo {
+    0%, 100% { box-shadow: 0 calc(12 * var(--u)) calc(40 * var(--u)) rgba(212,175,55,0.35); }
+    50% { box-shadow: 0 calc(12 * var(--u)) calc(60 * var(--u)) rgba(212,175,55,0.6), 0 0 calc(40 * var(--u)) rgba(0,71,171,0.35); }
+  }
+
+  .intro-eyebrow {
+    font-family: 'Poppins', sans-serif;
+    font-size: calc(16 * var(--u));
+    font-weight: 600;
+    color: var(--teal);
+    letter-spacing: calc(3 * var(--u));
+    text-transform: uppercase;
+  }
+
+  .intro-title {
+    font-family: 'Poppins', sans-serif;
+    font-size: calc(68 * var(--u));
+    font-weight: 900;
+    color: var(--gold);
+    line-height: 1.05;
+    text-shadow: 0 calc(4 * var(--u)) calc(20 * var(--u)) rgba(212,175,55,0.25);
+    letter-spacing: -0.5px;
+  }
+
+  .intro-subtitle-bm {
+    font-family: 'Poppins', sans-serif;
+    font-size: calc(28 * var(--u));
+    font-weight: 600;
+    color: var(--blue);
+    text-align: center;
+  }
+
+  .intro-subtitle-en {
+    font-family: 'Poppins', sans-serif;
+    font-size: calc(20 * var(--u));
+    font-weight: 400;
+    color: var(--teal);
+    text-align: center;
+    margin-top: calc(-12 * var(--u));
+    display: none; /* hidden until EN is selected */
+  }
+
+  /* Language visibility — BM default, EN switches via body.lang-en */
+  body.lang-en .intro-subtitle-bm { display: none; }
+  body.lang-en .intro-subtitle-en { display: block; }
+  body.lang-en .lang-bm { display: none !important; }
+  body.lang-en .lang-en { display: inline !important; }
+
+  .intro-divider {
+    width: calc(80 * var(--u));
+    height: calc(4 * var(--u));
+    background: linear-gradient(90deg, var(--gold), var(--gold-bright));
+    border-radius: calc(2 * var(--u));
+    box-shadow: 0 0 calc(12 * var(--u)) rgba(212,175,55,0.6);
+  }
+
+  .intro-body {
+    font-size: calc(19 * var(--u));
+    color: var(--text-mid);
+    text-align: center;
+    max-width: calc(800 * var(--u));
+    line-height: 1.6;
+    font-weight: 500;
+  }
+
+  .start-btn {
+    margin-top: calc(8 * var(--u));
+    padding: calc(22 * var(--u)) calc(72 * var(--u));
+    font-family: 'Poppins', sans-serif;
+    font-size: calc(26 * var(--u));
+    font-weight: 800;
+    border: none;
+    border-radius: calc(50 * var(--u));
+    background: linear-gradient(135deg, var(--gold), var(--gold-bright));
+    color: var(--white);
+    cursor: pointer;
+    box-shadow: 0 calc(8 * var(--u)) calc(32 * var(--u)) rgba(212,175,55,0.45),
+                0 0 calc(28 * var(--u)) rgba(212,175,55,0.35);
+    transition: transform 0.2s, box-shadow 0.2s;
+    letter-spacing: 1px;
+  }
+
+  .start-btn:hover {
+    transform: translateY(calc(-4 * var(--u))) scale(1.03);
+    box-shadow: 0 calc(14 * var(--u)) calc(40 * var(--u)) rgba(212,175,55,0.6);
+  }
+
+  .start-btn:active { transform: translateY(0) scale(0.98); }
+
+  .bnm-badge {
+    display: flex;
+    align-items: center;
+    gap: calc(12 * var(--u));
+    background: rgba(255,255,255,0.85);
+    border-radius: calc(50 * var(--u));
+    padding: calc(10 * var(--u)) calc(24 * var(--u));
+    box-shadow: var(--shadow);
+    font-size: calc(14 * var(--u));
+    font-weight: 600;
+    color: var(--text-mid);
+    margin-top: calc(8 * var(--u));
+  }
+
+  .bnm-dot {
+    width: calc(16 * var(--u));
+    height: calc(16 * var(--u));
+    background: var(--gold);
+    border-radius: 50%;
+    box-shadow: 0 0 calc(10 * var(--u)) rgba(212,175,55,0.7);
+  }
+
+  /* ──────────────────────────────────
+     SCREEN: QUIZ (character presenter style)
+  ────────────────────────────────── */
+  #quiz-screen {
+    background: transparent;
+    justify-content: flex-start;
+    padding: calc(20 * var(--u)) 0 0;
+    gap: 0;
+  }
+
+  /* top bar */
+  .quiz-topbar {
+    flex-shrink: 0;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 calc(48 * var(--u)) calc(6 * var(--u));
+  }
+
+  .question-counter {
+    font-family: 'Poppins', sans-serif;
+    font-size: calc(20 * var(--u));
+    font-weight: 700;
+    color: var(--blue);
+  }
+
+  .quiz-bnm-badge {
+    font-family: 'Poppins', sans-serif;
+    font-size: calc(14 * var(--u));
+    font-weight: 600;
+    color: var(--text-light);
+    display: flex;
+    align-items: center;
+    gap: calc(8 * var(--u));
+  }
+
+  .quiz-bnm-badge .dot {
+    width: calc(8 * var(--u));
+    height: calc(8 * var(--u));
+    border-radius: 50%;
+    background: var(--gold);
+  }
+
+  /* progress bar */
+  .progress-wrap {
+    flex-shrink: 0;
+    width: 100%;
+    height: calc(8 * var(--u));
+    background: var(--cream-dark);
+  }
+
+  .progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold), var(--gold-bright));
+    border-radius: 0 calc(4 * var(--u)) calc(4 * var(--u)) 0;
+    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 0 calc(8 * var(--u)) rgba(212,175,55,0.5);
+  }
+
+  /* presenter stage inside quiz */
+  #stage-quiz {
+    --char-h: 32vh;
+    flex-shrink: 0;
+  }
+
+  #stage-quiz .bubble-main {
+    width: min(72vw, calc(1260 * var(--u)));
+  }
+
+  #stage-quiz .bubble-main .bubble-content {
+    max-height: 32vh;
+  }
+
+  /* answer buttons below the stage */
+  .quiz-answers-area {
+    flex-shrink: 0;
+    width: 100%;
+    padding: calc(10 * var(--u)) calc(60 * var(--u)) calc(14 * var(--u));
+  }
+
+  .answers-wrap {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: calc(14 * var(--u));
+    max-width: calc(1600 * var(--u));
+    margin: 0 auto;
+  }
+
+  .answer-btn {
+    display: flex;
+    align-items: center;
+    gap: calc(18 * var(--u));
+    padding: 0 calc(26 * var(--u));
+    height: calc(80 * var(--u));
+    min-height: calc(68 * var(--u));
+    border-radius: calc(16 * var(--u));
+    border: calc(2.5 * var(--u)) solid rgba(212,175,55,0.3);
+    background: rgba(255,255,255,0.88);
+    backdrop-filter: blur(calc(6 * var(--u)));
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: 'Nunito', sans-serif;
+    text-align: left;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 0 calc(10 * var(--u)) rgba(212,175,55,0.1);
+  }
+
+  .answer-btn:hover:not(:disabled) {
+    border-color: var(--gold);
+    background: rgba(255,248,200,0.9);
+    transform: translateY(calc(-2 * var(--u)));
+    box-shadow: 0 0 calc(18 * var(--u)) rgba(212,175,55,0.35);
+  }
+
+  .answer-btn.selected {
+    border-color: var(--gold);
+    background: rgba(255,248,200,0.9);
+    box-shadow: 0 0 calc(20 * var(--u)) rgba(212,175,55,0.4);
+  }
+
+  .answer-btn.correct {
+    border-color: var(--green);
+    background: var(--green-light);
+    animation: bounceIn 0.5s ease;
+  }
+
+  .answer-btn.wrong {
+    border-color: var(--red);
+    background: var(--red-light);
+    animation: shakeWrong 0.5s ease;
+  }
+
+  .answer-btn.reveal-correct {
+    border-color: var(--gold);
+    background: var(--gold-light);
+    box-shadow: 0 0 calc(16 * var(--u)) rgba(212,175,55,0.4);
+  }
+
+  .answer-btn:disabled { cursor: not-allowed; }
+
+  .answer-letter {
+    width: calc(46 * var(--u));
+    height: calc(46 * var(--u));
+    border-radius: calc(12 * var(--u));
+    background: var(--cream-dark);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Poppins', sans-serif;
+    font-size: calc(20 * var(--u));
+    font-weight: 800;
+    color: var(--blue);
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+  }
+
+  .answer-btn.selected .answer-letter { background: var(--gold); color: var(--white); }
+  .answer-btn.correct .answer-letter { background: var(--green); color: var(--white); }
+  .answer-btn.wrong .answer-letter { background: var(--red); color: var(--white); }
+  .answer-btn.reveal-correct .answer-letter { background: var(--gold); color: var(--white); }
+
+  .answer-text {
+    flex: 1;
+    font-size: calc(19 * var(--u));
+    font-weight: 600;
+    color: var(--text-dark);
+    line-height: 1.3;
+  }
+
+  .answer-text-en {
+    font-size: calc(15 * var(--u));
+    font-weight: 400;
+    color: var(--text-mid);
+    display: block;
+    line-height: 1.2;
+  }
+
+  .answer-check {
+    font-size: calc(24 * var(--u));
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    flex-shrink: 0;
+  }
+
+  .answer-btn.correct .answer-check,
+  .answer-btn.wrong .answer-check,
+  .answer-btn.reveal-correct .answer-check { opacity: 1; }
+  .answer-btn.correct .answer-check { color: var(--green); }
+  .answer-btn.wrong .answer-check { color: var(--red); }
+  .answer-btn.reveal-correct .answer-check { color: var(--gold); }
+
+  /* ── KEYFRAMES ── */
+  @keyframes bounceIn {
+    0% { transform: scale(0.97); }
+    40% { transform: scale(1.04); }
+    70% { transform: scale(0.99); }
+    100% { transform: scale(1); }
+  }
+
+  @keyframes shakeWrong {
+    0%, 100% { transform: translateX(0); }
+    15% { transform: translateX(calc(-12 * var(--u))); }
+    30% { transform: translateX(calc(10 * var(--u))); }
+    45% { transform: translateX(calc(-8 * var(--u))); }
+    60% { transform: translateX(calc(6 * var(--u))); }
+    75% { transform: translateX(calc(-4 * var(--u))); }
+    90% { transform: translateX(calc(3 * var(--u))); }
+  }
+
+  /* ──────────────────────────────────
+     SCREEN: RESULT
+  ────────────────────────────────── */
+  #result-screen {
+    background: transparent;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: calc(40 * var(--u)) calc(60 * var(--u));
+  }
+
+  .result-outer {
+    display: flex;
+    align-items: center;
+    gap: calc(56 * var(--u));
+    width: 100%;
+    max-width: calc(1600 * var(--u));
+  }
+
+  /* character side */
+  .result-char-side {
+    flex-shrink: 0;
+    position: relative;
+    width: calc(320 * var(--u));
+    height: calc(520 * var(--u));
+  }
+
+  .result-char-side .presenter-char {
+    height: calc(500 * var(--u));
+    left: 50%;
+  }
+
+  .result-char-side .bubble-main {
+    left: 50%;
+    bottom: calc(490 * var(--u));
+    width: calc(440 * var(--u));
+  }
+
+  /* result card */
+  .result-card {
+    flex: 1;
+    border-radius: calc(32 * var(--u));
+    padding: calc(48 * var(--u)) calc(64 * var(--u));
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: calc(20 * var(--u));
+    box-shadow: var(--shadow-lg);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .result-card::before {
+    content: '';
+    position: absolute;
+    top: calc(-60 * var(--u)); right: calc(-60 * var(--u));
+    width: calc(240 * var(--u)); height: calc(240 * var(--u));
+    border-radius: 50%;
+    opacity: 0.12;
+  }
+
+  .result-card.tier-low {
+    background: linear-gradient(135deg, #FFF3E0, #FFE0B2);
+    border: 3px solid var(--orange);
+  }
+  .result-card.tier-low::before { background: var(--orange); }
+
+  .result-card.tier-mid {
+    background: linear-gradient(135deg, var(--blue-light), #D6E4FF);
+    border: 3px solid var(--blue);
+  }
+  .result-card.tier-mid::before { background: var(--blue); }
+
+  .result-card.tier-high {
+    background: linear-gradient(135deg, var(--gold-light), #FFF0A0);
+    border: 3px solid var(--gold);
+  }
+  .result-card.tier-high::before { background: var(--gold); }
+
+  .result-emoji {
+    font-size: calc(80 * var(--u));
+    filter: drop-shadow(0 calc(8 * var(--u)) calc(16 * var(--u)) rgba(0,0,0,0.15));
+    animation: resultPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  }
+
+  @keyframes resultPop {
+    0% { transform: scale(0) rotate(-10deg); opacity: 0; }
+    100% { transform: scale(1) rotate(0deg); opacity: 1; }
+  }
+
+  .result-score-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: calc(4 * var(--u));
+  }
+
+  .result-score {
+    font-family: 'Poppins', sans-serif;
+    font-size: calc(80 * var(--u));
+    font-weight: 900;
+    line-height: 1;
+    color: var(--blue);
+  }
+
+  .result-card.tier-high .result-score { color: var(--gold); }
+  .result-card.tier-low .result-score { color: var(--orange); }
+
+  .score-label {
+    font-size: calc(18 * var(--u));
+    color: var(--text-mid);
+    font-weight: 600;
+  }
+
+  .result-title {
+    font-family: 'Poppins', sans-serif;
+    font-size: calc(30 * var(--u));
+    font-weight: 800;
+    text-align: center;
+    color: var(--text-dark);
+    line-height: 1.3;
+  }
+
+  .result-title-en {
+    font-family: 'Poppins', sans-serif;
+    font-size: calc(20 * var(--u));
+    font-weight: 600;
+    text-align: center;
+    color: var(--text-mid);
+    margin-top: calc(-10 * var(--u));
+  }
+
+  .result-msg {
+    font-size: calc(18 * var(--u));
+    text-align: center;
+    color: var(--text-mid);
+    line-height: 1.6;
+    max-width: calc(700 * var(--u));
+  }
+
+  .result-msg-en {
+    font-size: calc(15 * var(--u));
+    text-align: center;
+    color: var(--text-light);
+    line-height: 1.5;
+    max-width: calc(700 * var(--u));
+    margin-top: calc(-8 * var(--u));
+  }
+
+  .result-btns {
+    display: flex;
+    gap: calc(20 * var(--u));
+    margin-top: calc(8 * var(--u));
+  }
+
+  .retry-btn {
+    padding: calc(18 * var(--u)) calc(52 * var(--u));
+    font-family: 'Poppins', sans-serif;
+    font-size: calc(20 * var(--u));
+    font-weight: 700;
+    border: 3px solid var(--blue);
+    border-radius: calc(50 * var(--u));
+    background: transparent;
+    color: var(--blue);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .retry-btn:hover {
+    background: var(--blue);
+    color: var(--white);
+    transform: translateY(calc(-3 * var(--u)));
+    box-shadow: 0 calc(8 * var(--u)) calc(24 * var(--u)) rgba(0,71,171,0.3);
+  }
+
+  .finish-btn {
+    padding: calc(18 * var(--u)) calc(52 * var(--u));
+    font-family: 'Poppins', sans-serif;
+    font-size: calc(20 * var(--u));
+    font-weight: 700;
+    border: none;
+    border-radius: calc(50 * var(--u));
+    background: linear-gradient(135deg, var(--gold), var(--gold-bright));
+    color: var(--white);
+    cursor: pointer;
+    box-shadow: 0 calc(8 * var(--u)) calc(24 * var(--u)) rgba(212,175,55,0.4);
+    transition: all 0.2s ease;
+  }
+
+  .finish-btn:hover {
+    transform: translateY(calc(-3 * var(--u)));
+    box-shadow: 0 calc(12 * var(--u)) calc(32 * var(--u)) rgba(212,175,55,0.55);
+  }
+
+  /* Confetti canvas */
+  #confetti-canvas {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    pointer-events: none;
+    z-index: 900;
+  }
+
+  /* ── IDLE OVERLAY ── */
+  #idle-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(255,248,240,0.97);
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: calc(28 * var(--u));
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.5s ease;
+  }
+
+  #idle-overlay.visible {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .idle-icon {
+    font-size: calc(96 * var(--u));
+    animation: float-emoji 2s ease-in-out infinite;
+  }
+
+  .idle-text {
+    font-family: 'Poppins', sans-serif;
+    font-size: calc(40 * var(--u));
+    font-weight: 700;
+    color: var(--blue);
+    text-align: center;
+  }
+
+  .idle-sub {
+    font-size: calc(22 * var(--u));
+    color: var(--text-mid);
+    text-align: center;
+  }
+
+  .idle-touch-btn {
+    padding: calc(22 * var(--u)) calc(72 * var(--u));
+    font-family: 'Poppins', sans-serif;
+    font-size: calc(24 * var(--u));
+    font-weight: 700;
+    border: none;
+    border-radius: calc(50 * var(--u));
+    background: linear-gradient(135deg, var(--gold), var(--gold-bright));
+    color: var(--white);
+    cursor: pointer;
+    box-shadow: 0 calc(8 * var(--u)) calc(32 * var(--u)) rgba(212,175,55,0.4);
+    animation: pulseCta 2s ease-in-out infinite;
+  }
+
+  @keyframes pulseCta {
+    0%, 100% { box-shadow: 0 calc(8 * var(--u)) calc(32 * var(--u)) rgba(212,175,55,0.4); }
+    50% { box-shadow: 0 calc(12 * var(--u)) calc(48 * var(--u)) rgba(212,175,55,0.7); }
+  }
+</style>
+</head>
+<body>
+
+<!-- Holo grid backdrop -->
+<div id="holo-grid"></div>
+
+<!-- Scanline sweep element (fires on every screen change) -->
+<div id="scan-sweep"></div>
+
+<!-- Language Toggle -->
+<div id="lang-toggle">
+  <button id="btn-bm" class="active" onclick="setLang('bm')">BM</button>
+  <button id="btn-en" onclick="setLang('en')">EN</button>
+</div>
+
+<!-- Confetti Canvas -->
+<canvas id="confetti-canvas"></canvas>
+
+<!-- Idle Overlay -->
+<div id="idle-overlay">
+  <div class="idle-icon">🌙</div>
+  <div class="idle-text"><span class="lang-bm">Sentuh untuk meneruskan</span><span class="lang-en" style="display:none">Touch to continue</span></div>
+  <div class="idle-sub"><span class="lang-bm">Tiada aktiviti</span><span class="lang-en" style="display:none">No activity</span></div>
+  <button class="idle-touch-btn" onclick="dismissIdle()" id="idle-btn">✨ Mula / Start</button>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     SVG CHARACTER TEMPLATE (same Aisyah from P3)
+══════════════════════════════════════════════════════ -->
+<template id="presenter-svg-template">
+<svg class="presenter-svg" viewBox="0 0 360 520" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <!-- ground shadow -->
+  <ellipse cx="180" cy="508" rx="118" ry="11" fill="rgba(0,71,171,0.10)"/>
+  <g id="ch-root">
+    <!-- ── TORSO (breathes) ── -->
+    <g id="ch-torso">
+      <!-- skirt -->
+      <path d="M122 376 L238 376 L254 520 L106 520 Z" fill="#00337A"/>
+      <!-- blazer body -->
+      <path d="M116 252 C116 220 142 202 180 202 C218 202 244 220 244 252 L250 388 L110 388 Z" fill="#0047AB"/>
+      <!-- inner shirt -->
+      <path d="M158 206 L202 206 L197 272 L163 272 Z" fill="#EAF0FB"/>
+      <!-- lapels -->
+      <path d="M158 206 L180 246 L150 284 L140 224 Z" fill="#00337A"/>
+      <path d="M202 206 L180 246 L210 284 L220 224 Z" fill="#00337A"/>
+      <!-- gold brooch -->
+      <circle cx="180" cy="262" r="7.5" fill="#F5A623"/>
+      <circle cx="180" cy="262" r="3" fill="#FFCB6B"/>
+      <!-- teal pocket square -->
+      <rect x="204" y="306" width="24" height="11" rx="3" fill="#00B4A6"/>
+      <!-- blazer buttons -->
+      <circle cx="180" cy="306" r="4" fill="#F5A623"/>
+      <circle cx="180" cy="334" r="4" fill="#F5A623"/>
+
+      <!-- left arm — always resting -->
+      <g id="arm-left-rest">
+        <path d="M126 250 C104 278 98 318 104 354 C106 366 122 366 125 354 C131 322 134 290 144 262 Z" fill="#0047AB"/>
+        <circle cx="111" cy="362" r="11" fill="#C98A5E"/>
+      </g>
+
+      <!-- right arm — resting -->
+      <g id="arm-right-rest">
+        <path d="M234 250 C256 278 262 318 256 354 C254 366 238 366 235 354 C229 322 226 290 216 262 Z" fill="#0047AB"/>
+        <circle cx="249" cy="362" r="11" fill="#C98A5E"/>
+      </g>
+
+      <!-- right arm — raised (talking) -->
+      <g id="arm-right-up">
+        <path d="M232 252 C262 246 292 224 308 196 C315 184 302 172 292 180 C272 198 252 214 226 224 Z" fill="#0047AB"/>
+        <circle cx="305" cy="183" r="13" fill="#C98A5E"/>
+        <path d="M299 170 Q304 162 309 170 M308 168 Q313 161 317 169" stroke="#C98A5E" stroke-width="6" stroke-linecap="round" fill="none"/>
+        <path d="M284 184 L296 200 L286 208 L274 192 Z" fill="#00337A"/>
+      </g>
+    </g>
+
+    <!-- ── HEAD (sways) ── -->
+    <g id="ch-head">
+      <!-- hijab back / shoulders drape -->
+      <path d="M180 56 C120 56 96 106 96 158 C96 210 118 244 142 252 L218 252 C242 244 264 210 264 158 C264 106 240 56 180 56 Z" fill="#00B4A6"/>
+      <!-- hijab chest drape -->
+      <path d="M128 210 C120 252 142 276 180 282 C218 276 240 252 232 210 C224 238 204 250 180 250 C156 250 136 238 128 210 Z" fill="#008F83"/>
+      <!-- face -->
+      <ellipse cx="180" cy="152" rx="45" ry="50" fill="#C98A5E"/>
+      <!-- hijab front band -->
+      <path d="M180 84 C146 84 130 110 128 142 C138 106 156 97 180 97 C204 97 222 106 232 142 C230 110 214 84 180 84 Z" fill="#008F83"/>
+      <!-- gold trim -->
+      <path d="M132 132 C142 102 158 94 180 94 C202 94 218 102 228 132" stroke="#F5A623" stroke-width="4" fill="none" stroke-linecap="round"/>
+      <!-- under-chin wrap -->
+      <path d="M138 168 C140 202 158 220 180 220 C202 220 220 202 222 168 C222 200 206 230 180 230 C154 230 138 200 138 168 Z" fill="#00B4A6"/>
+      <!-- eyebrows -->
+      <path d="M148 132 Q159 125 170 130" stroke="#7A4A22" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      <path d="M190 130 Q201 125 212 132" stroke="#7A4A22" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      <!-- eyes (blink) -->
+      <g class="ch-eye"><ellipse cx="160" cy="147" rx="5" ry="7" fill="#1A1A2E"/><circle cx="162" cy="144" r="1.8" fill="#FFFFFF"/></g>
+      <g class="ch-eye"><ellipse cx="200" cy="147" rx="5" ry="7" fill="#1A1A2E"/><circle cx="202" cy="144" r="1.8" fill="#FFFFFF"/></g>
+      <!-- blush -->
+      <ellipse cx="146" cy="168" rx="8" ry="4.5" fill="#E07856" opacity="0.32"/>
+      <ellipse cx="214" cy="168" rx="8" ry="4.5" fill="#E07856" opacity="0.32"/>
+      <!-- nose -->
+      <path d="M178 156 Q175 167 181 169" stroke="#A96B3F" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <!-- mouth idle -->
+      <path id="mouth-smile" d="M163 184 Q180 197 197 184" stroke="#8C4A2F" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+      <!-- mouth talking -->
+      <g id="mouth-open">
+        <ellipse cx="180" cy="189" rx="12" ry="9" fill="#7C3A28"/>
+        <path d="M170 185 Q180 191 190 185 L190 183 L170 183 Z" fill="#FFFFFF"/>
+      </g>
+    </g>
+  </g>
+</svg>
+</template>
+
+<!-- ══════════════════════════════════════════════════════
+     SCREEN 1: INTRO
+══════════════════════════════════════════════════════ -->
+<div class="screen active" id="intro-screen">
+  <span class="floating-emoji fe-1">💰</span>
+  <span class="floating-emoji fe-2">✨</span>
+  <span class="floating-emoji fe-3">🌱</span>
+  <span class="floating-emoji fe-4">⚖️</span>
+  <span class="floating-emoji fe-5">💎</span>
+  <span class="floating-emoji fe-6">🕌</span>
+
+  <div class="intro-content">
+    <div class="intro-logo">🕌</div>
+    <div class="intro-eyebrow">Bank Negara Malaysia Museum &amp; Art Gallery • IMD 2026</div>
+    <div class="intro-title glitch"><span class="lang-bm">Kewangan Islam</span><span class="lang-en" style="display:none">Islamic Finance</span></div>
+    <div class="intro-subtitle-bm">Pilihan Bijak, Masa Depan Beretika</div>
+    <div class="intro-subtitle-en">Smart Choices, Ethical Future</div>
+    <div class="intro-divider"></div>
+    <div class="intro-body" id="intro-body">Satu penerokaan interaktif prinsip kewangan Islam melalui pilihan nilai.</div>
+    <button class="start-btn" onclick="startQuiz()" id="intro-start-btn">Mula ✨</button>
+    <div class="bnm-badge">
+      <div class="bnm-dot"></div>
+      <span>Bank Negara Malaysia — Festival Hari Museum Antarabangsa 2026</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     SCREEN 2: QUIZ
+══════════════════════════════════════════════════════ -->
+<div class="screen" id="quiz-screen">
+
+  <div class="quiz-topbar">
+    <div class="question-counter" id="q-counter">Soalan 1 / 6</div>
+    <div class="quiz-bnm-badge">
+      <div class="dot"></div>
+      <span>Bank Negara Malaysia Museum — IMD 2026</span>
+    </div>
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-bar" id="progress-bar" style="width:0%"></div>
+  </div>
+
+  <!-- Presenter stage inside quiz screen -->
+  <div class="presenter-stage" id="stage-quiz">
+    <div class="bubble bubble-main"><div class="bubble-content"></div></div>
+    <div class="presenter-char"></div>
+    <div class="presenter-tag">Aisyah — Penasihat Kewangan Islam Anda</div>
+  </div>
+
+  <!-- Answer buttons -->
+  <div class="quiz-answers-area" id="answers-area">
+    <div class="answers-wrap" id="answers-wrap"></div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     SCREEN 3: RESULT
+══════════════════════════════════════════════════════ -->
+<div class="screen" id="result-screen">
+  <div class="result-outer">
+
+    <!-- Character side with result speech bubble -->
+    <div class="result-char-side" id="stage-result">
+      <div class="bubble bubble-main"><div class="bubble-content"></div></div>
+      <div class="presenter-char"></div>
+      <div class="presenter-tag">Aisyah</div>
+    </div>
+
+    <!-- Score card -->
+    <div class="result-card" id="result-card">
+      <div class="result-emoji" id="result-emoji">🌟</div>
+      <div class="result-score-wrap">
+        <div class="result-score" id="result-score">0 / 6</div>
+        <div class="score-label">markah / marks</div>
+      </div>
+      <div class="result-title" id="result-title-bm">Tahniah!</div>
+      <div class="result-title-en" id="result-title-en">Congratulations!</div>
+      <div class="result-msg" id="result-msg-bm"></div>
+      <div class="result-msg-en" id="result-msg-en"></div>
+      <div class="result-btns">
+        <button class="retry-btn" onclick="restartQuiz()">Cuba Lagi / Try Again</button>
+        <button class="finish-btn" onclick="finishQuiz()">Tamat / Finish</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════
+// SFX — synthesized high-tech sounds (Web Audio API, no files)
+// tap() every button · swap() screen/question change
+// win() correct answer · lose() wrong answer
+// ══════════════════════════════════════════════════════
+const SFX=(()=>{let ctx;const ac=()=>ctx||(ctx=new(window.AudioContext||window.webkitAudioContext)());function tone({freq=440,type='sine',dur=.15,vol=.2,slide=0,delay=0}){try{const c=ac(),t=c.currentTime+delay,o=c.createOscillator(),g=c.createGain();o.type=type;o.frequency.setValueAtTime(freq,t);if(slide)o.frequency.exponentialRampToValueAtTime(Math.max(40,freq+slide),t+dur);g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.connect(g).connect(c.destination);o.start(t);o.stop(t+dur+.05)}catch(e){}}
+return{tap(){tone({freq:1200,type:'square',dur:.06,vol:.1});tone({freq:1800,dur:.08,vol:.07,delay:.02})},swap(){tone({freq:300,type:'sawtooth',dur:.25,vol:.09,slide:900})},win(){[523,659,784,1047].forEach((f,i)=>tone({freq:f,type:'triangle',dur:.18,vol:.15,delay:i*.09}))},lose(){tone({freq:220,type:'sawtooth',dur:.3,vol:.15,slide:-120});tone({freq:110,type:'square',dur:.35,vol:.1,delay:.05})}};})();
+
+// ══════════════════════════════════════════════════════
+// QUIZ DATA (BM + EN, all 6 questions preserved)
+// ══════════════════════════════════════════════════════
+const quizData = [
+  {
+    id: 1,
+    icon: '🌍',
+    q: {
+      bm: 'Pada pandangan anda, apakah peranan sebenar kewangan Islam?',
+      en: 'In your view, what is the true role of Islamic finance?'
+    },
+    answers: [
+      { id: 'a', bm: 'Memaksimumkan keuntungan semata-mata', en: 'Maximise profit only' },
+      { id: 'b', bm: 'Memberi manfaat kepada masyarakat', en: 'Benefit society' },
+      { id: 'c', bm: 'Melindungi alam sekitar', en: 'Protect the environment' },
+      { id: 'd', bm: 'Memberi manfaat kepada masyarakat dan alam sekitar', en: 'Benefit both society and the environment' }
+    ],
+    correct: 'd',
+    feedback: {
+      bm: 'Tepat sekali! ✅ Kewangan Islam bukan sekadar menjana keuntungan. Ia perlu memberi kebaikan kepada manusia serta memelihara alam sekitar — seperti membiayai projek tenaga hijau. Pendekatan yang seimbang dan bermakna.',
+      en: 'Exactly right! ✅ Islamic finance is not just about profit. It must benefit humanity and preserve the environment — such as financing green energy projects. A balanced, meaningful approach.'
+    },
+    wrongFeedback: {
+      bm: 'Belum tepat. ❌ Jawapan yang betul ialah D — kewangan Islam memberi manfaat kepada masyarakat DAN alam sekitar, bukan semata-mata keuntungan.',
+      en: 'Not quite. ❌ The correct answer is D — Islamic finance benefits both society AND the environment, not profit alone.'
+    }
+  },
+  {
+    id: 2,
+    icon: '⚖️',
+    q: {
+      bm: 'Dalam urusan kewangan Islam, apakah pendekatan paling adil untuk mengurus risiko?',
+      en: 'In Islamic finance, what is the fairest approach to managing risk?'
+    },
+    answers: [
+      { id: 'a', bm: 'Satu pihak menanggung semua risiko', en: 'One party bears all the risk' },
+      { id: 'b', bm: 'Risiko disembunyikan atau tidak dijelaskan dengan telus', en: 'Risk is hidden or not clearly disclosed' },
+      { id: 'c', bm: 'Risiko dikongsi secara adil antara semua pihak', en: 'Risk is shared fairly among all parties' },
+      { id: 'd', bm: 'Risiko dielakkan sepenuhnya', en: 'Risk is avoided entirely' }
+    ],
+    correct: 'c',
+    feedback: {
+      bm: 'Betul! ✅ Pendekatan kewangan yang adil bukan tentang memindahkan risiko kepada orang lain. Ia menekankan tanggungjawab bersama — setiap pihak berkongsi risiko secara telus dan saksama.',
+      en: 'Correct! ✅ A fair financial approach is not about transferring risk to others. It emphasises shared responsibility — each party shares risk transparently and equitably.'
+    },
+    wrongFeedback: {
+      bm: 'Belum tepat. ❌ Jawapan yang betul ialah C — risiko dikongsi secara adil antara semua pihak, bukan ditanggung seorang diri atau disembunyikan.',
+      en: 'Not quite. ❌ The correct answer is C — risk is shared fairly among all parties, not borne alone or hidden.'
+    }
+  },
+  {
+    id: 3,
+    icon: '🏘️',
+    q: {
+      bm: 'Apakah jenis aktiviti ekonomi yang paling wajar disokong?',
+      en: 'What type of economic activity should most appropriately be supported?'
+    },
+    answers: [
+      { id: 'a', bm: 'Aktiviti spekulatif untuk keuntungan pantas', en: 'Speculative activities for quick profit' },
+      { id: 'b', bm: 'Aktiviti yang boleh memudaratkan masyarakat', en: 'Activities that could harm society' },
+      { id: 'c', bm: 'Aktiviti yang memenuhi keperluan sebenar seperti perumahan dan perkhidmatan', en: 'Activities that meet real needs like housing and services' },
+      { id: 'd', bm: 'Apa sahaja asalkan pulangannya tinggi', en: 'Anything as long as returns are high' }
+    ],
+    correct: 'c',
+    feedback: {
+      bm: 'Betul! ✅ Kewangan Islam menyokong aktiviti yang memenuhi keperluan sebenar manusia dan memberi kebaikan kepada masyarakat — bukan spekulasi semata-mata.',
+      en: 'Correct! ✅ Islamic finance supports activities that meet real human needs and benefit society — not speculation alone.'
+    },
+    wrongFeedback: {
+      bm: 'Belum tepat. ❌ Jawapan betul ialah C — kewangan Islam menyokong aktiviti yang memenuhi keperluan sebenar, bukan spekulasi atau aktiviti yang memudaratkan.',
+      en: 'Not quite. ❌ The correct answer is C — Islamic finance supports activities meeting real needs, not speculation or harmful ones.'
+    }
+  },
+  {
+    id: 4,
+    icon: '📋',
+    q: {
+      bm: 'Dalam kewangan Islam, apakah prinsip paling penting dalam sesuatu transaksi?',
+      en: 'In Islamic finance, what is the most important principle in a transaction?'
+    },
+    answers: [
+      { id: 'a', bm: 'Ketidakpastian tinggi (gharar) dibenarkan', en: 'High uncertainty (gharar) is permitted' },
+      { id: 'b', bm: 'Riba (faedah) dibenarkan', en: 'Riba (interest) is permitted' },
+      { id: 'c', bm: 'Ketelusan dan keadilan dalam kontrak', en: 'Transparency and fairness in contracts' },
+      { id: 'd', bm: 'Keuntungan tanpa usaha', en: 'Profit without effort' }
+    ],
+    correct: 'c',
+    feedback: {
+      bm: 'Tepat! ✅ Setiap transaksi dalam kewangan Islam perlu jelas, telus dan adil kepada semua pihak. Tiada unsur tersembunyi atau mengambil kesempatan.',
+      en: 'Exact! ✅ Every Islamic finance transaction must be clear, transparent, and fair to all parties. No hidden elements or exploitation.'
+    },
+    wrongFeedback: {
+      bm: 'Belum tepat. ❌ Jawapan betul ialah C — ketelusan dan keadilan dalam kontrak adalah prinsip terpenting. Riba dan gharar adalah dilarang.',
+      en: 'Not quite. ❌ Correct answer is C — transparency and fairness in contracts is key. Riba and gharar are prohibited.'
+    }
+  },
+  {
+    id: 5,
+    icon: '🎲',
+    q: {
+      bm: 'Mengapakah aktiviti seperti perjudian dan spekulasi tidak dibenarkan dalam kewangan Islam?',
+      en: 'Why are activities like gambling and speculation not permitted in Islamic finance?'
+    },
+    answers: [
+      { id: 'a', bm: 'Kerana ia memberikan pulangan yang rendah', en: 'Because they give low returns' },
+      { id: 'b', bm: 'Kerana ia melibatkan ketidaktentuan dan bergantung kepada nasib', en: 'Because they involve uncertainty and depend on luck' },
+      { id: 'c', bm: 'Kerana ia memerlukan modal yang besar', en: 'Because they require large capital' },
+      { id: 'd', bm: 'Kerana ia sukar difahami', en: 'Because they are difficult to understand' }
+    ],
+    correct: 'b',
+    feedback: {
+      bm: 'Betul! ✅ Perjudian dan spekulasi dilarang kerana bergantung kepada nasib semata-mata dan tidak berasaskan aktiviti ekonomi sebenar. Ini boleh membawa ketidakadilan kepada pihak terlibat.',
+      en: 'Correct! ✅ Gambling and speculation are prohibited because they rely purely on luck and are not based on real economic activity. This can lead to unfairness.'
+    },
+    wrongFeedback: {
+      bm: 'Belum tepat. ❌ Jawapan betul ialah B — perjudian dan spekulasi dilarang kerana bergantung kepada nasib, bukan aktiviti ekonomi sebenar.',
+      en: 'Not quite. ❌ The correct answer is B — gambling and speculation are prohibited because they rely on luck, not real economic activity.'
+    }
+  },
+  {
+    id: 6,
+    icon: '🏛️',
+    q: {
+      bm: 'Apakah peranan sebenar institusi kewangan Islam dalam ekonomi?',
+      en: 'What is the true role of Islamic financial institutions in the economy?'
+    },
+    answers: [
+      { id: 'a', bm: 'Mengejar keuntungan semata-mata', en: 'Pursue profit only' },
+      { id: 'b', bm: 'Menyokong ekonomi sebenar secara beretika', en: 'Support the real economy ethically' },
+      { id: 'c', bm: 'Menggalakkan aktiviti spekulasi', en: 'Encourage speculative activities' },
+      { id: 'd', bm: 'Tidak terlibat dalam pembangunan masyarakat', en: 'Not involved in community development' }
+    ],
+    correct: 'b',
+    feedback: {
+      bm: 'Syabas! ✅ Institusi kewangan Islam membantu pertumbuhan ekonomi yang sihat — menyokong perniagaan, mencipta peluang pekerjaan, dan menyumbang kepada kesejahteraan masyarakat dengan pendekatan beretika.',
+      en: 'Well done! ✅ Islamic financial institutions support healthy economic growth — supporting businesses, creating employment, and contributing to community wellbeing ethically.'
+    },
+    wrongFeedback: {
+      bm: 'Belum tepat. ❌ Jawapan betul ialah B — institusi kewangan Islam menyokong ekonomi sebenar secara beretika, bukan semata-mata mencari keuntungan.',
+      en: 'Not quite. ❌ Correct answer is B — Islamic financial institutions support the real economy ethically, not merely pursue profit.'
+    }
+  }
+];
+
+const resultTiers = [
+  {
+    range: [0, 2],
+    tierClass: 'tier-low',
+    emoji: '😅',
+    titleBm: 'Oh-oh! Masih banyak ruang boleh dibaiki — jom, cuba lagi!',
+    titleEn: "Oh-oh! Still lots of room to improve — come on, try again!",
+    msgBm: 'Masih banyak yang boleh diterokai tentang kewangan berasaskan nilai. Cuba lagi — setiap pilihan membawa anda lebih dekat kepada pemahaman yang lebih baik!',
+    msgEn: "There's still much to explore about values-based finance. Try again — each choice brings you closer to a better understanding!",
+    bubbleBm: 'Jangan putus asa! Cuba lagi dan belajar lebih banyak tentang kewangan Islam. 💪',
+    bubbleEn: "Don't give up! Try again and learn more about Islamic finance. 💪"
+  },
+  {
+    range: [3, 4],
+    tierClass: 'tier-mid',
+    emoji: '🤔',
+    titleBm: 'Anda di landasan yang betul!',
+    titleEn: "You're on the right track!",
+    msgBm: 'Anda sudah mula memahami konsep kewangan yang adil, tetapi masih ada ruang untuk diperkukuh. Teruskan bermain dan cabar diri untuk capai tahap seterusnya!',
+    msgEn: "You're starting to understand fair financial concepts, but there's still room to grow. Keep playing!",
+    bubbleBm: 'Bagus! Anda hampir faham sepenuhnya. Cuba lagi untuk markah sempurna! 🌟',
+    bubbleEn: 'Good effort! You nearly have it. Try again for a perfect score! 🌟'
+  },
+  {
+    range: [5, 6],
+    tierClass: 'tier-high',
+    emoji: '🌟',
+    titleBm: "Tahniah! Anda bakal jadi 'Game Changer'!",
+    titleEn: "Congratulations! You're a future 'Game Changer'!",
+    msgBm: 'Anda memahami prinsip kewangan Islam dan nilai keseimbangannya dengan baik.',
+    msgEn: 'You understand Islamic finance principles and their balance of values well.',
+    bubbleBm: 'Luar biasa! Anda benar-benar faham kewangan Islam. Hebat! 🎉',
+    bubbleEn: 'Outstanding! You truly understand Islamic finance. Amazing! 🎉'
+  }
+];
+
+// ══════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════
+let state = {
+  screen: 'intro',
+  lang: 'bm',
+  currentQ: 0,
+  score: 0,
+  selectedAnswer: null,
+  answered: false,
+  waitingNext: false,
+  idleTimer: null,
+  confettiAnim: null
+};
+
+// ══════════════════════════════════════════════════════
+// PRESENTER MODULE (shared P3/P4/P6)
+// ══════════════════════════════════════════════════════
+const Presenter = (() => {
+  const stages = {};
+  let activeId = null;
+
+  function mount(stageId) {
+    const stage = document.getElementById(stageId);
+    if (!stage || stages[stageId]) return;
+    const charMount = stage.querySelector('.presenter-char');
+    const tpl = document.getElementById('presenter-svg-template');
+    charMount.appendChild(tpl.content.cloneNode(true));
+    stages[stageId] = {
+      stage,
+      svg: charMount.querySelector('svg'),
+      bubble: stage.querySelector('.bubble-main'),
+      bubbleContent: stage.querySelector('.bubble-main .bubble-content'),
+      talkTimer: null,
+    };
+  }
+
+  function use(stageId) { activeId = stageId; return stages[stageId]; }
+
+  function get() { return stages[activeId]; }
+
+  function say(content, opts) {
+    const s = get();
+    if (!s) return;
+    const o = opts || {};
+    const talkMs = o.talkMs || 2800;
+    s.bubble.classList.remove('visible');
+    void s.bubble.offsetWidth;
+    if (typeof content === 'string') {
+      s.bubbleContent.innerHTML = content;
+    } else {
+      s.bubbleContent.innerHTML = '';
+      s.bubbleContent.appendChild(content);
+    }
+    s.bubbleContent.scrollTop = 0;
+    s.bubble.classList.add('visible');
+    s.svg.classList.add('is-talking');
+    clearTimeout(s.talkTimer);
+    s.talkTimer = setTimeout(() => s.svg.classList.remove('is-talking'), talkMs);
+  }
+
+  function ask(content, opts) { say(content, opts); }
+
+  function hide() {
+    const s = get();
+    if (!s) return;
+    s.bubble.classList.remove('visible');
+    s.svg.classList.remove('is-talking');
+  }
+
+  return { mount, use, say, ask, hide };
+})();
+
+// ══════════════════════════════════════════════════════
+// SCANLINE SWEEP + GLITCH helpers
+// ══════════════════════════════════════════════════════
+function runScanSweep() {
+  const s = document.getElementById('scan-sweep');
+  s.classList.remove('run');
+  void s.offsetWidth;
+  s.classList.add('run');
+}
+
+function runGlitchEl(el) {
+  if (!el) return;
+  el.classList.remove('glitch-in');
+  void el.offsetWidth;
+  el.classList.add('glitch-in');
+}
+
+// ══════════════════════════════════════════════════════
+// SCREEN TRANSITIONS
+// ══════════════════════════════════════════════════════
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  state.screen = id.replace('-screen', '');
+  SFX.swap();
+  runScanSweep();
+}
+
+// ══════════════════════════════════════════════════════
+// LANGUAGE
+// ══════════════════════════════════════════════════════
+function setLang(lang, silent) {
+  state.lang = lang;
+  document.getElementById('btn-bm').classList.toggle('active', lang === 'bm');
+  document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+  document.body.classList.toggle('lang-en', lang === 'en');
+  // Update intro screen static text
+  const introBody = document.getElementById('intro-body');
+  if (introBody) introBody.textContent = lang === 'bm'
+    ? 'Satu penerokaan interaktif prinsip kewangan Islam melalui pilihan nilai.'
+    : 'An interactive exploration of Islamic finance principles through value-based choices.';
+  const startBtn = document.getElementById('intro-start-btn');
+  if (startBtn) startBtn.textContent = lang === 'bm' ? 'Mula ✨' : 'Start ✨';
+  const idleBtn = document.getElementById('idle-btn');
+  if (idleBtn) idleBtn.textContent = lang === 'bm' ? '✨ Mula' : '✨ Start';
+  if (!silent) SFX.tap();
+  if (state.screen === 'quiz') {
+    renderCurrentQuestion(false);
+  }
+  if (!silent) resetIdle();
+}
+
+// ══════════════════════════════════════════════════════
+// IDLE TIMER
+// ══════════════════════════════════════════════════════
+function resetIdle() {
+  clearTimeout(state.idleTimer);
+  document.getElementById('idle-overlay').classList.remove('visible');
+  state.idleTimer = setTimeout(() => {
+    if (state.screen !== 'intro') {
+      document.getElementById('idle-overlay').classList.add('visible');
+    }
+  }, 60000);
+}
+
+function dismissIdle() {
+  document.getElementById('idle-overlay').classList.remove('visible');
+  SFX.tap();
+  resetIdle();
+  if (state.screen !== 'intro') {
+    restartQuiz();
+  }
+}
+
+// ══════════════════════════════════════════════════════
+// INTRO → QUIZ
+// ══════════════════════════════════════════════════════
+function startQuiz() {
+  SFX.tap();
+  state.currentQ = 0;
+  state.score = 0;
+  state.selectedAnswer = null;
+  state.answered = false;
+  state.waitingNext = false;
+  showScreen('quiz-screen');
+  Presenter.use('stage-quiz');
+  renderCurrentQuestion(true);
+  resetIdle();
+}
+
+// ══════════════════════════════════════════════════════
+// RENDER QUESTION
+// ══════════════════════════════════════════════════════
+function buildQuestionBubbleHTML(q) {
+  const lang = state.lang;
+  const iconHtml = `<span style="font-size:calc(36 * var(--u));margin-right:calc(10 * var(--u));">${q.icon}</span>`;
+  const primaryText = lang === 'bm' ? q.q.bm : q.q.en;
+  return `<div class="bubble-line">${iconHtml}${primaryText}</div>`;
+}
+
+function renderCurrentQuestion(animate) {
+  const q = quizData[state.currentQ];
+
+  // Progress
+  document.getElementById('progress-bar').style.width = ((state.currentQ) / quizData.length * 100) + '%';
+  document.getElementById('q-counter').textContent =
+    (state.lang === 'bm' ? 'Soalan ' : 'Question ') + (state.currentQ + 1) + ' / ' + quizData.length;
+
+  // Speech bubble: ask the question
+  Presenter.use('stage-quiz');
+  Presenter.ask(buildQuestionBubbleHTML(q), { talkMs: 3000 });
+
+  // Render answers
+  const wrap = document.getElementById('answers-wrap');
+  wrap.innerHTML = '';
+  const letters = ['A', 'B', 'C', 'D'];
+  q.answers.forEach((ans, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'answer-btn';
+    btn.id = 'ans-' + ans.id;
+    const ansText = state.lang === 'bm' ? ans.bm : ans.en;
+    btn.innerHTML = `
+      <div class="answer-letter">${letters[i]}</div>
+      <div class="answer-text">${ansText}</div>
+      <div class="answer-check" id="check-${ans.id}">●</div>
+    `;
+    btn.onclick = () => handleAnswerTap(ans.id);
+    wrap.appendChild(btn);
+  });
+
+  state.selectedAnswer = null;
+  state.answered = false;
+  state.waitingNext = false;
+  // Re-enable pointer events on fresh buttons
+  document.querySelectorAll('.answer-btn').forEach(btn => btn.style.pointerEvents = '');
+
+  if (animate) {
+    const area = document.getElementById('answers-area');
+    gsap.fromTo(area,
+      { y: 40, opacity: 0 },
+      { y: 0, opacity: 1, duration: 0.45, ease: 'power2.out', delay: 0.3 }
+    );
+    gsap.fromTo('#stage-quiz .presenter-char',
+      { scale: 0.88, opacity: 0 },
+      { scale: 1, opacity: 1, duration: 0.5, ease: 'back.out(1.7)' }
+    );
+  }
+}
+
+// ══════════════════════════════════════════════════════
+// HANDLE ANSWER TAP
+// ══════════════════════════════════════════════════════
+function handleAnswerTap(id) {
+  if (state.answered) {
+    // After answer revealed: tap anywhere on answers to proceed
+    if (state.waitingNext) {
+      state.waitingNext = false;
+      nextQuestion();
+    }
+    return;
+  }
+
+  SFX.tap();
+  state.selectedAnswer = id;
+  state.answered = true;
+
+  const q = quizData[state.currentQ];
+  const isCorrect = id === q.correct;
+
+  if (isCorrect) {
+    state.score++;
+    SFX.win();
+  } else {
+    SFX.lose();
+  }
+
+  // Mark buttons as visually inactive (do NOT set disabled — it blocks click events needed for "tap to continue")
+  document.querySelectorAll('.answer-btn').forEach(btn => btn.style.pointerEvents = 'none');
+
+  // Highlight answer states
+  const selBtn = document.getElementById('ans-' + id);
+  const correctBtn = document.getElementById('ans-' + q.correct);
+  const checkSel = document.getElementById('check-' + id);
+  const checkCorrect = document.getElementById('check-' + q.correct);
+
+  if (isCorrect) {
+    selBtn.classList.remove('selected');
+    selBtn.classList.add('correct');
+    checkSel.textContent = '✓';
+  } else {
+    selBtn.classList.remove('selected');
+    selBtn.classList.add('wrong');
+    checkSel.textContent = '✗';
+    correctBtn.classList.add('reveal-correct');
+    checkCorrect.textContent = '✓';
+  }
+
+  // Presenter gives feedback in speech bubble
+  const fb = isCorrect ? q.feedback : q.wrongFeedback;
+  const fbText = state.lang === 'bm' ? fb.bm : fb.en;
+  const isLast = state.currentQ === quizData.length - 1;
+  const nextPrompt = isLast
+    ? (state.lang === 'bm' ? '<br><em style="font-size:calc(15 * var(--u));color:var(--teal);">Sentuh mana-mana jawapan untuk lihat keputusan...</em>'
+                           : '<br><em style="font-size:calc(15 * var(--u));color:var(--teal);">Tap any answer to see results...</em>')
+    : (state.lang === 'bm' ? '<br><em style="font-size:calc(15 * var(--u));color:var(--teal);">Sentuh mana-mana jawapan untuk soalan seterusnya...</em>'
+                           : '<br><em style="font-size:calc(15 * var(--u));color:var(--teal);">Tap any answer for the next question...</em>');
+
+  setTimeout(() => {
+    Presenter.use('stage-quiz');
+    Presenter.say(
+      `<div class="bubble-line" style="font-size:calc(20 * var(--u));text-align:left;">${fbText}${nextPrompt}</div>`,
+      { talkMs: 4000 }
+    );
+    state.waitingNext = true;
+  }, 400);
+
+  resetIdle();
+}
+
+// ══════════════════════════════════════════════════════
+// NEXT QUESTION
+// ══════════════════════════════════════════════════════
+function nextQuestion() {
+  const isLast = state.currentQ === quizData.length - 1;
+  if (isLast) {
+    showResults();
+    return;
+  }
+
+  SFX.swap();
+  runScanSweep();
+
+  const area = document.getElementById('answers-area');
+  gsap.to(area, {
+    x: -80, opacity: 0, duration: 0.28, ease: 'power2.in',
+    onComplete: () => {
+      gsap.set(area, { x: 0 });
+      state.currentQ++;
+      renderCurrentQuestion(true);
+    }
+  });
+  resetIdle();
+}
+
+// ══════════════════════════════════════════════════════
+// SHOW RESULTS
+// ══════════════════════════════════════════════════════
+function showResults() {
+  showScreen('result-screen');
+
+  const score = state.score;
+  let tier = resultTiers[0];
+  for (const t of resultTiers) {
+    if (score >= t.range[0] && score <= t.range[1]) {
+      tier = t;
+      break;
+    }
+  }
+
+  const card = document.getElementById('result-card');
+  card.className = 'result-card ' + tier.tierClass;
+
+  document.getElementById('result-emoji').textContent = tier.emoji;
+  document.getElementById('result-title-bm').textContent = tier.titleBm;
+  document.getElementById('result-title-en').textContent = tier.titleEn;
+  document.getElementById('result-msg-bm').textContent = tier.msgBm;
+  document.getElementById('result-msg-en').textContent = tier.msgEn;
+
+  // Score count-up
+  const scoreEl = document.getElementById('result-score');
+  scoreEl.textContent = '0 / 6';
+  let count = 0;
+  const interval = setInterval(() => {
+    count++;
+    scoreEl.textContent = count + ' / 6';
+    if (count >= score) clearInterval(interval);
+  }, 180);
+
+  // Animate card in
+  gsap.fromTo(card,
+    { scale: 0.9, opacity: 0, y: 40 },
+    { scale: 1, opacity: 1, y: 0, duration: 0.6, ease: 'back.out(1.4)' }
+  );
+
+  // Character presenter on result screen
+  Presenter.use('stage-result');
+  const bubbleText = state.lang === 'bm' ? tier.bubbleBm : tier.bubbleEn;
+  setTimeout(() => {
+    Presenter.say(
+      `<div class="bubble-line" style="font-size:calc(18 * var(--u));">${bubbleText}</div>`,
+      { talkMs: 4000 }
+    );
+    if (score >= 5) SFX.win();
+  }, 700);
+
+  // Confetti for high score
+  if (score >= 5) {
+    setTimeout(launchConfetti, 800);
+  }
+
+  resetIdle();
+}
+
+// ══════════════════════════════════════════════════════
+// CONFETTI
+// ══════════════════════════════════════════════════════
+function launchConfetti() {
+  const canvas = document.getElementById('confetti-canvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  const particles = [];
+  const colors = ['#D4AF37', '#F5A623', '#0047AB', '#00B4A6', '#2ECC71', '#E74C3C', '#9B59B6', '#FFF8F0'];
+
+  for (let i = 0; i < 200; i++) {
+    particles.push({
+      x: Math.random() * canvas.width,
+      y: -20 - Math.random() * 400,
+      w: 8 + Math.random() * 12,
+      h: 4 + Math.random() * 8,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      vx: (Math.random() - 0.5) * 4,
+      vy: 2 + Math.random() * 4,
+      rot: Math.random() * 360,
+      vrot: (Math.random() - 0.5) * 6,
+      opacity: 1
+    });
+  }
+
+  let frame = 0;
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    frame++;
+    particles.forEach(p => {
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy += 0.05;
+      p.rot += p.vrot;
+      if (frame > 120) p.opacity -= 0.008;
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, p.opacity);
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot * Math.PI / 180);
+      ctx.fillStyle = p.color;
+      ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+      ctx.restore();
+    });
+    if (frame < 220) {
+      state.confettiAnim = requestAnimationFrame(draw);
+    } else {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+  }
+  if (state.confettiAnim) cancelAnimationFrame(state.confettiAnim);
+  draw();
+}
+
+// ══════════════════════════════════════════════════════
+// RESTART / FINISH
+// ══════════════════════════════════════════════════════
+function restartQuiz() {
+  SFX.tap();
+  if (state.confettiAnim) {
+    cancelAnimationFrame(state.confettiAnim);
+    const canvas = document.getElementById('confetti-canvas');
+    canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+  }
+  showScreen('intro-screen');
+  // Glitch the title on intro
+  setTimeout(() => runGlitchEl(document.querySelector('.intro-title')), 100);
+  resetIdle();
+}
+
+function finishQuiz() {
+  SFX.tap();
+  if (state.confettiAnim) {
+    cancelAnimationFrame(state.confettiAnim);
+    const canvas = document.getElementById('confetti-canvas');
+    canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+  }
+  showScreen('intro-screen');
+  setTimeout(() => runGlitchEl(document.querySelector('.intro-title')), 100);
+  resetIdle();
+}
+
+// ══════════════════════════════════════════════════════
+// KIOSK HARDENING
+// ══════════════════════════════════════════════════════
+document.addEventListener('contextmenu', e => e.preventDefault());
+document.addEventListener('selectstart', e => e.preventDefault());
+
+// Fullscreen on first touch/click
+const goFullscreen = () => {
+  document.documentElement.requestFullscreen().catch(() => {});
+  document.removeEventListener('pointerdown', goFullscreen);
+};
+document.addEventListener('pointerdown', goFullscreen);
+
+// SFX.tap() on every button press (delegated)
+document.addEventListener('pointerdown', e => {
+  if (e.target.closest('button')) SFX.tap();
+}, { passive: true });
+
+// Reset idle on any interaction
+['click', 'touchstart', 'mousemove', 'keydown'].forEach(evt => {
+  document.addEventListener(evt, () => {
+    if (state.screen !== 'intro') resetIdle();
+  }, { passive: true });
+});
+
+// ══════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  Presenter.mount('stage-quiz');
+  Presenter.mount('stage-result');
+  // Initialize language (BM default, silent = no SFX)
+  setLang('bm', true);
+  // Glitch the intro title once on load
+  setTimeout(() => runGlitchEl(document.querySelector('.intro-title')), 300);
+  resetIdle();
+
+  // Tap-to-continue: clicking the answers area (or any answer button) after
+  // feedback is shown advances to the next question. Using pointerdown so it
+  // fires even when child buttons have pointer-events:none.
+  document.getElementById('answers-area').addEventListener('pointerdown', () => {
+    if (state.waitingNext) {
+      state.waitingNext = false;
+      nextQuestion();
+    }
+  });
+});
+</script>
+</body>
+</html>

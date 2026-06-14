@@ -1,0 +1,2087 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pengalaman Pembayaran QR Rentas Sempadan | Cross-Border QR Payment Experience</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --blue: #0047AB;
+    --teal: #00B4A6;
+    --gold: #F5A623;
+    --bg: #F0F7FF;
+    --white: #FFFFFF;
+    --card-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    --radius: 24px;
+    --text-dark: #1A2340;
+    --text-mid: #3A4A6B;
+    --text-light: #6B7A99;
+    --green: #22C55E;
+    --red: #EF4444;
+    --coral: #FF6B5B;
+    --purple: #7B5EA7;
+    --duitnow: #ED2E67;
+  }
+
+  * {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+    touch-action: manipulation;
+  }
+
+  html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font-family: 'Nunito', sans-serif;
+    background:
+      radial-gradient(120vw 80vh at 12% -10%, rgba(0,180,166,0.10), transparent 60%),
+      radial-gradient(130vw 90vh at 88% 110%, rgba(0,71,171,0.10), transparent 60%),
+      var(--bg);
+    color: var(--text-dark);
+    user-select: none;
+    -webkit-user-select: none;
+    cursor: default;
+  }
+
+  /* Proportional kiosk scaler: #stage is authored at 1920x1080 design units
+     and scaled by JS to fit any viewport (1280x720 up to 4K) with no overflow.
+     The transform also makes position:fixed children contain to the stage. */
+  #stage {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1920px;
+    height: 1080px;
+    transform-origin: 0 0;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(120deg, rgba(0,180,166,0.05) 1px, transparent 1px),
+      linear-gradient(60deg, rgba(0,71,171,0.04) 1px, transparent 1px),
+      linear-gradient(180deg, rgba(0,180,166,0.03) 1px, transparent 1px);
+    background-size: 80px 80px, 80px 80px, 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  #app {
+    position: relative;
+    width: 1920px;
+    height: 1080px;
+    overflow: hidden;
+    z-index: 1;
+  }
+
+  /* ---- Progress dots ---- */
+  #progress-dots {
+    position: fixed;
+    top: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 100;
+    padding: 12px 22px;
+    background: rgba(255,255,255,0.55);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.75);
+    border-radius: 40px;
+    box-shadow: 0 4px 18px rgba(0,40,100,0.08);
+  }
+  .dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: rgba(0,71,171,0.25);
+    transition: all 0.4s;
+  }
+  .dot.active { background: var(--blue); transform: scale(1.4); }
+  .dot.done { background: var(--teal); }
+
+  /* ---- Language toggle ---- */
+  #lang-toggle {
+    position: fixed;
+    top: 20px;
+    right: 40px;
+    z-index: 100;
+    display: flex;
+    background: rgba(255,255,255,0.72);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(255,255,255,0.8);
+    border-radius: 50px;
+    box-shadow: var(--card-shadow);
+    overflow: hidden;
+  }
+  .lang-btn {
+    padding: 10px 24px;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    font-size: 18px;
+    border: none;
+    background: transparent;
+    color: var(--text-mid);
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  .lang-btn.active { background: var(--blue); color: white; border-radius: 50px; }
+
+  /* ---- Nav buttons ---- */
+  #nav-back, #nav-next {
+    position: fixed;
+    bottom: 32px;
+    z-index: 100;
+    padding: 20px 48px;
+    border: none;
+    border-radius: 50px;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    font-size: 22px;
+    cursor: pointer;
+    min-width: 220px;
+    min-height: 72px;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  #nav-back {
+    left: 60px;
+    background: rgba(255,255,255,0.78);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.85);
+    color: var(--blue);
+    box-shadow: var(--card-shadow);
+    display: none;
+  }
+  #nav-back:hover { background: var(--bg); transform: translateX(-4px); }
+  #nav-next {
+    right: 60px;
+    background: linear-gradient(135deg, var(--blue), var(--teal));
+    color: white;
+    box-shadow: 0 8px 32px rgba(0,71,171,0.35);
+  }
+  #nav-next:hover { transform: translateX(4px); box-shadow: 0 12px 40px rgba(0,71,171,0.45); }
+
+  /* ---- Sections ---- */
+  .section {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 100px 120px 120px;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .section.active { opacity: 1; pointer-events: all; }
+
+  /* ========================================================
+     SECTION 1 — OPENING
+  ======================================================== */
+  #section-0 { gap: 36px; }
+
+  .skyline-container {
+    width: 1000px;
+    height: 180px;
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+  }
+  .skyline { display: flex; align-items: flex-end; gap: 5px; }
+  .sky-building { border-radius: 4px 4px 0 0; }
+
+  .skyline-jb .b1 { width:30px; height:62px; background:var(--blue); }
+  .skyline-jb .b2 { width:24px; height:92px; background:#1a5fb4; }
+  .skyline-jb .b3 { width:38px; height:115px; background:var(--blue); }
+  .skyline-jb .b4 { width:22px; height:72px; background:#2d73c4; }
+  .skyline-jb .b5 { width:32px; height:135px; background:var(--blue); position:relative; }
+  .skyline-jb .b5::before { content:''; position:absolute; top:-18px; left:50%; transform:translateX(-50%); width:5px; height:18px; background:var(--gold); }
+  .skyline-jb .b6 { width:26px; height:82px; background:#1a5fb4; }
+  .skyline-jb .b7 { width:34px; height:68px; background:var(--blue); }
+
+  .skyline-sg .b1 { width:28px; height:72px; background:var(--teal); }
+  .skyline-sg .b2 { width:36px; height:105px; background:#00a090; }
+  .skyline-sg .b3 { width:22px; height:88px; background:var(--teal); }
+  .skyline-sg .b4 { width:42px; height:155px; background:#009988; position:relative; }
+  .skyline-sg .b4::after { content:''; position:absolute; top:-14px; left:50%; transform:translateX(-50%); width:18px; height:14px; background:var(--gold); border-radius:50% 50% 0 0; }
+  .skyline-sg .b5 { width:30px; height:125px; background:var(--teal); }
+  .skyline-sg .b6 { width:24px; height:93px; background:#00c4b4; }
+  .skyline-sg .b7 { width:32px; height:78px; background:var(--teal); }
+
+  .skyline-bridge {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 24px;
+    width: 320px;
+    height: 48px;
+  }
+  .flow-line {
+    position: absolute;
+    height: 3px;
+    border-radius: 3px;
+    background: linear-gradient(90deg, var(--blue), var(--teal), var(--gold), var(--teal), var(--blue));
+    background-size: 200% 100%;
+    animation: flowAnim 2s linear infinite;
+  }
+  .flow-line:nth-child(1) { width:320px; bottom:26px; }
+  .flow-line:nth-child(2) { width:270px; left:25px; bottom:16px; opacity:0.6; animation-delay:0.3s; }
+  .flow-line:nth-child(3) { width:220px; left:50px; bottom:6px; opacity:0.3; animation-delay:0.6s; }
+  @keyframes flowAnim {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+  .flow-dot {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--gold);
+    bottom: 22px;
+    animation: dotFlow 2.2s ease-in-out infinite;
+  }
+  .flow-dot:nth-child(4) { animation-delay:0s; }
+  .flow-dot:nth-child(5) { animation-delay:0.7s; }
+  .flow-dot:nth-child(6) { animation-delay:1.4s; }
+  @keyframes dotFlow {
+    0% { left:0; opacity:0; transform:scale(0.5); }
+    10% { opacity:1; transform:scale(1); }
+    90% { opacity:1; transform:scale(1); }
+    100% { left:calc(100% - 10px); opacity:0; transform:scale(0.5); }
+  }
+
+  .label-city {
+    position: absolute;
+    bottom: -30px;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    font-size: 17px;
+    color: var(--text-mid);
+  }
+  .label-city.left { left: 0; }
+  .label-city.right { right: 0; }
+
+  #section-0 h1 {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 800;
+    font-size: 52px;
+    text-align: center;
+    background: linear-gradient(135deg, var(--blue), var(--teal));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.2;
+    max-width: 1200px;
+  }
+  #section-0 p {
+    font-size: 26px;
+    text-align: center;
+    color: var(--text-mid);
+    max-width: 1200px;
+    line-height: 1.6;
+  }
+  .cta-pulse {
+    padding: 28px 72px;
+    border: none;
+    border-radius: 50px;
+    background: linear-gradient(135deg, var(--blue), var(--teal));
+    color: white;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    font-size: 28px;
+    cursor: pointer;
+    animation: pulseCta 2s ease-in-out infinite;
+    box-shadow: 0 8px 32px rgba(0,71,171,0.35);
+    min-height: 80px;
+  }
+  @keyframes pulseCta {
+    0%,100% { transform:scale(1); box-shadow:0 8px 32px rgba(0,71,171,0.35); }
+    50% { transform:scale(1.04); box-shadow:0 12px 48px rgba(0,71,171,0.5); }
+  }
+
+  /* ========================================================
+     SECTION 2 — SCENARIOS
+  ======================================================== */
+  #section-1 { gap: 52px; }
+  #section-1 h2 {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 800;
+    font-size: 50px;
+    color: var(--blue);
+    text-align: center;
+  }
+  .scenario-cards { display: flex; gap: 64px; justify-content: center; }
+  .scenario-card {
+    background: white;
+    border-radius: var(--radius);
+    box-shadow: var(--card-shadow);
+    padding: 68px 80px;
+    width: 720px;
+    text-align: center;
+    border: 3px solid transparent;
+    transition: all 0.3s;
+    cursor: pointer;
+  }
+  .scenario-card:hover { border-color: var(--teal); transform: translateY(-8px); box-shadow: 0 20px 56px rgba(0,71,171,0.15); }
+  .scenario-emoji { font-size: 108px; line-height: 1; margin-bottom: 28px; display: block; }
+  .scenario-card h3 { font-family:'Poppins',sans-serif; font-weight:700; font-size:32px; color:var(--blue); margin-bottom:18px; line-height:1.3; }
+  .scenario-card p { font-size:24px; color:var(--text-mid); line-height:1.6; }
+
+  /* ========================================================
+     SECTION 3 — QR SIMULATION
+  ======================================================== */
+  #section-2 {
+    flex-direction: row;
+    gap: 100px;
+    align-items: center;
+  }
+  .phone-wrapper { display:flex; flex-direction:column; align-items:center; gap:28px; }
+  .phone-mock {
+    width: 360px;
+    height: 660px;
+    background: #1A2340;
+    border-radius: 44px;
+    padding: 18px;
+    box-shadow: 0 24px 72px rgba(0,0,0,0.35);
+    position: relative;
+  }
+  .phone-notch { width:130px; height:26px; background:#0d1525; border-radius:0 0 18px 18px; margin:0 auto 10px; }
+  .phone-screen {
+    background: #f8faff;
+    border-radius: 28px;
+    height: 576px;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px 16px 16px;
+  }
+  .step-dots { position:absolute; top:14px; left:50%; transform:translateX(-50%); display:flex; gap:7px; }
+  .step-dot { width:9px; height:9px; border-radius:50%; background:rgba(0,71,171,0.2); transition:all 0.3s; }
+  .step-dot.active { background:var(--blue); transform:scale(1.3); }
+  .step-dot.done { background:var(--teal); }
+
+  /* QR */
+  .qr-container { width:210px; height:210px; position:relative; margin:24px 0 14px; }
+  .qr-grid {
+    width:210px; height:210px;
+    display:grid;
+    grid-template-columns:repeat(10,1fr);
+    grid-template-rows:repeat(10,1fr);
+    gap:2px;
+    border:4px solid var(--blue);
+    border-radius:8px;
+    padding:8px;
+    background:white;
+  }
+  .qr-cell { border-radius:2px; }
+  .qr-cell.filled { background:var(--text-dark); }
+  .qr-cell.empty { background:white; }
+  .qr-corner { position:absolute; width:42px; height:42px; border:4px solid var(--blue); border-radius:4px; }
+  .qr-corner.tl { top:8px; left:8px; border-right:none; border-bottom:none; }
+  .qr-corner.tr { top:8px; right:8px; border-left:none; border-bottom:none; }
+  .qr-corner.bl { bottom:8px; left:8px; border-right:none; border-top:none; }
+  .scan-line {
+    position:absolute; left:8px; right:8px; height:3px;
+    background:linear-gradient(90deg,transparent,var(--teal),transparent);
+    border-radius:2px;
+    animation:scanLine 2s ease-in-out infinite;
+    top:0;
+  }
+  @keyframes scanLine {
+    0%,100% { top:8px; opacity:0; }
+    10% { opacity:1; }
+    90% { opacity:1; }
+    50% { top:calc(100% - 11px); }
+  }
+  .step-label { font-family:'Poppins',sans-serif; font-weight:700; font-size:15px; color:var(--blue); margin-bottom:5px; text-align:center; }
+  .step-desc { font-size:13px; color:var(--text-mid); text-align:center; line-height:1.4; padding:0 8px; }
+
+  /* Wallet options */
+  .wallet-options { display:flex; flex-direction:column; gap:10px; width:100%; padding:0 4px; }
+  .wallet-opt {
+    display:flex; align-items:center; gap:12px;
+    padding:13px 16px;
+    background:white;
+    border-radius:13px;
+    border:2px solid transparent;
+    cursor:pointer;
+    transition:all 0.2s;
+    box-shadow:0 2px 8px rgba(0,0,0,0.06);
+  }
+  .wallet-opt:hover, .wallet-opt.selected { border-color:var(--teal); background:#f0fff8; }
+  .wallet-icon { width:38px; height:38px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:19px; font-weight:800; color:white; flex-shrink:0; }
+  .wallet-name { font-weight:700; font-size:15px; color:var(--text-dark); }
+  .wallet-sub { font-size:11px; color:var(--text-light); }
+
+  /* Conversion */
+  .conversion-display { text-align:center; padding:10px; }
+  .amount-from { font-family:'Poppins',sans-serif; font-weight:800; font-size:34px; color:var(--blue); margin-bottom:6px; }
+  .conversion-arrow { font-size:26px; color:var(--teal); margin:4px 0; }
+  .amount-to { font-family:'Poppins',sans-serif; font-weight:800; font-size:38px; color:var(--teal); margin-bottom:6px; }
+  .rate-note { font-size:12px; color:var(--text-light); }
+
+  /* Confirmed */
+  .confirmed-screen { text-align:center; }
+  .checkmark-circle { width:84px; height:84px; background:var(--green); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:44px; margin:0 auto 14px; animation:popIn 0.5s cubic-bezier(0.175,0.885,0.32,1.275); }
+  @keyframes popIn { 0% { transform:scale(0); opacity:0; } 100% { transform:scale(1); opacity:1; } }
+  .fingerprint-icon { font-size:42px; margin-bottom:10px; animation:fingerprintPulse 1.5s ease-in-out infinite; }
+  @keyframes fingerprintPulse { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:0.6; transform:scale(1.1); } }
+  .confirmed-text { font-family:'Poppins',sans-serif; font-weight:700; font-size:16px; color:var(--green); line-height:1.4; }
+
+  /* Toast */
+  .toast-notif { width:100%; background:linear-gradient(135deg,var(--blue),var(--teal)); border-radius:13px; padding:15px 17px; color:white; margin-bottom:12px; animation:slideInToast 0.5s ease; }
+  @keyframes slideInToast { from { transform:translateY(-20px); opacity:0; } to { transform:translateY(0); opacity:1; } }
+  .toast-header { font-weight:700; font-size:14px; margin-bottom:4px; }
+  .toast-body { font-size:12px; opacity:0.9; }
+  .merchant-badge { display:inline-flex; align-items:center; gap:8px; background:white; border-radius:9px; padding:9px 14px; margin-top:8px; }
+  .merchant-badge span { font-size:14px; font-weight:700; color:var(--blue); }
+
+  /* Sim info panel */
+  .sim-info-panel { max-width: 820px; }
+  .sim-info-panel h2 { font-family:'Poppins',sans-serif; font-weight:800; font-size:46px; color:var(--blue); margin-bottom:24px; line-height:1.2; }
+  .sim-info-panel p { font-size:26px; color:var(--text-mid); line-height:1.6; margin-bottom:36px; }
+  .step-nav-btns { display:flex; gap:18px; align-items:center; }
+  .btn-step-next { padding:18px 38px; border:none; border-radius:50px; background:linear-gradient(135deg,var(--blue),var(--teal)); color:white; font-family:'Poppins',sans-serif; font-weight:700; font-size:19px; cursor:pointer; transition:all 0.2s; min-height:68px; }
+  .btn-step-next:hover { transform:scale(1.04); }
+  .btn-step-prev { padding:15px 30px; border:2px solid var(--blue); border-radius:50px; background:transparent; color:var(--blue); font-family:'Poppins',sans-serif; font-weight:600; font-size:17px; cursor:pointer; min-height:64px; }
+
+  /* ========================================================
+     SECTION 4 — BEHIND SCENES
+  ======================================================== */
+  #section-3 { gap: 44px; }
+  #section-3 h2 { font-family:'Poppins',sans-serif; font-weight:800; font-size:50px; color:var(--blue); text-align:center; }
+  .info-grid { display:grid; grid-template-columns:1fr 1fr; gap:36px; width:100%; max-width:1600px; }
+  .info-card { background:white; border-radius:var(--radius); box-shadow:var(--card-shadow); overflow:hidden; cursor:pointer; border:2px solid transparent; transition:border-color 0.3s; }
+  .info-card.expanded { border-color:var(--teal); }
+  .info-card-header { padding:34px 44px; display:flex; align-items:center; gap:22px; }
+  .info-icon { font-size:46px; }
+  .info-title { font-family:'Poppins',sans-serif; font-weight:700; font-size:23px; color:var(--blue); line-height:1.3; flex:1; }
+  .expand-arrow { font-size:24px; color:var(--teal); transition:transform 0.3s; flex-shrink:0; }
+  .info-card.expanded .expand-arrow { transform:rotate(180deg); }
+  .info-card-body { max-height:0; overflow:hidden; transition:max-height 0.4s ease; padding:0 44px; }
+  .info-card.expanded .info-card-body { max-height:220px; }
+  .info-card-body-inner { padding-bottom:30px; border-top:1px solid #e8f0fe; padding-top:22px; }
+  .info-card-body p { font-size:21px; color:var(--text-mid); line-height:1.65; }
+
+  /* ========================================================
+     SECTION 5 — SAFETY
+  ======================================================== */
+  #section-4 { gap: 52px; }
+  #section-4 h2 { font-family:'Poppins',sans-serif; font-weight:800; font-size:50px; color:var(--blue); text-align:center; }
+  .safety-list { display:flex; flex-direction:column; gap:26px; max-width:1280px; width:100%; }
+  .safety-item { background:white; border-radius:20px; box-shadow:var(--card-shadow); padding:34px 52px; display:flex; align-items:center; gap:34px; opacity:0; transform:translateX(-40px); border-left:7px solid var(--teal); }
+  .safety-item.visible { animation:slideInRight 0.5s ease forwards; }
+  @keyframes slideInRight { to { opacity:1; transform:translateX(0); } }
+  .safety-num { width:58px; height:58px; border-radius:50%; background:linear-gradient(135deg,var(--blue),var(--teal)); color:white; font-family:'Poppins',sans-serif; font-weight:800; font-size:24px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .safety-text { font-size:28px; font-weight:600; color:var(--text-dark); line-height:1.4; }
+
+  /* ========================================================
+     SECTION 6 — QUIZ
+  ======================================================== */
+  #section-5 { gap: 28px; justify-content:center; }
+  #section-5 h2 { font-family:'Poppins',sans-serif; font-weight:800; font-size:46px; color:var(--blue); text-align:center; }
+  #quiz-content { width:100%; max-width:1480px; }
+
+  /* Facts */
+  .facts-container { display:flex; gap:52px; justify-content:center; margin-bottom:36px; }
+  .fact-bubble { background:white; border-radius:var(--radius); box-shadow:var(--card-shadow); padding:52px 60px; max-width:640px; text-align:center; border:3px solid var(--teal); position:relative; }
+  .fact-bubble::after { content:''; position:absolute; bottom:-22px; left:50%; transform:translateX(-50%); border:13px solid transparent; border-top-color:var(--teal); }
+  .fact-text { font-size:23px; line-height:1.6; color:var(--text-dark); font-weight:600; }
+  .btn-dismiss-facts { padding:20px 60px; border:none; border-radius:50px; background:linear-gradient(135deg,var(--teal),var(--blue)); color:white; font-family:'Poppins',sans-serif; font-weight:700; font-size:24px; cursor:pointer; min-height:72px; }
+  .btn-dismiss-facts:hover { opacity:0.9; }
+
+  /* Quiz */
+  .quiz-progress-bar { display:flex; gap:14px; margin-bottom:26px; justify-content:center; }
+  .qpb-dot { width:15px; height:15px; border-radius:50%; background:#d0dcea; transition:background 0.3s; }
+  .qpb-dot.answered-correct { background:var(--green); }
+  .qpb-dot.answered-wrong { background:var(--red); }
+  .qpb-dot.current { background:var(--blue); transform:scale(1.3); }
+
+  .quiz-question-card { background:white; border-radius:var(--radius); box-shadow:var(--card-shadow); padding:60px 80px; max-width:1180px; width:100%; margin:0 auto; }
+  .quiz-qnum { font-family:'Poppins',sans-serif; font-weight:600; font-size:19px; color:var(--teal); margin-bottom:14px; text-transform:uppercase; letter-spacing:2px; }
+  .quiz-q { font-family:'Poppins',sans-serif; font-weight:700; font-size:34px; color:var(--text-dark); margin-bottom:38px; line-height:1.3; }
+  .quiz-options { display:flex; flex-direction:column; gap:18px; }
+  .quiz-opt { padding:26px 38px; border:3px solid #e0e8f5; border-radius:17px; font-size:25px; font-weight:600; cursor:pointer; transition:all 0.2s; text-align:left; background:#f8faff; color:var(--text-dark); }
+  .quiz-opt:hover:not([disabled]) { border-color:var(--blue); background:#eef4ff; }
+  .quiz-opt.correct { border-color:var(--green); background:#f0fff4; color:#15803d; }
+  .quiz-opt.wrong { border-color:var(--red); background:#fff5f5; color:#b91c1c; animation:shake 0.4s; }
+  .quiz-opt.reveal-correct { border-color:var(--green); background:#f0fff4; }
+  @keyframes shake { 0%,100%{transform:translateX(0);} 20%{transform:translateX(-10px);} 40%{transform:translateX(10px);} 60%{transform:translateX(-6px);} 80%{transform:translateX(6px);} }
+  .quiz-feedback { margin-top:22px; padding:18px 26px; border-radius:13px; font-weight:600; font-size:21px; display:none; }
+  .quiz-feedback.show { display:block; }
+  .quiz-feedback.correct { background:#f0fff4; color:#15803d; border:2px solid var(--green); }
+  .quiz-feedback.wrong { background:#fff5f5; color:#b91c1c; border:2px solid var(--red); }
+  .btn-next-q { margin-top:26px; padding:20px 52px; border:none; border-radius:50px; background:linear-gradient(135deg,var(--blue),var(--teal)); color:white; font-family:'Poppins',sans-serif; font-weight:700; font-size:22px; cursor:pointer; display:none; min-height:68px; }
+  .btn-next-q.show { display:block; }
+
+  /* ========================================================
+     SECTION 7 — CLOSING
+  ======================================================== */
+  #section-6 { gap: 40px; }
+  .celebration-emoji { font-size:130px; animation:celebSpin 0.8s ease, celebFloat 3s ease-in-out infinite 0.8s; display:block; text-align:center; }
+  @keyframes celebSpin { from { transform:rotate(-180deg) scale(0); opacity:0; } to { transform:rotate(0) scale(1); opacity:1; } }
+  @keyframes celebFloat { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-14px);} }
+  .closing-text { text-align:center; max-width:1200px; }
+  .closing-text h2 { font-family:'Poppins',sans-serif; font-weight:800; font-size:50px; color:var(--blue); margin-bottom:18px; line-height:1.2; }
+  .closing-text p { font-size:28px; color:var(--text-mid); line-height:1.6; margin-bottom:12px; }
+  .score-display { background:linear-gradient(135deg,var(--blue),var(--teal)); border-radius:22px; padding:30px 72px; color:white; text-align:center; display:inline-block; }
+  .score-num { font-family:'Poppins',sans-serif; font-weight:900; font-size:68px; line-height:1; }
+  .score-label { font-size:22px; opacity:0.9; margin-top:6px; }
+  .btn-restart { padding:26px 80px; border:3px solid var(--blue); border-radius:50px; background:white; color:var(--blue); font-family:'Poppins',sans-serif; font-weight:800; font-size:30px; cursor:pointer; box-shadow:0 8px 32px rgba(0,71,171,0.15); transition:all 0.3s; min-height:86px; }
+  .btn-restart:hover { background:var(--blue); color:white; transform:scale(1.04); }
+
+  /* ========================================================
+     SECTION 8 — TRY QR PAYMENT (E-WALLET PHONE DEMO)
+  ======================================================== */
+  .btn-pay-cta {
+    padding: 24px 64px;
+    border: none;
+    border-radius: 50px;
+    background: linear-gradient(135deg, var(--gold), var(--coral));
+    color: white;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 800;
+    font-size: 28px;
+    cursor: pointer;
+    min-height: 80px;
+    box-shadow: 0 10px 36px rgba(245,166,35,0.45);
+    animation: pulseCta 2s ease-in-out infinite;
+  }
+
+  #section-7 { flex-direction: row; gap: 90px; padding: 50px 150px 60px; }
+
+  /* Coaching panel (outside the phone) */
+  .pay-coach {
+    max-width: 620px;
+    background: rgba(255,255,255,0.6);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255,255,255,0.85);
+    border-radius: var(--radius);
+    box-shadow: 0 12px 44px rgba(0,40,100,0.12);
+    padding: 50px 54px;
+  }
+  .pay-coach-badge {
+    display: inline-block;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    font-size: 18px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: white;
+    background: linear-gradient(135deg, var(--purple), var(--blue));
+    padding: 10px 28px;
+    border-radius: 40px;
+    margin-bottom: 24px;
+    box-shadow: 0 6px 20px rgba(123,94,167,0.35);
+  }
+  .pay-coach h2 { font-family:'Poppins',sans-serif; font-weight:800; font-size:44px; color:var(--blue); line-height:1.22; margin-bottom:20px; }
+  .pay-coach p { font-size:26px; color:var(--text-mid); line-height:1.65; }
+  .pay-coach-dots { display:flex; gap:12px; margin-top:34px; }
+  .pay-dot { width:15px; height:15px; border-radius:50%; background:rgba(0,71,171,0.18); transition:all 0.3s; }
+  .pay-dot.active { background:var(--gold); transform:scale(1.35); box-shadow:0 0 14px rgba(245,166,35,0.75); }
+  .pay-dot.done { background:var(--teal); }
+
+  /* Phone frame — ~9:19 aspect, authored in 1080-unit stage (895/1080 ≈ 83%
+     of viewport height once the stage scaler runs ≈ min(85vh, ...)) */
+  .payphone {
+    width: 424px;
+    height: 895px;
+    background: linear-gradient(165deg, #3b4a6e, #161e33 40%, #0c1322);
+    border-radius: 58px;
+    padding: 13px;
+    box-shadow: 0 36px 90px rgba(10,20,45,0.5), 0 0 60px rgba(0,180,166,0.18), inset 0 0 0 2px rgba(255,255,255,0.14);
+    position: relative;
+    flex-shrink: 0;
+  }
+  .payphone::before { content:''; position:absolute; right:-5px; top:200px; width:5px; height:96px; background:#3b4a6e; border-radius:0 5px 5px 0; }
+  .payphone::after { content:''; position:absolute; right:-5px; top:320px; width:5px; height:56px; background:#3b4a6e; border-radius:0 5px 5px 0; }
+  .payphone-screen {
+    width: 100%;
+    height: 100%;
+    border-radius: 46px;
+    overflow: hidden;
+    position: relative;
+    background: #F4F8FF;
+  }
+  .pp-punchhole {
+    position: absolute; top: 16px; left: 50%; transform: translateX(-50%);
+    width: 18px; height: 18px; border-radius: 50%;
+    background: #0c1322;
+    box-shadow: inset 0 0 5px rgba(90,130,255,0.7), 0 0 0 3px rgba(0,0,0,0.18);
+    z-index: 30;
+  }
+  .pp-statusbar {
+    position: absolute; top: 0; left: 0; right: 0;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 14px 30px 0;
+    font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 16px;
+    color: var(--text-dark);
+    z-index: 20;
+    pointer-events: none;
+  }
+  .pp-statusbar.light { color: #fff; }
+  .pp-status-icons { display: flex; align-items: center; gap: 9px; }
+  .pp-sig { font-size: 12px; letter-spacing: 1px; font-weight: 700; }
+  .pp-battery { width: 27px; height: 13px; border: 2px solid currentColor; border-radius: 4px; position: relative; }
+  .pp-battery::before { content:''; position:absolute; inset:2px; right:28%; background:currentColor; border-radius:1px; }
+  .pp-battery::after { content:''; position:absolute; right:-6px; top:2.5px; width:3px; height:6px; background:currentColor; border-radius:0 2px 2px 0; }
+  #pay-screen { position: absolute; inset: 0; display: flex; flex-direction: column; }
+
+  /* -- App home screen -- */
+  .pph-header {
+    background: linear-gradient(150deg, var(--blue) 0%, #0a5fc4 55%, var(--teal) 130%);
+    padding: 66px 28px 72px;
+    border-radius: 0 0 36px 36px;
+    color: white;
+    position: relative;
+    box-shadow: 0 10px 30px rgba(0,71,171,0.25);
+  }
+  .pph-greet { font-size: 17px; opacity: 0.85; }
+  .pph-name { font-family:'Poppins',sans-serif; font-weight:700; font-size:24px; margin-bottom:20px; }
+  .pph-balance-card {
+    background: rgba(255,255,255,0.16);
+    border: 1px solid rgba(255,255,255,0.35);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-radius: 20px;
+    padding: 18px 24px;
+  }
+  .pph-balance-label { font-size: 15px; opacity: 0.85; }
+  .pph-balance { font-family:'Poppins',sans-serif; font-weight:800; font-size:40px; letter-spacing:0.5px; }
+  .pph-scan-btn {
+    position: absolute; left: 50%; bottom: -44px; transform: translateX(-50%);
+    width: 304px; min-height: 90px;
+    border: none; border-radius: 48px;
+    background: linear-gradient(135deg, var(--gold), var(--coral));
+    color: white;
+    font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 26px;
+    cursor: pointer;
+    box-shadow: 0 14px 36px rgba(255,107,91,0.45);
+    animation: pulseScanBtn 1.8s ease-in-out infinite;
+    display: flex; align-items: center; justify-content: center; gap: 12px;
+    z-index: 5;
+  }
+  @keyframes pulseScanBtn {
+    0%,100% { transform: translateX(-50%) scale(1); box-shadow: 0 14px 36px rgba(255,107,91,0.45); }
+    50% { transform: translateX(-50%) scale(1.05); box-shadow: 0 18px 48px rgba(255,107,91,0.6); }
+  }
+  .pph-section-label { font-family:'Poppins',sans-serif; font-weight:700; font-size:17px; color:var(--text-mid); margin:66px 26px 12px; }
+  .pph-tx { display:flex; align-items:center; gap:14px; background:white; border-radius:16px; padding:14px 18px; margin:0 22px 10px; box-shadow:0 2px 10px rgba(0,40,100,0.06); }
+  .pph-tx-icon { width:46px; height:46px; border-radius:13px; display:flex; align-items:center; justify-content:center; font-size:23px; flex-shrink:0; }
+  .pph-tx-name { font-weight:700; font-size:16px; color:var(--text-dark); }
+  .pph-tx-date { font-size:13px; color:var(--text-light); }
+  .pph-tx-amt { margin-left:auto; font-family:'Poppins',sans-serif; font-weight:700; font-size:16px; white-space:nowrap; }
+  .pph-tx-amt.neg { color:var(--text-dark); }
+  .pph-tx-amt.pos { color:var(--green); }
+
+  /* -- Camera viewfinder / scanner -- */
+  .pps-scanner { flex:1; background:radial-gradient(circle at 50% 30%, #122036, #0A1020 70%); display:flex; flex-direction:column; align-items:center; padding-top:78px; position:relative; }
+  .pps-title { color:white; font-family:'Poppins',sans-serif; font-weight:700; font-size:22px; margin-bottom:6px; }
+  .pps-sub { color:rgba(255,255,255,0.6); font-size:16px; margin-bottom:30px; }
+  .pps-frame { width:304px; height:304px; position:relative; display:flex; align-items:center; justify-content:center; cursor:pointer; }
+  .pps-corner { position:absolute; width:56px; height:56px; border:5px solid var(--teal); border-radius:8px; filter:drop-shadow(0 0 8px rgba(0,180,166,0.8)); }
+  .pps-corner.tl { top:0; left:0; border-right:none; border-bottom:none; border-radius:8px 0 0 0; }
+  .pps-corner.tr { top:0; right:0; border-left:none; border-bottom:none; border-radius:0 8px 0 0; }
+  .pps-corner.bl { bottom:0; left:0; border-right:none; border-top:none; border-radius:0 0 0 8px; }
+  .pps-corner.br { bottom:0; right:0; border-left:none; border-top:none; border-radius:0 0 8px 0; }
+  .pps-scanline {
+    position:absolute; left:12px; right:12px; height:4px;
+    background:linear-gradient(90deg, transparent, var(--teal), transparent);
+    box-shadow:0 0 18px var(--teal);
+    border-radius:3px;
+    animation:scanSweep 2.2s ease-in-out infinite;
+    z-index:6;
+  }
+  @keyframes scanSweep {
+    0%,100% { top:14px; opacity:0.25; }
+    12% { opacity:1; }
+    88% { opacity:1; }
+    50% { top:calc(100% - 18px); }
+  }
+  .duitnow-card { width:230px; background:white; border-radius:16px; overflow:hidden; box-shadow:0 8px 30px rgba(237,46,103,0.4); animation:qrFloat 3s ease-in-out infinite; }
+  @keyframes qrFloat { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-7px); } }
+  .duitnow-head { background:var(--duitnow); color:white; font-family:'Poppins',sans-serif; font-weight:800; font-size:17px; text-align:center; padding:9px; letter-spacing:0.5px; }
+  .duitnow-qr { width:160px; height:160px; display:grid; grid-template-columns:repeat(10,1fr); grid-template-rows:repeat(10,1fr); gap:2px; margin:13px auto 6px; }
+  .duitnow-qr .qr-cell.filled { background:#1A2340; }
+  .duitnow-foot { text-align:center; font-size:11px; font-weight:800; color:var(--duitnow); padding-bottom:11px; letter-spacing:1.5px; }
+  .pps-hint { margin-top:28px; color:var(--gold); font-weight:700; font-size:17px; animation:fingerprintPulse 1.5s ease-in-out infinite; text-align:center; padding:0 30px; line-height:1.5; }
+  .pps-flash { position:absolute; inset:0; background:white; opacity:0; pointer-events:none; z-index:40; }
+
+  /* -- Payment confirmation -- */
+  .ppc-wrap { flex:1; padding:70px 26px 26px; display:flex; flex-direction:column; gap:15px; overflow:hidden; }
+  .ppc-title { font-family:'Poppins',sans-serif; font-weight:800; font-size:24px; color:var(--blue); text-align:center; }
+  .ppc-merchant { background:white; border-radius:18px; padding:18px 20px; display:flex; align-items:center; gap:15px; box-shadow:0 3px 14px rgba(0,40,100,0.08); }
+  .ppc-merchant-icon { width:56px; height:56px; border-radius:15px; background:linear-gradient(135deg,var(--purple),var(--coral)); display:flex; align-items:center; justify-content:center; font-size:27px; flex-shrink:0; }
+  .ppc-merchant-name { font-weight:800; font-size:18px; color:var(--text-dark); }
+  .ppc-merchant-loc { font-size:14px; color:var(--text-light); }
+  .ppc-amount-card { background:linear-gradient(150deg,var(--blue),var(--teal)); border-radius:22px; padding:22px 20px 18px; text-align:center; color:white; box-shadow:0 8px 26px rgba(0,71,171,0.3); }
+  .ppc-foreign { font-family:'Poppins',sans-serif; font-weight:800; font-size:40px; }
+  .ppc-rate { font-size:14px; opacity:0.95; margin:9px 0 7px; background:rgba(255,255,255,0.16); display:inline-block; padding:6px 18px; border-radius:20px; }
+  .ppc-arrow { font-size:21px; margin:2px 0; }
+  .ppc-myr { font-family:'Poppins',sans-serif; font-weight:800; font-size:34px; color:#FFE08A; }
+  .ppc-myr-label { font-size:13px; opacity:0.85; margin-top:2px; }
+  .duitnow-badge { align-self:center; background:rgba(237,46,103,0.1); color:var(--duitnow); border:1.5px solid rgba(237,46,103,0.4); border-radius:20px; padding:8px 20px; font-weight:800; font-size:13.5px; letter-spacing:0.5px; }
+  .ppc-confirm-btn {
+    margin-top:auto; border:none; border-radius:44px; min-height:82px;
+    background:linear-gradient(135deg,var(--green),var(--teal));
+    color:white; font-family:'Poppins',sans-serif; font-weight:800; font-size:25px;
+    cursor:pointer; box-shadow:0 10px 30px rgba(34,197,94,0.4);
+    animation:pulseCta 1.8s ease-in-out infinite;
+  }
+
+  /* -- Processing -- */
+  .ppp-wrap { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:34px; background:radial-gradient(circle at 50% 42%, #122036, #0A1020 75%); }
+  .ppp-pulse { width:136px; height:136px; position:relative; display:flex; align-items:center; justify-content:center; }
+  .ppp-ring { position:absolute; inset:0; border-radius:50%; border:4px solid var(--teal); animation:ppRing 1.6s ease-out infinite; }
+  .ppp-ring:nth-child(2) { animation-delay:0.55s; }
+  .ppp-ring:nth-child(3) { animation-delay:1.1s; }
+  @keyframes ppRing { 0% { transform:scale(0.45); opacity:1; } 100% { transform:scale(1.7); opacity:0; } }
+  .ppp-core { width:78px; height:78px; border-radius:50%; background:linear-gradient(135deg,var(--blue),var(--teal)); display:flex; align-items:center; justify-content:center; font-size:36px; box-shadow:0 0 36px rgba(0,180,166,0.6); animation:fingerprintPulse 1s ease-in-out infinite; }
+  .ppp-text { color:white; font-family:'Poppins',sans-serif; font-weight:700; font-size:22px; }
+  .ppp-subtext { color:rgba(255,255,255,0.55); font-size:14.5px; margin-top:-22px; text-align:center; padding:0 36px; line-height:1.5; }
+
+  /* -- Success / receipt -- */
+  .ppd-wrap { flex:1; display:flex; flex-direction:column; align-items:center; padding:74px 26px 26px; gap:14px; background:linear-gradient(180deg,#E9FBF4,#F4F8FF 48%); position:relative; overflow:hidden; }
+  .ppd-check {
+    width:106px; height:106px; border-radius:50%;
+    background:var(--green);
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 0 0 13px rgba(34,197,94,0.16), 0 12px 32px rgba(34,197,94,0.45);
+    animation:popIn 0.6s cubic-bezier(0.175,0.885,0.32,1.275);
+    flex-shrink:0;
+  }
+  .ppd-check svg path { stroke-dasharray:60; stroke-dashoffset:60; animation:drawCheck 0.5s ease forwards 0.35s; }
+  @keyframes drawCheck { to { stroke-dashoffset:0; } }
+  .ppd-title { font-family:'Poppins',sans-serif; font-weight:800; font-size:28px; color:var(--green); }
+  .ppd-receipt { width:100%; background:white; border-radius:18px; padding:18px 24px; box-shadow:0 4px 18px rgba(0,40,100,0.1); z-index:5; }
+  .ppd-row { display:flex; justify-content:space-between; gap:12px; font-size:15.5px; padding:8px 0; border-bottom:1px dashed #E2EAF6; }
+  .ppd-row:last-child { border-bottom:none; }
+  .ppd-row span:first-child { color:var(--text-light); }
+  .ppd-row span:last-child { font-weight:700; color:var(--text-dark); text-align:right; }
+  .ppd-row.total span:last-child { color:var(--blue); font-family:'Poppins',sans-serif; font-size:18px; }
+  .ppd-done-btn {
+    margin-top:auto; width:100%; border:none; border-radius:44px; min-height:80px;
+    background:linear-gradient(135deg,var(--blue),var(--teal));
+    color:white; font-family:'Poppins',sans-serif; font-weight:800; font-size:24px;
+    cursor:pointer; box-shadow:0 10px 28px rgba(0,71,171,0.35); z-index:5;
+  }
+  .confetti-bit { position:absolute; top:-16px; width:11px; height:16px; border-radius:3px; animation:confFall linear forwards; z-index:4; pointer-events:none; }
+  @keyframes confFall {
+    0% { transform:translateY(0) rotate(0deg); opacity:1; }
+    100% { transform:translateY(900px) rotate(640deg); opacity:0.55; }
+  }
+
+  /* ---- Idle overlay ---- */
+  #idle-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.88); z-index:1000; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:36px; opacity:0; pointer-events:none; transition:opacity 0.5s; }
+  #idle-overlay.show { opacity:1; pointer-events:all; }
+  .idle-text { font-family:'Poppins',sans-serif; font-weight:700; font-size:52px; color:white; text-align:center; }
+  .idle-sub { font-size:30px; color:rgba(255,255,255,0.7); text-align:center; }
+  .idle-touch-icon { font-size:104px; animation:touchBounce 1.5s ease-in-out infinite; }
+  @keyframes touchBounce { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-22px);} }
+
+  .hidden { display:none !important; }
+</style>
+</head>
+<body>
+<div id="stage">
+
+<!-- Progress dots -->
+<div id="progress-dots">
+  <div class="dot active" data-idx="0"></div>
+  <div class="dot" data-idx="1"></div>
+  <div class="dot" data-idx="2"></div>
+  <div class="dot" data-idx="3"></div>
+  <div class="dot" data-idx="4"></div>
+  <div class="dot" data-idx="5"></div>
+  <div class="dot" data-idx="6"></div>
+  <div class="dot" data-idx="7"></div>
+</div>
+
+<!-- Language toggle -->
+<div id="lang-toggle">
+  <button class="lang-btn active" data-lang="bm" onclick="setLang('bm')">BM</button>
+  <button class="lang-btn" data-lang="en" onclick="setLang('en')">EN</button>
+</div>
+
+<!-- Nav buttons -->
+<button id="nav-back" onclick="navigate(-1)">← <span id="nav-back-txt">Kembali / Back</span></button>
+<button id="nav-next" onclick="navigate(1)"><span id="nav-next-txt">Seterusnya / Next</span> →</button>
+
+<div id="app">
+
+  <!-- ========== SECTION 1: OPENING ========== -->
+  <div class="section active" id="section-0">
+    <div class="skyline-container">
+      <div class="skyline skyline-jb">
+        <div class="sky-building b1"></div>
+        <div class="sky-building b2"></div>
+        <div class="sky-building b3"></div>
+        <div class="sky-building b4"></div>
+        <div class="sky-building b5"></div>
+        <div class="sky-building b6"></div>
+        <div class="sky-building b7"></div>
+      </div>
+      <div class="skyline-bridge">
+        <div class="flow-line"></div>
+        <div class="flow-line"></div>
+        <div class="flow-line"></div>
+        <div class="flow-dot"></div>
+        <div class="flow-dot"></div>
+        <div class="flow-dot"></div>
+      </div>
+      <div class="skyline skyline-sg">
+        <div class="sky-building b1"></div>
+        <div class="sky-building b2"></div>
+        <div class="sky-building b3"></div>
+        <div class="sky-building b4"></div>
+        <div class="sky-building b5"></div>
+        <div class="sky-building b6"></div>
+        <div class="sky-building b7"></div>
+      </div>
+      <span class="label-city left">Johor Bahru 🇲🇾</span>
+      <span class="label-city right">Singapore 🇸🇬</span>
+    </div>
+    <h1 id="s0-title">Dunia yang semakin bersambung...<br>Kini, semuanya terasa lebih dekat...</h1>
+    <p id="s0-body">Dahulu, pembayaran rentas negara memerlukan wang tunai dan pertukaran mata wang. Hari ini, hanya perlu satu imbasan QR. Pembayaran digital rentas sempadan menunjukkan bagaimana Malaysia dan Singapura berbeza dari segi negara, tetapi bersatu sebagai satu ekosistem digital.</p>
+    <button class="cta-pulse" onclick="navigate(1)" id="s0-cta">Tekan untuk meneroka / Tap to explore →</button>
+  </div>
+
+  <!-- ========== SECTION 2: SCENARIOS ========== -->
+  <div class="section" id="section-1">
+    <h2 id="s1-title">Situasi Nyata / Real-World Scenarios</h2>
+    <div class="scenario-cards">
+      <div class="scenario-card">
+        <span class="scenario-emoji">👫</span>
+        <h3 id="s1-c1-title">Rakan menghantar wang serta-merta</h3>
+        <p id="s1-c1-body">Hantar wang kepada rakan di Singapura dalam masa beberapa saat — tanpa perlu ke bank atau tukar wang tunai. Mudah, cepat dan selamat.</p>
+      </div>
+      <div class="scenario-card">
+        <span class="scenario-emoji">🚌</span>
+        <h3 id="s1-c2-title">Membayar pengangkutan di luar negara</h3>
+        <p id="s1-c2-body">Gunakan e-dompet Malaysia untuk membayar tambang bas atau teksi di Singapura. Kadar pertukaran automatik — tiada bayaran tersembunyi.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== SECTION 3: QR SIMULATION ========== -->
+  <div class="section" id="section-2">
+    <div class="phone-wrapper">
+      <div class="phone-mock">
+        <div class="phone-notch"></div>
+        <div class="phone-screen" id="phone-screen">
+          <div class="step-dots" id="sim-step-dots">
+            <div class="step-dot active"></div>
+            <div class="step-dot"></div>
+            <div class="step-dot"></div>
+            <div class="step-dot"></div>
+            <div class="step-dot"></div>
+          </div>
+          <div id="sim-content"></div>
+        </div>
+      </div>
+      <div class="step-nav-btns">
+        <button class="btn-step-prev" id="btn-sim-prev" onclick="simStep(-1)" style="display:none">← <span id="s2-prev-lbl">Sebelumnya</span></button>
+        <button class="btn-step-next" id="btn-sim-next" onclick="simStep(1)"><span id="s2-next-lbl">Langkah Seterusnya</span> →</button>
+      </div>
+      <div id="sim-step-label" style="font-family:'Poppins',sans-serif;font-weight:700;font-size:19px;color:var(--blue);">Langkah 1/5</div>
+    </div>
+    <div class="sim-info-panel">
+      <h2 id="s2-title">Cuba Sendiri!</h2>
+      <p id="s2-body">Ikuti langkah-langkah di sebelah untuk mengalami bagaimana pembayaran QR rentas sempadan berfungsi dari mula hingga selesai.</p>
+    </div>
+  </div>
+
+  <!-- ========== SECTION 4: BEHIND SCENES ========== -->
+  <div class="section" id="section-3">
+    <h2 id="s3-title">Di Di Sebalik Tabir</h2>
+    <div class="info-grid">
+
+      <div class="info-card" onclick="toggleInfoCard(0)">
+        <div class="info-card-header">
+          <span class="info-icon">🏦</span>
+          <span class="info-title" id="ic0-title">Sistem penyelesaian antara bank</span>
+          <span class="expand-arrow">▼</span>
+        </div>
+        <div class="info-card-body">
+          <div class="info-card-body-inner">
+            <p id="ic0-body"></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-card" onclick="toggleInfoCard(1)">
+        <div class="info-card-header">
+          <span class="info-icon">📱</span>
+          <span class="info-title" id="ic1-title">Kebolehgunaan QR rentas sempadan</span>
+          <span class="expand-arrow">▼</span>
+        </div>
+        <div class="info-card-body">
+          <div class="info-card-body-inner">
+            <p id="ic1-body"></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-card" onclick="toggleInfoCard(2)">
+        <div class="info-card-header">
+          <span class="info-icon">💱</span>
+          <span class="info-title" id="ic2-title">Enjin penukaran mata wang</span>
+          <span class="expand-arrow">▼</span>
+        </div>
+        <div class="info-card-body">
+          <div class="info-card-body-inner">
+            <p id="ic2-body"></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-card" onclick="toggleInfoCard(3)">
+        <div class="info-card-header">
+          <span class="info-icon">🤝</span>
+          <span class="info-title" id="ic3-title">Kerjasama pengawalseliaan</span>
+          <span class="expand-arrow">▼</span>
+        </div>
+        <div class="info-card-body">
+          <div class="info-card-body-inner">
+            <p id="ic3-body"></p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========== SECTION 5: SAFETY ========== -->
+  <div class="section" id="section-4">
+    <h2 id="s4-title">🛡️ Selamat &amp; Mudah / Safe &amp; Easy</h2>
+    <div class="safety-list">
+      <div class="safety-item" id="si-0">
+        <div class="safety-num">1</div>
+        <div class="safety-text" id="si0-text">Imbas QR daripada peniaga yang betul sahaja / Scan QR from verified merchants only</div>
+      </div>
+      <div class="safety-item" id="si-1">
+        <div class="safety-num">2</div>
+        <div class="safety-text" id="si1-text">Semak nama peniaga dan jumlah pembayaran sebelum mengesahkan / Check merchant name and amount before confirming</div>
+      </div>
+      <div class="safety-item" id="si-2">
+        <div class="safety-num">3</div>
+        <div class="safety-text" id="si2-text">Lindungi telefon dengan PIN atau biometric / Protect your phone with PIN or biometrics</div>
+      </div>
+      <div class="safety-item" id="si-3">
+        <div class="safety-num">4</div>
+        <div class="safety-text" id="si3-text">Jangan sesekali kongsi OTP anda dengan sesiapa / Never share your OTP with anyone</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== SECTION 6: QUIZ ========== -->
+  <div class="section" id="section-5">
+    <h2 id="s5-title">🌟 Fakta &amp; Kuiz / Facts &amp; Quiz</h2>
+    <div id="quiz-content">
+      <div id="facts-area">
+        <div class="facts-container">
+          <div class="fact-bubble">
+            <div class="fact-text" id="fact1-text">🌟 Malaysia dan Singapura antara negara terawal di ASEAN yang melaksanakan hubungan pembayaran QR rentas sempadan!</div>
+          </div>
+          <div class="fact-bubble">
+            <div class="fact-text" id="fact2-text">💳 Tak perlu tukar duit atau cari ATM! Gunakan e-dompet untuk bayar di kedua-dua negara.</div>
+          </div>
+        </div>
+        <div style="text-align:center">
+          <button class="btn-dismiss-facts" onclick="dismissFacts()" id="btn-dismiss">Mula Kuiz / Start Quiz →</button>
+        </div>
+      </div>
+
+      <div id="quiz-area" class="hidden">
+        <div class="quiz-progress-bar">
+          <div class="qpb-dot current" id="qpb-0"></div>
+          <div class="qpb-dot" id="qpb-1"></div>
+          <div class="qpb-dot" id="qpb-2"></div>
+          <div class="qpb-dot" id="qpb-3"></div>
+        </div>
+        <div class="quiz-question-card">
+          <div class="quiz-qnum" id="quiz-qnum">Soalan 1 / Question 1</div>
+          <div class="quiz-q" id="quiz-q"></div>
+          <div class="quiz-options" id="quiz-opts"></div>
+          <div class="quiz-feedback" id="quiz-feedback"></div>
+          <button class="btn-next-q" id="btn-next-q" onclick="nextQuestion()">Soalan Seterusnya →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== SECTION 7: CLOSING ========== -->
+  <div class="section" id="section-6">
+    <span class="celebration-emoji">✨</span>
+    <div class="closing-text">
+      <h2 id="s6-title">Tahniah! / Congratulations!</h2>
+      <p id="s6-body1">Anda telah mengalami bagaimana kewangan digital menghubungkan manusia, perniagaan dan negara.</p>
+      <p id="s6-body2">Kewangan bukan sekadar transaksi — ia menyatukan kita!</p>
+    </div>
+    <div class="score-display">
+      <div class="score-num" id="final-score">0 / 4</div>
+      <div class="score-label" id="final-score-label">soalan betul / questions correct</div>
+    </div>
+    <button class="btn-pay-cta" onclick="startPayDemo()" id="s6-paycta">📲 Cuba Bayar Dengan QR! / Try QR Payment!</button>
+    <button class="btn-restart" onclick="restart()" id="s6-restart">↺ Mulakan Semula / Restart</button>
+  </div>
+
+  <!-- ========== SECTION 8: TRY QR PAYMENT (E-WALLET PHONE DEMO) ========== -->
+  <div class="section" id="section-7">
+    <div class="pay-coach">
+      <div class="pay-coach-badge" id="pay-badge">Langkah 1 / 5</div>
+      <h2 id="pay-coach-title"></h2>
+      <p id="pay-coach-body"></p>
+      <div class="pay-coach-dots">
+        <div class="pay-dot active" id="pd-0"></div>
+        <div class="pay-dot" id="pd-1"></div>
+        <div class="pay-dot" id="pd-2"></div>
+        <div class="pay-dot" id="pd-3"></div>
+        <div class="pay-dot" id="pd-4"></div>
+      </div>
+    </div>
+    <div class="payphone">
+      <div class="payphone-screen">
+        <div class="pp-punchhole"></div>
+        <div class="pp-statusbar" id="pp-statusbar">
+          <span id="pp-time">12:30</span>
+          <span class="pp-status-icons"><span class="pp-sig">5G</span><span class="pp-battery"></span></span>
+        </div>
+        <div id="pay-screen"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Idle overlay -->
+<div id="idle-overlay" onclick="dismissIdle()">
+  <div class="idle-touch-icon">👆</div>
+  <div class="idle-text" id="idle-title">Sentuh untuk mula semula</div>
+  <div class="idle-sub" id="idle-sub">Tiada aktiviti • Touch to restart</div>
+</div>
+
+</div><!-- /#stage -->
+
+<script>
+/* ============================================================
+   SFX — synthesized high-tech sounds via Web Audio API
+   ============================================================ */
+const SFX=(()=>{let ctx;const ac=()=>ctx||(ctx=new(window.AudioContext||window.webkitAudioContext)());function tone({freq=440,type='sine',dur=.15,vol=.2,slide=0,delay=0}){try{const c=ac(),t=c.currentTime+delay,o=c.createOscillator(),g=c.createGain();o.type=type;o.frequency.setValueAtTime(freq,t);if(slide)o.frequency.exponentialRampToValueAtTime(Math.max(40,freq+slide),t+dur);g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.connect(g).connect(c.destination);o.start(t);o.stop(t+dur+.05)}catch(e){}}
+return{tap(){tone({freq:1200,type:'square',dur:.06,vol:.1});tone({freq:1800,dur:.08,vol:.07,delay:.02})},swap(){tone({freq:300,type:'sawtooth',dur:.25,vol:.09,slide:900})},win(){[523,659,784,1047].forEach((f,i)=>tone({freq:f,type:'triangle',dur:.18,vol:.15,delay:i*.09}))},lose(){tone({freq:220,type:'sawtooth',dur:.3,vol:.15,slide:-120});tone({freq:110,type:'square',dur:.35,vol:.1,delay:.05})}};})();
+
+/* ============================================================
+   STATE
+   ============================================================ */
+var currentSection = 0;
+var currentLang = 'bm';
+var quizScore = 0;
+var quizAnswered = [null, null, null, null];
+var currentQuestion = 0;
+var factsShown = true;
+var simCurrentStep = 0;
+var idleTimer = null;
+var convInterval = null;
+var payStep = 0;
+var payTimer = null;
+var payConvInterval = null;
+var payRefNo = 'BNM-2026-000000';
+
+/* ============================================================
+   i18n
+   ============================================================ */
+var i18n = {
+  bm: {
+    s0_title: 'Dunia yang semakin bersambung...<br>Kini, semuanya terasa lebih dekat...',
+    s0_body: 'Dahulu, pembayaran rentas negara memerlukan wang tunai dan pertukaran mata wang. Hari ini, hanya perlu satu imbasan QR. Pembayaran digital rentas sempadan menunjukkan bagaimana Malaysia dan Singapura berbeza dari segi negara, tetapi bersatu sebagai satu ekosistem digital.',
+    s0_cta: 'Tekan untuk meneroka →',
+    s1_title: 'Situasi Nyata',
+    s1_c1_title: 'Rakan menghantar wang serta-merta',
+    s1_c1_body: 'Hantar wang kepada rakan di Singapura dalam masa beberapa saat — tanpa perlu ke bank atau tukar wang tunai. Mudah, cepat dan selamat.',
+    s1_c2_title: 'Membayar pengangkutan di luar negara',
+    s1_c2_body: 'Gunakan e-dompet Malaysia untuk membayar tambang bas atau teksi di Singapura. Kadar pertukaran automatik — tiada bayaran tersembunyi.',
+    s2_title: 'Cuba Sendiri!',
+    s2_body: 'Ikuti langkah-langkah di sebelah untuk mengalami bagaimana pembayaran QR rentas sempadan berfungsi dari mula hingga selesai.',
+    sim_labels: ['Langkah 1/5','Langkah 2/5','Langkah 3/5','Langkah 4/5','Langkah 5/5'],
+    sim_next: 'Langkah Seterusnya',
+    sim_prev: 'Sebelumnya',
+    sim_step_titles: ['Imbas Kod QR','Pilih E-Dompet','Penukaran Mata Wang','Pengesahan Pembayaran','Pemberitahuan Diterima'],
+    sim_step_descs: ['Imbas kod QR peniaga untuk bayar','Pilih e-dompet yang ingin digunakan','Kadar pertukaran dikira secara automatik','Sahkan pembayaran dengan biometrik','Pembayaran berjaya diterima!'],
+    sim_balance: 'Baki',
+    sim_rate: 'Kadar: 1 MYR = 0.315 SGD',
+    sim_confirmed: 'Pembayaran Disahkan!',
+    sim_notif_hdr: '💬 Pemberitahuan Baru',
+    sim_notif_body: 'Pembayaran diterima! SGD 3.15',
+    sim_merchant: 'Kedai ABC Singapore',
+    s3_title: 'Di Sebalik Tabir',
+    ic_titles: ['Sistem penyelesaian antara bank','Kebolehgunaan QR rentas sempadan','Enjin penukaran mata wang','Kerjasama pengawalseliaan'],
+    ic_bodies: [
+      'Apabila anda membayar, wang tidak bergerak secara terus. Bank anda menghantar arahan kepada bank penerima melalui sistem penyelesaian bersama yang selamat. Proses ini berlaku dalam beberapa saat tetapi melibatkan beberapa lapisan semakan keselamatan.',
+      'Kod QR di Malaysia dan Singapura menggunakan piawaian yang sama — EMVCo. Ini membolehkan e-dompet dari kedua-dua negara membaca dan memproses kod QR sesama sendiri tanpa perlu menukar aplikasi.',
+      'Kadar pertukaran ditentukan secara automatik semasa transaksi berlaku. Bank Negara Malaysia dan MAS Singapore memastikan kadar yang adil dan telus, supaya pengguna tahu amaun sebenar sebelum mengesahkan.',
+      'Bank Negara Malaysia dan Monetary Authority of Singapore (MAS) bekerjasama menetapkan peraturan bersama bagi memastikan keselamatan transaksi, perlindungan pengguna dan pencegahan penipuan di kedua-dua belah sempadan.'
+    ],
+    s4_title: '🛡️ Selamat & Mudah',
+    safety_items: [
+      'Imbas QR daripada peniaga yang betul sahaja',
+      'Semak nama peniaga dan jumlah pembayaran sebelum mengesahkan',
+      'Lindungi telefon dengan PIN atau biometric',
+      'Jangan sesekali kongsi OTP anda dengan sesiapa'
+    ],
+    s5_title: '🌟 Fakta & Kuiz',
+    fact1: '🌟 Malaysia dan Singapura antara negara terawal di ASEAN yang melaksanakan hubungan pembayaran QR rentas sempadan!',
+    fact2: '💳 Tak perlu tukar duit atau cari ATM! Gunakan e-dompet untuk bayar di kedua-dua negara.',
+    btn_dismiss: 'Mula Kuiz →',
+    quiz_qs: [
+      { q: 'Apakah yang membolehkan pembayaran rentas sempadan?',
+        a: 'Pertukaran wang tunai sahaja',
+        b: 'Pembayaran serta-merta antara negara melalui sistem digital',
+        correct: 'b' },
+      { q: 'Mengapa Malaysia dan Singapura menghubungkan sistem pembayaran?',
+        a: 'Untuk memudahkan perjalanan dan perdagangan',
+        b: 'Untuk meningkatkan penggunaan tunai',
+        correct: 'a' },
+      { q: 'Siapa yang bekerjasama untuk membolehkan pembayaran rentas sempadan?',
+        a: 'Hanya peniaga',
+        b: 'Bank, pengawal selia dan rangkaian pembayaran',
+        correct: 'b' },
+      { q: 'Apakah manfaat jangka panjang sistem pembayaran rentas sempadan?',
+        a: 'Ekonomi serantau yang lebih bersambung',
+        b: 'Kurang perdagangan antara negara',
+        correct: 'a' }
+    ],
+    quiz_correct_msg: '✓ Betul! Syabas!',
+    quiz_wrong_msg: '✗ Tidak tepat. Jawapan betul telah ditanda.',
+    qnum_prefix: 'Soalan',
+    btn_next_q: 'Soalan Seterusnya →',
+    btn_last_q: 'Lihat Keputusan →',
+    s6_title: 'Tahniah!',
+    s6_body1: 'Anda telah mengalami bagaimana kewangan digital menghubungkan manusia, perniagaan dan negara.',
+    s6_body2: 'Kewangan bukan sekadar transaksi — ia menyatukan kita!',
+    final_score_label: 'soalan betul',
+    s6_restart: '↺ Mulakan Semula',
+    s6_paycta: '📲 Cuba Bayar Dengan QR!',
+    pay_badges: ['Langkah 1 / 5', 'Langkah 2 / 5', 'Langkah 3 / 5', 'Langkah 4 / 5', 'Langkah 5 / 5'],
+    pay_coach_titles: ['Buka E-Dompet Anda', 'Imbas Kod QR DuitNow', 'Semak & Sahkan', 'Sedang Diproses...', 'Pembayaran Berjaya! 🎉'],
+    pay_coach_bodies: [
+      'Bayangkan anda sedang melancong di Bangkok, Thailand 🇹🇭 dan mahu membeli som tam yang sedap. Tekan butang "Imbas QR" pada telefon untuk mula.',
+      'Halakan kamera dan sentuh kod QR DuitNow peniaga. E-dompet Malaysia anda boleh membaca kod QR di luar negara!',
+      'Semak nama peniaga dan jumlah bayaran. Baht Thailand (THB) ditukar kepada Ringgit Malaysia (RM) secara automatik. Tekan "Sahkan".',
+      'Rangkaian pembayaran rentas sempadan sedang memproses transaksi anda dengan selamat. Tunggu sebentar...',
+      'Tahniah! Anda baru sahaja membayar peniaga di Thailand terus daripada e-dompet Malaysia anda. Tekan "Selesai" untuk kembali ke skrin utama.'
+    ],
+    pay_home_greet: 'Selamat kembali 👋',
+    pay_home_name: 'Dompet Digital Saya',
+    pay_balance: 'Baki Anda',
+    pay_scan_btn: 'Imbas QR',
+    pay_recent: 'Transaksi Terkini',
+    pay_tx: [
+      { icon: '🍛', bg: '#FFF1DC', name: 'Nasi Lemak Cik Kiah', date: 'Hari ini, 8:15 pagi', amt: '- RM 8.50', cls: 'neg' },
+      { icon: '💳', bg: '#E2F7EE', name: 'Tambah Nilai', date: 'Semalam', amt: '+ RM 50.00', cls: 'pos' },
+      { icon: '🚆', bg: '#E4EEFF', name: 'Tiket MRT', date: 'Semalam', amt: '- RM 2.40', cls: 'neg' }
+    ],
+    pay_scan_title: 'Imbas Kod QR',
+    pay_scan_sub: '📍 Bangkok, Thailand 🇹🇭',
+    pay_scan_hint: '👆 Sentuh kod QR untuk mengimbas',
+    pay_confirm_title: 'Sahkan Pembayaran',
+    pay_merchant: 'Kedai Som Tam Aroy',
+    pay_merchant_loc: 'Bangkok • Thailand 🇹🇭',
+    pay_rate: 'Kadar: 1 THB = RM 0.1320',
+    pay_myr_label: 'Anda bayar (Ringgit Malaysia)',
+    pay_xb_badge: 'DuitNow QR • Rentas Sempadan',
+    pay_confirm_btn: '✓ Sahkan',
+    pay_processing: 'Memproses...',
+    pay_processing_sub: 'Menghubungi rangkaian pembayaran ASEAN dengan selamat',
+    pay_success: 'Berjaya!',
+    pay_r_merchant: 'Peniaga',
+    pay_r_amount: 'Jumlah (THB)',
+    pay_r_rate: 'Kadar pertukaran',
+    pay_r_paid: 'Dibayar (MYR)',
+    pay_r_ref: 'No. rujukan',
+    pay_r_date: 'Tarikh',
+    pay_today: 'Hari ini',
+    pay_done_btn: 'Selesai',
+    nav_back: 'Kembali',
+    nav_next: 'Seterusnya',
+    idle_title: 'Sentuh untuk mula semula',
+    idle_sub: 'Tiada aktiviti selama 60 saat'
+  },
+  en: {
+    s0_title: 'A world growing closer...<br>Now, everything feels within reach...',
+    s0_body: 'In the past, cross-border payments required cash and currency exchange. Today, all it takes is one QR scan. Cross-border digital payments show how Malaysia and Singapore — two different countries — are united as one digital ecosystem.',
+    s0_cta: 'Tap to explore →',
+    s1_title: 'Real-World Scenarios',
+    s1_c1_title: 'Friends sending money instantly',
+    s1_c1_body: 'Send money to a friend in Singapore in seconds — no need to visit a bank or exchange cash. Easy, fast and secure.',
+    s1_c2_title: 'Paying for transport abroad',
+    s1_c2_body: 'Use your Malaysian e-wallet to pay bus or taxi fares in Singapore. Automatic exchange rates — no hidden charges.',
+    s2_title: 'Try It Yourself!',
+    s2_body: 'Follow the steps on the left to experience how cross-border QR payment works from start to finish.',
+    sim_labels: ['Step 1/5','Step 2/5','Step 3/5','Step 4/5','Step 5/5'],
+    sim_next: 'Next Step',
+    sim_prev: 'Previous',
+    sim_step_titles: ['Scan QR Code','Select E-Wallet','Currency Conversion','Payment Confirmation','Notification Received'],
+    sim_step_descs: ['Scan the merchant QR code to pay','Select the e-wallet you wish to use','Exchange rate calculated automatically','Confirm payment with biometrics','Payment successfully received!'],
+    sim_balance: 'Balance',
+    sim_rate: 'Rate: 1 MYR = 0.315 SGD',
+    sim_confirmed: 'Payment Confirmed!',
+    sim_notif_hdr: '💬 New Notification',
+    sim_notif_body: 'Payment Received! SGD 3.15',
+    sim_merchant: 'ABC Shop Singapore',
+    s3_title: 'Behind the Scenes',
+    ic_titles: ['Inter-bank settlement system','Cross-border QR interoperability','Currency conversion engine','Regulatory cooperation'],
+    ic_bodies: [
+      'When you pay, money doesn\'t move directly. Your bank sends instructions through a shared, secure settlement system — completed in seconds with multiple security checks.',
+      'QR codes in both countries use the same EMVCo standard, allowing e-wallets from either nation to read and process each other\'s codes seamlessly.',
+      'Exchange rates are set automatically at transaction time. BNM and MAS ensure fair, transparent rates so users always see the exact amount before confirming.',
+      'BNM and MAS collaborate on shared rules ensuring transaction security, consumer protection, and fraud prevention across both sides of the border.'
+    ],
+    s4_title: '🛡️ Safe & Easy',
+    safety_items: [
+      'Only scan QR from verified merchants',
+      'Check merchant name and payment amount before confirming',
+      'Protect your phone with PIN or biometrics',
+      'Never share your OTP with anyone'
+    ],
+    s5_title: '🌟 Facts & Quiz',
+    fact1: '🌟 Malaysia and Singapore are among the first countries in ASEAN to implement cross-border QR payment linkages!',
+    fact2: '💳 No need to exchange money or find an ATM! Use your e-wallet to pay in both countries.',
+    btn_dismiss: 'Start Quiz →',
+    quiz_qs: [
+      { q: 'What enables cross-border payments?',
+        a: 'Cash exchange only',
+        b: 'Instant cross-country payments through digital systems',
+        correct: 'b' },
+      { q: 'Why did Malaysia and Singapore connect their payment systems?',
+        a: 'To facilitate travel and trade',
+        b: 'To increase cash usage',
+        correct: 'a' },
+      { q: 'Who collaborated to enable cross-border payments?',
+        a: 'Merchants only',
+        b: 'Banks, regulators and payment networks',
+        correct: 'b' },
+      { q: 'What is the long-term benefit of cross-border payment systems?',
+        a: 'A more connected regional economy',
+        b: 'Less trade between countries',
+        correct: 'a' }
+    ],
+    quiz_correct_msg: '✓ Correct! Well done!',
+    quiz_wrong_msg: '✗ Not quite. The correct answer has been highlighted.',
+    qnum_prefix: 'Question',
+    btn_next_q: 'Next Question →',
+    btn_last_q: 'See Results →',
+    s6_title: 'Congratulations!',
+    s6_body1: "You've experienced how digital finance connects people, businesses and nations.",
+    s6_body2: 'Finance is more than transactions — it unites us!',
+    final_score_label: 'questions correct',
+    s6_restart: '↺ Restart',
+    s6_paycta: '📲 Try QR Payment!',
+    pay_badges: ['Step 1 / 5', 'Step 2 / 5', 'Step 3 / 5', 'Step 4 / 5', 'Step 5 / 5'],
+    pay_coach_titles: ['Open Your E-Wallet', 'Scan the DuitNow QR Code', 'Check & Confirm', 'Processing...', 'Payment Successful! 🎉'],
+    pay_coach_bodies: [
+      'Imagine you are travelling in Bangkok, Thailand 🇹🇭 and want to buy some delicious som tam. Tap the "Scan QR" button on the phone to begin.',
+      "Point the camera and touch the merchant's DuitNow QR code. Your Malaysian e-wallet can read QR codes abroad!",
+      'Check the merchant name and amount. Thai Baht (THB) is converted to Malaysian Ringgit (RM) automatically. Tap "Confirm".',
+      'The cross-border payment network is securely processing your transaction. Just a moment...',
+      'Congratulations! You just paid a merchant in Thailand straight from your Malaysian e-wallet. Tap "Done" to return to the start screen.'
+    ],
+    pay_home_greet: 'Welcome back 👋',
+    pay_home_name: 'My Digital Wallet',
+    pay_balance: 'Your Balance',
+    pay_scan_btn: 'Scan QR',
+    pay_recent: 'Recent Transactions',
+    pay_tx: [
+      { icon: '🍛', bg: '#FFF1DC', name: "Cik Kiah's Nasi Lemak", date: 'Today, 8:15 AM', amt: '- RM 8.50', cls: 'neg' },
+      { icon: '💳', bg: '#E2F7EE', name: 'Top Up', date: 'Yesterday', amt: '+ RM 50.00', cls: 'pos' },
+      { icon: '🚆', bg: '#E4EEFF', name: 'MRT Ticket', date: 'Yesterday', amt: '- RM 2.40', cls: 'neg' }
+    ],
+    pay_scan_title: 'Scan QR Code',
+    pay_scan_sub: '📍 Bangkok, Thailand 🇹🇭',
+    pay_scan_hint: '👆 Touch the QR code to scan',
+    pay_confirm_title: 'Confirm Payment',
+    pay_merchant: 'Kedai Som Tam Aroy',
+    pay_merchant_loc: 'Bangkok • Thailand 🇹🇭',
+    pay_rate: 'Rate: 1 THB = RM 0.1320',
+    pay_myr_label: 'You pay (Malaysian Ringgit)',
+    pay_xb_badge: 'DuitNow QR • Cross-Border',
+    pay_confirm_btn: '✓ Confirm',
+    pay_processing: 'Processing...',
+    pay_processing_sub: 'Securely connecting to the ASEAN payment network',
+    pay_success: 'Success!',
+    pay_r_merchant: 'Merchant',
+    pay_r_amount: 'Amount (THB)',
+    pay_r_rate: 'Exchange rate',
+    pay_r_paid: 'Paid (MYR)',
+    pay_r_ref: 'Reference no.',
+    pay_r_date: 'Date',
+    pay_today: 'Today',
+    pay_done_btn: 'Done',
+    nav_back: 'Back',
+    nav_next: 'Next',
+    idle_title: 'Touch to restart',
+    idle_sub: 'No activity for 60 seconds'
+  }
+};
+
+/* ============================================================
+   LANGUAGE
+   ============================================================ */
+function setLang(lang) {
+  currentLang = lang;
+  document.querySelectorAll('.lang-btn').forEach(function(b) {
+    b.classList.toggle('active', b.dataset.lang === lang);
+  });
+  renderTexts();
+  if (currentSection === 2) renderSimStep();
+  if (currentSection === 7) renderPayStep();
+}
+
+function L(key) {
+  return i18n[currentLang][key] !== undefined ? i18n[currentLang][key] : (i18n['bm'][key] || key);
+}
+
+function renderTexts() {
+  var l = i18n[currentLang];
+  // S0
+  document.getElementById('s0-title').innerHTML = l.s0_title;
+  document.getElementById('s0-body').textContent = l.s0_body;
+  document.getElementById('s0-cta').textContent = l.s0_cta;
+  // S1
+  document.getElementById('s1-title').textContent = l.s1_title;
+  document.getElementById('s1-c1-title').textContent = l.s1_c1_title;
+  document.getElementById('s1-c1-body').textContent = l.s1_c1_body;
+  document.getElementById('s1-c2-title').textContent = l.s1_c2_title;
+  document.getElementById('s1-c2-body').textContent = l.s1_c2_body;
+  // S2
+  document.getElementById('s2-title').textContent = l.s2_title;
+  document.getElementById('s2-body').textContent = l.s2_body;
+  document.getElementById('sim-step-label').textContent = l.sim_labels[simCurrentStep];
+  document.getElementById('s2-next-lbl').textContent = simCurrentStep < 4 ? l.sim_next : (currentLang === 'bm' ? 'Selesai!' : 'Done!');
+  document.getElementById('s2-prev-lbl').textContent = l.sim_prev;
+  // S3
+  document.getElementById('s3-title').textContent = l.s3_title;
+  l.ic_titles.forEach(function(tt, i) {
+    var el = document.getElementById('ic' + i + '-title');
+    if (el) el.textContent = tt;
+  });
+  l.ic_bodies.forEach(function(bt, i) {
+    var el = document.getElementById('ic' + i + '-body');
+    if (el) el.textContent = bt;
+  });
+  // S4
+  document.getElementById('s4-title').innerHTML = l.s4_title;
+  l.safety_items.forEach(function(txt, i) {
+    var el = document.getElementById('si' + i + '-text');
+    if (el) el.textContent = txt;
+  });
+  // S5
+  document.getElementById('s5-title').innerHTML = l.s5_title;
+  document.getElementById('fact1-text').textContent = l.fact1;
+  document.getElementById('fact2-text').textContent = l.fact2;
+  document.getElementById('btn-dismiss').textContent = l.btn_dismiss;
+  // S6
+  document.getElementById('s6-title').textContent = l.s6_title;
+  document.getElementById('s6-body1').textContent = l.s6_body1;
+  document.getElementById('s6-body2').textContent = l.s6_body2;
+  document.getElementById('final-score-label').textContent = l.final_score_label;
+  document.getElementById('s6-restart').textContent = l.s6_restart;
+  document.getElementById('s6-paycta').textContent = l.s6_paycta;
+  // Nav
+  document.getElementById('nav-back-txt').textContent = l.nav_back;
+  document.getElementById('nav-next-txt').textContent = l.nav_next;
+  // Idle
+  document.getElementById('idle-title').textContent = l.idle_title;
+  document.getElementById('idle-sub').textContent = l.idle_sub;
+  // Quiz if active
+  var qa = document.getElementById('quiz-area');
+  if (qa && !qa.classList.contains('hidden')) renderQuestion();
+  // Next-q button label
+  var bnq = document.getElementById('btn-next-q');
+  if (bnq) bnq.textContent = currentQuestion < 3 ? l.btn_next_q : l.btn_last_q;
+}
+
+/* ============================================================
+   NAVIGATION
+   ============================================================ */
+function navigate(dir) {
+  var next = currentSection + dir;
+  if (next < 0 || next > 6) return;
+  goTo(next);
+}
+
+function goTo(next) {
+  resetIdleTimer();
+  if (next === currentSection || next < 0 || next > 7) return;
+  var prev = currentSection;
+  var dir = next > prev ? 1 : -1;
+  SFX.swap();
+
+  var prevEl = document.getElementById('section-' + prev);
+  var nextEl = document.getElementById('section-' + next);
+
+  gsap.to(prevEl, {
+    x: dir > 0 ? -140 : 140,
+    opacity: 0,
+    duration: 0.38,
+    ease: 'power2.in',
+    onComplete: function() {
+      prevEl.classList.remove('active');
+      gsap.set(prevEl, { x: 0, opacity: 0 });
+    }
+  });
+
+  gsap.set(nextEl, { x: dir > 0 ? 140 : -140, opacity: 0 });
+  nextEl.classList.add('active');
+  gsap.to(nextEl, { x: 0, opacity: 1, duration: 0.38, ease: 'power2.out', delay: 0.1 });
+
+  currentSection = next;
+  updateDots();
+  updateNav();
+  onSectionEnter(next);
+}
+
+function updateDots() {
+  document.querySelectorAll('.dot').forEach(function(d, i) {
+    d.classList.remove('active', 'done');
+    if (i < currentSection) d.classList.add('done');
+    if (i === currentSection) d.classList.add('active');
+  });
+  // Section-7 (QR demo) shares the dot-6 as done
+  if (currentSection === 7) {
+    var lastDot = document.querySelector('.dot[data-idx="7"]');
+    if (lastDot) { lastDot.classList.remove('done'); lastDot.classList.add('active'); }
+    var prevDot = document.querySelector('.dot[data-idx="6"]');
+    if (prevDot) { prevDot.classList.remove('active'); prevDot.classList.add('done'); }
+  }
+}
+
+function updateNav() {
+  var back = document.getElementById('nav-back');
+  var next = document.getElementById('nav-next');
+  back.style.display = (currentSection > 0 && currentSection < 7) ? 'flex' : 'none';
+  next.style.display = currentSection < 6 ? 'flex' : 'none';
+}
+
+function onSectionEnter(idx) {
+  if (idx === 2) { simCurrentStep = 0; renderSimStep(); }
+  if (idx === 4) animateSafetyItems();
+  if (idx === 5) {
+    if (factsShown) {
+      document.getElementById('facts-area').classList.remove('hidden');
+      document.getElementById('quiz-area').classList.add('hidden');
+    } else {
+      renderQuestion();
+    }
+  }
+  if (idx === 6) {
+    document.getElementById('final-score').textContent = quizScore + ' / 4';
+  }
+  if (idx === 7) {
+    payStep = 0;
+    if (payTimer) { clearTimeout(payTimer); payTimer = null; }
+    payRefNo = 'BNM-2026-' + Math.floor(100000 + Math.random() * 900000);
+    renderPayStep();
+  }
+}
+
+/* ============================================================
+   SIMULATION
+   ============================================================ */
+function renderSimStep() {
+  var l = i18n[currentLang];
+  var sc = document.getElementById('sim-content');
+  var dots = document.querySelectorAll('#sim-step-dots .step-dot');
+  dots.forEach(function(d, i) {
+    d.classList.remove('active', 'done');
+    if (i < simCurrentStep) d.classList.add('done');
+    if (i === simCurrentStep) d.classList.add('active');
+  });
+
+  document.getElementById('sim-step-label').textContent = l.sim_labels[simCurrentStep];
+  document.getElementById('s2-next-lbl').textContent = simCurrentStep < 4 ? l.sim_next : (currentLang === 'bm' ? 'Selesai!' : 'Done!');
+  document.getElementById('s2-prev-lbl').textContent = l.sim_prev;
+  document.getElementById('btn-sim-prev').style.display = simCurrentStep > 0 ? 'inline-flex' : 'none';
+  document.getElementById('btn-sim-next').style.display = simCurrentStep <= 4 ? 'inline-flex' : 'none';
+
+  if (convInterval) { clearInterval(convInterval); convInterval = null; }
+
+  var html = '';
+  switch (simCurrentStep) {
+    case 0:
+      html = '<div class="step-label">' + l.sim_step_titles[0] + '</div>'
+           + '<div class="qr-container">'
+           + '  <div class="qr-grid" id="qr-grid"></div>'
+           + '  <div class="qr-corner tl"></div>'
+           + '  <div class="qr-corner tr"></div>'
+           + '  <div class="qr-corner bl"></div>'
+           + '  <div class="scan-line"></div>'
+           + '</div>'
+           + '<div class="step-desc">' + l.sim_step_descs[0] + '</div>';
+      break;
+    case 1:
+      html = '<div class="step-label">' + l.sim_step_titles[1] + '</div>'
+           + '<div class="wallet-options">'
+           + '  <div class="wallet-opt" onclick="selectWallet(this)">'
+           + '    <div class="wallet-icon" style="background:#0047AB">T</div>'
+           + '    <div><div class="wallet-name">TouchPay</div><div class="wallet-sub">' + l.sim_balance + ': RM 150.00</div></div>'
+           + '  </div>'
+           + '  <div class="wallet-opt" onclick="selectWallet(this)">'
+           + '    <div class="wallet-icon" style="background:#00B4A6">M</div>'
+           + '    <div><div class="wallet-name">MyWallet</div><div class="wallet-sub">' + l.sim_balance + ': RM 280.50</div></div>'
+           + '  </div>'
+           + '  <div class="wallet-opt" onclick="selectWallet(this)">'
+           + '    <div class="wallet-icon" style="background:#F5A623">P</div>'
+           + '    <div><div class="wallet-name">PayGo</div><div class="wallet-sub">' + l.sim_balance + ': RM 95.00</div></div>'
+           + '  </div>'
+           + '</div>'
+           + '<div class="step-desc" style="margin-top:8px">' + l.sim_step_descs[1] + '</div>';
+      break;
+    case 2:
+      html = '<div class="step-label">' + l.sim_step_titles[2] + '</div>'
+           + '<div class="conversion-display">'
+           + '  <div class="amount-from">RM 10.00</div>'
+           + '  <div class="conversion-arrow">↓</div>'
+           + '  <div class="amount-to" id="conv-to">SGD 0.00</div>'
+           + '  <div class="rate-note">' + l.sim_rate + '</div>'
+           + '</div>'
+           + '<div class="step-desc">' + l.sim_step_descs[2] + '</div>';
+      setTimeout(startConvAnim, 80);
+      break;
+    case 3:
+      html = '<div class="step-label">' + l.sim_step_titles[3] + '</div>'
+           + '<div class="confirmed-screen">'
+           + '  <div class="checkmark-circle">✓</div>'
+           + '  <div class="fingerprint-icon">🔐</div>'
+           + '  <div class="confirmed-text">' + l.sim_confirmed + '</div>'
+           + '</div>'
+           + '<div class="step-desc">' + l.sim_step_descs[3] + '</div>';
+      break;
+    case 4:
+      html = '<div class="step-label">' + l.sim_step_titles[4] + '</div>'
+           + '<div class="toast-notif">'
+           + '  <div class="toast-header">' + l.sim_notif_hdr + '</div>'
+           + '  <div class="toast-body">' + l.sim_notif_body + '</div>'
+           + '</div>'
+           + '<div class="merchant-badge"><span>🏪</span><span>' + l.sim_merchant + '</span></div>'
+           + '<div class="step-desc" style="margin-top:10px">' + l.sim_step_descs[4] + '</div>';
+      break;
+  }
+  sc.innerHTML = html;
+  if (simCurrentStep === 0) setTimeout(buildQR, 50);
+}
+
+function buildQR() {
+  var grid = document.getElementById('qr-grid');
+  if (!grid) return;
+  var pattern = [
+    1,1,1,1,1,1,1,0,1,0,
+    1,0,0,0,0,0,1,0,0,1,
+    1,0,1,1,1,0,1,0,1,0,
+    1,0,1,1,1,0,1,0,0,1,
+    1,0,1,1,1,0,1,0,1,1,
+    1,0,0,0,0,0,1,0,0,0,
+    1,1,1,1,1,1,1,0,1,0,
+    0,0,0,0,0,0,0,0,1,1,
+    1,0,1,1,0,1,1,1,0,1,
+    0,1,0,0,1,1,0,1,1,0
+  ];
+  grid.innerHTML = pattern.map(function(v) {
+    return '<div class="qr-cell ' + (v ? 'filled' : 'empty') + '"></div>';
+  }).join('');
+}
+
+function selectWallet(el) {
+  document.querySelectorAll('.wallet-opt').forEach(function(o) { o.classList.remove('selected'); });
+  el.classList.add('selected');
+}
+
+function startConvAnim() {
+  var val = 0;
+  var target = 3.15;
+  var el = document.getElementById('conv-to');
+  if (!el) return;
+  convInterval = setInterval(function() {
+    val += 0.06;
+    if (val >= target) { val = target; clearInterval(convInterval); convInterval = null; }
+    var cur = document.getElementById('conv-to');
+    if (cur) cur.textContent = 'SGD ' + val.toFixed(2);
+  }, 35);
+}
+
+function simStep(dir) {
+  resetIdleTimer();
+  var next = simCurrentStep + dir;
+  if (next < 0) return;
+  if (next > 4) { navigate(1); return; }
+  simCurrentStep = next;
+  if (dir > 0 && simCurrentStep === 4) SFX.win(); else SFX.swap();
+  renderSimStep();
+}
+
+/* ============================================================
+   INFO CARDS
+   ============================================================ */
+function toggleInfoCard(idx) {
+  resetIdleTimer();
+  SFX.tap();
+  var cards = document.querySelectorAll('.info-card');
+  var card = cards[idx];
+  var isExpanded = card.classList.contains('expanded');
+  cards.forEach(function(c) { c.classList.remove('expanded'); });
+  if (!isExpanded) card.classList.add('expanded');
+}
+
+/* ============================================================
+   SAFETY ITEMS
+   ============================================================ */
+function animateSafetyItems() {
+  var items = document.querySelectorAll('.safety-item');
+  items.forEach(function(item) {
+    item.classList.remove('visible');
+    item.style.opacity = '0';
+    item.style.transform = 'translateX(-40px)';
+  });
+  items.forEach(function(item, i) {
+    setTimeout(function() { item.classList.add('visible'); }, i * 180 + 200);
+  });
+}
+
+/* ============================================================
+   QUIZ
+   ============================================================ */
+function dismissFacts() {
+  resetIdleTimer();
+  SFX.tap();
+  factsShown = false;
+  document.getElementById('facts-area').classList.add('hidden');
+  document.getElementById('quiz-area').classList.remove('hidden');
+  renderQuestion();
+}
+
+function renderQuestion() {
+  var l = i18n[currentLang];
+  var q = l.quiz_qs[currentQuestion];
+  document.getElementById('quiz-qnum').textContent = l.qnum_prefix + ' ' + (currentQuestion + 1) + ' / 4';
+  document.getElementById('quiz-q').textContent = q.q;
+
+  // Progress dots
+  for (var i = 0; i < 4; i++) {
+    var d = document.getElementById('qpb-' + i);
+    if (!d) continue;
+    d.classList.remove('current','answered-correct','answered-wrong');
+    if (quizAnswered[i] === 'correct') d.classList.add('answered-correct');
+    else if (quizAnswered[i] === 'wrong') d.classList.add('answered-wrong');
+    else if (i === currentQuestion) d.classList.add('current');
+  }
+
+  var optsEl = document.getElementById('quiz-opts');
+  optsEl.innerHTML =
+    '<button class="quiz-opt" id="qopt-a" onclick="answerQuiz(\'a\')">A. ' + q.a + '</button>' +
+    '<button class="quiz-opt" id="qopt-b" onclick="answerQuiz(\'b\')">B. ' + q.b + '</button>';
+
+  var fb = document.getElementById('quiz-feedback');
+  fb.className = 'quiz-feedback';
+  fb.textContent = '';
+
+  var bnq = document.getElementById('btn-next-q');
+  bnq.className = 'btn-next-q';
+  bnq.textContent = currentQuestion < 3 ? l.btn_next_q : l.btn_last_q;
+
+  if (quizAnswered[currentQuestion] !== null) restoreAnswerState();
+}
+
+function answerQuiz(choice) {
+  resetIdleTimer();
+  if (quizAnswered[currentQuestion] !== null) return;
+  var l = i18n[currentLang];
+  var q = l.quiz_qs[currentQuestion];
+  var correct = choice === q.correct;
+
+  document.getElementById('qopt-a').disabled = true;
+  document.getElementById('qopt-b').disabled = true;
+
+  var fb = document.getElementById('quiz-feedback');
+  fb.classList.add('show');
+
+  if (correct) {
+    SFX.win();
+    document.getElementById('qopt-' + choice).classList.add('correct');
+    fb.textContent = l.quiz_correct_msg;
+    fb.classList.add('correct');
+    quizScore++;
+    quizAnswered[currentQuestion] = 'correct';
+  } else {
+    SFX.lose();
+    document.getElementById('qopt-' + choice).classList.add('wrong');
+    document.getElementById('qopt-' + q.correct).classList.add('reveal-correct');
+    fb.textContent = l.quiz_wrong_msg;
+    fb.classList.add('wrong');
+    quizAnswered[currentQuestion] = 'wrong';
+  }
+
+  var d = document.getElementById('qpb-' + currentQuestion);
+  if (d) {
+    d.classList.remove('current');
+    d.classList.add(correct ? 'answered-correct' : 'answered-wrong');
+  }
+
+  document.getElementById('btn-next-q').classList.add('show');
+}
+
+function restoreAnswerState() {
+  var l = i18n[currentLang];
+  var q = l.quiz_qs[currentQuestion];
+  document.getElementById('qopt-a').disabled = true;
+  document.getElementById('qopt-b').disabled = true;
+  var result = quizAnswered[currentQuestion];
+  var fb = document.getElementById('quiz-feedback');
+  fb.classList.add('show');
+  if (result === 'correct') {
+    document.getElementById('qopt-' + q.correct).classList.add('correct');
+    fb.textContent = l.quiz_correct_msg;
+    fb.classList.add('correct');
+  } else {
+    var wrongChoice = q.correct === 'a' ? 'b' : 'a';
+    document.getElementById('qopt-' + wrongChoice).classList.add('wrong');
+    document.getElementById('qopt-' + q.correct).classList.add('reveal-correct');
+    fb.textContent = l.quiz_wrong_msg;
+    fb.classList.add('wrong');
+  }
+  document.getElementById('btn-next-q').classList.add('show');
+}
+
+function nextQuestion() {
+  resetIdleTimer();
+  SFX.tap();
+  if (currentQuestion < 3) {
+    currentQuestion++;
+    renderQuestion();
+  } else {
+    navigate(1);
+  }
+}
+
+/* ============================================================
+   TRY QR PAYMENT — E-WALLET PHONE DEMO (Section 8)
+   ============================================================ */
+function startPayDemo() {
+  goTo(7);
+}
+
+function renderPayStep() {
+  var l = i18n[currentLang];
+
+  // Coaching panel (outside the phone)
+  document.getElementById('pay-badge').textContent = l.pay_badges[payStep];
+  document.getElementById('pay-coach-title').textContent = l.pay_coach_titles[payStep];
+  document.getElementById('pay-coach-body').textContent = l.pay_coach_bodies[payStep];
+  for (var i = 0; i < 5; i++) {
+    var d = document.getElementById('pd-' + i);
+    d.classList.remove('active', 'done');
+    if (i < payStep) d.classList.add('done');
+    if (i === payStep) d.classList.add('active');
+  }
+
+  // Status bar: live time + light/dark per screen background
+  var now = new Date();
+  document.getElementById('pp-time').textContent =
+    ('0' + now.getHours()).slice(-2) + ':' + ('0' + now.getMinutes()).slice(-2);
+  document.getElementById('pp-statusbar').classList.toggle('light', payStep === 0 || payStep === 1 || payStep === 3);
+
+  if (payTimer) { clearTimeout(payTimer); payTimer = null; }
+  if (payConvInterval) { clearInterval(payConvInterval); payConvInterval = null; }
+
+  var html = '';
+  switch (payStep) {
+    case 0: // e-wallet home screen
+      html = '<div class="pph-header">'
+           + '<div class="pph-greet">' + l.pay_home_greet + '</div>'
+           + '<div class="pph-name">' + l.pay_home_name + '</div>'
+           + '<div class="pph-balance-card"><div class="pph-balance-label">' + l.pay_balance + '</div><div class="pph-balance">RM 250.00</div></div>'
+           + '<button class="pph-scan-btn" onclick="payOpenScanner()">📷 ' + l.pay_scan_btn + '</button>'
+           + '</div>'
+           + '<div class="pph-section-label">' + l.pay_recent + '</div>'
+           + l.pay_tx.map(function(t) {
+               return '<div class="pph-tx">'
+                    + '<div class="pph-tx-icon" style="background:' + t.bg + '">' + t.icon + '</div>'
+                    + '<div><div class="pph-tx-name">' + t.name + '</div><div class="pph-tx-date">' + t.date + '</div></div>'
+                    + '<div class="pph-tx-amt ' + t.cls + '">' + t.amt + '</div>'
+                    + '</div>';
+             }).join('');
+      break;
+    case 1: // camera viewfinder + DuitNow QR
+      html = '<div class="pps-scanner">'
+           + '<div class="pps-title">' + l.pay_scan_title + '</div>'
+           + '<div class="pps-sub">' + l.pay_scan_sub + '</div>'
+           + '<div class="pps-frame" onclick="payScanned()">'
+           + '<div class="pps-corner tl"></div><div class="pps-corner tr"></div><div class="pps-corner bl"></div><div class="pps-corner br"></div>'
+           + '<div class="duitnow-card"><div class="duitnow-head">DuitNow QR</div><div class="duitnow-qr" id="duitnow-qr"></div><div class="duitnow-foot">MALAYSIA ↔ ASEAN</div></div>'
+           + '<div class="pps-scanline"></div>'
+           + '</div>'
+           + '<div class="pps-hint">' + l.pay_scan_hint + '</div>'
+           + '<div class="pps-flash" id="pps-flash"></div>'
+           + '</div>';
+      break;
+    case 2: // confirmation with currency conversion
+      html = '<div class="ppc-wrap">'
+           + '<div class="ppc-title">' + l.pay_confirm_title + '</div>'
+           + '<div class="ppc-merchant"><div class="ppc-merchant-icon">🍜</div><div><div class="ppc-merchant-name">' + l.pay_merchant + '</div><div class="ppc-merchant-loc">' + l.pay_merchant_loc + '</div></div></div>'
+           + '<div class="ppc-amount-card">'
+           + '<div class="ppc-foreign">THB 120.00</div>'
+           + '<div class="ppc-rate">💱 ' + l.pay_rate + '</div>'
+           + '<div class="ppc-arrow">⬇</div>'
+           + '<div class="ppc-myr" id="ppc-myr">RM 0.00</div>'
+           + '<div class="ppc-myr-label">' + l.pay_myr_label + '</div>'
+           + '</div>'
+           + '<div class="duitnow-badge">' + l.pay_xb_badge + '</div>'
+           + '<button class="ppc-confirm-btn" onclick="payConfirm()">' + l.pay_confirm_btn + '</button>'
+           + '</div>';
+      break;
+    case 3: // processing
+      html = '<div class="ppp-wrap">'
+           + '<div class="ppp-pulse"><div class="ppp-ring"></div><div class="ppp-ring"></div><div class="ppp-ring"></div><div class="ppp-core">🌐</div></div>'
+           + '<div class="ppp-text">' + l.pay_processing + '</div>'
+           + '<div class="ppp-subtext">' + l.pay_processing_sub + '</div>'
+           + '</div>';
+      break;
+    case 4: // success + receipt + confetti
+      var d2 = new Date();
+      var dateStr = l.pay_today + ', ' + ('0' + d2.getHours()).slice(-2) + ':' + ('0' + d2.getMinutes()).slice(-2);
+      html = '<div class="ppd-wrap" id="ppd-wrap">'
+           + '<div class="ppd-check"><svg width="54" height="54" viewBox="0 0 54 54"><path d="M12 28 L23 39 L43 16" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>'
+           + '<div class="ppd-title">' + l.pay_success + '</div>'
+           + '<div class="ppd-receipt">'
+           + '<div class="ppd-row"><span>' + l.pay_r_merchant + '</span><span>' + l.pay_merchant + '</span></div>'
+           + '<div class="ppd-row"><span>' + l.pay_r_amount + '</span><span>THB 120.00</span></div>'
+           + '<div class="ppd-row"><span>' + l.pay_r_rate + '</span><span>1 THB = RM 0.1320</span></div>'
+           + '<div class="ppd-row total"><span>' + l.pay_r_paid + '</span><span>RM 15.84</span></div>'
+           + '<div class="ppd-row"><span>' + l.pay_r_ref + '</span><span>' + payRefNo + '</span></div>'
+           + '<div class="ppd-row"><span>' + l.pay_r_date + '</span><span>' + dateStr + '</span></div>'
+           + '</div>'
+           + '<button class="ppd-done-btn" onclick="payDone()">✓ ' + l.pay_done_btn + '</button>'
+           + '</div>';
+      break;
+  }
+  document.getElementById('pay-screen').innerHTML = html;
+
+  if (payStep === 1) setTimeout(buildPayQR, 40);
+  if (payStep === 2) setTimeout(payConvAnim, 180);
+  if (payStep === 3) {
+    payTimer = setTimeout(function() {
+      payStep = 4;
+      SFX.win();
+      renderPayStep();
+      launchPayConfetti();
+    }, 2400);
+  }
+}
+
+function buildPayQR() {
+  var grid = document.getElementById('duitnow-qr');
+  if (!grid) return;
+  var pattern = [
+    1,1,1,1,1,1,1,0,1,0,
+    1,0,0,0,0,0,1,0,0,1,
+    1,0,1,1,1,0,1,0,1,0,
+    1,0,1,1,1,0,1,0,0,1,
+    1,0,1,1,1,0,1,0,1,1,
+    1,0,0,0,0,0,1,0,0,0,
+    1,1,1,1,1,1,1,0,1,0,
+    0,0,0,0,0,0,0,0,1,1,
+    1,0,1,1,0,1,1,1,0,1,
+    0,1,0,0,1,1,0,1,1,0
+  ];
+  grid.innerHTML = pattern.map(function(v) {
+    return '<div class="qr-cell ' + (v ? 'filled' : 'empty') + '"></div>';
+  }).join('');
+}
+
+function payOpenScanner() {
+  resetIdleTimer();
+  if (payStep !== 0) return;
+  payStep = 1;
+  SFX.swap();
+  renderPayStep();
+}
+
+function payScanned() {
+  resetIdleTimer();
+  if (payStep !== 1) return;
+  SFX.tap();
+  var flash = document.getElementById('pps-flash');
+  if (flash) {
+    flash.style.transition = 'none';
+    flash.style.opacity = '0.9';
+    setTimeout(function() {
+      flash.style.transition = 'opacity 0.3s';
+      flash.style.opacity = '0';
+    }, 50);
+  }
+  setTimeout(function() {
+    if (payStep !== 1) return;
+    payStep = 2;
+    SFX.swap();
+    renderPayStep();
+  }, 380);
+}
+
+function payConvAnim() {
+  var el = document.getElementById('ppc-myr');
+  if (!el) return;
+  var val = 0, target = 15.84;
+  payConvInterval = setInterval(function() {
+    val += 0.66;
+    if (val >= target) {
+      val = target;
+      clearInterval(payConvInterval);
+      payConvInterval = null;
+    }
+    var cur = document.getElementById('ppc-myr');
+    if (cur) cur.textContent = 'RM ' + val.toFixed(2);
+    else if (payConvInterval) { clearInterval(payConvInterval); payConvInterval = null; }
+  }, 30);
+}
+
+function payConfirm() {
+  resetIdleTimer();
+  if (payStep !== 2) return;
+  payStep = 3;
+  SFX.swap();
+  renderPayStep();
+}
+
+function launchPayConfetti() {
+  var wrap = document.getElementById('ppd-wrap');
+  if (!wrap) return;
+  var colors = ['#0047AB', '#F5A623', '#00B4A6', '#FF6B5B', '#7B5EA7', '#ED2E67'];
+  for (var i = 0; i < 46; i++) {
+    var c = document.createElement('div');
+    c.className = 'confetti-bit';
+    c.style.left = (Math.random() * 100) + '%';
+    c.style.background = colors[i % colors.length];
+    c.style.animationDuration = (1.6 + Math.random() * 1.7) + 's';
+    c.style.animationDelay = (Math.random() * 0.6) + 's';
+    wrap.appendChild(c);
+  }
+}
+
+function payDone() {
+  resetIdleTimer();
+  SFX.tap();
+  restart();
+}
+
+/* ============================================================
+   RESTART
+   ============================================================ */
+function restart() {
+  resetIdleTimer();
+  quizScore = 0;
+  quizAnswered = [null, null, null, null];
+  currentQuestion = 0;
+  factsShown = true;
+  simCurrentStep = 0;
+  payStep = 0;
+  if (payTimer) { clearTimeout(payTimer); payTimer = null; }
+  if (payConvInterval) { clearInterval(payConvInterval); payConvInterval = null; }
+  SFX.swap();
+
+  document.querySelectorAll('.info-card').forEach(function(c) { c.classList.remove('expanded'); });
+  document.getElementById('facts-area').classList.remove('hidden');
+  document.getElementById('quiz-area').classList.add('hidden');
+
+  var oldEl = document.getElementById('section-' + currentSection);
+  gsap.to(oldEl, {
+    x: 140, opacity: 0, duration: 0.38, ease: 'power2.in',
+    onComplete: function() {
+      oldEl.classList.remove('active');
+      gsap.set(oldEl, { x: 0, opacity: 0 });
+    }
+  });
+
+  currentSection = 0;
+  var newEl = document.getElementById('section-0');
+  gsap.set(newEl, { x: -140, opacity: 0 });
+  newEl.classList.add('active');
+  gsap.to(newEl, { x: 0, opacity: 1, duration: 0.38, ease: 'power2.out', delay: 0.15 });
+
+  updateDots();
+  updateNav();
+}
+
+/* ============================================================
+   IDLE
+   ============================================================ */
+function resetIdleTimer() {
+  if (idleTimer) clearTimeout(idleTimer);
+  idleTimer = setTimeout(showIdle, 60000);
+}
+
+function showIdle() {
+  document.getElementById('idle-overlay').classList.add('show');
+}
+
+function dismissIdle() {
+  document.getElementById('idle-overlay').classList.remove('show');
+  restart();
+}
+
+/* ============================================================
+   KIOSK: PROPORTIONAL STAGE SCALER (1280x720 → 4K, no overflow)
+   ============================================================ */
+function fitStage() {
+  var s = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+  document.getElementById('stage').style.transform =
+    'translate(' + ((window.innerWidth - 1920 * s) / 2) + 'px,' +
+    ((window.innerHeight - 1080 * s) / 2) + 'px) scale(' + s + ')';
+}
+window.addEventListener('resize', fitStage);
+
+/* ============================================================
+   INIT
+   ============================================================ */
+document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+document.addEventListener('selectstart', function(e) { e.preventDefault(); });
+document.addEventListener('touchstart', resetIdleTimer, { passive: true });
+document.addEventListener('click', resetIdleTimer);
+
+// Fullscreen on first touch/click + tap SFX on interactive elements
+document.addEventListener('pointerdown', function(e) {
+  if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
+    document.documentElement.requestFullscreen().catch(function() {});
+  }
+  if (e.target.closest('button, .wallet-opt, .info-card, .scenario-card, .quiz-opt, .pps-frame, .fact-bubble, .lang-btn')) {
+    SFX.tap();
+  }
+}, true);
+
+renderTexts();
+updateDots();
+updateNav();
+resetIdleTimer();
+fitStage();
+
+gsap.from('#section-0', { opacity: 0, y: 36, duration: 0.9, ease: 'power2.out', delay: 0.3 });
+</script>
+</body>
+</html>

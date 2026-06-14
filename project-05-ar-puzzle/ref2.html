@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>Rujukan Puzzle 2 — Unity in Diversity Series 2</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --cream: #FFF8F0;
+      --blue: #0047AB;
+      --gold: #F5A623;
+      --teal: #00B4A6;
+      --dark: #0A0A0A;
+      --text: #1A1A1A;
+      --text-muted: #666;
+      --card-bg: #FFFFFF;
+      --radius: 16px;
+      --shadow: 0 4px 24px rgba(0,0,0,0.10);
+    }
+    html, body {
+      min-height: 100vh;
+      background: var(--cream);
+      font-family: 'Nunito', sans-serif;
+      color: var(--text);
+    }
+    body { padding-bottom: 40px; }
+
+    /* HEADER */
+    .header {
+      background: #003893;
+      padding: 18px 20px 14px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 12px rgba(0,56,147,0.35);
+    }
+    .header-inner {
+      max-width: 430px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .back-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: white;
+      text-decoration: none;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      font-size: 0.85rem;
+      min-height: 44px;
+    }
+    .header-title {
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: white;
+      text-align: center;
+      flex: 1;
+      padding: 0 8px;
+    }
+    .lang-toggle {
+      display: flex;
+      background: rgba(255,255,255,0.15);
+      border-radius: 24px;
+      overflow: hidden;
+    }
+    .lang-btn {
+      padding: 7px 11px;
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 700;
+      border: none;
+      background: transparent;
+      color: rgba(255,255,255,0.7);
+      cursor: pointer;
+      min-height: 34px;
+      transition: all 0.2s;
+    }
+    .lang-btn.active { background: #FFCC00; color: #001A5C; border-radius: 24px; }
+
+    /* CONTENT */
+    .content { max-width: 430px; margin: 0 auto; padding: 20px 16px 0; }
+
+    /* PAGE TITLE */
+    .page-title-card {
+      background: white;
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
+      text-align: center;
+      border-top: 5px solid #CC0001;
+    }
+    .page-title-card .badge {
+      display: inline-block;
+      background: rgba(204,0,1,0.1);
+      color: #8B0000;
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 5px 14px;
+      border-radius: 20px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    .page-title-card h1 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #003893;
+      margin-bottom: 4px;
+    }
+    .page-title-card .subtitle {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    /* ARTWORK CONTAINER */
+    .artwork-container {
+      background: #001A5C;
+      border-radius: var(--radius);
+      padding: 24px 20px;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .artwork-label {
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: rgba(255,255,255,0.5);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+
+    /* Full artwork */
+    .artwork-full {
+      width: 280px;
+      height: 340px;
+      background: #001A5C;
+      border-radius: 6px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Malaysia title */
+    .malaysia-title {
+      position: absolute;
+      top: 14px;
+      left: 0; right: 0;
+      text-align: center;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 800;
+      font-size: 1.3rem;
+      color: #FFCC00;
+      letter-spacing: 0.12em;
+      z-index: 10;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.6);
+    }
+
+    /* Blue canton */
+    .flag-canton {
+      position: absolute;
+      top: 55px;
+      left: 0; right: 0;
+      height: 110px;
+      background: #003893;
+      z-index: 2;
+    }
+
+    /* Crescent */
+    .crescent-wrap {
+      position: absolute;
+      top: 65px;
+      left: 22px;
+      z-index: 8;
+    }
+    .crescent {
+      width: 52px; height: 52px;
+      background: #FFCC00;
+      border-radius: 50%;
+      position: relative;
+    }
+    .crescent::after {
+      content: '';
+      position: absolute;
+      width: 42px; height: 42px;
+      background: #003893;
+      border-radius: 50%;
+      top: 4px; left: 10px;
+    }
+
+    /* Star */
+    .star-14 {
+      position: absolute;
+      top: 60px;
+      left: 88px;
+      font-size: 3rem;
+      color: #FFCC00;
+      z-index: 8;
+      line-height: 1;
+    }
+
+    /* Stripes */
+    .stripes-container {
+      position: absolute;
+      top: 165px;
+      left: 0; right: 0;
+      bottom: 0;
+      display: flex;
+      flex-direction: column;
+      z-index: 3;
+    }
+    .stripe { flex: 1; }
+    .stripe-r { background: #CC0001; }
+    .stripe-w { background: #FFFFFF; }
+
+    /* Figures */
+    .figures-row {
+      position: absolute;
+      bottom: 16px;
+      left: 0; right: 0;
+      display: flex;
+      justify-content: space-around;
+      align-items: flex-end;
+      z-index: 15;
+      padding: 0 16px;
+    }
+    .figure { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+    .fig-hair { position: relative; top: -2px; width: 26px; height: 13px; border-radius: 13px 13px 0 0; }
+    .fig-head { width: 22px; height: 22px; border-radius: 50%; }
+    .fig-body { width: 0; height: 0; border-left: 20px solid transparent; border-right: 20px solid transparent; }
+
+    .fig1 .fig-head { background: #C68642; }
+    .fig1 .fig-hair { background: #1A0A00; }
+    .fig1 .fig-body { border-bottom: 56px solid #E53935; }
+
+    .fig2 .fig-head { background: #FDBCB4; }
+    .fig2 .fig-hair { background: #000; }
+    .fig2 .fig-body { border-bottom: 56px solid #F5A623; }
+
+    .fig3 .fig-head { background: #7D4B2A; }
+    .fig3 .fig-hair { background: #4A1500; }
+    .fig3 .fig-body { border-bottom: 56px solid #00B4A6; }
+
+    .fig4 .fig-head { background: #F0CFA0; }
+    .fig4 .fig-hair { background: #2C1810; }
+    .fig4 .fig-body { border-bottom: 56px solid #0047AB; }
+
+    /* ELEMENT KEY */
+    .element-key-card {
+      background: white;
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
+    }
+    .element-key-card h2 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--blue);
+      margin-bottom: 14px;
+    }
+    .element-list { display: flex; flex-direction: column; gap: 10px; }
+    .element-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px;
+      background: #F8F5F0;
+      border-radius: 10px;
+    }
+    .element-icon {
+      width: 36px; height: 36px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+    .element-info .label {
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .element-info .desc {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 1px;
+    }
+
+    /* TIPS */
+    .tips-card {
+      background: white;
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
+    }
+    .tips-card h2 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--blue);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .tip-list { list-style: none; }
+    .tip-item {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      margin-bottom: 14px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid #F0EBE4;
+    }
+    .tip-item:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+    .tip-num {
+      min-width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, #CC0001, #003893);
+      color: white;
+      border-radius: 50%;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 700;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .tip-text { font-size: 0.88rem; line-height: 1.55; color: var(--text); }
+
+    /* ACTION */
+    .scan-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: #003893;
+      color: white;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 700;
+      font-size: 0.95rem;
+      padding: 18px 24px;
+      border-radius: 14px;
+      text-decoration: none;
+      min-height: 62px;
+      text-align: center;
+      margin-bottom: 12px;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .scan-btn:active { transform: scale(0.98); }
+
+    /* FLAG COLOURS ROW */
+    .flag-colours {
+      display: flex;
+      gap: 8px;
+      margin-top: 14px;
+    }
+    .flag-colour-chip {
+      flex: 1;
+      height: 28px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.6rem;
+      font-weight: 700;
+    }
+
+    /* LANG */
+    .bm-text { display: block; }
+    .en-text { display: none; }
+    body.lang-en .bm-text { display: none; }
+    body.lang-en .en-text { display: block; }
+    body.lang-en .bm-title { display: none; }
+    body.lang-en .en-title { display: block; }
+    .bm-title { display: block; }
+    .en-title { display: none; }
+    span.bm-text { display: inline; }
+    span.en-text { display: inline; }
+    body.lang-en span.bm-text { display: none; }
+    body:not(.lang-en) span.en-text { display: none; }
+  </style>
+</head>
+<body>
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-inner">
+      <a href="index.html" class="back-btn">← <span class="bm-text">Kembali</span><span class="en-text">Back</span></a>
+      <div class="header-title">
+        <span class="bm-text">Rujukan Puzzle</span>
+        <span class="en-text">Puzzle Reference</span>
+      </div>
+      <div class="lang-toggle">
+        <button class="lang-btn active" id="btnBM" onclick="setLang('bm')">BM</button>
+        <button class="lang-btn" id="btnEN" onclick="setLang('en')">EN</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="content">
+
+    <!-- PAGE TITLE -->
+    <div class="page-title-card">
+      <div class="badge">
+        <span class="bm-text">Rupa Siap Puzzle</span>
+        <span class="en-text">Completed Puzzle Reference</span>
+      </div>
+      <h1>Unity in Diversity Series 2</h1>
+      <p class="subtitle">ArtJamila · 2017</p>
+    </div>
+
+    <!-- ARTWORK REFERENCE -->
+    <div class="artwork-container">
+      <div class="artwork-label">
+        <span class="bm-text">Gambar lengkap untuk panduan</span>
+        <span class="en-text">Reference image for guidance</span>
+      </div>
+      <div class="artwork-full">
+        <!-- Malaysia title -->
+        <div class="malaysia-title">MALAYSIA</div>
+        <!-- Blue canton -->
+        <div class="flag-canton"></div>
+        <!-- Crescent -->
+        <div class="crescent-wrap">
+          <div class="crescent"></div>
+        </div>
+        <!-- Star -->
+        <div class="star-14">✦</div>
+        <!-- Stripes -->
+        <div class="stripes-container">
+          <div class="stripe stripe-r"></div>
+          <div class="stripe stripe-w"></div>
+          <div class="stripe stripe-r"></div>
+          <div class="stripe stripe-w"></div>
+          <div class="stripe stripe-r"></div>
+          <div class="stripe stripe-w"></div>
+          <div class="stripe stripe-r"></div>
+        </div>
+        <!-- Figures -->
+        <div class="figures-row">
+          <div class="figure fig1">
+            <div class="fig-hair"></div>
+            <div class="fig-head"></div>
+            <div class="fig-body"></div>
+          </div>
+          <div class="figure fig2">
+            <div class="fig-hair"></div>
+            <div class="fig-head"></div>
+            <div class="fig-body"></div>
+          </div>
+          <div class="figure fig3">
+            <div class="fig-hair"></div>
+            <div class="fig-head"></div>
+            <div class="fig-body"></div>
+          </div>
+          <div class="figure fig4">
+            <div class="fig-hair"></div>
+            <div class="fig-head"></div>
+            <div class="fig-body"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Flag colour chips -->
+      <div class="flag-colours">
+        <div class="flag-colour-chip" style="background:#CC0001; color:white;">Merah</div>
+        <div class="flag-colour-chip" style="background:#FFFFFF; color:#333; border:1px solid #ddd;">Putih</div>
+        <div class="flag-colour-chip" style="background:#FFCC00; color:#333;">Kuning</div>
+        <div class="flag-colour-chip" style="background:#003893; color:white;">Biru</div>
+      </div>
+    </div>
+
+    <!-- ELEMENT KEY -->
+    <div class="element-key-card">
+      <h2>
+        🗺️ <span class="bm-text">Panduan Elemen Lukisan</span>
+        <span class="en-text">Painting Elements Guide</span>
+      </h2>
+      <div class="element-list">
+        <div class="element-item">
+          <div class="element-icon" style="background:#003893; color:#FFCC00; font-size:0.9rem;">MALAYSIA</div>
+          <div class="element-info">
+            <div class="label"><span class="bm-text">Perkataan "Malaysia"</span><span class="en-text">"Malaysia" text</span></div>
+            <div class="desc"><span class="bm-text">Teks emas di bahagian atas</span><span class="en-text">Gold text at the top</span></div>
+          </div>
+        </div>
+        <div class="element-item">
+          <div class="element-icon" style="background:#003893;">🌙</div>
+          <div class="element-info">
+            <div class="label"><span class="bm-text">Anak bulan emas</span><span class="en-text">Gold crescent moon</span></div>
+            <div class="desc"><span class="bm-text">Di kawasan biru, sebelah kiri</span><span class="en-text">In the blue canton, left side</span></div>
+          </div>
+        </div>
+        <div class="element-item">
+          <div class="element-icon" style="background:#003893; color:#FFCC00;">✦</div>
+          <div class="element-info">
+            <div class="label"><span class="bm-text">Bintang 14 mata emas</span><span class="en-text">14-pointed gold star</span></div>
+            <div class="desc"><span class="bm-text">Di sebelah kanan anak bulan</span><span class="en-text">To the right of the crescent</span></div>
+          </div>
+        </div>
+        <div class="element-item">
+          <div class="element-icon" style="background: repeating-linear-gradient(0deg, #CC0001 0px, #CC0001 5px, #fff 5px, #fff 10px);">  </div>
+          <div class="element-info">
+            <div class="label"><span class="bm-text">7 jalur merah &amp; putih</span><span class="en-text">7 red &amp; white stripes</span></div>
+            <div class="desc"><span class="bm-text">Di bahagian bawah &amp; kanan lukisan</span><span class="en-text">In the lower and right sections</span></div>
+          </div>
+        </div>
+        <div class="element-item">
+          <div class="element-icon" style="background: linear-gradient(90deg, #C68642, #FDBCB4, #7D4B2A, #F0CFA0);">👩</div>
+          <div class="element-info">
+            <div class="label"><span class="bm-text">4 figura wanita pelbagai kaum</span><span class="en-text">4 women figures of diverse races</span></div>
+            <div class="desc"><span class="bm-text">Di bahagian bawah lukisan</span><span class="en-text">At the bottom of the painting</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TIPS -->
+    <div class="tips-card">
+      <h2>
+        💡 <span class="bm-text">Tips Menyusun Puzzle</span>
+        <span class="en-text">Assembly Tips</span>
+      </h2>
+      <ol class="tip-list">
+        <li class="tip-item">
+          <div class="tip-num">1</div>
+          <div class="tip-text">
+            <span class="bm-text">Cari jalur dengan kawasan biru gelap — ini adalah bahagian atas/kiri (kantung bendera) yang mengandungi anak bulan dan bintang.</span>
+            <span class="en-text">Find the strip with the dark blue area — this is the upper-left canton containing the crescent and star.</span>
+          </div>
+        </li>
+        <li class="tip-item">
+          <div class="tip-num">2</div>
+          <div class="tip-text">
+            <span class="bm-text">Susun jalur merah dan putih berselang-seli di bahagian kanan dan bawah gambar.</span>
+            <span class="en-text">Arrange red and white strips alternately on the right and lower portions of the image.</span>
+          </div>
+        </li>
+        <li class="tip-item">
+          <div class="tip-num">3</div>
+          <div class="tip-text">
+            <span class="bm-text">Perkataan "MALAYSIA" dalam warna emas mestilah kelihatan di bahagian atas.</span>
+            <span class="en-text">The word "MALAYSIA" in gold must be visible at the top.</span>
+          </div>
+        </li>
+        <li class="tip-item">
+          <div class="tip-num">4</div>
+          <div class="tip-text">
+            <span class="bm-text">4 figura wanita pelbagai warna kulit perlu kelihatan di bahagian bawah lukisan.</span>
+            <span class="en-text">4 women figures of various skin tones should appear at the bottom of the painting.</span>
+          </div>
+        </li>
+        <li class="tip-item">
+          <div class="tip-num">5</div>
+          <div class="tip-text">
+            <span class="bm-text">Apabila gambar lengkap, pergi ke skrin AR dan tekan 'Simulasi AR' untuk lihat Jalur Gemilang berkibar!</span>
+            <span class="en-text">Once the image is complete, go to the AR screen and press 'Simulate AR' to see the Jalur Gemilang wave!</span>
+          </div>
+        </li>
+      </ol>
+    </div>
+
+    <!-- ACTION BUTTON -->
+    <a href="artwork2.html" class="scan-btn">
+      ▶ <span class="bm-text">Pergi ke Skrin AR Lukisan 2</span>
+      <span class="en-text">Go to Artwork 2 AR Screen</span>
+    </a>
+
+  </main>
+
+  <script>
+    function setLang(lang) {
+      if (lang === 'en') {
+        document.body.classList.add('lang-en');
+        document.getElementById('btnEN').classList.add('active');
+        document.getElementById('btnBM').classList.remove('active');
+        localStorage.setItem('imd_lang', 'en');
+      } else {
+        document.body.classList.remove('lang-en');
+        document.getElementById('btnBM').classList.add('active');
+        document.getElementById('btnEN').classList.remove('active');
+        localStorage.setItem('imd_lang', 'bm');
+      }
+    }
+    const savedLang = localStorage.getItem('imd_lang');
+    if (savedLang === 'en') setLang('en');
+  </script>
+</body>
+</html>

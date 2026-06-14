@@ -1,0 +1,17 @@
+{
+  "nodes": [
+    { "id": 0, "activated": false, "activatedCount": 0, "color": "#00E5FF" },
+    { "id": 1, "activated": false, "activatedCount": 0, "color": "#F5A623" },
+    { "id": 2, "activated": false, "activatedCount": 0, "color": "#7B5EA7" },
+    { "id": 3, "activated": false, "activatedCount": 0, "color": "#27AE60" },
+    { "id": 4, "activated": false, "activatedCount": 0, "color": "#FF6B5B" },
+    { "id": 5, "activated": false, "activatedCount": 0, "color": "#00B4A6" },
+    { "id": 6, "activated": false, "activatedCount": 0, "color": "#F5A623" },
+    { "id": 7, "activated": false, "activatedCount": 0, "color": "#0047AB" },
+    { "id": 8, "activated": false, "activatedCount": 0, "color": "#27AE60" },
+    { "id": 9, "activated": false, "activatedCount": 0, "color": "#00E5FF" }
+  ],
+  "connections": [],
+  "totalSessions": 0,
+  "totalPositive": 0
+}

@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>Rhythm of Nationality — AR Simulasi</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --cream: #FFF8F0;
+      --dark: #0A0A0A;
+      --blue: #0047AB;
+      --blue-dark: #003588;
+      --gold: #F5A623;
+      --teal: #00B4A6;
+      --green: #1B8C3E;
+      --white: #FFFFFF;
+      --text: #1A1A1A;
+      --text-muted: #888888;
+      --radius: 16px;
+    }
+    html, body {
+      height: 100%;
+      overflow: hidden;
+      background: var(--dark);
+      font-family: 'Nunito', sans-serif;
+    }
+
+    /* ── TOP BAR ── */
+    .topbar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      background: linear-gradient(180deg, rgba(0,0,0,0.85) 0%, transparent 100%);
+    }
+    .back-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: white;
+      text-decoration: none;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      font-size: 0.85rem;
+      min-height: 44px;
+      padding: 0 4px;
+    }
+    .topbar-title {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 700;
+      font-size: 0.82rem;
+      color: white;
+      text-align: center;
+      flex: 1;
+      padding: 0 8px;
+    }
+    .lang-toggle {
+      display: flex;
+      background: rgba(255,255,255,0.15);
+      border-radius: 24px;
+      overflow: hidden;
+    }
+    .lang-btn {
+      padding: 7px 11px;
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 700;
+      border: none;
+      background: transparent;
+      color: rgba(255,255,255,0.7);
+      cursor: pointer;
+      min-height: 34px;
+      transition: all 0.2s;
+    }
+    .lang-btn.active {
+      background: var(--gold);
+      color: var(--dark);
+      border-radius: 24px;
+    }
+
+    /* ── AR VIEWPORT ── */
+    .ar-viewport {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: var(--dark);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Corner guides */
+    .corner-guide {
+      position: absolute;
+      width: 28px; height: 28px;
+      border-color: rgba(245,166,35,0.6);
+      border-style: solid;
+      border-width: 0;
+    }
+    .cg-tl { top: 72px; left: 28px; border-top-width: 3px; border-left-width: 3px; border-radius: 4px 0 0 0; }
+    .cg-tr { top: 72px; right: 28px; border-top-width: 3px; border-right-width: 3px; border-radius: 0 4px 0 0; }
+    .cg-bl { bottom: 130px; left: 28px; border-bottom-width: 3px; border-left-width: 3px; border-radius: 0 0 0 4px; }
+    .cg-br { bottom: 130px; right: 28px; border-bottom-width: 3px; border-right-width: 3px; border-radius: 0 0 4px 0; }
+
+    /* ── ARTWORK CANVAS ── */
+    .artwork-wrap {
+      position: relative;
+      width: 300px;
+      height: 380px;
+    }
+    .artwork-canvas {
+      width: 300px;
+      height: 380px;
+      background: #1A1010;
+      border-radius: 8px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 36px;
+      overflow: hidden;
+    }
+
+    /* Wall texture */
+    .artwork-canvas::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(0deg, rgba(255,255,255,0.01) 0px, rgba(255,255,255,0.01) 1px, transparent 1px, transparent 40px);
+      pointer-events: none;
+    }
+
+    /* Rope */
+    .rope {
+      position: absolute;
+      top: 24px;
+      left: 18px;
+      right: 18px;
+      height: 6px;
+      background: linear-gradient(90deg, #5D2F0A, #8B4513, #A0522D, #8B4513, #5D2F0A);
+      border-radius: 3px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+      z-index: 5;
+    }
+    .rope::before, .rope::after {
+      content: '';
+      position: absolute;
+      top: -8px;
+      width: 12px; height: 12px;
+      background: #5D2F0A;
+      border-radius: 50%;
+    }
+    .rope::before { left: 4px; }
+    .rope::after { right: 4px; }
+
+    /* Fabric strips container */
+    .strips-container {
+      position: absolute;
+      top: 30px;
+      left: 10px;
+      right: 10px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      gap: 3px;
+    }
+    .strip {
+      width: 32px;
+      height: 210px;
+      border-radius: 0 0 6px 6px;
+      transform-origin: top center;
+      position: relative;
+      box-shadow: 2px 0 6px rgba(0,0,0,0.3);
+    }
+    /* Clip pin */
+    .strip::before {
+      content: '';
+      position: absolute;
+      top: -3px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 6px; height: 8px;
+      background: #B0B0B0;
+      border-radius: 1px;
+      z-index: 6;
+    }
+
+    /* Strip patterns */
+    .s1 {
+      background: repeating-linear-gradient(135deg, #CC2200 0px, #CC2200 6px, #ffffff 6px, #ffffff 12px);
+      transform: rotate(-1.5deg);
+    }
+    .s2 {
+      background: repeating-linear-gradient(60deg, #E8960A 0px, #E8960A 8px, #FFD700 8px, #FFD700 16px);
+      transform: rotate(2deg);
+    }
+    .s3 {
+      background: radial-gradient(circle, #ffffff 3px, transparent 3px) 0 0 / 12px 12px #1B6B2E;
+      transform: rotate(-0.5deg);
+    }
+    .s4 {
+      background: repeating-linear-gradient(0deg, #0047AB 0px, #0047AB 5px, #66B3FF 5px, #66B3FF 10px);
+      transform: rotate(1.5deg);
+    }
+    .s5 {
+      background: repeating-linear-gradient(45deg, #6A1B99 0px, #6A1B99 7px, #CE93D8 7px, #CE93D8 14px);
+      transform: rotate(-2deg);
+    }
+    .s6 {
+      background: repeating-linear-gradient(90deg, #BF360C 0px, #BF360C 5px, #FFB300 5px, #FFB300 10px);
+      transform: rotate(0.8deg);
+    }
+    .s7 {
+      background:
+        repeating-linear-gradient(0deg, rgba(0,105,92,0.9) 0px, rgba(0,105,92,0.9) 6px, rgba(128,203,196,0.9) 6px, rgba(128,203,196,0.9) 12px),
+        repeating-linear-gradient(90deg, rgba(0,0,0,0.15) 0px, rgba(0,0,0,0.15) 6px, transparent 6px, transparent 12px);
+      transform: rotate(-1deg);
+    }
+    .s8 {
+      background: repeating-linear-gradient(135deg, #AD1457 0px, #AD1457 5px, #F8BBD9 5px, #F8BBD9 10px);
+      transform: rotate(2.5deg);
+    }
+
+    /* ── SWAY ANIMATIONS (active when .ar-active) ── */
+    @keyframes sway1 { 0%,100%{transform:rotate(-4deg)} 50%{transform:rotate(4deg)} }
+    @keyframes sway2 { 0%,100%{transform:rotate(4deg)} 50%{transform:rotate(-4deg)} }
+    @keyframes sway3 { 0%,100%{transform:rotate(-3deg)} 50%{transform:rotate(5deg)} }
+    @keyframes sway4 { 0%,100%{transform:rotate(2deg)} 50%{transform:rotate(-5deg)} }
+    @keyframes sway5 { 0%,100%{transform:rotate(-5deg)} 50%{transform:rotate(3deg)} }
+    @keyframes sway6 { 0%,100%{transform:rotate(3deg)} 50%{transform:rotate(-3deg)} }
+    @keyframes sway7 { 0%,100%{transform:rotate(-2deg)} 50%{transform:rotate(4deg)} }
+    @keyframes sway8 { 0%,100%{transform:rotate(4deg)} 50%{transform:rotate(-2deg)} }
+
+    .ar-active .s1 { animation: sway1 2s ease-in-out infinite 0s; }
+    .ar-active .s2 { animation: sway2 2s ease-in-out infinite 0.25s; }
+    .ar-active .s3 { animation: sway3 2.1s ease-in-out infinite 0.5s; }
+    .ar-active .s4 { animation: sway4 1.9s ease-in-out infinite 0.75s; }
+    .ar-active .s5 { animation: sway5 2.2s ease-in-out infinite 1s; }
+    .ar-active .s6 { animation: sway6 2s ease-in-out infinite 1.25s; }
+    .ar-active .s7 { animation: sway7 1.85s ease-in-out infinite 1.5s; }
+    .ar-active .s8 { animation: sway8 2.1s ease-in-out infinite 1.75s; }
+
+    /* ── WARM GLOW OVERLAY ── */
+    @keyframes warmPulse {
+      0%,100% { opacity: 0.3; transform: scale(1); }
+      50% { opacity: 0.7; transform: scale(1.05); }
+    }
+    .glow-overlay {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 80% 60% at 50% 40%, rgba(245,166,35,0.2) 0%, transparent 70%);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.5s;
+      z-index: 3;
+    }
+    .ar-active .glow-overlay {
+      animation: warmPulse 3s ease-in-out infinite;
+    }
+
+    /* ── POEM TEXT OVERLAY ── */
+    .poem-overlay {
+      position: absolute;
+      bottom: 8px;
+      left: 8px;
+      right: 8px;
+      z-index: 10;
+      pointer-events: none;
+    }
+    .poem-line {
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.72rem;
+      font-style: italic;
+      color: rgba(255,255,255,0.95);
+      text-align: center;
+      text-shadow: 0 1px 8px rgba(0,0,0,0.9), 0 0 12px rgba(245,166,35,0.5);
+      line-height: 1.5;
+      opacity: 0;
+      transform: translateY(6px);
+      transition: opacity 0.6s, transform 0.6s;
+      display: block;
+      margin-bottom: 2px;
+    }
+    .poem-line.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ── AR ACTIVE STATE on canvas ── */
+    .artwork-canvas.ar-active {
+      box-shadow: 0 0 40px rgba(245,166,35,0.3), 0 0 80px rgba(0,180,166,0.15);
+    }
+
+    /* ── SCAN INDICATOR ── */
+    .scan-indicator {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(0,0,0,0.6);
+      padding: 6px 10px;
+      border-radius: 20px;
+      z-index: 20;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .scan-indicator.visible { opacity: 1; }
+    .scan-dot {
+      width: 8px; height: 8px;
+      background: #4CAF50;
+      border-radius: 50%;
+    }
+    @keyframes blinkDot { 0%,100%{opacity:1} 50%{opacity:0.3} }
+    .scan-indicator.visible .scan-dot { animation: blinkDot 1s infinite; }
+    .scan-indicator span {
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.68rem;
+      font-weight: 600;
+      color: white;
+    }
+
+    /* ── CONTROLS ── */
+    .controls-bar {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      z-index: 150;
+      background: linear-gradient(0deg, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.7) 100%);
+      padding: 12px 16px 24px;
+    }
+    .controls-row {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+      max-width: 400px;
+      margin: 0 auto;
+    }
+    .ctrl-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 14px 16px;
+      border-radius: 12px;
+      border: none;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 700;
+      font-size: 0.82rem;
+      cursor: pointer;
+      min-height: 52px;
+      flex: 1;
+      max-width: 130px;
+      transition: transform 0.1s, opacity 0.2s;
+    }
+    .ctrl-btn:active { transform: scale(0.96); }
+    .btn-start { background: var(--green); color: white; }
+    .btn-stop { background: #333; color: white; display: none; }
+    .btn-info { background: var(--gold); color: #1A1A1A; }
+    .btn-back {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 14px 16px;
+      border-radius: 12px;
+      border: 1.5px solid rgba(255,255,255,0.2);
+      color: rgba(255,255,255,0.8);
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      font-size: 0.82rem;
+      text-decoration: none;
+      min-height: 52px;
+      flex: 0 0 auto;
+    }
+
+    /* ── INFO PANEL ── */
+    .panel-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 300;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    .panel-backdrop.open { opacity: 1; pointer-events: auto; }
+
+    .info-panel {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      z-index: 400;
+      background: var(--cream);
+      border-radius: 20px 20px 0 0;
+      max-height: 72vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transform: translateY(100%);
+      transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+    }
+    .info-panel.open { transform: translateY(0); }
+
+    .panel-handle {
+      width: 36px; height: 4px;
+      background: #CCCCCC;
+      border-radius: 2px;
+      margin: 12px auto 0;
+      flex-shrink: 0;
+    }
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 20px 0;
+      flex-shrink: 0;
+    }
+    .panel-header h3 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--blue);
+    }
+    .close-btn {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: #EEEEEE;
+      border: none;
+      font-size: 1.1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #666;
+    }
+
+    /* Tab bar */
+    .tab-bar {
+      display: flex;
+      gap: 0;
+      padding: 12px 20px 0;
+      border-bottom: 2px solid #EEEEEE;
+      flex-shrink: 0;
+    }
+    .tab-btn {
+      padding: 10px 16px;
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 700;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      transition: all 0.2s;
+      min-height: 44px;
+    }
+    .tab-btn.active {
+      color: var(--blue);
+      border-bottom-color: var(--blue);
+    }
+
+    .panel-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 20px 32px;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    /* Tab content */
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* Info tab */
+    .info-para {
+      font-size: 0.88rem;
+      line-height: 1.65;
+      color: var(--text);
+      margin-bottom: 12px;
+    }
+    .info-para .en {
+      display: block;
+      color: #555;
+      font-size: 0.82rem;
+      margin-top: 4px;
+      font-style: italic;
+    }
+
+    /* Think & Share collapsible */
+    .think-section {
+      margin-top: 16px;
+      background: #fff;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1.5px solid #E8E0D8;
+    }
+    .think-toggle {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--teal);
+      min-height: 52px;
+    }
+    .think-toggle .chevron {
+      transition: transform 0.3s;
+      font-size: 0.72rem;
+    }
+    .think-toggle.open .chevron { transform: rotate(180deg); }
+    .think-body {
+      padding: 0 16px 14px;
+      display: none;
+    }
+    .think-body.open { display: block; }
+    .think-q {
+      margin-bottom: 12px;
+      padding-left: 12px;
+      border-left: 3px solid var(--teal);
+    }
+    .think-q p {
+      font-size: 0.85rem;
+      line-height: 1.5;
+      color: var(--text);
+    }
+    .think-q .en {
+      display: block;
+      color: #666;
+      font-size: 0.78rem;
+      margin-top: 2px;
+      font-style: italic;
+    }
+
+    /* Poem tab */
+    .poem-container {
+      padding: 8px 0;
+    }
+    .poem-lang-label {
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--gold);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .poem-lang-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: #E0D8D0;
+    }
+    .poem-text {
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.88rem;
+      line-height: 1.9;
+      color: var(--text);
+      margin-bottom: 20px;
+    }
+    .poem-text p { margin-bottom: 2px; }
+
+    /* Artist tab */
+    .artist-card {
+      background: white;
+      border-radius: 12px;
+      padding: 16px;
+      border: 1.5px solid #E8E0D8;
+    }
+    .artist-avatar {
+      width: 60px; height: 60px;
+      background: linear-gradient(135deg, var(--blue), var(--teal));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      margin-bottom: 12px;
+    }
+    .artist-name {
+      font-family: 'Poppins', sans-serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--blue);
+      margin-bottom: 4px;
+    }
+    .artist-award {
+      display: inline-block;
+      background: rgba(245,166,35,0.15);
+      color: #8B6A00;
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 20px;
+      margin-bottom: 12px;
+    }
+    .artist-bio {
+      font-size: 0.88rem;
+      line-height: 1.65;
+      color: var(--text);
+      margin-bottom: 10px;
+    }
+    .artist-bio .en {
+      display: block;
+      color: #555;
+      font-size: 0.82rem;
+      margin-top: 6px;
+      font-style: italic;
+    }
+
+    /* ── LANGUAGE STATES ── */
+    .bm-text { display: block; }
+    .en-text { display: none; }
+    body.lang-en .bm-text { display: none; }
+    body.lang-en .en-text { display: block; }
+    body.lang-en .bm-title { display: none; }
+    body.lang-en .en-title { display: block; }
+    .bm-title { display: block; }
+    .en-title { display: none; }
+    /* Inline bilingual spans */
+    span.bm-text { display: inline; }
+    span.en-text { display: inline; }
+    body.lang-en span.bm-text { display: none; }
+    body:not(.lang-en) span.en-text { display: none; }
+  </style>
+</head>
+<body>
+  <!-- TOP BAR -->
+  <header class="topbar">
+    <a href="index.html" class="back-btn">← <span class="bm-text">Kembali</span><span class="en-text">Back</span></a>
+    <div class="topbar-title">Rhythm of Nationality</div>
+    <div class="lang-toggle">
+      <button class="lang-btn active" id="btnBM" onclick="setLang('bm')">BM</button>
+      <button class="lang-btn" id="btnEN" onclick="setLang('en')">EN</button>
+    </div>
+  </header>
+
+  <!-- AR VIEWPORT -->
+  <div class="ar-viewport" id="arViewport">
+    <!-- Corner guides -->
+    <div class="corner-guide cg-tl"></div>
+    <div class="corner-guide cg-tr"></div>
+    <div class="corner-guide cg-bl"></div>
+    <div class="corner-guide cg-br"></div>
+
+    <div class="artwork-wrap">
+      <div class="artwork-canvas" id="artworkCanvas">
+        <!-- Glow overlay -->
+        <div class="glow-overlay"></div>
+
+        <!-- Rope -->
+        <div class="rope"></div>
+
+        <!-- Fabric strips -->
+        <div class="strips-container" id="stripsContainer">
+          <div class="strip s1"></div>
+          <div class="strip s2"></div>
+          <div class="strip s3"></div>
+          <div class="strip s4"></div>
+          <div class="strip s5"></div>
+          <div class="strip s6"></div>
+          <div class="strip s7"></div>
+          <div class="strip s8"></div>
+        </div>
+
+        <!-- Poem overlay -->
+        <div class="poem-overlay" id="poemOverlay">
+          <span class="poem-line" id="pl0"></span>
+          <span class="poem-line" id="pl1"></span>
+          <span class="poem-line" id="pl2"></span>
+          <span class="poem-line" id="pl3"></span>
+        </div>
+
+        <!-- Scan indicator -->
+        <div class="scan-indicator" id="scanIndicator">
+          <div class="scan-dot"></div>
+          <span>AR LIVE</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTROLS BAR -->
+  <div class="controls-bar">
+    <div class="controls-row">
+      <button class="ctrl-btn btn-start" id="btnStart" onclick="startAR()">
+        ▶ <span class="bm-text">Simulasi AR</span><span class="en-text">Simulate AR</span>
+      </button>
+      <button class="ctrl-btn btn-stop" id="btnStop" onclick="stopAR()">
+        ⏸ <span class="bm-text">Berhenti</span><span class="en-text">Stop</span>
+      </button>
+      <button class="ctrl-btn btn-info" onclick="openPanel()">
+        ℹ <span class="bm-text">Tentang</span><span class="en-text">About</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- PANEL BACKDROP -->
+  <div class="panel-backdrop" id="backdrop" onclick="closePanel()"></div>
+
+  <!-- INFO PANEL -->
+  <div class="info-panel" id="infoPanel">
+    <div class="panel-handle"></div>
+    <div class="panel-header">
+      <h3>Rhythm of Nationality</h3>
+      <button class="close-btn" onclick="closePanel()">✕</button>
+    </div>
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="switchTab('info')">
+        <span class="bm-text">Info</span><span class="en-text">Info</span>
+      </button>
+      <button class="tab-btn" onclick="switchTab('puisi')">
+        <span class="bm-text">Puisi</span><span class="en-text">Poem</span>
+      </button>
+      <button class="tab-btn" onclick="switchTab('pelukis')">
+        <span class="bm-text">Pelukis</span><span class="en-text">Artist</span>
+      </button>
+    </div>
+    <div class="panel-body">
+
+      <!-- INFO TAB -->
+      <div class="tab-content active" id="tab-info">
+        <p class="info-para">
+          <span class="bm-text">Lukisan ini menonjolkan ampaian kain tradisional yang sering dilihat di halaman rumah di Malaysia. Disokong oleh dahan kayu, setiap kain memaparkan corak yang mewakili pelbagai budaya dan tradisi di Malaysia.</span>
+          <span class="en-text">This painting features traditional clotheslines often seen in Malaysian backyards. Supported by wooden branches, each cloth displays patterns representing various cultures and traditions in Malaysia.</span>
+        </p>
+        <p class="info-para">
+          <span class="bm-text">Gabungan pelbagai kain bercorak meraikan perpaduan dalam kekayaan dan keindahan budaya masyarakat majmuk di Malaysia.</span>
+          <span class="en-text">The combination of various patterned cloths celebrates unity in the rich cultural diversity of Malaysia's multiracial society.</span>
+        </p>
+
+        <!-- Think & Share -->
+        <div class="think-section">
+          <button class="think-toggle" id="thinkToggle" onclick="toggleThink()">
+            <span>💭 <span class="bm-text">Fikir &amp; Kongsi</span><span class="en-text">Think &amp; Share</span></span>
+            <span class="chevron">▼</span>
+          </button>
+          <div class="think-body" id="thinkBody">
+            <div class="think-q">
+              <p>
+                <span class="bm-text">Berapa jenis corak pada kain yang anda kenal dari lukisan ini?</span>
+                <span class="en-text">How many types of patterns on the cloths can you recognise in this painting?</span>
+              </p>
+            </div>
+            <div class="think-q">
+              <p>
+                <span class="bm-text">Penting untuk kita hidup saling menghormati sesama kaum. Bagaimana kita saling menghormati?</span>
+                <span class="en-text">It's important to respect each other across races. How do we show respect?</span>
+              </p>
+            </div>
+            <div class="think-q">
+              <p>
+                <span class="bm-text">Apakah yang boleh kita pelajari daripada orang yang berbeza daripada kita?</span>
+                <span class="en-text">What can we learn from people who are different from us?</span>
+              </p>
+            </div>
+            <div class="think-q">
+              <p>
+                <span class="bm-text">Bagaimanakah kepelbagaian menjadikan Malaysia istimewa?</span>
+                <span class="en-text">How does diversity make Malaysia special?</span>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PUISI/POEM TAB -->
+      <div class="tab-content" id="tab-puisi">
+        <div class="poem-container">
+          <div class="poem-lang-label bm-text">Bahasa Melayu</div>
+          <div class="poem-text bm-text">
+            <p>Tiada jurang antara kaum yang berbeza,</p>
+            <p>Kita hidup dalam keharmonian sempurna,</p>
+            <p>Hati kita saling terikat erat,</p>
+            <p>Seperti kain-kain di ampaian,</p>
+            <p>Dengan inspirasi yang teguh dipegang,</p>
+            <p>Segala-galanya berkembang,</p>
+            <p>Irama memimpin kita,</p>
+            <p>Merentas setiap insan,</p>
+            <p>Meresap ke setiap ruang,</p>
+            <p>Ia menari, ia hidup,</p>
+            <p>Kita bayangkan tempat yang indah,</p>
+            <p>Semoga Malaysia terus kekal indah dalam keharmonian yang sempurna</p>
+          </div>
+          <div class="poem-lang-label en-text">English</div>
+          <div class="poem-text en-text">
+            <p>There is no gap between different race,</p>
+            <p>We exist in perfect harmony,</p>
+            <p>Our heart link closely,</p>
+            <p>Like the clothes on the string,</p>
+            <p>Within our strong held inspiration,</p>
+            <p>Everything arise,</p>
+            <p>Rhythm lead us,</p>
+            <p>Shuttle through everyone,</p>
+            <p>Shuttle into every single space,</p>
+            <p>Its dancing, its active,</p>
+            <p>We foresee a beautiful place,</p>
+            <p>Hope, Malaysia continue its beauty in perfect harmony</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- PELUKIS/ARTIST TAB -->
+      <div class="tab-content" id="tab-pelukis">
+        <div class="artist-card">
+          <div class="artist-avatar">🎨</div>
+          <div class="artist-name">Kong Kien Choong</div>
+          <div class="artist-award">🏆 Kijang Award 2004 — Special Mention</div>
+          <p class="artist-bio">
+            <span class="bm-text">Kong Kien Choong (lahir 1982, Kuala Lumpur) merupakan graduan Diploma Seni Halus daripada Dasein Academy of Art (2002–2004). Beliau menerima Special Mention Prize dalam Kijang Award 2004 anjuran Bank Negara Malaysia.</span>
+            <span class="en-text">Kong Kien Choong (born 1982, Kuala Lumpur) graduated with a Diploma in Fine Arts from Dasein Academy of Art (2002–2004). He received the Special Mention Prize at the 2004 Kijang Award by Bank Negara Malaysia.</span>
+          </p>
+        </div>
+      </div>
+
+    </div><!-- /panel-body -->
+  </div><!-- /info-panel -->
+
+  <script>
+    // ── LANGUAGE ──
+    function setLang(lang) {
+      if (lang === 'en') {
+        document.body.classList.add('lang-en');
+        document.getElementById('btnEN').classList.add('active');
+        document.getElementById('btnBM').classList.remove('active');
+        localStorage.setItem('imd_lang', 'en');
+      } else {
+        document.body.classList.remove('lang-en');
+        document.getElementById('btnBM').classList.add('active');
+        document.getElementById('btnEN').classList.remove('active');
+        localStorage.setItem('imd_lang', 'bm');
+      }
+      updatePoemText();
+    }
+    const savedLang = localStorage.getItem('imd_lang');
+    if (savedLang === 'en') setLang('en');
+
+    // ── TABS ──
+    function switchTab(name) {
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('tab-' + name).classList.add('active');
+      event.target.classList.add('active');
+    }
+
+    // ── THINK TOGGLE ──
+    function toggleThink() {
+      const body = document.getElementById('thinkBody');
+      const toggle = document.getElementById('thinkToggle');
+      body.classList.toggle('open');
+      toggle.classList.toggle('open');
+    }
+
+    // ── INFO PANEL ──
+    function openPanel() {
+      document.getElementById('infoPanel').classList.add('open');
+      document.getElementById('backdrop').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closePanel() {
+      document.getElementById('infoPanel').classList.remove('open');
+      document.getElementById('backdrop').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    // ── AR SIMULATION ──
+    let arActive = false;
+    let poemTimer = null;
+    let poemInterval = null;
+
+    const poemLinesBM = [
+      "Tiada jurang antara kaum yang berbeza,",
+      "Kita hidup dalam keharmonian sempurna,",
+      "Hati kita saling terikat erat,",
+      "Seperti kain-kain di ampaian..."
+    ];
+    const poemLinesEN = [
+      "There is no gap between different race,",
+      "We exist in perfect harmony,",
+      "Our heart link closely,",
+      "Like the clothes on the string..."
+    ];
+
+    function updatePoemText() {
+      const isEN = document.body.classList.contains('lang-en');
+      const lines = isEN ? poemLinesEN : poemLinesBM;
+      for (let i = 0; i < 4; i++) {
+        document.getElementById('pl' + i).textContent = lines[i];
+      }
+    }
+
+    function runPoemCycle() {
+      const lines = document.querySelectorAll('.poem-line');
+      let idx = 0;
+      // Clear all
+      lines.forEach(l => { l.classList.remove('visible'); });
+
+      function showNext() {
+        if (!arActive) return;
+        if (idx < lines.length) {
+          lines[idx].classList.add('visible');
+          idx++;
+          poemTimer = setTimeout(showNext, 1200);
+        } else {
+          // Fade out after 2s, then restart after 3s
+          poemTimer = setTimeout(() => {
+            lines.forEach(l => l.classList.remove('visible'));
+            if (arActive) {
+              poemTimer = setTimeout(runPoemCycle, 3000);
+            }
+          }, 2000);
+        }
+      }
+      showNext();
+    }
+
+    function startAR() {
+      arActive = true;
+      updatePoemText();
+      document.getElementById('artworkCanvas').classList.add('ar-active');
+      document.getElementById('scanIndicator').classList.add('visible');
+      document.getElementById('btnStart').style.display = 'none';
+      document.getElementById('btnStop').style.display = 'flex';
+      runPoemCycle();
+    }
+
+    function stopAR() {
+      arActive = false;
+      document.getElementById('artworkCanvas').classList.remove('ar-active');
+      document.getElementById('scanIndicator').classList.remove('visible');
+      document.getElementById('btnStart').style.display = 'flex';
+      document.getElementById('btnStop').style.display = 'none';
+      if (poemTimer) clearTimeout(poemTimer);
+      document.querySelectorAll('.poem-line').forEach(l => l.classList.remove('visible'));
+    }
+  </script>
+
+  <!--
+  ═══════════════════════════════════════════════════════════════
+  MINDAR.JS INTEGRATION — PRODUCTION AR IMPLEMENTATION
+  ═══════════════════════════════════════════════════════════════
+
+  To replace this simulation with real AR:
+
+  1. COMPILE IMAGE TARGET:
+     - Take a clear photo of the completed "Rhythm of Nationality" puzzle
+     - Go to https://hiukim.github.io/mind-ar-js-doc/tools/compile
+     - Upload the photo and download the generated .mind file
+     - Save as: assets/targets/artwork1.mind
+
+  2. ADD SCRIPT TAGS (before </head>):
+     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
+     <script src="https://cdn.jsdelivr.net/npm/aframe@1.4.2/dist/aframe.min.js"></script>
+
+  3. REPLACE #ar-viewport with:
+     <a-scene
+       mindar-image="imageTargetSrc: ./assets/targets/artwork1.mind; autoStart: false;"
+       color-space="sRGB"
+       renderer="colorManagement: true"
+       vr-mode-ui="enabled: false"
+       device-orientation-permission-ui="enabled: false"
+       embedded>
+
+       <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+       <a-entity mindar-image-target="targetIndex: 0">
+
+         <!-- Glow plane -->
+         <a-plane
+           position="0 0 0.001"
+           width="1" height="1.3"
+           material="shader: flat; src: #glowTexture; transparent: true; alphaTest: 0.1"
+           animation="property: material.opacity; from: 0.3; to: 0.7; dur: 3000; loop: true; dir: alternate">
+         </a-plane>
+
+         <!-- Sway animation on fabric entity -->
+         <a-entity
+           id="fabricEntity"
+           animation__sway="property: rotation; from: 0 0 -4; to: 0 0 4; dur: 2000; loop: true; dir: alternate; easing: easeInOutSine">
+         </a-entity>
+
+         <!-- Floating poem text -->
+         <a-text
+           id="arPoem"
+           value="Tiada jurang antara kaum yang berbeza..."
+           position="0 -0.5 0.01"
+           align="center"
+           color="#FFFFFF"
+           width="0.9"
+           font="https://cdn.aframe.io/fonts/Nunito.fnt">
+         </a-text>
+
+       </a-entity>
+     </a-scene>
+
+  4. UPDATE startAR() to call:
+     document.querySelector('a-scene').systems['mindar-image'].start();
+
+  5. UPDATE stopAR() to call:
+     document.querySelector('a-scene').systems['mindar-image'].stop();
+
+  ═══════════════════════════════════════════════════════════════
+  -->
+</body>
+</html>

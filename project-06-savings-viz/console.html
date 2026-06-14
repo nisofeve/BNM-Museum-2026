@@ -1,0 +1,1433 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Bina Semula Simpanan Bersama — IMD 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream:       #FFF8F0;
+    --teal:        #00B4A6;
+    --teal-dark:   #008F83;
+    --teal-light:  #E0F7F5;
+    --blue:        #0047AB;
+    --blue-light:  #EAF0FB;
+    --gold:        #F5A623;
+    --gold-light:  #FEF3DC;
+    --red:         #E53935;
+    --red-light:   #FDECEA;
+    --coral:       #FF6B5B;
+    --green:       #27AE60;
+    --green-light: #E8F5E9;
+    --white:       #FFFFFF;
+    --text-dark:   #1A1A2E;
+    --text-mid:    #4A4A6A;
+    --text-light:  #8888A8;
+    --shadow-sm:   0 2px 12px rgba(0,0,0,0.08);
+    --shadow-md:   0 8px 32px rgba(0,0,0,0.12);
+    /* Fluid scale: 1u == 1px on 1920×1080; min() clamps for both 1280×720 and 4K */
+    --u: min(0.05208vw, 0.09259vh);
+    --radius-sm: calc(12 * var(--u));
+    --radius-md: calc(20 * var(--u));
+    --radius-lg: calc(28 * var(--u));
+    --radius-xl: calc(40 * var(--u));
+    --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  /* ── GLOBAL KIOSK LOCKDOWN ── */
+  * {
+    margin: 0; padding: 0; box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+    touch-action: manipulation;
+  }
+
+  html, body {
+    width: 100vw; height: 100vh;
+    overflow: hidden;
+    background: var(--cream);
+    font-family: 'Nunito', sans-serif;
+    font-size: calc(18 * var(--u));
+    color: var(--text-dark);
+    overscroll-behavior: none;
+  }
+
+  /* ─── HOLO GRID BACKDROP ─── */
+  #holo-grid {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background-image:
+      linear-gradient(rgba(0,71,171,0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,71,171,0.05) 1px, transparent 1px);
+    background-size: calc(64 * var(--u)) calc(64 * var(--u));
+    -webkit-mask-image: radial-gradient(ellipse at 50% 58%, rgba(0,0,0,0.9), transparent 78%);
+    mask-image: radial-gradient(ellipse at 50% 58%, rgba(0,0,0,0.9), transparent 78%);
+  }
+  #holo-grid::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(115deg, transparent 40%, rgba(0,180,166,0.08) 50%, transparent 60%);
+    background-size: 220% 220%;
+    animation: grid-shimmer 9s ease-in-out infinite;
+  }
+  @keyframes grid-shimmer {
+    0%   { background-position: 0% 0%; }
+    100% { background-position: 200% 200%; }
+  }
+
+  /* ─── SCANLINE SWEEP ─── */
+  #scan-sweep {
+    position: fixed; left: 0; right: 0; top: -14vh;
+    height: 12vh; z-index: 1200; pointer-events: none; opacity: 0;
+    background: linear-gradient(180deg,
+      transparent,
+      rgba(0,180,166,0.14) 42%,
+      rgba(0,180,166,0.45) 50%,
+      rgba(0,71,171,0.16) 58%,
+      transparent);
+  }
+  #scan-sweep.run { animation: sweep-down 0.7s ease-in both; }
+  @keyframes sweep-down {
+    0%   { top: -14vh; opacity: 1; }
+    100% { top: 110vh;  opacity: 0; }
+  }
+
+  /* ─── GLITCH-IN TEXT ─── */
+  .glitch-in {
+    animation: glitch-in 0.55s steps(2, end) both;
+  }
+  @keyframes glitch-in {
+    0%   { opacity: 0; transform: translateX(calc(-10 * var(--u))); text-shadow: 3px 0 var(--teal), -3px 0 var(--coral); clip-path: inset(0 0 55% 0); }
+    20%  { opacity: 1; transform: translateX(calc(7 * var(--u)));   clip-path: inset(40% 0 8% 0); }
+    40%  { transform: translateX(calc(-5 * var(--u))); text-shadow: 2px 0 var(--blue), -2px 0 var(--teal); clip-path: inset(8% 0 42% 0); }
+    65%  { transform: translateX(calc(2 * var(--u))); clip-path: inset(0); }
+    100% { opacity: 1; transform: none; text-shadow: none; clip-path: inset(0); }
+  }
+
+  /* ─── NEON HOLO PANEL ─── */
+  .holo-panel {
+    background: rgba(255,255,255,0.84);
+    backdrop-filter: blur(calc(8 * var(--u)));
+    -webkit-backdrop-filter: blur(calc(8 * var(--u)));
+    border: 1px solid rgba(0,180,166,0.35);
+    animation: neon-pulse 3.4s ease-in-out infinite;
+  }
+  @keyframes neon-pulse {
+    0%, 100% { box-shadow: 0 0 calc(12 * var(--u)) rgba(0,180,166,0.16), 0 calc(8 * var(--u)) calc(32 * var(--u)) rgba(0,71,171,0.10); }
+    50%       { box-shadow: 0 0 calc(28 * var(--u)) rgba(0,180,166,0.32), 0 calc(8 * var(--u)) calc(32 * var(--u)) rgba(0,71,171,0.12); }
+  }
+
+  /* ─── LANG TOGGLE ─── */
+  #lang-toggle {
+    position: fixed;
+    top: calc(24 * var(--u)); right: calc(32 * var(--u));
+    z-index: 1000;
+    background: rgba(255,255,255,0.9);
+    backdrop-filter: blur(calc(6 * var(--u)));
+    border: 2px solid var(--teal);
+    border-radius: calc(50 * var(--u));
+    display: flex; overflow: hidden;
+    box-shadow: 0 0 calc(16 * var(--u)) rgba(0,180,166,0.25);
+  }
+  #lang-toggle button {
+    padding: calc(10 * var(--u)) calc(24 * var(--u));
+    border: none; background: transparent; cursor: pointer;
+    font-family: 'Poppins', sans-serif; font-weight: 700;
+    font-size: calc(16 * var(--u)); color: var(--text-mid);
+    transition: all 0.2s; min-width: calc(70 * var(--u));
+  }
+  #lang-toggle button.active {
+    background: var(--teal); color: var(--white);
+    border-radius: calc(50 * var(--u));
+  }
+
+  /* ─── CONNECTION STATUS ─── */
+  #conn-status {
+    position: fixed; top: calc(24 * var(--u)); left: calc(32 * var(--u));
+    display: flex; align-items: center; gap: calc(6 * var(--u));
+    font-size: calc(13 * var(--u)); color: var(--text-light);
+    z-index: 1000;
+    background: rgba(255,255,255,0.85);
+    backdrop-filter: blur(calc(6 * var(--u)));
+    padding: calc(8 * var(--u)) calc(16 * var(--u));
+    border-radius: calc(50 * var(--u));
+    box-shadow: 0 calc(2 * var(--u)) calc(10 * var(--u)) rgba(0,0,0,0.08);
+  }
+  #conn-dot {
+    width: calc(8 * var(--u)); height: calc(8 * var(--u));
+    border-radius: 50%; background: #ccc; transition: background 0.3s;
+  }
+  #conn-dot.connected    { background: var(--green); box-shadow: 0 0 calc(6 * var(--u)) var(--green); }
+  #conn-dot.disconnected { background: var(--red); }
+  #conn-dot.demo         { background: var(--gold); }
+
+  /* ─── SCREEN BASE ─── */
+  .screen {
+    width: 100vw; height: 100vh;
+    position: absolute; top: 0; left: 0;
+    z-index: 1;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none;
+    transform: scale(1.02);
+    filter: blur(calc(8 * var(--u))) saturate(1.4);
+    transition: opacity 0.5s ease, transform 0.55s ease, filter 0.5s ease;
+  }
+  .screen.active {
+    opacity: 1; pointer-events: all;
+    transform: none; filter: none;
+  }
+
+  /* ─── IDLE TIMER BAR ─── */
+  #idle-bar {
+    position: fixed; bottom: 0; left: 0;
+    height: calc(5 * var(--u));
+    background: var(--teal);
+    box-shadow: 0 0 calc(12 * var(--u)) rgba(0,180,166,0.7);
+    transition: width 1s linear; opacity: 0; z-index: 999;
+  }
+  #idle-bar.visible { opacity: 1; }
+
+  /* ════════════════════════════════════════════════════════
+     ===== CHARACTER PRESENTER THEME (shared P3/P4/P6) =====
+  ════════════════════════════════════════════════════════ */
+  .presenter-stage {
+    position: relative; width: 100%; flex: 1; min-height: 0;
+    --char-h: 36vh;
+  }
+
+  .presenter-char {
+    position: absolute; bottom: 0; left: 50%;
+    transform: translateX(-50%);
+    height: var(--char-h); aspect-ratio: 360 / 520;
+    z-index: 2; pointer-events: none;
+    filter: drop-shadow(0 0 calc(22 * var(--u)) rgba(0,180,166,0.28));
+    animation: char-arrive 0.7s var(--ease-bounce) both;
+  }
+  @keyframes char-arrive {
+    0%   { opacity: 0; transform: translateX(-50%) translateY(4vh) scale(0.9); }
+    100% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+  }
+
+  .presenter-svg { width: 100%; height: 100%; display: block; }
+
+  .presenter-svg #ch-torso {
+    transform-origin: 50% 95%;
+    animation: ch-breathe 3.6s ease-in-out infinite;
+  }
+  @keyframes ch-breathe {
+    0%, 100% { transform: scale(1, 1); }
+    50%       { transform: scale(1.012, 1.018); }
+  }
+
+  .presenter-svg #ch-head {
+    transform-origin: 50% 46%;
+    animation: ch-sway 5.4s ease-in-out infinite;
+  }
+  @keyframes ch-sway {
+    0%, 100% { transform: rotate(0deg) translateY(0); }
+    35%       { transform: rotate(-1.4deg) translateY(calc(1.5 * var(--u))); }
+    70%       { transform: rotate(1.2deg) translateY(0); }
+  }
+
+  .presenter-svg .ch-eye {
+    transform-box: fill-box; transform-origin: center;
+    animation: ch-blink 4.4s infinite;
+  }
+  @keyframes ch-blink {
+    0%, 92%, 100% { transform: scaleY(1); }
+    95%            { transform: scaleY(0.06); }
+    98%            { transform: scaleY(1); }
+  }
+
+  .presenter-svg #mouth-open,
+  .presenter-svg #arm-right-up { opacity: 0; transition: opacity 0.22s ease; }
+  .presenter-svg #mouth-smile,
+  .presenter-svg #arm-right-rest { opacity: 1; transition: opacity 0.22s ease; }
+
+  .presenter-svg.is-talking #mouth-smile   { opacity: 0; }
+  .presenter-svg.is-talking #arm-right-rest { opacity: 0; }
+  .presenter-svg.is-talking #arm-right-up   { opacity: 1; }
+  .presenter-svg.is-talking #mouth-open {
+    opacity: 1;
+    transform-box: fill-box; transform-origin: center;
+    animation: ch-talk 0.26s ease-in-out infinite alternate;
+  }
+  @keyframes ch-talk {
+    0%   { transform: scaleY(0.35); }
+    100% { transform: scaleY(1); }
+  }
+
+  .presenter-tag {
+    position: absolute;
+    bottom: calc(6 * var(--u)); left: 50%;
+    transform: translateX(-50%);
+    z-index: 3;
+    background: linear-gradient(135deg, rgba(0,71,171,0.92), rgba(0,143,131,0.92));
+    color: var(--white);
+    font-family: 'Poppins', sans-serif; font-weight: 600;
+    font-size: calc(15 * var(--u));
+    padding: calc(7 * var(--u)) calc(22 * var(--u));
+    border-radius: calc(50 * var(--u));
+    border: 1px solid rgba(255,255,255,0.5);
+    box-shadow: 0 0 calc(16 * var(--u)) rgba(0,180,166,0.45);
+    white-space: nowrap; pointer-events: none;
+  }
+
+  /* ── HOLOGRAPHIC SPEECH BUBBLES ── */
+  .bubble { position: absolute; opacity: 0; pointer-events: none; z-index: 4; }
+
+  .bubble-main {
+    left: 50%; bottom: calc(var(--char-h) - 1.5vh);
+    transform: translateX(-50%);
+    width: min(74vw, calc(1280 * var(--u)));
+    border-radius: calc(26 * var(--u));
+    background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(224,247,245,0.82));
+    backdrop-filter: blur(calc(12 * var(--u)));
+    -webkit-backdrop-filter: blur(calc(12 * var(--u)));
+    border: calc(1.5 * var(--u)) solid rgba(0,180,166,0.55);
+    box-shadow:
+      0 0 calc(26 * var(--u)) rgba(0,180,166,0.28),
+      0 0 calc(70 * var(--u)) rgba(0,71,171,0.12),
+      inset 0 0 calc(34 * var(--u)) rgba(255,255,255,0.5);
+    animation: neon-pulse 3.4s ease-in-out infinite;
+  }
+  .bubble-main::before {
+    content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+    background: repeating-linear-gradient(180deg,
+      rgba(0,180,166,0.045) 0,
+      rgba(0,180,166,0.045) calc(2 * var(--u)),
+      transparent calc(2 * var(--u)),
+      transparent calc(7 * var(--u)));
+  }
+  .bubble-main::after {
+    content: ''; position: absolute;
+    bottom: calc(-19 * var(--u)); left: 50%;
+    transform: translateX(-50%);
+    width: calc(40 * var(--u)); height: calc(20 * var(--u));
+    background: rgba(232,250,248,0.92);
+    clip-path: polygon(0 0, 100% 0, 50% 100%);
+    filter: drop-shadow(0 calc(3 * var(--u)) calc(7 * var(--u)) rgba(0,180,166,0.4));
+  }
+  .bubble-main.visible {
+    opacity: 1; pointer-events: auto;
+    animation: bubble-pop 0.45s var(--ease-bounce) both, neon-pulse 3.4s ease-in-out 0.45s infinite;
+  }
+  @keyframes bubble-pop {
+    0%   { opacity: 0; transform: translateX(-50%) scale(0.55) translateY(calc(30 * var(--u))); filter: blur(calc(7 * var(--u))); }
+    60%  { opacity: 1; transform: translateX(-50%) scale(1.04) translateY(calc(-5 * var(--u))); filter: blur(0); }
+    100% { opacity: 1; transform: translateX(-50%) scale(1) translateY(0); }
+  }
+
+  .bubble-main .bubble-content {
+    position: relative;
+    padding: calc(30 * var(--u)) calc(36 * var(--u));
+    max-height: 44vh; overflow-y: auto;
+    font-size: calc(20 * var(--u));
+    color: var(--text-dark); line-height: 1.55;
+  }
+  .bubble-main .bubble-content::-webkit-scrollbar { width: calc(6 * var(--u)); }
+  .bubble-main .bubble-content::-webkit-scrollbar-track { background: transparent; }
+  .bubble-main .bubble-content::-webkit-scrollbar-thumb { background: rgba(0,180,166,0.4); border-radius: calc(3 * var(--u)); }
+
+  .bubble-line {
+    font-family: 'Poppins', sans-serif; font-weight: 600;
+    font-size: calc(26 * var(--u)); color: var(--text-dark);
+    text-align: center;
+  }
+
+  .bubble-user {
+    bottom: 3vh; right: 6vw;
+    background: linear-gradient(135deg, var(--blue), #1A6AC9);
+    color: var(--white);
+    font-family: 'Poppins', sans-serif; font-weight: 600;
+    font-size: calc(19 * var(--u));
+    padding: calc(14 * var(--u)) calc(28 * var(--u));
+    border-radius: calc(24 * var(--u)) calc(24 * var(--u)) calc(6 * var(--u)) calc(24 * var(--u));
+    border: 1px solid rgba(255,255,255,0.45);
+    box-shadow: 0 0 calc(22 * var(--u)) rgba(0,71,171,0.4);
+    max-width: 36vw; z-index: 5;
+  }
+  .bubble-user.visible {
+    opacity: 1;
+    animation: user-pop 0.35s var(--ease-bounce) both;
+  }
+  @keyframes user-pop {
+    0%   { opacity: 0; transform: translateY(calc(50 * var(--u))) scale(0.6); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  /* ===== END CHARACTER PRESENTER THEME ===== */
+
+  /* ════════════════════════════════════════════════════════
+     SCREEN 1 — WELCOME
+  ════════════════════════════════════════════════════════ */
+  #screen-welcome {
+    background: linear-gradient(160deg, #FFF8F0 0%, #E0F7F5 50%, #EAF0FB 100%);
+    overflow: hidden; gap: 0;
+  }
+
+  .float-icon {
+    position: absolute;
+    font-size: calc(80 * var(--u));
+    animation: float-emoji 6s ease-in-out infinite;
+    opacity: 0.12; pointer-events: none;
+    filter: drop-shadow(0 0 calc(14 * var(--u)) rgba(0,180,166,0.35));
+  }
+  .fe-1 { top: 8%;  left: 5%;  animation-delay: 0s; }
+  .fe-2 { top: 15%; right: 8%; animation-delay: 1.2s; }
+  .fe-3 { bottom: 15%; left: 8%; animation-delay: 2.4s; }
+  .fe-4 { bottom: 10%; right: 6%; animation-delay: 0.8s; }
+  .fe-5 { top: 50%; left: 2%; animation-delay: 1.8s; }
+  .fe-6 { top: 40%; right: 3%; animation-delay: 3.0s; }
+  @keyframes float-emoji {
+    0%, 100% { transform: translateY(0) rotate(-5deg); }
+    33%       { transform: translateY(calc(-20 * var(--u))) rotate(3deg); }
+    66%       { transform: translateY(calc(-10 * var(--u))) rotate(-8deg); }
+  }
+
+  .welcome-content {
+    text-align: center; z-index: 1;
+    display: flex; flex-direction: column;
+    align-items: center; gap: calc(18 * var(--u));
+  }
+
+  .welcome-logo {
+    width: calc(130 * var(--u)); height: calc(130 * var(--u));
+    background: linear-gradient(135deg, var(--teal) 0%, var(--blue) 100%);
+    border-radius: calc(36 * var(--u));
+    display: flex; align-items: center; justify-content: center;
+    font-size: calc(68 * var(--u));
+    box-shadow: 0 calc(12 * var(--u)) calc(40 * var(--u)) rgba(0,71,171,0.3);
+    animation: pulse-logo 3s ease-in-out infinite;
+  }
+  @keyframes pulse-logo {
+    0%, 100% { box-shadow: 0 calc(12 * var(--u)) calc(40 * var(--u)) rgba(0,71,171,0.3), 0 0 0 rgba(0,180,166,0); }
+    50%       { box-shadow: 0 calc(12 * var(--u)) calc(60 * var(--u)) rgba(0,71,171,0.5), 0 0 calc(40 * var(--u)) rgba(0,180,166,0.45); }
+  }
+
+  .welcome-subtitle {
+    font-family: 'Poppins', sans-serif; font-size: calc(16 * var(--u));
+    font-weight: 600; color: var(--teal);
+    letter-spacing: calc(2.5 * var(--u)); text-transform: uppercase;
+  }
+  .welcome-title-bm {
+    font-family: 'Poppins', sans-serif; font-size: calc(52 * var(--u));
+    font-weight: 900; color: var(--text-dark); line-height: 1.15;
+    max-width: calc(860 * var(--u));
+  }
+  .welcome-title-en {
+    font-family: 'Poppins', sans-serif; font-size: calc(30 * var(--u));
+    font-weight: 700; color: var(--blue); max-width: calc(700 * var(--u));
+  }
+  .welcome-tagline {
+    font-size: calc(20 * var(--u)); color: var(--text-mid);
+    font-weight: 500; max-width: calc(680 * var(--u)); line-height: 1.6;
+  }
+  .welcome-divider {
+    width: calc(80 * var(--u)); height: calc(4 * var(--u));
+    background: linear-gradient(90deg, var(--teal), var(--gold));
+    border-radius: calc(2 * var(--u));
+    box-shadow: 0 0 calc(12 * var(--u)) rgba(0,180,166,0.6);
+  }
+
+  .stats-card {
+    background: rgba(255,255,255,0.85);
+    backdrop-filter: blur(calc(8 * var(--u)));
+    border: 1px solid rgba(0,180,166,0.3);
+    border-radius: calc(24 * var(--u));
+    padding: calc(16 * var(--u)) calc(48 * var(--u));
+    text-align: center;
+    box-shadow: 0 0 calc(20 * var(--u)) rgba(0,180,166,0.16);
+  }
+  .stats-card .label {
+    font-size: calc(13 * var(--u)); color: var(--text-light); margin-bottom: calc(4 * var(--u));
+  }
+  .stats-card .value {
+    font-family: 'Poppins', sans-serif; font-weight: 900;
+    font-size: calc(54 * var(--u)); color: var(--blue); line-height: 1;
+    text-shadow: 0 0 calc(20 * var(--u)) rgba(0,71,171,0.25);
+  }
+  .stats-card .sublabel { font-size: calc(12 * var(--u)); color: #bbb; margin-top: calc(2 * var(--u)); }
+
+  .btn-start {
+    font-family: 'Poppins', sans-serif; font-weight: 700;
+    font-size: calc(24 * var(--u)); color: var(--white);
+    background: linear-gradient(135deg, var(--blue), var(--teal-dark));
+    border: none; border-radius: calc(50 * var(--u));
+    padding: calc(24 * var(--u)) calc(80 * var(--u));
+    cursor: pointer; min-height: calc(80 * var(--u));
+    box-shadow: 0 0 calc(28 * var(--u)) rgba(0,71,171,0.45), 0 calc(8 * var(--u)) calc(28 * var(--u)) rgba(0,71,171,0.3);
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .btn-start:hover {
+    transform: translateY(calc(-2 * var(--u)));
+    box-shadow: 0 0 calc(42 * var(--u)) rgba(0,180,166,0.6), 0 calc(12 * var(--u)) calc(36 * var(--u)) rgba(0,71,171,0.4);
+  }
+  .btn-start:active { transform: scale(0.97); }
+  .btn-start .sub { font-size: calc(15 * var(--u)); font-weight: 600; opacity: 0.75; display: block; margin-top: calc(2 * var(--u)); }
+
+  .bnm-badge {
+    display: flex; align-items: center; gap: calc(10 * var(--u));
+    background: rgba(255,255,255,0.8); border-radius: calc(50 * var(--u));
+    padding: calc(8 * var(--u)) calc(22 * var(--u));
+    box-shadow: var(--shadow-sm); font-size: calc(13 * var(--u));
+    font-weight: 600; color: var(--text-mid);
+  }
+  .bnm-dot {
+    width: calc(14 * var(--u)); height: calc(14 * var(--u));
+    background: var(--blue); border-radius: 50%;
+    box-shadow: 0 0 calc(10 * var(--u)) rgba(0,71,171,0.7);
+  }
+
+  /* ════════════════════════════════════════════════════════
+     SCREEN 2 — QUESTION (character stage + answer buttons)
+  ════════════════════════════════════════════════════════ */
+  #screen-question {
+    background: transparent;
+    padding: calc(24 * var(--u)) 4vw calc(16 * var(--u));
+    gap: calc(8 * var(--u));
+    justify-content: flex-start;
+  }
+
+  .q-header {
+    flex-shrink: 0; width: 100%; max-width: calc(1320 * var(--u));
+    padding-top: calc(8 * var(--u));
+  }
+
+  .progress-bar-wrap {
+    width: 100%; height: calc(10 * var(--u));
+    background: rgba(0,71,171,0.1);
+    border-radius: calc(5 * var(--u)); overflow: hidden;
+    margin-bottom: calc(8 * var(--u));
+    box-shadow: 0 0 calc(14 * var(--u)) rgba(0,180,166,0.2);
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--blue), var(--gold));
+    border-radius: calc(5 * var(--u));
+    transition: width 0.5s var(--ease-bounce);
+    box-shadow: 0 0 calc(14 * var(--u)) rgba(0,180,166,0.5);
+  }
+
+  .q-label {
+    font-family: 'Poppins', sans-serif; font-size: calc(15 * var(--u));
+    font-weight: 600; color: var(--text-light); text-align: center;
+  }
+
+  /* Stage override for question screen — smaller char */
+  #stage-question { --char-h: 32vh; }
+  #stage-question .bubble-main { width: min(66vw, calc(1100 * var(--u))); }
+  #stage-question .bubble-main .bubble-content { max-height: 32vh; padding: calc(22 * var(--u)) calc(28 * var(--u)); }
+
+  /* Answer buttons area */
+  #q-answer-area {
+    flex-shrink: 0; width: 100%;
+    max-width: calc(1120 * var(--u));
+    min-height: calc(220 * var(--u));
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .answer-panel {
+    display: none; width: 100%;
+    flex-direction: column; gap: calc(14 * var(--u));
+  }
+  .answer-panel.show {
+    display: flex;
+    animation: answer-in 0.4s var(--ease-bounce) both;
+  }
+  @keyframes answer-in {
+    0%   { opacity: 0; transform: translateY(calc(30 * var(--u))) scale(0.96); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .answer-btn {
+    display: flex; align-items: flex-start;
+    width: 100%; min-height: calc(88 * var(--u));
+    border-radius: calc(18 * var(--u)); border: none;
+    padding: calc(18 * var(--u)) calc(24 * var(--u));
+    cursor: pointer; text-align: left;
+    font-family: 'Nunito', sans-serif; font-weight: 700;
+    font-size: calc(18 * var(--u));
+    transition: transform 0.15s, box-shadow 0.15s, opacity 0.2s;
+    gap: calc(16 * var(--u));
+  }
+  .answer-btn:active { transform: scale(0.97); }
+  .answer-btn.disabled { pointer-events: none; opacity: 0.5; }
+
+  .answer-btn .badge {
+    min-width: calc(38 * var(--u)); height: calc(38 * var(--u));
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-size: calc(16 * var(--u)); font-weight: 900; flex-shrink: 0; margin-top: calc(2 * var(--u));
+  }
+  .answer-btn .btn-text { line-height: 1.4; }
+  .answer-btn .btn-text .bm { font-size: calc(18 * var(--u)); color: inherit; display: block; }
+  .answer-btn .btn-text .en { font-size: calc(14 * var(--u)); opacity: 0.75; display: block; margin-top: calc(3 * var(--u)); }
+
+  /* A — positive */
+  .answer-a {
+    background: var(--blue); color: var(--white);
+    border-left: calc(6 * var(--u)) solid var(--gold);
+    box-shadow: 0 calc(4 * var(--u)) calc(24 * var(--u)) rgba(0,71,171,0.28),
+                0 0 calc(16 * var(--u)) rgba(0,180,166,0.18);
+  }
+  .answer-a .badge { background: rgba(255,255,255,0.2); color: var(--white); }
+  .answer-a:hover:not(.disabled) {
+    transform: translateY(calc(-2 * var(--u)));
+    box-shadow: 0 calc(6 * var(--u)) calc(32 * var(--u)) rgba(0,71,171,0.4), 0 0 calc(26 * var(--u)) rgba(0,180,166,0.3);
+  }
+
+  /* B — learning */
+  .answer-b {
+    background: rgba(255,255,255,0.85); color: var(--blue);
+    border: calc(2 * var(--u)) solid var(--blue);
+    backdrop-filter: blur(calc(6 * var(--u)));
+  }
+  .answer-b .badge { background: var(--blue); color: var(--white); }
+  .answer-b:hover:not(.disabled) {
+    transform: translateY(calc(-2 * var(--u)));
+    box-shadow: 0 calc(4 * var(--u)) calc(20 * var(--u)) rgba(0,71,171,0.14);
+  }
+
+  @keyframes flashGreen { 0%,100%{background:var(--blue)} 50%{background:var(--green)} }
+  @keyframes flashBlue  { 0%,100%{background:rgba(255,255,255,0.85)} 50%{background:#D8EEFF} }
+  .answer-a.selected { animation: flashGreen 0.4s ease; }
+  .answer-b.selected { animation: flashBlue  0.4s ease; }
+
+  /* ════════════════════════════════════════════════════════
+     SCREEN 3 — THANK YOU
+  ════════════════════════════════════════════════════════ */
+  #screen-thankyou {
+    background: linear-gradient(160deg, #FFF8F0 0%, #E0F7F5 50%, #EAF0FB 100%);
+    gap: 0;
+  }
+
+  .thankyou-content {
+    text-align: center; z-index: 1;
+    display: flex; flex-direction: column;
+    align-items: center; gap: calc(16 * var(--u));
+  }
+
+  .sparkle-wrap {
+    font-size: calc(64 * var(--u));
+    animation: sparkleAnim 1s infinite alternate;
+  }
+  @keyframes sparkleAnim {
+    from { transform: scale(1) rotate(-5deg); }
+    to   { transform: scale(1.15) rotate(5deg); }
+  }
+
+  .ty-title {
+    font-family: 'Poppins', sans-serif; font-weight: 900;
+    font-size: calc(46 * var(--u)); color: var(--blue);
+    text-align: center; line-height: 1.1;
+  }
+  .ty-title-en {
+    font-family: 'Poppins', sans-serif; font-weight: 700;
+    font-size: calc(28 * var(--u)); color: var(--gold); text-align: center;
+  }
+
+  .ty-divider {
+    width: calc(80 * var(--u)); height: calc(4 * var(--u));
+    background: linear-gradient(90deg, var(--teal), var(--gold));
+    border-radius: calc(2 * var(--u));
+    box-shadow: 0 0 calc(12 * var(--u)) rgba(0,180,166,0.6);
+  }
+
+  .score-badge {
+    background: linear-gradient(135deg, var(--blue), var(--teal-dark));
+    color: var(--white);
+    font-family: 'Poppins', sans-serif; font-weight: 900;
+    font-size: calc(24 * var(--u));
+    padding: calc(18 * var(--u)) calc(48 * var(--u));
+    border-radius: calc(50 * var(--u));
+    box-shadow: 0 0 calc(28 * var(--u)) rgba(0,71,171,0.4),
+                0 0 calc(14 * var(--u)) rgba(0,180,166,0.3);
+    display: inline-block;
+  }
+  .score-badge span { color: var(--gold); }
+
+  .ty-msg {
+    font-size: calc(18 * var(--u)); color: var(--text-mid);
+    text-align: center; max-width: calc(600 * var(--u)); line-height: 1.6;
+  }
+  .ty-msg-en {
+    font-size: calc(14 * var(--u)); color: var(--text-light);
+    text-align: center; max-width: calc(580 * var(--u)); line-height: 1.5;
+  }
+
+  .btn-done {
+    font-family: 'Poppins', sans-serif; font-weight: 700;
+    font-size: calc(22 * var(--u)); color: var(--white);
+    background: linear-gradient(135deg, var(--green), #1E8B4A);
+    border: none; border-radius: calc(50 * var(--u));
+    padding: calc(22 * var(--u)) calc(70 * var(--u));
+    cursor: pointer;
+    box-shadow: 0 0 calc(24 * var(--u)) rgba(39,174,96,0.45), 0 calc(6 * var(--u)) calc(24 * var(--u)) rgba(39,174,96,0.3);
+    transition: transform 0.15s;
+    min-height: calc(72 * var(--u));
+  }
+  .btn-done:hover {
+    transform: translateY(calc(-2 * var(--u)));
+    box-shadow: 0 0 calc(36 * var(--u)) rgba(39,174,96,0.6);
+  }
+  .btn-done:active { transform: scale(0.97); }
+  .countdown-label {
+    font-size: calc(14 * var(--u)); color: var(--text-light); margin-top: calc(8 * var(--u));
+  }
+</style>
+</head>
+<body>
+
+<!-- SCI-FI BACKDROP + SCANLINE -->
+<div id="holo-grid"></div>
+<div id="scan-sweep"></div>
+
+<!-- LANG TOGGLE -->
+<div id="lang-toggle">
+  <button id="btn-bm" class="active" onclick="setLang('bm')">BM</button>
+  <button id="btn-en" onclick="setLang('en')">EN</button>
+</div>
+
+<!-- CONNECTION STATUS -->
+<div id="conn-status">
+  <div id="conn-dot"></div>
+  <span id="conn-label">Menghubung...</span>
+</div>
+
+<!-- IDLE BAR -->
+<div id="idle-bar"></div>
+
+<!-- ══════════════════════════════════════════════════════
+     CHARACTER PRESENTER SVG TEMPLATE (Aisyah)
+     Shared with P3/P4/P6 — do not modify IDs
+══════════════════════════════════════════════════════ -->
+<template id="presenter-svg-template">
+<svg class="presenter-svg" viewBox="0 0 360 520" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <ellipse cx="180" cy="508" rx="118" ry="11" fill="rgba(0,71,171,0.10)"/>
+  <g id="ch-root">
+    <g id="ch-torso">
+      <path d="M122 376 L238 376 L254 520 L106 520 Z" fill="#00337A"/>
+      <path d="M116 252 C116 220 142 202 180 202 C218 202 244 220 244 252 L250 388 L110 388 Z" fill="#0047AB"/>
+      <path d="M158 206 L202 206 L197 272 L163 272 Z" fill="#EAF0FB"/>
+      <path d="M158 206 L180 246 L150 284 L140 224 Z" fill="#00337A"/>
+      <path d="M202 206 L180 246 L210 284 L220 224 Z" fill="#00337A"/>
+      <circle cx="180" cy="262" r="7.5" fill="#F5A623"/>
+      <circle cx="180" cy="262" r="3" fill="#FFCB6B"/>
+      <rect x="204" y="306" width="24" height="11" rx="3" fill="#00B4A6"/>
+      <circle cx="180" cy="306" r="4" fill="#F5A623"/>
+      <circle cx="180" cy="334" r="4" fill="#F5A623"/>
+      <g id="arm-left-rest">
+        <path d="M126 250 C104 278 98 318 104 354 C106 366 122 366 125 354 C131 322 134 290 144 262 Z" fill="#0047AB"/>
+        <circle cx="111" cy="362" r="11" fill="#C98A5E"/>
+      </g>
+      <g id="arm-right-rest">
+        <path d="M234 250 C256 278 262 318 256 354 C254 366 238 366 235 354 C229 322 226 290 216 262 Z" fill="#0047AB"/>
+        <circle cx="249" cy="362" r="11" fill="#C98A5E"/>
+      </g>
+      <g id="arm-right-up">
+        <path d="M232 252 C262 246 292 224 308 196 C315 184 302 172 292 180 C272 198 252 214 226 224 Z" fill="#0047AB"/>
+        <circle cx="305" cy="183" r="13" fill="#C98A5E"/>
+        <path d="M299 170 Q304 162 309 170 M308 168 Q313 161 317 169" stroke="#C98A5E" stroke-width="6" stroke-linecap="round" fill="none"/>
+        <path d="M284 184 L296 200 L286 208 L274 192 Z" fill="#00337A"/>
+      </g>
+    </g>
+    <g id="ch-head">
+      <path d="M180 56 C120 56 96 106 96 158 C96 210 118 244 142 252 L218 252 C242 244 264 210 264 158 C264 106 240 56 180 56 Z" fill="#00B4A6"/>
+      <path d="M128 210 C120 252 142 276 180 282 C218 276 240 252 232 210 C224 238 204 250 180 250 C156 250 136 238 128 210 Z" fill="#008F83"/>
+      <ellipse cx="180" cy="152" rx="45" ry="50" fill="#C98A5E"/>
+      <path d="M180 84 C146 84 130 110 128 142 C138 106 156 97 180 97 C204 97 222 106 232 142 C230 110 214 84 180 84 Z" fill="#008F83"/>
+      <path d="M132 132 C142 102 158 94 180 94 C202 94 218 102 228 132" stroke="#F5A623" stroke-width="4" fill="none" stroke-linecap="round"/>
+      <path d="M138 168 C140 202 158 220 180 220 C202 220 220 202 222 168 C222 200 206 230 180 230 C154 230 138 200 138 168 Z" fill="#00B4A6"/>
+      <path d="M148 132 Q159 125 170 130" stroke="#7A4A22" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      <path d="M190 130 Q201 125 212 132" stroke="#7A4A22" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      <g class="ch-eye"><ellipse cx="160" cy="147" rx="5" ry="7" fill="#1A1A2E"/><circle cx="162" cy="144" r="1.8" fill="#FFFFFF"/></g>
+      <g class="ch-eye"><ellipse cx="200" cy="147" rx="5" ry="7" fill="#1A1A2E"/><circle cx="202" cy="144" r="1.8" fill="#FFFFFF"/></g>
+      <ellipse cx="146" cy="168" rx="8" ry="4.5" fill="#E07856" opacity="0.32"/>
+      <ellipse cx="214" cy="168" rx="8" ry="4.5" fill="#E07856" opacity="0.32"/>
+      <path d="M178 156 Q175 167 181 169" stroke="#A96B3F" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <path id="mouth-smile" d="M163 184 Q180 197 197 184" stroke="#8C4A2F" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+      <g id="mouth-open">
+        <ellipse cx="180" cy="189" rx="12" ry="9" fill="#7C3A28"/>
+        <path d="M170 185 Q180 191 190 185 L190 183 L170 183 Z" fill="#FFFFFF"/>
+      </g>
+    </g>
+  </g>
+</svg>
+</template>
+
+<!-- ══════════════════════════════════════════════════════
+     SCREEN 1: WELCOME
+══════════════════════════════════════════════════════ -->
+<div id="screen-welcome" class="screen active">
+  <span class="float-icon fe-1">🏦</span>
+  <span class="float-icon fe-2">💰</span>
+  <span class="float-icon fe-3">📊</span>
+  <span class="float-icon fe-4">🎯</span>
+  <span class="float-icon fe-5">🛡️</span>
+  <span class="float-icon fe-6">💡</span>
+
+  <div class="welcome-content">
+    <div class="welcome-logo">🏦</div>
+    <div class="welcome-subtitle">Bank Negara Malaysia Museum &amp; Art Gallery • IMD 2026</div>
+    <div class="welcome-title-bm glitch">Bina Semula Simpanan Bersama</div>
+    <div class="welcome-divider"></div>
+    <div class="welcome-title-en">Building Savings Together</div>
+    <div class="welcome-tagline">Jawab 10 soalan mudah dan tolong nyalakan rangkaian simpanan komuniti kita!<br><small style="font-size:0.8em;opacity:0.75;">Answer 10 simple questions and help light up our community savings network!</small></div>
+
+    <div class="stats-card">
+      <div class="label">Sesi hari ini / Today's sessions</div>
+      <div class="value" id="session-count">—</div>
+      <div class="sublabel">peserta telah menyertai / participants joined</div>
+    </div>
+
+    <button class="btn-start" id="btn-start">
+      Mula
+      <span class="sub">Start</span>
+    </button>
+
+    <div class="bnm-badge">
+      <div class="bnm-dot"></div>
+      <span>Bank Negara Malaysia — Festival Hari Museum Antarabangsa 2026</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     SCREEN 2: QUESTION (character + answer buttons)
+══════════════════════════════════════════════════════ -->
+<div id="screen-question" class="screen">
+
+  <div class="q-header">
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+    </div>
+    <div class="q-label glitch" id="q-label">Soalan 1 daripada 10 / Question 1 of 10</div>
+  </div>
+
+  <!-- character stage -->
+  <div class="presenter-stage" id="stage-question">
+    <div class="bubble bubble-main"><div class="bubble-content"></div></div>
+    <div class="bubble bubble-user"><div class="bubble-content"></div></div>
+    <div class="presenter-char"></div>
+    <div class="presenter-tag" id="presenter-tag-q">Aisyah — Penasihat Kewangan Anda</div>
+  </div>
+
+  <!-- answer buttons -->
+  <div id="q-answer-area">
+    <div class="answer-panel" id="answer-choices">
+      <button class="answer-btn answer-a" id="btn-a">
+        <div class="badge">A</div>
+        <div class="btn-text">
+          <span class="bm" id="a-bm"></span>
+          <span class="en" id="a-en"></span>
+        </div>
+      </button>
+      <button class="answer-btn answer-b" id="btn-b">
+        <div class="badge">B</div>
+        <div class="btn-text">
+          <span class="bm" id="b-bm"></span>
+          <span class="en" id="b-en"></span>
+        </div>
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     SCREEN 3: THANK YOU
+══════════════════════════════════════════════════════ -->
+<div id="screen-thankyou" class="screen">
+  <div class="thankyou-content">
+    <div class="sparkle-wrap">✨</div>
+    <h2 class="ty-title glitch">Terima kasih atas penyertaan anda!</h2>
+    <p class="ty-title-en">Thank you for participating!</p>
+    <div class="ty-divider"></div>
+    <div class="score-badge"><span id="ty-score">0</span>/10 kapsul diaktifkan / capsules activated</div>
+    <p class="ty-msg">Pilihan anda telah menyumbang kepada rangkaian kewangan komuniti kita!</p>
+    <p class="ty-msg-en">Your choices have contributed to our community finance network!</p>
+    <button class="btn-done" id="btn-done">Selesai / Done</button>
+    <div class="countdown-label" id="countdown-label"></div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// SFX — synthesised sounds (Web Audio API; no audio files)
+// tap()  every button press
+// swap() screen / question change
+// win()  success / submission
+// lose() wrong / invalid
+// ═══════════════════════════════════════════════════════════
+const SFX = (() => {
+  let ctx;
+  const ac = () => ctx || (ctx = new (window.AudioContext || window.webkitAudioContext)());
+  function tone({ freq = 440, type = 'sine', dur = 0.15, vol = 0.2, slide = 0, delay = 0 }) {
+    try {
+      const c = ac(), t = c.currentTime + delay;
+      const o = c.createOscillator(), g = c.createGain();
+      o.type = type;
+      o.frequency.setValueAtTime(freq, t);
+      if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(40, freq + slide), t + dur);
+      g.gain.setValueAtTime(vol, t);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      o.connect(g).connect(c.destination);
+      o.start(t); o.stop(t + dur + 0.05);
+    } catch (e) {}
+  }
+  return {
+    tap()  { tone({ freq: 1200, type: 'square', dur: 0.06, vol: 0.1 }); tone({ freq: 1800, dur: 0.08, vol: 0.07, delay: 0.02 }); },
+    swap() { tone({ freq: 300, type: 'sawtooth', dur: 0.25, vol: 0.09, slide: 900 }); },
+    win()  { [523, 659, 784, 1047].forEach((f, i) => tone({ freq: f, type: 'triangle', dur: 0.18, vol: 0.15, delay: i * 0.09 })); },
+    lose() { tone({ freq: 220, type: 'sawtooth', dur: 0.3, vol: 0.15, slide: -120 }); tone({ freq: 110, type: 'square', dur: 0.35, vol: 0.1, delay: 0.05 }); }
+  };
+})();
+
+// ═══════════════════════════════════════════════════════════
+// QUESTIONS DATA (bilingual BM / EN, same as original)
+// ═══════════════════════════════════════════════════════════
+const QUESTIONS = [
+  {
+    icon: '🛡️',
+    bm: 'Adakah anda mempunyai wang simpanan untuk digunakan disaat-saat kecemasan?',
+    en: 'Do you have savings set aside for emergencies?',
+    a: { bm: 'Ya, saya mempunyai simpanan kecemasan', en: 'Yes, I have emergency savings' },
+    b: { bm: 'Belum, tetapi saya ingin memulakannya', en: 'Not yet, but I want to start' }
+  },
+  {
+    icon: '📊',
+    bm: 'Bagaimana anda mengawal perbelanjaan harian?',
+    en: 'How do you control your daily spending?',
+    a: { bm: 'Saya merancang perbelanjaan mengikut bajet', en: 'I plan my spending according to a budget' },
+    b: { bm: 'Saya masih berbelanja tanpa perancangan tetap', en: 'I still spend without a fixed plan' }
+  },
+  {
+    icon: '📝',
+    bm: 'Adakah anda merekod simpanan dan perbelanjaan?',
+    en: 'Do you record your savings and expenses?',
+    a: { bm: 'Ya, saya sentiasa memantau kewangan saya', en: 'Yes, I always monitor my finances' },
+    b: { bm: 'Tidak, saya jarang merekod perbelanjaan saya', en: 'No, I rarely record my expenses' }
+  },
+  {
+    icon: '🏦',
+    bm: 'Bagaimana anda mengurus simpanan kewangan?',
+    en: 'How do you manage your financial savings?',
+    a: { bm: 'Saya menetapkan jumlah simpanan tetap', en: 'I set a fixed savings amount' },
+    b: { bm: 'Saya menyimpan jika ada lebihan wang', en: "I save only if there's money left over" }
+  },
+  {
+    icon: '📱',
+    bm: 'Adakah anda menggunakan aplikasi digital untuk mengurus kewangan?',
+    en: 'Do you use digital apps to manage your finances?',
+    a: { bm: 'Ya, aplikasi membantu saya memantau kewangan', en: 'Yes, apps help me monitor my finances' },
+    b: { bm: 'Tidak, saya masih menggunakan cara biasa', en: 'No, I use traditional methods' }
+  },
+  {
+    icon: '🛒',
+    bm: 'Bagaimana anda membuat keputusan sebelum membeli sesuatu?',
+    en: 'How do you decide before buying something?',
+    a: { bm: 'Saya membeli mengikut keperluan dan kemampuan', en: 'I buy according to need and affordability' },
+    b: { bm: 'Saya membeli berdasarkan kehendak semasa', en: 'I buy based on current wants' }
+  },
+  {
+    icon: '🎯',
+    bm: 'Adakah anda mempunyai matlamat simpanan tertentu?',
+    en: 'Do you have specific savings goals?',
+    a: { bm: 'Ya, saya menyimpan untuk masa hadapan', en: 'Yes, I save for the future' },
+    b: { bm: "Belum, saya belum menetapkan matlamat simpanan", en: "Not yet, I haven't set savings goals" }
+  },
+  {
+    icon: '🚨',
+    bm: 'Jika berlaku kecemasan hari ini, adakah anda bersedia?',
+    en: 'If an emergency happened today, are you prepared?',
+    a: { bm: 'Ya, saya mempunyai persediaan kewangan', en: 'Yes, I have financial preparedness' },
+    b: { bm: 'Tidak, saya perlu memperbaiki simpanan saya', en: 'No, I need to improve my savings' }
+  },
+  {
+    icon: '💡',
+    bm: 'Bagaimana anda melihat kepentingan simpanan?',
+    en: 'How do you view the importance of savings?',
+    a: { bm: 'Simpanan penting untuk kestabilan masa depan', en: 'Savings are important for future stability' },
+    b: { bm: 'Saya masih sedang belajar menguruskan simpanan', en: "I'm still learning to manage savings" }
+  },
+  {
+    icon: '🤝',
+    bm: 'Bagaimana kewangan dapat menyatukan masyarakat?',
+    en: 'How can finance unite society?',
+    a: { bm: 'Pengurusan kewangan yang baik membantu kesejahteraan bersama', en: 'Good financial management helps communal wellbeing' },
+    b: { bm: 'Kesedaran kewangan perlu dipertingkatkan dalam masyarakat', en: 'Financial awareness needs to be improved in society' }
+  }
+];
+
+// ═══════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════
+let ws = null;
+let wsConnected = false;
+let demoMode = false;
+let currentQ = 0;
+let sessionPositive = 0;
+let answering = false;
+let countdownTimer = null;
+
+const appState = {
+  lang: localStorage.getItem('imd_lang') || 'bm',
+  screen: 'welcome',
+  idleTimer: null,
+  idleSeconds: 60,
+  idleRemaining: 60,
+};
+
+// ═══════════════════════════════════════════════════════════
+// I18N
+// ═══════════════════════════════════════════════════════════
+function setLang(lang) {
+  appState.lang = lang;
+  localStorage.setItem('imd_lang', lang);
+  document.getElementById('btn-bm').classList.toggle('active', lang === 'bm');
+  document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+  // Update presenter tag
+  const tag = document.getElementById('presenter-tag-q');
+  if (tag) tag.textContent = lang === 'bm' ? 'Aisyah — Penasihat Kewangan Anda' : 'Aisyah — Your Financial Advisor';
+  SFX.tap();
+  resetIdle();
+}
+
+// ═══════════════════════════════════════════════════════════
+// PRESENTER MODULE (shared P3/P4/P6)
+// Presenter.mount(stageId) — clone SVG into stage
+// Presenter.use(stageId)   — set active stage
+// Presenter.say(html, opts)— speech bubble + talking pose
+// Presenter.ask(html, opts)— alias of say()
+// Presenter.userSay(text)  — visitor echo bubble
+// Presenter.hide()         — hide bubble
+// ═══════════════════════════════════════════════════════════
+const Presenter = (() => {
+  const stages = {};
+  let activeId = null;
+
+  function mount(stageId) {
+    const stage = document.getElementById(stageId);
+    if (!stage || stages[stageId]) return;
+    const charMount = stage.querySelector('.presenter-char');
+    const tpl = document.getElementById('presenter-svg-template');
+    charMount.appendChild(tpl.content.cloneNode(true));
+    stages[stageId] = {
+      stage,
+      svg: charMount.querySelector('svg'),
+      bubble: stage.querySelector('.bubble-main'),
+      bubbleContent: stage.querySelector('.bubble-main .bubble-content'),
+      userBubble: stage.querySelector('.bubble-user'),
+      userContent: stage.querySelector('.bubble-user .bubble-content'),
+      talkTimer: null,
+      userTimer: null,
+    };
+  }
+
+  function use(stageId) { activeId = stageId; return stages[stageId]; }
+  function get() { return stages[activeId]; }
+
+  function say(content, opts) {
+    const s = get();
+    if (!s) return;
+    const o = opts || {};
+    const talkMs = o.talkMs || 2800;
+    s.bubble.classList.remove('visible');
+    void s.bubble.offsetWidth;
+    if (typeof content === 'string') {
+      s.bubbleContent.innerHTML = '<div class="bubble-line">' + content + '</div>';
+    } else {
+      s.bubbleContent.innerHTML = '';
+      s.bubbleContent.appendChild(content);
+    }
+    s.bubbleContent.scrollTop = 0;
+    s.bubble.classList.add('visible');
+    s.svg.classList.add('is-talking');
+    clearTimeout(s.talkTimer);
+    s.talkTimer = setTimeout(() => s.svg.classList.remove('is-talking'), talkMs);
+  }
+
+  function ask(content, opts) { say(content, opts); }
+
+  function userSay(text, holdMs) {
+    const s = get();
+    if (!s) return;
+    s.userContent.textContent = text;
+    s.userBubble.classList.remove('visible');
+    void s.userBubble.offsetWidth;
+    s.userBubble.classList.add('visible');
+    clearTimeout(s.userTimer);
+    s.userTimer = setTimeout(() => s.userBubble.classList.remove('visible'), holdMs || 2200);
+  }
+
+  function hide() {
+    const s = get();
+    if (!s) return;
+    s.bubble.classList.remove('visible');
+    s.svg.classList.remove('is-talking');
+  }
+
+  return { mount, use, say, ask, userSay, hide };
+})();
+
+// ═══════════════════════════════════════════════════════════
+// SCREEN NAV (scanline sweep + glitch-in + SFX swap)
+// ═══════════════════════════════════════════════════════════
+function runScanSweep() {
+  const s = document.getElementById('scan-sweep');
+  s.classList.remove('run');
+  void s.offsetWidth;
+  s.classList.add('run');
+}
+
+function runGlitch(screenEl) {
+  screenEl.querySelectorAll('.glitch').forEach(el => {
+    el.classList.remove('glitch-in');
+    void el.offsetWidth;
+    el.classList.add('glitch-in');
+  });
+}
+
+function showScreen(name) {
+  ['welcome', 'question', 'thankyou'].forEach(s => {
+    document.getElementById('screen-' + s).classList.remove('active');
+  });
+  const scr = document.getElementById('screen-' + name);
+  scr.classList.add('active');
+  appState.screen = name;
+  SFX.swap();
+  runScanSweep();
+  runGlitch(scr);
+  if (name !== 'welcome') resetIdle();
+  else stopIdleTimer();
+}
+
+// ═══════════════════════════════════════════════════════════
+// WEBSOCKET (unchanged server protocol)
+// ═══════════════════════════════════════════════════════════
+let wsRetryTimer = null;
+let demoFallbackTimer = null;
+
+function connectWS() {
+  if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) return;
+  const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+  const host = window.location.hostname || 'localhost';
+  const url = `${protocol}//${host}:3000`;
+  try { ws = new WebSocket(url); } catch (e) { scheduleWsRetry(); return; }
+
+  ws.onopen = () => {
+    wsConnected = true; demoMode = false;
+    clearTimeout(demoFallbackTimer);
+    setConnStatus('connected', 'Tersambung / Connected');
+  };
+
+  ws.onmessage = (evt) => {
+    try {
+      const data = JSON.parse(evt.data);
+      if (data.type === 'STATE_SYNC') {
+        document.getElementById('session-count').textContent = data.state.totalSessions;
+      }
+      if (data.type === 'SESSION_START') {
+        document.getElementById('session-count').textContent = data.total;
+      }
+    } catch (e) {}
+  };
+
+  ws.onerror = () => {};
+
+  ws.onclose = () => {
+    wsConnected = false;
+    setConnStatus('disconnected', 'Terputus / Offline');
+    scheduleWsRetry();
+  };
+}
+
+function scheduleWsRetry() {
+  clearTimeout(wsRetryTimer);
+  wsRetryTimer = setTimeout(() => connectWS(), 3000);
+}
+
+function sendWS(obj) {
+  if (wsConnected && ws && ws.readyState === WebSocket.OPEN) {
+    ws.send(JSON.stringify(obj));
+    return true;
+  }
+  return false;
+}
+
+// Demo mode fallback after 5 s
+demoFallbackTimer = setTimeout(() => {
+  if (!wsConnected) {
+    demoMode = true;
+    setConnStatus('demo', 'Demo Mode');
+    const saved = localStorage.getItem('imd_sessions');
+    if (saved) document.getElementById('session-count').textContent = saved;
+  }
+}, 5000);
+
+// REST fallback for session count
+fetch('/api/state')
+  .then(r => r.json())
+  .then(s => { document.getElementById('session-count').textContent = s.totalSessions; })
+  .catch(() => {});
+
+function setConnStatus(state, label) {
+  document.getElementById('conn-dot').className = state;
+  document.getElementById('conn-label').textContent = label;
+}
+
+// ═══════════════════════════════════════════════════════════
+// WELCOME → START
+// ═══════════════════════════════════════════════════════════
+document.getElementById('btn-start').addEventListener('click', () => {
+  currentQ = 0;
+  sessionPositive = 0;
+  answering = false;
+
+  if (!sendWS({ type: 'SESSION_START' })) {
+    if (demoMode) {
+      const n = parseInt(localStorage.getItem('imd_sessions') || '0') + 1;
+      localStorage.setItem('imd_sessions', n);
+      document.getElementById('session-count').textContent = n;
+    }
+  }
+
+  showScreen('question');
+  Presenter.use('stage-question');
+  Presenter.hide();
+  document.querySelector('#answer-choices').classList.remove('show');
+
+  // character arrives, then asks first question
+  setTimeout(() => loadQuestion(0), 500);
+});
+
+// ═══════════════════════════════════════════════════════════
+// QUESTION LOGIC
+// ═══════════════════════════════════════════════════════════
+function buildQuestionBubble(q) {
+  const wrap = document.createElement('div');
+  const icon = document.createElement('div');
+  icon.style.cssText = 'font-size:calc(44 * var(--u));text-align:center;margin-bottom:calc(8 * var(--u));';
+  icon.textContent = q.icon;
+  const bmEl = document.createElement('div');
+  bmEl.style.cssText = 'font-family:Poppins,sans-serif;font-weight:700;font-size:calc(24 * var(--u));color:var(--text-dark);text-align:center;line-height:1.4;margin-bottom:calc(6 * var(--u));';
+  bmEl.textContent = q.bm;
+  const enEl = document.createElement('div');
+  enEl.style.cssText = 'font-size:calc(17 * var(--u));color:var(--text-light);text-align:center;line-height:1.4;';
+  enEl.textContent = q.en;
+  wrap.appendChild(icon);
+  wrap.appendChild(bmEl);
+  wrap.appendChild(enEl);
+  return wrap;
+}
+
+function loadQuestion(idx) {
+  const q = QUESTIONS[idx];
+  answering = false;
+
+  // Progress bar
+  const pct = (idx / 10) * 100;
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('q-label').textContent =
+    `Soalan ${idx + 1} daripada 10 / Question ${idx + 1} of 10`;
+
+  // Fill answer buttons
+  document.getElementById('a-bm').textContent = q.a.bm;
+  document.getElementById('a-en').textContent = q.a.en;
+  document.getElementById('b-bm').textContent = q.b.bm;
+  document.getElementById('b-en').textContent = q.b.en;
+
+  const btnA = document.getElementById('btn-a');
+  const btnB = document.getElementById('btn-b');
+  btnA.classList.remove('disabled', 'selected');
+  btnB.classList.remove('disabled', 'selected');
+
+  // Hide answer buttons while Aisyah asks
+  document.getElementById('answer-choices').classList.remove('show');
+
+  // Character asks via speech bubble
+  Presenter.use('stage-question');
+  Presenter.ask(buildQuestionBubble(q), { talkMs: 3000 });
+
+  // Show answer buttons after short delay
+  setTimeout(() => {
+    document.getElementById('answer-choices').classList.add('show');
+    answering = false;
+  }, 700);
+
+  resetIdle();
+}
+
+function handleAnswer(isPositive) {
+  if (answering) return;
+  answering = true;
+
+  const btnA = document.getElementById('btn-a');
+  const btnB = document.getElementById('btn-b');
+  btnA.classList.add('disabled');
+  btnB.classList.add('disabled');
+
+  if (isPositive) {
+    btnA.classList.add('selected');
+    sessionPositive++;
+    SFX.win();
+    // User echo bubble + acknowledgement
+    Presenter.use('stage-question');
+    Presenter.userSay(appState.lang === 'bm' ? '✓ Syabas! / Well done!' : '✓ Well done! / Syabas!');
+    setTimeout(() => {
+      Presenter.say(appState.lang === 'bm'
+        ? '✓ Tepat sekali! Pilihan bijak! 🌟'
+        : '✓ Exactly right! Smart choice! 🌟',
+        { talkMs: 1400 });
+    }, 400);
+    sendWS({ type: 'ANSWER_SUBMITTED', questionIndex: currentQ, isPositive: true });
+  } else {
+    btnB.classList.add('selected');
+    SFX.lose();
+    Presenter.use('stage-question');
+    Presenter.userSay(appState.lang === 'bm' ? '💡 Bagus! / Good thinking!' : '💡 Good thinking! / Bagus!');
+    setTimeout(() => {
+      Presenter.say(appState.lang === 'bm'
+        ? '💡 Bagus! Terus belajar tentang pengurusan kewangan!'
+        : '💡 Good effort! Keep learning about financial management!',
+        { talkMs: 1400 });
+    }, 400);
+    sendWS({ type: 'ANSWER_SUBMITTED', questionIndex: currentQ, isPositive: false });
+  }
+
+  setTimeout(() => {
+    currentQ++;
+    if (currentQ >= 10) {
+      showThankYou();
+    } else {
+      Presenter.hide();
+      document.getElementById('answer-choices').classList.remove('show');
+      setTimeout(() => loadQuestion(currentQ), 300);
+    }
+  }, 1600);
+}
+
+document.getElementById('btn-a').addEventListener('click', () => { SFX.tap(); handleAnswer(true); });
+document.getElementById('btn-b').addEventListener('click', () => { SFX.tap(); handleAnswer(false); });
+
+// ═══════════════════════════════════════════════════════════
+// THANK YOU SCREEN
+// ═══════════════════════════════════════════════════════════
+function showThankYou() {
+  document.getElementById('progress-fill').style.width = '100%';
+  document.getElementById('ty-score').textContent = sessionPositive;
+  showScreen('thankyou');
+  SFX.win();
+
+  let secs = 10;
+  clearInterval(countdownTimer);
+  updateCountdown(secs);
+  countdownTimer = setInterval(() => {
+    secs--;
+    updateCountdown(secs);
+    if (secs <= 0) {
+      clearInterval(countdownTimer);
+      returnToWelcome();
+    }
+  }, 1000);
+}
+
+function updateCountdown(s) {
+  document.getElementById('countdown-label').textContent =
+    s > 0 ? `Kembali ke mula dalam ${s}s... / Back to start in ${s}s...` : '';
+}
+
+function returnToWelcome() {
+  clearInterval(countdownTimer);
+  fetch('/api/state')
+    .then(r => r.json())
+    .then(s => { document.getElementById('session-count').textContent = s.totalSessions; })
+    .catch(() => {});
+  showScreen('welcome');
+}
+
+document.getElementById('btn-done').addEventListener('click', () => {
+  SFX.tap();
+  clearInterval(countdownTimer);
+  returnToWelcome();
+});
+
+// ═══════════════════════════════════════════════════════════
+// IDLE TIMER
+// ═══════════════════════════════════════════════════════════
+function resetIdle() {
+  stopIdleTimer();
+  if (appState.screen !== 'welcome') startIdleTimer();
+}
+
+function startIdleTimer() {
+  appState.idleRemaining = appState.idleSeconds;
+  const bar = document.getElementById('idle-bar');
+  bar.classList.remove('visible');
+  bar.style.width = '100%';
+  appState.idleTimer = setInterval(() => {
+    appState.idleRemaining--;
+    const pct = (appState.idleRemaining / appState.idleSeconds) * 100;
+    bar.style.width = pct + '%';
+    if (appState.idleRemaining <= 15) bar.classList.add('visible');
+    if (appState.idleRemaining <= 0) {
+      stopIdleTimer();
+      clearInterval(countdownTimer);
+      returnToWelcome();
+    }
+  }, 1000);
+}
+
+function stopIdleTimer() {
+  if (appState.idleTimer) { clearInterval(appState.idleTimer); appState.idleTimer = null; }
+  const bar = document.getElementById('idle-bar');
+  bar.classList.remove('visible');
+  bar.style.width = '100%';
+}
+
+// Reset idle on any interaction
+['click', 'touchstart', 'mousemove', 'keydown'].forEach(evt => {
+  document.addEventListener(evt, () => { if (appState.screen !== 'welcome') resetIdle(); }, { passive: true });
+});
+
+// ═══════════════════════════════════════════════════════════
+// KIOSK HARDENING
+// ═══════════════════════════════════════════════════════════
+// Disable long-press + text selection
+document.addEventListener('contextmenu', e => e.preventDefault());
+document.addEventListener('selectstart', e => e.preventDefault());
+
+// Fullscreen on first touch/click
+const goFullscreen = () => {
+  document.documentElement.requestFullscreen().catch(() => {});
+  document.removeEventListener('pointerdown', goFullscreen);
+};
+document.addEventListener('pointerdown', goFullscreen);
+
+// SFX.tap() delegated to all button-like elements
+document.addEventListener('pointerdown', e => {
+  if (e.target.closest('button, .answer-btn')) SFX.tap();
+}, { passive: true });
+
+// ═══════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  Presenter.mount('stage-question');
+
+  // Apply saved lang
+  const savedLang = localStorage.getItem('imd_lang') || 'bm';
+  document.getElementById('btn-bm').classList.toggle('active', savedLang === 'bm');
+  document.getElementById('btn-en').classList.toggle('active', savedLang === 'en');
+  appState.lang = savedLang;
+
+  connectWS();
+  showScreen('welcome');
+});
+</script>
+</body>
+</html>
