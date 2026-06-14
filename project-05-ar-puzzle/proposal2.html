@@ -435,7 +435,23 @@ html,body{
   color:#fff;margin-bottom:12px;text-align:center;
   text-shadow:0 0 40px rgba(245,166,35,0.5);
 }
-.win-sub{font-size:1.1rem;color:rgba(255,255,255,0.65);margin-bottom:40px;text-align:center;line-height:1.6;}
+.win-sub{font-size:1.1rem;color:rgba(255,255,255,0.65);margin-bottom:28px;text-align:center;line-height:1.6;}
+/* Completion time stat */
+.win-time{
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  padding:20px 56px;border-radius:18px;margin-bottom:36px;
+  background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.1);
+}
+.win-time-label{
+  font-family:'Poppins',sans-serif;font-size:0.68rem;font-weight:700;
+  color:rgba(255,255,255,0.4);letter-spacing:0.14em;text-transform:uppercase;
+}
+.win-time-value{
+  font-family:'Poppins',sans-serif;font-size:3.2rem;font-weight:800;
+  color:#F5A623;line-height:1;
+  text-shadow:0 0 30px rgba(245,166,35,0.4);
+}
 .win-actions{display:flex;gap:16px;}
 .win-btn{
   display:flex;align-items:center;justify-content:center;gap:10px;
@@ -805,6 +821,13 @@ body.lang-en .en-text{display:inline;}
         <span class="bm-text">Anda telah melengkapkan teka-teki!<br>Lukisan ini kini hidup semula.</span>
         <span class="en-text">You completed the puzzle!<br>The artwork has come alive.</span>
       </div>
+      <div class="win-time">
+        <div class="win-time-label">
+          <span class="bm-text">&#9201; Masa Siap</span>
+          <span class="en-text">&#9201; Completion Time</span>
+        </div>
+        <div class="win-time-value" id="win-time-value">0:00</div>
+      </div>
       <div class="win-actions">
         <button class="win-btn" onclick="resetPuzzle()">
           &#x21BA; <span class="bm-text">Cuba Lagi</span><span class="en-text">Try Again</span>
@@ -1060,6 +1083,17 @@ let currentArtwork = null;
 let pieces = [];
 let placedCount = 0;
 let activeDrag = null;
+let puzzleStartTime = null;
+let puzzleElapsed  = 0;
+
+function formatTime(ms) {
+  const s   = Math.floor(ms / 1000);
+  const min = Math.floor(s / 60);
+  const sec = s % 60;
+  return min > 0
+    ? `${min}:${String(sec).padStart(2, '0')}`
+    : `0:${String(sec).padStart(2, '0')}`;
+}
 
 function selectArtwork(id) {
   if (currentArtwork === id) return;
@@ -1119,6 +1153,8 @@ function cleanupArtAlive() {
 // ── Build puzzle ──────────────────────────────
 function buildPuzzle(id) {
   cleanupArtAlive();
+  puzzleStartTime = null;
+  puzzleElapsed = 0;
   placedCount = 0;
   pieces = [];
 
@@ -1233,6 +1269,7 @@ function startDrag(el, pos) {
   const idx = parseInt(el.dataset.idx);
   const p   = pieces[idx];
   if (!p || p.placed) return;
+  if (!puzzleStartTime) puzzleStartTime = Date.now();  // start timer on first interaction
   activeDrag = {
     piece:   p,
     offsetX: pos.x - parseFloat(p.el.style.left),
@@ -1307,7 +1344,11 @@ function endDrag() {
     placedCount++;
     updateProgress();
     snapSound();
-    if (placedCount >= TOTAL) setTimeout(triggerWin, 500);
+    if (placedCount >= TOTAL) {
+      puzzleElapsed = puzzleStartTime ? Date.now() - puzzleStartTime : 0;
+      document.getElementById('win-time-value').textContent = formatTime(puzzleElapsed);
+      setTimeout(triggerWin, 500);
+    }
   }
   activeDrag = null;
 }
