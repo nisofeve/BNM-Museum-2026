@@ -379,16 +379,63 @@ html,body{
 /* Celebration state */
 @keyframes artAlive{
   0%{filter:brightness(1) saturate(1);}
-  25%{filter:brightness(1.35) saturate(1.7);}
-  50%{filter:brightness(1.1) saturate(1.3) hue-rotate(12deg);}
-  75%{filter:brightness(1.45) saturate(1.9) hue-rotate(-8deg);}
+  25%{filter:brightness(1.4) saturate(1.9);}
+  50%{filter:brightness(1.15) saturate(1.4) hue-rotate(14deg);}
+  75%{filter:brightness(1.5) saturate(2.1) hue-rotate(-10deg);}
   100%{filter:brightness(1) saturate(1);}
 }
 @keyframes celebGlow{
   from{box-shadow:0 0 8px rgba(245,166,35,0.4),0 4px 16px rgba(0,0,0,0.4);}
-  to{box-shadow:0 0 28px rgba(245,166,35,1),0 4px 16px rgba(0,0,0,0.4);}
+  to{box-shadow:0 0 32px rgba(245,166,35,1),0 4px 16px rgba(0,0,0,0.4);}
 }
-.piece.celebrate{animation:artAlive 2.2s ease-in-out infinite,celebGlow 1s ease-in-out infinite alternate;}
+.piece.celebrate{animation:artAlive 2.4s ease-in-out infinite,celebGlow 1s ease-in-out infinite alternate;}
+
+/* ── BOARD CELEBRATION OVERLAY ── */
+#board-celebrate{
+  position:absolute;border-radius:10px;pointer-events:none;z-index:50;
+  display:none;overflow:hidden;
+}
+#board-celebrate.show{display:block;}
+
+@keyframes artBorderGlow{
+  0%,100%{box-shadow:0 0 0 3px rgba(245,166,35,0.8),0 0 50px rgba(245,166,35,0.35),inset 0 0 30px rgba(245,166,35,0.08);}
+  50%{box-shadow:0 0 0 6px rgba(255,215,0,1),0 0 100px rgba(245,166,35,0.65),inset 0 0 60px rgba(245,166,35,0.15);}
+}
+#board-celebrate.show{animation:artBorderGlow 1.1s ease-in-out infinite;}
+
+@keyframes shimmerSweep{
+  0%{transform:translateX(-160%) skewX(-18deg);}
+  100%{transform:translateX(260%) skewX(-18deg);}
+}
+.shimmer-bar{
+  position:absolute;top:-50%;bottom:-50%;width:55%;
+  background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,0.3) 40%,rgba(255,255,255,0.55) 50%,rgba(255,255,255,0.3) 60%,transparent 100%);
+  animation:shimmerSweep 1.4s cubic-bezier(0.4,0,0.2,1) infinite;
+}
+.shimmer-bar:nth-child(2){animation-delay:0.7s;}
+
+/* Sparkles */
+@keyframes sparkleFloat{
+  0%{transform:translateY(0) scale(1) rotate(0deg);opacity:1;}
+  70%{opacity:1;}
+  100%{transform:translateY(-100px) scale(0) rotate(180deg);opacity:0;}
+}
+.sparkle{
+  position:absolute;pointer-events:none;z-index:60;
+  animation:sparkleFloat linear forwards;
+  font-size:1.6rem;
+}
+
+/* Ripple ring from board center */
+@keyframes rippleOut{
+  0%{transform:scale(0.5);opacity:0.9;}
+  100%{transform:scale(2.2);opacity:0;}
+}
+.ripple-ring{
+  position:absolute;border-radius:50%;border:3px solid rgba(245,166,35,0.9);
+  pointer-events:none;z-index:48;
+  animation:rippleOut 1.2s ease-out forwards;
+}
 
 /* Piece enter animation when puzzle first builds */
 @keyframes pieceAppear{
@@ -1121,16 +1168,77 @@ function winSound() {
 //  WIN
 // ══════════════════════════════════════════════
 function triggerWin() {
-  winSound();
-  burstConfetti();
+  // 1. Pieces glow immediately
   pieces.forEach(p => p.el.classList.add('celebrate'));
-  setTimeout(() => document.getElementById('win-overlay').classList.add('show'), 1400);
+
+  // 2. Board shimmer + sparkles
+  showBoardCelebration();
+
+  // 3. Confetti at 800ms
+  setTimeout(burstConfetti, 800);
+
+  // 4. Win sound at 500ms (after player has moment to appreciate the art)
+  setTimeout(winSound, 500);
+
+  // 5. Win overlay at 4.5s — user sees the artwork animation first
+  setTimeout(() => document.getElementById('win-overlay').classList.add('show'), 4500);
+}
+
+function showBoardCelebration() {
+  const stage = document.getElementById('puzzle-stage');
+
+  // Create or reuse overlay
+  let cel = document.getElementById('board-celebrate');
+  if (!cel) {
+    cel = document.createElement('div');
+    cel.id = 'board-celebrate';
+    cel.innerHTML = '<div class="shimmer-bar"></div><div class="shimmer-bar"></div>';
+    stage.appendChild(cel);
+  }
+  cel.style.left   = BOARD_X + 'px';
+  cel.style.top    = BOARD_Y + 'px';
+  cel.style.width  = ART_W   + 'px';
+  cel.style.height = ART_H   + 'px';
+  cel.classList.add('show');
+
+  // Ripple rings from board center — 3 rings staggered
+  const cx = BOARD_X + ART_W / 2;
+  const cy = BOARD_Y + ART_H / 2;
+  const ringSize = Math.min(ART_W, ART_H) * 0.5;
+  [0, 400, 800].forEach(delay => {
+    setTimeout(() => {
+      const ring = document.createElement('div');
+      ring.className = 'ripple-ring';
+      ring.style.cssText = `width:${ringSize}px;height:${ringSize}px;left:${cx - ringSize/2}px;top:${cy - ringSize/2}px;`;
+      stage.appendChild(ring);
+      ring.addEventListener('animationend', () => ring.remove());
+    }, delay);
+  });
+
+  // Sparkle rain — 40 sparkles over 3.5 seconds
+  const SPARKLES = ['✨','⭐','🌟','💫','✦','🎇'];
+  let count = 0;
+  const iv = setInterval(() => {
+    if (count >= 40) { clearInterval(iv); return; }
+    const sp = document.createElement('div');
+    sp.className = 'sparkle';
+    sp.textContent = SPARKLES[Math.floor(Math.random() * SPARKLES.length)];
+    sp.style.left = (BOARD_X + 20 + Math.random() * (ART_W - 40)) + 'px';
+    sp.style.top  = (BOARD_Y + 20 + Math.random() * (ART_H - 40)) + 'px';
+    sp.style.animationDuration = (0.7 + Math.random() * 1) + 's';
+    sp.style.animationDelay   = (Math.random() * 0.3) + 's';
+    stage.appendChild(sp);
+    sp.addEventListener('animationend', () => sp.remove());
+    count++;
+  }, 85);
 }
 
 function resetPuzzle() {
   document.getElementById('win-overlay').classList.remove('show');
+  // Clean up celebration overlay
+  const cel = document.getElementById('board-celebrate');
+  if (cel) cel.classList.remove('show');
   if (currentArtwork) {
-    // Remove celebrate styles
     pieces.forEach(p => p.el.classList.remove('celebrate'));
     buildPuzzle(currentArtwork);
   }
