@@ -800,6 +800,160 @@
   @keyframes touchBounce { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-22px);} }
 
   .hidden { display:none !important; }
+
+  /* ========================================================
+     TABUNG DIGITAL — Coin Container Toggle
+  ======================================================== */
+  .tabung-dot-sep { width:1px; height:16px; background:rgba(0,71,171,0.18); flex-shrink:0; margin-left:4px; }
+  .tabung-toggle-btn {
+    flex-shrink:0; margin-left:2px; padding:5px 12px;
+    border:none; border-radius:30px;
+    background:linear-gradient(135deg,var(--blue),var(--teal));
+    color:white; font-size:14px; font-weight:700; font-family:'Poppins',sans-serif;
+    cursor:pointer; letter-spacing:.3px;
+    box-shadow:0 2px 10px rgba(0,71,171,0.25);
+    transition:transform 0.2s, box-shadow 0.2s;
+    display:flex; align-items:center; gap:6px; line-height:1;
+  }
+  .tabung-toggle-btn:hover { transform:scale(1.07); box-shadow:0 4px 16px rgba(0,71,171,0.4); }
+  .tabung-toggle-btn.active { background:linear-gradient(135deg,var(--gold),var(--coral)); box-shadow:0 2px 12px rgba(245,166,35,0.45); }
+
+  #progress-dots {
+    transition: opacity 0.3s ease, transform 0.35s ease;
+  }
+  #progress-dots.tabung-open {
+    opacity:0; pointer-events:none; transform:translateX(-50%) translateY(-180%);
+  }
+
+  #tabung-panel {
+    position: fixed;
+    top: 14px; left: 50%;
+    transform: translateX(-50%) translateY(-200%);
+    z-index: 101;
+    background: rgba(255,255,255,0.97);
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    border: 1.5px solid rgba(255,255,255,0.92);
+    border-radius: 28px;
+    box-shadow: 0 8px 48px rgba(0,40,100,0.18);
+    padding: 16px 24px 16px 20px;
+    width: 860px;
+    display: flex; align-items: center; gap: 20px;
+    transition: transform 0.45s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s ease;
+    opacity: 0; pointer-events: none;
+  }
+  #tabung-panel.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1; pointer-events: all;
+  }
+  .tabung-close {
+    position:absolute; top:10px; right:14px;
+    width:26px; height:26px; border-radius:50%;
+    border:none; background:rgba(0,0,0,0.07);
+    cursor:pointer; font-size:13px; color:var(--text-mid);
+    display:flex; align-items:center; justify-content:center;
+    transition:background 0.2s;
+  }
+  .tabung-close:hover { background:rgba(0,0,0,0.14); }
+
+  .tabung-lbl { flex-shrink:0; }
+  .tabung-lbl-title { font-family:'Poppins',sans-serif; font-weight:800; font-size:17px; color:var(--blue); }
+  .tabung-lbl-sub { font-size:12px; color:var(--text-light); margin-top:2px; line-height:1.4; }
+
+  /* Jar container (side view) */
+  .tabung-jar-wrap { flex:1; position:relative; padding-top:14px; }
+  .tabung-jar {
+    width:100%; height:80px;
+    border:3px solid #7a9fc8;
+    border-radius:5px 5px 14px 14px;
+    background:rgba(200,220,255,0.08);
+    position:relative; overflow:hidden;
+    box-shadow:inset 0 0 16px rgba(0,71,171,0.04), 0 3px 16px rgba(0,71,171,0.1);
+  }
+  /* Opening rim */
+  .tabung-jar::before {
+    content:''; position:absolute;
+    top:-13px; left:-5px; right:-5px; height:13px;
+    border:3px solid #7a9fc8; border-bottom:none;
+    border-radius:5px 5px 0 0;
+  }
+  /* Glass glare */
+  .tabung-jar::after {
+    content:''; position:absolute;
+    top:5px; left:5px; width:28%; height:calc(100% - 10px);
+    background:linear-gradient(120deg, rgba(255,255,255,0.45), transparent 70%);
+    border-radius:4px; pointer-events:none;
+  }
+  .tabung-jar-fill {
+    position:absolute; bottom:0; left:0; right:0; height:0%;
+    background:repeating-linear-gradient(
+      to top,
+      #9aa8bc 0px, #9aa8bc 6px,
+      #c8d4e4 6px, #c8d4e4 12px
+    );
+    border-radius:0 0 10px 10px;
+    transition: height 0.9s cubic-bezier(0.34,1.2,0.64,1);
+  }
+  /* Full shimmer when ≥ 90% */
+  .tabung-jar-fill.nearly-full {
+    background:repeating-linear-gradient(
+      to top,
+      #b8a060 0px, #b8a060 6px,
+      #dfc880 6px, #dfc880 12px
+    );
+  }
+  @keyframes jarRipple {
+    0%   { transform:scaleX(0.2); opacity:0.9; }
+    100% { transform:scaleX(1.1); opacity:0; }
+  }
+  .jar-ripple {
+    position:absolute; left:0; right:0; height:4px;
+    background:linear-gradient(90deg,transparent,rgba(245,166,35,0.85),transparent);
+    animation:jarRipple 0.5s ease-out forwards;
+    pointer-events:none;
+  }
+
+  .tabung-stat { flex-shrink:0; text-align:center; min-width:88px; }
+  .tabung-stat-num {
+    font-family:'Poppins',sans-serif; font-weight:900; font-size:44px;
+    color:var(--blue); line-height:1;
+    transition:transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  .tabung-stat-num.bump { transform:scale(1.4) !important; }
+  .tabung-stat-lbl { font-size:13px; color:var(--text-light); font-weight:600; margin-top:1px; }
+  .tabung-stat-sessions {
+    font-size:11px; font-weight:700; color:var(--teal); margin-top:4px;
+    background:rgba(0,180,166,0.1); border-radius:10px; padding:2px 8px; display:inline-block;
+  }
+
+  /* Falling coin VFX */
+  .coin-drop {
+    position:fixed; width:28px; height:28px; border-radius:50%;
+    background:radial-gradient(circle at 34% 30%, #f2f2f2, #c4c4c4 48%, #9a9a9a 78%, #808080);
+    border:2px solid #b8b8b8;
+    box-shadow:0 3px 8px rgba(0,0,0,0.28), inset 0 1px 3px rgba(255,255,255,0.7);
+    z-index:500; pointer-events:none; will-change:transform,top;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .coin-drop::after { content:'$'; font-size:12px; font-weight:900; color:rgba(140,140,140,0.7); }
+  @keyframes coinSpin { 0%{transform:scaleX(1)} 25%{transform:scaleX(0.3)} 50%{transform:scaleX(1)} 75%{transform:scaleX(0.3)} 100%{transform:scaleX(1)} }
+  .coin-drop.spinning { animation:coinSpin 0.35s linear infinite; }
+
+  .coin-spark {
+    position:fixed; width:42px; height:42px; border-radius:50%;
+    border:3px solid rgba(245,166,35,0.9);
+    z-index:499; pointer-events:none;
+    transform:translate(-50%,-50%) scale(0);
+    animation:sparkRing 0.42s ease-out forwards;
+  }
+  .coin-spark::after {
+    content:''; position:absolute; inset:3px; border-radius:50%;
+    background:radial-gradient(circle, rgba(245,166,35,0.35), transparent 68%);
+  }
+  @keyframes sparkRing {
+    0%   { transform:translate(-50%,-50%) scale(0.15); opacity:1; }
+    55%  { transform:translate(-50%,-50%) scale(1);    opacity:0.85; }
+    100% { transform:translate(-50%,-50%) scale(1.9);  opacity:0; }
+  }
 </style>
 </head>
 <body>
@@ -815,6 +969,27 @@
   <div class="dot" data-idx="5"></div>
   <div class="dot" data-idx="6"></div>
   <div class="dot" data-idx="7"></div>
+  <div class="tabung-dot-sep"></div>
+  <button class="tabung-toggle-btn" id="tabung-toggle-btn" onclick="toggleTabung()">🪙 Tabung</button>
+</div>
+
+<!-- Tabung Panel -->
+<div id="tabung-panel">
+  <button class="tabung-close" onclick="toggleTabung()">✕</button>
+  <div class="tabung-lbl">
+    <div class="tabung-lbl-title">🏦 Tabung Digital</div>
+    <div class="tabung-lbl-sub">Syiling terkumpul<br>daripada peserta</div>
+  </div>
+  <div class="tabung-jar-wrap">
+    <div class="tabung-jar" id="tabung-jar">
+      <div class="tabung-jar-fill" id="tabung-jar-fill"></div>
+    </div>
+  </div>
+  <div class="tabung-stat">
+    <div class="tabung-stat-num" id="tabung-count">0</div>
+    <div class="tabung-stat-lbl">syiling</div>
+    <div class="tabung-stat-sessions" id="tabung-sessions">0 sesi</div>
+  </div>
 </div>
 
 <!-- Language toggle -->
@@ -1088,7 +1263,7 @@
    SFX — synthesized high-tech sounds via Web Audio API
    ============================================================ */
 const SFX=(()=>{let ctx;const ac=()=>ctx||(ctx=new(window.AudioContext||window.webkitAudioContext)());function tone({freq=440,type='sine',dur=.15,vol=.2,slide=0,delay=0}){try{const c=ac(),t=c.currentTime+delay,o=c.createOscillator(),g=c.createGain();o.type=type;o.frequency.setValueAtTime(freq,t);if(slide)o.frequency.exponentialRampToValueAtTime(Math.max(40,freq+slide),t+dur);g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.connect(g).connect(c.destination);o.start(t);o.stop(t+dur+.05)}catch(e){}}
-return{tap(){tone({freq:1200,type:'square',dur:.06,vol:.1});tone({freq:1800,dur:.08,vol:.07,delay:.02})},swap(){tone({freq:300,type:'sawtooth',dur:.25,vol:.09,slide:900})},win(){[523,659,784,1047].forEach((f,i)=>tone({freq:f,type:'triangle',dur:.18,vol:.15,delay:i*.09}))},lose(){tone({freq:220,type:'sawtooth',dur:.3,vol:.15,slide:-120});tone({freq:110,type:'square',dur:.35,vol:.1,delay:.05})}};})();
+return{tap(){tone({freq:1200,type:'square',dur:.06,vol:.1});tone({freq:1800,dur:.08,vol:.07,delay:.02})},swap(){tone({freq:300,type:'sawtooth',dur:.25,vol:.09,slide:900})},win(){[523,659,784,1047].forEach((f,i)=>tone({freq:f,type:'triangle',dur:.18,vol:.15,delay:i*.09}))},lose(){tone({freq:220,type:'sawtooth',dur:.3,vol:.15,slide:-120});tone({freq:110,type:'square',dur:.35,vol:.1,delay:.05})},clink(){tone({freq:3200,type:'triangle',dur:.09,vol:.2});tone({freq:2100,type:'sine',dur:.18,vol:.1,delay:.03});tone({freq:4100,type:'triangle',dur:.05,vol:.07,delay:.01})}};})();
 
 /* ============================================================
    STATE
@@ -1106,6 +1281,10 @@ var payStep = 0;
 var payTimer = null;
 var payConvInterval = null;
 var payRefNo = 'BNM-2026-000000';
+var tabungOpen = false;
+var quizJustCompleted = false;
+var tabungCoins = parseInt(localStorage.getItem('tabungCoins') || '0', 10);
+var tabungSessions = parseInt(localStorage.getItem('tabungSessions') || '0', 10);
 
 /* ============================================================
    i18n
@@ -1344,6 +1523,155 @@ var i18n = {
 };
 
 /* ============================================================
+   TABUNG DIGITAL
+   ============================================================ */
+function toggleTabung() {
+  tabungOpen = !tabungOpen;
+  var panel = document.getElementById('tabung-panel');
+  var dots  = document.getElementById('progress-dots');
+  var btn   = document.getElementById('tabung-toggle-btn');
+  panel.classList.toggle('show', tabungOpen);
+  dots.classList.toggle('tabung-open', tabungOpen);
+  btn.classList.toggle('active', tabungOpen);
+  if (tabungOpen) updateTabungDisplay();
+  SFX.tap();
+}
+
+function updateTabungDisplay() {
+  var countEl = document.getElementById('tabung-count');
+  var fillEl  = document.getElementById('tabung-jar-fill');
+  var sessEl  = document.getElementById('tabung-sessions');
+  if (!countEl) return;
+  countEl.textContent = tabungCoins;
+  sessEl.textContent  = tabungSessions + ' sesi';
+  var pct = Math.min(100, (tabungCoins / 100) * 100);
+  fillEl.style.height = pct + '%';
+  fillEl.classList.toggle('nearly-full', pct >= 88);
+}
+
+function addTabungCoins(n) {
+  var jarEl = document.getElementById('tabung-jar');
+  if (!jarEl) return;
+  if (!tabungOpen) {
+    toggleTabung();
+    setTimeout(function() { dropCoins(n); }, 600);
+    return;
+  }
+  dropCoins(n);
+}
+
+function dropCoins(n) {
+  for (var i = 0; i < n; i++) {
+    (function(idx) {
+      setTimeout(function() { dropOneCoin(idx, n); }, idx * 360);
+    })(i);
+  }
+  setTimeout(function() {
+    tabungCoins += n;
+    tabungSessions += 1;
+    localStorage.setItem('tabungCoins', tabungCoins);
+    localStorage.setItem('tabungSessions', tabungSessions);
+    updateTabungDisplay();
+    bumpCount();
+  }, n * 360 + 100);
+}
+
+function bumpCount() {
+  var el = document.getElementById('tabung-count');
+  if (!el) return;
+  el.classList.remove('bump');
+  void el.offsetWidth;
+  el.classList.add('bump');
+  setTimeout(function() { el.classList.remove('bump'); }, 400);
+}
+
+function dropOneCoin(idx, total) {
+  var jarEl = document.getElementById('tabung-jar');
+  if (!jarEl) return;
+  var rect   = jarEl.getBoundingClientRect();
+  var spread = Math.min(140, rect.width * 0.4);
+  var startX = rect.left + rect.width / 2 + (Math.random() - 0.5) * spread;
+  var startY = rect.top  - 60 - Math.random() * 30;
+  var landY  = rect.bottom - 18;
+
+  var coin = document.createElement('div');
+  coin.className = 'coin-drop spinning';
+  coin.style.left = (startX - 14) + 'px';
+  coin.style.top  = startY + 'px';
+  document.body.appendChild(coin);
+
+  var startTime = null;
+  var dur = 480 + Math.random() * 120;
+  var bounceH = 14 + Math.random() * 8;
+
+  function animate(t) {
+    if (!startTime) startTime = t;
+    var p = Math.min(1, (t - startTime) / dur);
+
+    var y;
+    if (p < 0.65) {
+      // Free fall — ease-in^2
+      var fp = p / 0.65;
+      y = startY + (landY - startY) * (fp * fp);
+    } else if (p < 0.80) {
+      // First bounce up
+      var bp = (p - 0.65) / 0.15;
+      y = landY - bounceH * Math.sin(bp * Math.PI);
+    } else if (p < 0.91) {
+      // Settle fall
+      var sp = (p - 0.80) / 0.11;
+      y = landY - (bounceH * 0.35) * Math.sin((1 - sp) * Math.PI * sp);
+    } else {
+      y = landY;
+    }
+
+    coin.style.top = y + 'px';
+
+    // Squash on first impact
+    if (p >= 0.64 && p <= 0.67) {
+      var sq = 1 - 0.35 * Math.sin(((p - 0.64) / 0.03) * Math.PI);
+      coin.style.transform = 'scaleY(' + sq + ') scaleX(' + (2 - sq) + ')';
+    } else {
+      coin.style.transform = '';
+    }
+
+    if (p < 1) {
+      requestAnimationFrame(animate);
+    } else {
+      coin.remove();
+      spawnSpark(startX, landY);
+      SFX.clink();
+      showJarRipple(landY - rect.top - 4);
+    }
+  }
+  requestAnimationFrame(animate);
+}
+
+function spawnSpark(x, y) {
+  var s = document.createElement('div');
+  s.className = 'coin-spark';
+  s.style.left = x + 'px';
+  s.style.top  = y + 'px';
+  document.body.appendChild(s);
+  setTimeout(function() { s.remove(); }, 500);
+}
+
+function showJarRipple(offsetFromTop) {
+  var jarEl = document.getElementById('tabung-jar');
+  if (!jarEl) return;
+  var r = document.createElement('div');
+  r.className = 'jar-ripple';
+  // put ripple near current fill surface
+  var fillEl = document.getElementById('tabung-jar-fill');
+  var fillH  = fillEl ? parseFloat(fillEl.style.height || '0') : 0;
+  var jarH   = jarEl.offsetHeight;
+  var fromBottom = (fillH / 100) * jarH;
+  r.style.bottom = fromBottom + 'px';
+  jarEl.appendChild(r);
+  setTimeout(function() { r.remove(); }, 600);
+}
+
+/* ============================================================
    LANGUAGE
    ============================================================ */
 function setLang(lang) {
@@ -1495,6 +1823,11 @@ function onSectionEnter(idx) {
   }
   if (idx === 6) {
     document.getElementById('final-score').textContent = quizScore + ' / 4';
+    if (quizJustCompleted) {
+      quizJustCompleted = false;
+      var coinsToAdd = Math.max(1, quizScore);
+      setTimeout(function() { addTabungCoins(coinsToAdd); }, 900);
+    }
   }
   if (idx === 7) {
     payStep = 0;
@@ -1777,6 +2110,7 @@ function nextQuestion() {
     currentQuestion++;
     renderQuestion();
   } else {
+    quizJustCompleted = true;
     navigate(1);
   }
 }
@@ -2002,6 +2336,7 @@ function restart() {
   factsShown = true;
   simCurrentStep = 0;
   payStep = 0;
+  quizJustCompleted = false;
   if (payTimer) { clearTimeout(payTimer); payTimer = null; }
   if (payConvInterval) { clearInterval(payConvInterval); payConvInterval = null; }
   SFX.swap();
@@ -2080,6 +2415,7 @@ updateDots();
 updateNav();
 resetIdleTimer();
 fitStage();
+updateTabungDisplay();
 
 gsap.from('#section-0', { opacity: 0, y: 36, duration: 0.9, ease: 'power2.out', delay: 0.3 });
 </script>
