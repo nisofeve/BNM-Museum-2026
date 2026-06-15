@@ -4,7 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=1080">
 <title>Bina Semula Simpanan Bersama — IMD 2026</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+@font-face{font-family:'Nunito';font-style:normal;font-weight:400 800;font-display:swap;src:url('fonts/nunito-latin.woff2') format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Poppins';font-style:normal;font-weight:400;font-display:swap;src:url('fonts/poppins-400-latin.woff2') format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Poppins';font-style:normal;font-weight:600;font-display:swap;src:url('fonts/poppins-600-latin.woff2') format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Poppins';font-style:normal;font-weight:700;font-display:swap;src:url('fonts/poppins-700-latin.woff2') format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Poppins';font-style:normal;font-weight:800;font-display:swap;src:url('fonts/poppins-800-latin.woff2') format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Poppins';font-style:normal;font-weight:900;font-display:swap;src:url('fonts/poppins-900-latin.woff2') format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+</style>
 <style>
 :root {
   --u: min(0.09259vw, 0.05208vh);
@@ -231,7 +238,7 @@ html,body{width:100vw;height:100vh;overflow:hidden;font-family:'Poppins',sans-se
   100%{opacity:1;transform:translateX(-50%) scale(1) translateY(0);}
 }
 .bubble-main .bubble-content{
-  padding:calc(14*var(--u)) calc(20*var(--u));max-height:calc(150*var(--u));overflow-y:auto;
+  padding:calc(14*var(--u)) calc(20*var(--u));
   font-size:calc(15*var(--u));color:var(--text-dark);line-height:1.5;
 }
 .bubble-line{font-weight:700;font-size:calc(17*var(--u));text-align:center;}
@@ -295,10 +302,10 @@ html,body{width:100vw;height:100vh;overflow:hidden;font-family:'Poppins',sans-se
 .countdown-label{font-size:calc(12*var(--u));color:var(--text-light);}
 
 /* Fixed overlays */
-/* quiz-inner: fixed 1080×960 canvas, scaled to fill 50vh section */
+/* quiz-inner: fixed 1080×1080 canvas, scaled to fill 50vh section */
 #quiz-inner{
   position:absolute;top:0;left:0;
-  width:1080px;height:960px;
+  width:1080px;height:1080px;
   transform-origin:top left;
   /* override --u so all calc(N*var(--u)) is sized for 1080×960 canvas */
   --u: 2px;
@@ -315,17 +322,7 @@ html,body{width:100vw;height:100vh;overflow:hidden;font-family:'Poppins',sans-se
   font-family:'Poppins',sans-serif;font-weight:700;font-size:13px;color:var(--text-mid);transition:all .2s;
 }
 #lang-toggle button.active{background:var(--teal);color:white;border-radius:50px;}
-#conn-status{
-  position:fixed;top:calc(14*var(--u));left:calc(22*var(--u));z-index:100;
-  display:flex;align-items:center;gap:calc(6*var(--u));
-  font-size:calc(11*var(--u));color:rgba(255,255,255,.45);
-  background:rgba(0,0,0,.28);backdrop-filter:blur(calc(4*var(--u)));
-  padding:calc(6*var(--u)) calc(13*var(--u));border-radius:calc(50*var(--u));
-}
-#conn-dot{width:calc(7*var(--u));height:calc(7*var(--u));border-radius:50%;background:#555;transition:background .3s;}
-#conn-dot.connected{background:#27AE60;box-shadow:0 0 6px #27AE60;}
-#conn-dot.disconnected{background:#E53935;}
-#conn-dot.demo{background:#F5A623;}
+
 #idle-bar{position:fixed;bottom:0;left:0;z-index:999;height:calc(4*var(--u));background:var(--teal);box-shadow:0 0 calc(10*var(--u)) rgba(0,180,166,.6);transition:width 1s linear;opacity:0;}
 #idle-bar.visible{opacity:1;}
 #scan-sweep{position:fixed;left:0;right:0;top:-14vh;height:12vh;z-index:1200;pointer-events:none;opacity:0;background:linear-gradient(180deg,transparent,rgba(0,180,166,.14) 42%,rgba(0,180,166,.45) 50%,rgba(0,71,171,.16) 58%,transparent);}
@@ -603,7 +600,7 @@ html,body{width:100vw;height:100vh;overflow:hidden;font-family:'Poppins',sans-se
 
 <!-- Fixed overlays -->
 
-<div id="conn-status"><div id="conn-dot"></div><span id="conn-label">Menghubung...</span></div>
+
 <div id="idle-bar"></div>
 <div id="scan-sweep"></div>
 
@@ -956,7 +953,7 @@ const QUESTIONS = [
 ];
 
 // ═══ STATE ═══
-let ws=null, wsConnected=false, demoMode=false;
+const demoMode=true;
 let currentQ=0, sessionPositive=0, answering=false, countdownTimer=null;
 const appState = { lang:'bm', screen:'welcome', idleTimer:null, idleSeconds:60 };
 
@@ -1182,53 +1179,18 @@ function showScreen(name){
   if(name!=='welcome') resetIdle(); else stopIdleTimer();
 }
 
-// ═══ WEBSOCKET ═══
-let wsRetryTimer=null, demoFallbackTimer=null;
-function connectWS(){
-  if(ws&&(ws.readyState===WebSocket.OPEN||ws.readyState===WebSocket.CONNECTING)) return;
-  const proto=location.protocol==='https:'?'wss:':'ws:';
-  const url=`${proto}//${location.hostname||'localhost'}:3000`;
-  try{ ws=new WebSocket(url); } catch(e){ scheduleWsRetry(); return; }
-  ws.onopen=()=>{ wsConnected=true; demoMode=false; clearTimeout(demoFallbackTimer); setConnStatus('connected','Tersambung'); };
-  ws.onmessage=(evt)=>{
-    try{
-      const d=JSON.parse(evt.data);
-      if(d.type==='STATE_SYNC'){
-        document.getElementById('session-count').textContent=d.state.totalSessions||0;
-        document.getElementById('stat-sessions').textContent=d.state.totalSessions||0;
-        d.state.nodes&&d.state.nodes.forEach((n,i)=>{ if(n.activated) activateNode(i,n.activatedCount,false); });
-        d.state.connections&&d.state.connections.forEach(c=>drawConnection(c.from,c.to,false));
-      }
-      if(d.type==='SESSION_START'){
-        document.getElementById('session-count').textContent=d.total;
-        document.getElementById('stat-sessions').textContent=d.total;
-      }
-      if(d.type==='NODE_ACTIVATED') activateNode(d.nodeId,d.node&&d.node.activatedCount,true);
-      if(d.type==='CONNECTION_DRAWN') drawConnection(d.connection.from,d.connection.to,true);
-    }catch(e){}
-  };
-  ws.onerror=()=>{};
-  ws.onclose=()=>{ wsConnected=false; setConnStatus('disconnected','Offline'); scheduleWsRetry(); };
-}
-function scheduleWsRetry(){ clearTimeout(wsRetryTimer); wsRetryTimer=setTimeout(connectWS,3000); }
-function sendWS(obj){ if(wsConnected&&ws&&ws.readyState===WebSocket.OPEN){ ws.send(JSON.stringify(obj)); return true; } return false; }
-function setConnStatus(s,l){ document.getElementById('conn-dot').className=s; document.getElementById('conn-label').textContent=l; }
-demoFallbackTimer=setTimeout(()=>{ if(!wsConnected){ demoMode=true; setConnStatus('demo','Demo Mode'); } },5000);
-if(location.protocol!=='file:') fetch('http://localhost:3000/api/state').then(r=>r.json()).then(s=>{ document.getElementById('session-count').textContent=s.totalSessions; document.getElementById('stat-sessions').textContent=s.totalSessions; }).catch(()=>{});
+// ═══ STANDALONE MODE ═══
+function sendWS(){ return false; }
 
 // ═══ WELCOME → START ═══
 document.getElementById('btn-start').addEventListener('click',()=>{
   if (tabungOpen) toggleTabung();
   currentQ=0; sessionPositive=0; answering=false;
   resetWallNodes();
-  if(!sendWS({type:'SESSION_START'})){
-    if(demoMode){
-      const n=parseInt(localStorage.getItem('imd_s')||'0')+1;
-      localStorage.setItem('imd_s',n);
-      document.getElementById('session-count').textContent=n;
-      document.getElementById('stat-sessions').textContent=n;
-    }
-  }
+  const n=parseInt(localStorage.getItem('imd_s')||'0')+1;
+  localStorage.setItem('imd_s',n);
+  document.getElementById('session-count').textContent=n;
+  document.getElementById('stat-sessions').textContent=n;
   showScreen('question'); Presenter.use('stage-question'); Presenter.hide();
   document.getElementById('answer-choices').classList.remove('show');
   setTimeout(()=>loadQuestion(0),500);
@@ -1279,12 +1241,10 @@ function handleAnswer(isPositive){
     btnA.classList.add('selected'); sessionPositive++; SFX.win(); Presenter.happy(2500);
     Presenter.userSay(lang==='bm'?'✓ Syabas!':'✓ Well done!');
     setTimeout(()=>Presenter.say(lang==='bm'?'✓ Tepat sekali! Pilihan bijak! 🌟':'✓ Exactly right! Smart choice! 🌟',{talkMs:1400}),400);
-    sendWS({type:'ANSWER_SUBMITTED',questionIndex:currentQ,isPositive:true});
   } else {
     btnB.classList.add('selected'); SFX.lose();
     Presenter.userSay(lang==='bm'?'💡 Bagus!':'💡 Good thinking!');
     setTimeout(()=>Presenter.say(lang==='bm'?'💡 Bagus! Terus belajar tentang pengurusan kewangan!':'💡 Good effort! Keep learning about financial management!',{talkMs:1400}),400);
-    sendWS({type:'ANSWER_SUBMITTED',questionIndex:currentQ,isPositive:false});
   }
 
   setTimeout(()=>{
@@ -1312,10 +1272,6 @@ function showThankYou(){
 function updateCd(s){ const bm=appState.lang==='bm'; document.getElementById('countdown-label').textContent=s>0?(bm?`Kembali ke mula dalam ${s}s...`:`Back to start in ${s}s...`):''; }
 function returnHome(){
   clearInterval(countdownTimer);
-  if(location.protocol!=='file:') fetch('http://localhost:3000/api/state').then(r=>r.json()).then(s=>{
-    document.getElementById('session-count').textContent=s.totalSessions;
-    document.getElementById('stat-sessions').textContent=s.totalSessions;
-  }).catch(()=>{});
   showScreen('welcome');
 }
 document.getElementById('btn-done').addEventListener('click',()=>{ SFX.tap(); clearInterval(countdownTimer); returnHome(); });
@@ -1359,9 +1315,9 @@ function scaleQuiz() {
   const inner   = document.getElementById('quiz-inner');
   const sw = section.offsetWidth;
   const sh = section.offsetHeight;
-  const scale = Math.min(sw / 1080, sh / 960);
+  const scale = Math.min(sw / 1080, sh / 1080);
   const ox = (sw - 1080 * scale) / 2;
-  const oy = (sh - 960  * scale) / 2;
+  const oy = (sh - 1080 * scale) / 2;
   inner.style.transform = `translate(${ox}px,${oy}px) scale(${scale})`;
 }
 window.addEventListener('resize', scaleQuiz);
@@ -1371,7 +1327,6 @@ document.addEventListener('DOMContentLoaded',()=>{
   scaleQuiz();
   Presenter.mount('stage-question');
   document.body.dataset.lang='bm'; setLang('bm');
-  connectWS();
   showScreen('welcome');
   updateTabungDisplay();
 });
