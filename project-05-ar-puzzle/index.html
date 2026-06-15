@@ -367,6 +367,10 @@
     .bilingual .bm-text,
     .bilingual .en-text { display: inline; }
     .bilingual .bm-text::after { content: ' / '; }
+/* ═══ P06-STYLE VFX ═══ */
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,71,171,.007) 3px,rgba(0,71,171,.007) 4px);}
+.p6-particles{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0;}
+.p6-part{position:absolute;border-radius:50%;background:radial-gradient(circle,rgba(0,229,255,.7),rgba(0,71,171,.3));opacity:.08;}
   </style>
 </head>
 <body>
@@ -548,6 +552,18 @@
     // Restore saved language
     const savedLang = localStorage.getItem('imd_lang');
     if (savedLang === 'en') setLang('en');
+  // P06-style ambient particles
+(function(){
+  const cont=document.createElement('div'); cont.className='p6-particles'; document.body.appendChild(cont);
+  for(let i=0;i<18;i++){
+    const p=document.createElement('div'); p.className='p6-part';
+    const sz=2+Math.random()*4;
+    p.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}vw;top:${Math.random()*100}vh;opacity:${.04+Math.random()*.07};animation:p6a${i} ${9+Math.random()*11}s ease-in-out infinite alternate`;
+    const st=document.createElement('style');
+    st.textContent=`@keyframes p6a${i}{from{transform:translate(0,0)}to{transform:translate(${(Math.random()-.5)*130}px,${(Math.random()-.5)*90}px)}}`;
+    document.head.appendChild(st); cont.appendChild(p);
+  }
+})();
   </script>
 </body>
 </html>

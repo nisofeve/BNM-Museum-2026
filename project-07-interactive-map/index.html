@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Johor — Currency &amp; Banking History</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:100%;height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-serif;background:#04050a}
+  /* disable long-press / selection */
+  *{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
+  :root{--u:min(0.18519vw,0.10417vh);--cyan:#00e5ff;--gold:#ffd700;--navy:#04091e}
+
+  /* ── scanline overlay ── */
+  body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
+    background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,71,171,.007) 3px,rgba(0,71,171,.007) 4px)}
+
+  /* ── map background ── */
+  #map-bg{position:fixed;inset:0;
+    background:url('Assets/Johore map.png') center/cover no-repeat;
+    filter:brightness(.82) saturate(.85)}
+  #map-vignette{position:fixed;inset:0;
+    background:radial-gradient(ellipse at 50% 50%,rgba(4,9,30,.25) 0%,rgba(4,9,30,.72) 100%)}
+
+  /* ── header ── */
+  #header{
+    position:fixed;top:0;left:0;right:0;z-index:100;
+    padding:calc(14*var(--u)) calc(36*var(--u));
+    display:flex;align-items:center;justify-content:space-between;
+    background:linear-gradient(to bottom,rgba(4,9,30,.92) 60%,transparent)}
+  #header-left h1{
+    font-size:calc(21*var(--u));font-weight:700;letter-spacing:.08em;
+    color:#fff;text-transform:uppercase;line-height:1.2}
+  #header-left p{
+    font-size:calc(11*var(--u));color:rgba(0,229,255,.65);letter-spacing:.2em;
+    text-transform:uppercase;margin-top:calc(3*var(--u))}
+  .header-badge{
+    background:rgba(0,229,255,.07);border:1px solid rgba(0,229,255,.25);
+    border-radius:calc(6*var(--u));padding:calc(7*var(--u)) calc(16*var(--u));
+    font-size:calc(11*var(--u));color:rgba(0,229,255,.75);letter-spacing:.12em;text-transform:uppercase}
+  #lang-toggle{display:flex;gap:calc(5*var(--u))}
+  .lang-btn{
+    background:rgba(0,229,255,.05);border:1px solid rgba(0,229,255,.2);
+    border-radius:calc(4*var(--u));padding:calc(6*var(--u)) calc(14*var(--u));
+    font-size:calc(10*var(--u));color:rgba(0,229,255,.45);letter-spacing:.14em;
+    text-transform:uppercase;cursor:pointer;font-family:inherit;transition:.18s}
+  .lang-btn.active{
+    background:rgba(0,229,255,.15);border-color:var(--cyan);color:var(--cyan);font-weight:700}
+
+  /* ── map stage ── */
+  #map-stage{position:fixed;inset:0}
+
+  /* ── connection lines svg ── */
+  #svg-lines{position:fixed;inset:0;pointer-events:none;z-index:10}
+
+  /* ── pins ── */
+  .map-pin{
+    position:absolute;transform:translate(-50%,-50%);
+    cursor:pointer;display:flex;flex-direction:column;align-items:center;
+    z-index:50;user-select:none}
+  .pin-icon-wrap{
+    position:relative;display:flex;align-items:center;justify-content:center}
+  .pin-ring{
+    position:absolute;border-radius:50%;
+    border:2px solid rgba(0,229,255,.3);pointer-events:none;
+    animation:pinRipple 2.8s ease-out infinite}
+  .pin-ring:nth-child(2){animation-delay:.9s}
+  .pin-icon{
+    width:calc(72*var(--u));height:calc(72*var(--u));border-radius:50%;
+    background:rgba(4,9,30,.9);
+    border:2px solid rgba(0,229,255,.55);
+    box-shadow:0 0 calc(12*var(--u)) rgba(0,229,255,.35),inset 0 0 calc(8*var(--u)) rgba(0,71,171,.25);
+    display:flex;align-items:center;justify-content:center;overflow:hidden;
+    transition:transform .2s,box-shadow .2s;
+    animation:pinFloat 3.2s ease-in-out infinite alternate}
+  .map-pin:hover .pin-icon{
+    transform:scale(1.12);
+    box-shadow:0 0 calc(22*var(--u)) rgba(0,229,255,.6),inset 0 0 calc(10*var(--u)) rgba(0,71,171,.3)}
+  .map-pin:active .pin-icon{transform:scale(.94)}
+  .pin-icon img{width:65%;height:65%;object-fit:contain}
+  .pin-num{
+    position:absolute;bottom:-2px;right:-2px;
+    width:calc(20*var(--u));height:calc(20*var(--u));border-radius:50%;
+    background:var(--gold);color:#000;
+    font-size:calc(10*var(--u));font-weight:700;
+    display:flex;align-items:center;justify-content:center}
+  .pin-label{
+    margin-top:calc(7*var(--u));
+    background:rgba(4,9,30,.88);border:1px solid rgba(0,229,255,.28);
+    border-radius:calc(4*var(--u));padding:calc(3*var(--u)) calc(9*var(--u));
+    font-size:calc(9.5*var(--u));letter-spacing:.07em;
+    color:rgba(0,229,255,.85);text-align:center;white-space:nowrap;
+    max-width:calc(130*var(--u));overflow:hidden;text-overflow:ellipsis}
+
+  @keyframes pinFloat{from{transform:translateY(0)}to{transform:translateY(calc(-7*var(--u)))}}
+  @keyframes pinRipple{
+    0%{width:calc(72*var(--u));height:calc(72*var(--u));opacity:.55}
+    100%{width:calc(160*var(--u));height:calc(160*var(--u));opacity:0}}
+
+  /* ── info overlay ── */
+  #info-overlay{
+    position:fixed;inset:0;z-index:200;
+    background:rgba(4,9,30,.78);backdrop-filter:blur(6px);
+    display:flex;align-items:center;justify-content:center;
+    opacity:0;pointer-events:none;transition:opacity .3s ease}
+  #info-overlay.open{opacity:1;pointer-events:all}
+
+  /* ── info card ── */
+  #info-card{
+    position:relative;
+    background:linear-gradient(140deg,rgba(4,9,30,.98) 0%,rgba(0,25,60,.96) 100%);
+    border:1px solid rgba(0,229,255,.32);
+    border-radius:calc(14*var(--u));
+    box-shadow:0 0 calc(50*var(--u)) rgba(0,229,255,.12),0 0 calc(100*var(--u)) rgba(0,71,171,.08);
+    width:min(88vw,calc(880*var(--u)));max-height:82vh;
+    padding:calc(36*var(--u)) calc(40*var(--u)) calc(28*var(--u));
+    overflow-y:auto;
+    transform:translateY(calc(24*var(--u))) scale(.95);
+    transition:transform .38s cubic-bezier(.175,.885,.32,1.275)}
+  #info-overlay.open #info-card{transform:translateY(0) scale(1)}
+  #info-card::-webkit-scrollbar{width:4px}
+  #info-card::-webkit-scrollbar-thumb{background:rgba(0,229,255,.25);border-radius:2px}
+
+  .c-corner{position:absolute;width:calc(18*var(--u));height:calc(18*var(--u));border-color:rgba(0,229,255,.45);border-style:solid}
+  .c-corner.tl{top:calc(8*var(--u));left:calc(8*var(--u));border-width:2px 0 0 2px}
+  .c-corner.tr{top:calc(8*var(--u));right:calc(8*var(--u));border-width:2px 2px 0 0}
+  .c-corner.bl{bottom:calc(8*var(--u));left:calc(8*var(--u));border-width:0 0 2px 2px}
+  .c-corner.br{bottom:calc(8*var(--u));right:calc(8*var(--u));border-width:0 2px 2px 0}
+
+  /* ── card header ── */
+  .card-header{
+    display:flex;align-items:flex-start;gap:calc(20*var(--u));
+    margin-bottom:calc(22*var(--u));padding-bottom:calc(18*var(--u));
+    border-bottom:1px solid rgba(0,229,255,.13)}
+  .card-icon-wrap{
+    flex-shrink:0;width:calc(76*var(--u));height:calc(76*var(--u));border-radius:50%;
+    background:rgba(0,229,255,.07);border:2px solid rgba(0,229,255,.28);
+    display:flex;align-items:center;justify-content:center;overflow:hidden}
+  .card-icon-wrap img{width:70%;height:70%;object-fit:contain}
+  .card-meta{flex:1}
+  .card-num{
+    font-size:calc(10.5*var(--u));letter-spacing:.2em;text-transform:uppercase;
+    color:rgba(0,229,255,.58);margin-bottom:calc(4*var(--u))}
+  .card-title{
+    font-size:calc(19*var(--u));font-weight:700;color:#fff;line-height:1.3;
+    letter-spacing:.02em}
+  .card-period{
+    font-size:calc(11*var(--u));color:rgba(255,215,0,.72);
+    margin-top:calc(5*var(--u));letter-spacing:.08em}
+
+  /* ── card body ── */
+  .card-body{font-size:calc(14.5*var(--u));color:rgba(255,255,255,.82);line-height:1.8}
+  .fact-img{width:100%;max-height:calc(210*var(--u));object-fit:contain;
+    border-radius:calc(8*var(--u));margin-bottom:calc(14*var(--u));
+    border:1px solid rgba(0,229,255,.15);background:rgba(0,0,0,.3)}
+  .fact-img.cover{object-fit:cover}
+  .card-body p{margin-bottom:calc(12*var(--u))}
+  .card-body strong{color:#fff;font-weight:600}
+  .card-body em{color:rgba(0,229,255,.85);font-style:italic}
+  .card-body .highlight{
+    background:rgba(0,229,255,.05);
+    border-left:3px solid rgba(0,229,255,.4);
+    padding:calc(10*var(--u)) calc(16*var(--u));
+    border-radius:0 calc(6*var(--u)) calc(6*var(--u)) 0;
+    margin:calc(14*var(--u)) 0;color:rgba(0,229,255,.9)}
+  .tag{
+    display:inline-block;
+    background:rgba(255,215,0,.1);border:1px solid rgba(255,215,0,.32);
+    border-radius:calc(4*var(--u));padding:calc(1*var(--u)) calc(7*var(--u));
+    color:rgba(255,215,0,.9);font-size:calc(12*var(--u));font-weight:600;margin:0 calc(2*var(--u))}
+
+  /* ── close button ── */
+  #btn-close{
+    position:absolute;top:calc(14*var(--u));right:calc(14*var(--u));
+    width:calc(34*var(--u));height:calc(34*var(--u));border-radius:50%;
+    border:1px solid rgba(0,229,255,.28);background:rgba(0,229,255,.07);
+    color:rgba(0,229,255,.75);font-size:calc(14*var(--u));cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    transition:background .2s,color .2s;z-index:10}
+  #btn-close:hover{background:rgba(0,229,255,.18);color:#fff}
+
+  /* nav row removed — use pins to switch facts */
+
+  /* ── hint bar ── */
+  #hint{
+    position:fixed;bottom:calc(18*var(--u));left:50%;transform:translateX(-50%);z-index:100;
+    background:rgba(4,9,30,.82);border:1px solid rgba(0,229,255,.18);
+    border-radius:calc(50*var(--u));padding:calc(7*var(--u)) calc(22*var(--u));
+    font-size:calc(11*var(--u));color:rgba(0,229,255,.6);letter-spacing:.1em;
+    text-transform:uppercase;white-space:nowrap;
+    animation:hintPulse 3s ease-in-out infinite}
+  @keyframes hintPulse{0%,100%{opacity:.55}50%{opacity:1}}
+
+  /* ── particles ── */
+  .p6-particles{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:1}
+  .p6-part{position:absolute;border-radius:50%;background:radial-gradient(circle,rgba(0,229,255,.7),rgba(0,71,171,.3))}
+</style>
+</head>
+<body>
+
+<div id="map-bg"></div>
+<div id="map-vignette"></div>
+<svg id="svg-lines" xmlns="http://www.w3.org/2000/svg"></svg>
+
+<div id="header">
+  <div id="header-left">
+    <h1 id="header-h1">Sejarah Mata Wang &amp; Perbankan Johor</h1>
+    <p id="header-sub">5 Fakta Menarik — Sentuh ikon untuk menerokai</p>
+  </div>
+  <div style="display:flex;align-items:center;gap:calc(16*var(--u))">
+    <div id="lang-toggle">
+      <button class="lang-btn active" id="btn-bm" onclick="setLang('bm')">BM</button>
+      <button class="lang-btn" id="btn-en" onclick="setLang('en')">EN</button>
+    </div>
+    <div class="header-badge">BNM Museum · IMD 2026</div>
+  </div>
+</div>
+
+<div id="map-stage"></div>
+
+<!-- Info overlay -->
+<div id="info-overlay">
+  <div id="info-card">
+    <span class="c-corner tl"></span><span class="c-corner tr"></span>
+    <span class="c-corner bl"></span><span class="c-corner br"></span>
+    <button id="btn-close" onclick="closePanel()">✕</button>
+    <div class="card-header">
+      <div class="card-icon-wrap"><img id="card-icon" src="" alt=""></div>
+      <div class="card-meta">
+        <div class="card-num" id="card-num"></div>
+        <div class="card-title" id="card-title"></div>
+        <div class="card-period" id="card-period"></div>
+      </div>
+    </div>
+    <div class="card-body" id="card-body"></div>
+  </div>
+</div>
+
+<div id="hint">Sentuh ikon untuk menerokai sejarah kewangan Johor</div>
+<div class="p6-particles" id="p6-particles"></div>
+
+<script>
+// ══════════════════════════════════════════════════
+// DATA
+// ══════════════════════════════════════════════════
+const FACTS = [
+  {
+    id: 1,
+    icon: 'Assets/Map icon/Icon_01.png',
+    x: 52, y: 42,
+    en: {
+      label: 'Gold Coins',
+      period: '1564 – 1760',
+      title: 'Johor Minted Its Own Gold Coins — The Mas & Kupang',
+      body: `
+        <img class="fact-img" src="Assets/maskupang.png" alt="Mas & Kupang gold coins">
+        <p>After the fall of Malacca to the Portuguese in <strong>1511</strong>, the Johor Sultanate developed its own gold trade coinage — two denominations known as the <span class="tag">Mas</span> and the <span class="tag">Kupang</span>.</p>
+        <p>These <strong>octagonal gold coins</strong> were so widely accepted that they circulated as far north as <em>Patani and Kedah</em>, and even into parts of Sumatra.</p>
+        <p>Alongside these, tin coins called <span class="tag">Katun</span> were used locally — minted in round, hexagonal, and octagonal shapes.</p>
+        <div class="highlight">Gold coin production eventually ceased during the reign of Sultan Sulaiman Badrul Alam Shah <strong>(1722–1760)</strong>.</div>
+      `
+    },
+    bm: {
+      label: 'Syiling Emas',
+      period: '1564 – 1760',
+      title: 'Johor Mencetak Syiling Emas Tersendiri — Mas & Kupang',
+      body: `
+        <img class="fact-img" src="Assets/maskupang.png" alt="Syiling Mas & Kupang">
+        <p>Selepas kejatuhan Melaka kepada Portugis pada <strong>1511</strong>, Kesultanan Johor membangunkan syiling perdagangan emas tersendiri — dua denominasi yang dikenali sebagai <span class="tag">Mas</span> dan <span class="tag">Kupang</span>.</p>
+        <p>Syiling emas <strong>bersegi lapan</strong> ini diterima secara meluas sehingga beredar sejauh utara seperti <em>Patani dan Kedah</em>, malah ke bahagian Sumatera.</p>
+        <p>Selain itu, syiling timah yang dikenali sebagai <span class="tag">Katun</span> digunakan secara tempatan — dicetak dalam bentuk bulat, segi enam, dan segi lapan.</p>
+        <div class="highlight">Pengeluaran syiling emas akhirnya terhenti semasa pemerintahan Sultan Sulaiman Badrul Alam Shah <strong>(1722–1760)</strong>.</div>
+      `
+    }
+  },
+  {
+    id: 2,
+    icon: 'Assets/Map icon/Icon_02.png',
+    x: 20, y: 77,
+    en: {
+      label: 'Constantinople Estate',
+      period: '1 May 1878',
+      title: "The Constantinople Estate: Johor's Own Private Banknotes",
+      body: `
+        <img class="fact-img cover" src="Assets/kukup.png" alt="Constantinople Estate currency notes">
+        <p>On <strong>1 May 1878</strong>, a wealthy Arab-Peranakan merchant named <strong>Sayid Muhammad al-Sagoff</strong> issued a series of rare private currency notes for exclusive use within his <strong>60,000-acre</strong> agricultural concession at <em>Kukup</em>, southwestern Johor — authorised by Sultan Abu Bakar himself.</p>
+        <p>The notes came in four denominations: <span class="tag">25¢</span> <span class="tag">50¢</span> <span class="tag">$1</span> <span class="tag">$2</span> — primarily used to pay coolie labourers working on plantations of gambier, pepper, sago, rubber, and cocoa.</p>
+        <div class="highlight">The estate was named <strong>"Constantinople"</strong> in homage to the Ottoman capital, reflecting al-Sagoff's ties to the Ottoman Empire — including his appointment as Ottoman consular representative in Singapore.</div>
+        <p>These notes are today extraordinarily rare — surviving pieces fetch <strong>SGD $10,000–$20,000</strong> at auction.</p>
+      `
+    },
+    bm: {
+      label: 'Estet Constantinople',
+      period: '1 Mei 1878',
+      title: 'Estet Constantinople: Wang Kertas Persendirian Johor',
+      body: `
+        <img class="fact-img cover" src="Assets/kukup.png" alt="Wang kertas Estet Constantinople">
+        <p>Pada <strong>1 Mei 1878</strong>, seorang saudagar kaya Arab-Peranakan bernama <strong>Sayid Muhammad al-Sagoff</strong> mengeluarkan siri wang kertas persendirian yang jarang untuk digunakan secara eksklusif dalam konsesi pertaniannya seluas <strong>60,000 ekar</strong> di <em>Kukup</em>, barat daya Johor — dengan kebenaran Sultan Abu Bakar sendiri.</p>
+        <p>Wang kertas ini terdapat dalam empat denominasi: <span class="tag">25¢</span> <span class="tag">50¢</span> <span class="tag">$1</span> <span class="tag">$2</span> — terutamanya digunakan untuk membayar buruh kuli yang bekerja di ladang gambir, lada, sagu, getah, dan koko.</p>
+        <div class="highlight">Estet ini dinamakan <strong>"Constantinople"</strong> sebagai penghormatan kepada ibu kota Ottoman, mencerminkan hubungan al-Sagoff dengan Empayar Ottoman — termasuk pelantikannya sebagai wakil konsul Ottoman di Singapura.</div>
+        <p>Wang kertas ini kini amat langka — kepingan yang masih wujud mencapai harga <strong>SGD $10,000–$20,000</strong> dalam lelongan.</p>
+      `
+    }
+  },
+  {
+    id: 3,
+    icon: 'Assets/Map icon/Icon_03.png',
+    x: 30, y: 40,
+    en: {
+      label: 'Doughnut Coin',
+      period: '1722 – 1760',
+      title: 'Johor Had a Unique "Doughnut Hole" Coin',
+      body: `
+        <img class="fact-img" src="Assets/pitis.jpg" alt="Johor pitis coin with hole">
+        <p>Among the currency designs on display at the BNM Museum, the Johor currency from <strong>Sultan Sulaiman Badrul Alam Shah's</strong> reign stands out — it featured a <strong>hole in the middle</strong>, reminiscent of modern Danish 1 krone coins.</p>
+        <div class="highlight">This distinctive circular-hole design was a <strong>unique feature</strong> of Johor's monetary identity — unlike any other Malay sultanate coinage of the era.</div>
+        <p>The design was eventually replaced as <em>British colonial standardisation</em> took over in the late 19th century, erasing the individuality of Johor's monetary tradition.</p>
+      `
+    },
+    bm: {
+      label: 'Syiling Berlubang',
+      period: '1722 – 1760',
+      title: 'Johor Mempunyai Syiling "Berlubang" Yang Unik',
+      body: `
+        <img class="fact-img" src="Assets/pitis.jpg" alt="Syiling pitis Johor berlubang">
+        <p>Antara reka bentuk mata wang yang dipamerkan di Museum BNM, mata wang Johor dari zaman pemerintahan <strong>Sultan Sulaiman Badrul Alam Shah</strong> amat menonjol — ia mempunyai <strong>lubang di tengah</strong>, mengingatkan kepada syiling 1 krone Denmark moden.</p>
+        <div class="highlight">Reka bentuk berlubang yang tersendiri ini merupakan <strong>ciri unik</strong> identiti kewangan Johor — tidak seperti mana-mana syiling kesultanan Melayu lain pada zaman tersebut.</div>
+        <p>Reka bentuk ini akhirnya digantikan apabila <em>penyeragaman kolonial British</em> mengambil alih pada akhir abad ke-19, menghapuskan keunikan tradisi kewangan Johor.</p>
+      `
+    }
+  },
+  {
+    id: 4,
+    icon: 'Assets/Map icon/Icon_04.png',
+    x: 80, y: 82,
+    en: {
+      label: 'Anglo-Johor Treaty',
+      period: '1885',
+      title: "The Anglo-Johor Treaty Ended Johor's Own Currency",
+      body: `
+        <img class="fact-img cover" src="Assets/treaty.png" alt="Anglo-Johor Treaty 1885">
+        <p>Under the <strong>Anglo-Johor Treaty of 1885</strong>, all currency apart from the <strong>Straits Settlements coinage</strong> was officially withdrawn from circulation in Johor.</p>
+        <p>This marked the end of Johor's monetary independence — the Sultanate had been <em>one of the last Malay states</em> to resist British financial control.</p>
+        <div class="highlight">The 1885 treaty included a provision that Johor's government would be supplied coins from <strong>British mints</strong> on the same terms as other Malay states — effectively folding Johor into the British colonial monetary system.</div>
+      `
+    },
+    bm: {
+      label: 'Perjanjian Anglo-Johor',
+      period: '1885',
+      title: 'Perjanjian Anglo-Johor Menamatkan Mata Wang Johor',
+      body: `
+        <img class="fact-img cover" src="Assets/treaty.png" alt="Perjanjian Anglo-Johor 1885">
+        <p>Di bawah <strong>Perjanjian Anglo-Johor 1885</strong>, semua mata wang selain daripada <strong>syiling Negeri-Negeri Selat</strong> telah ditarik balik secara rasmi daripada peredaran di Johor.</p>
+        <p>Ini menandakan berakhirnya kemerdekaan kewangan Johor — Kesultanan ini merupakan antara <em>negeri Melayu terakhir</em> yang menentang kawalan kewangan British.</p>
+        <div class="highlight">Perjanjian 1885 turut mengandungi peruntukan bahawa kerajaan Johor akan dibekalkan syiling daripada <strong>kilang percetakan British</strong> dengan terma yang sama seperti negeri-negeri Melayu lain — dengan berkesan melipat Johor ke dalam sistem kewangan kolonial British.</div>
+      `
+    }
+  },
+  {
+    id: 5,
+    icon: 'Assets/Map icon/Icon_05.png',
+    x: 68, y: 62,
+    en: {
+      label: "Johor's Treasury",
+      period: 'Late 19th Century',
+      title: "Johor's Treasury: One of Malaya's First Modern State Financial Institutions",
+      body: `
+        <img class="fact-img cover" src="Assets/bankjohor.png" alt="Bank of Johor">
+        <p>Under the leadership of <strong>Sultan Abu Bakar</strong> — known as the <em>"Father of Modern Johor"</em> — various government departments were established in the late 19th century, among them a formal <strong>Treasury</strong>.</p>
+        <p>This made Johor one of the <strong>earliest Malay states</strong> to have a structured, government-run financial administration.</p>
+        <div class="highlight">More recently, Sultan Ibrahim Ismail has even floated the idea of a <strong>Bank of Johor</strong> — continuing the state's long tradition of financial ambition and independence.</div>
+      `
+    },
+    bm: {
+      label: 'Perbendaharaan Johor',
+      period: 'Akhir Abad ke-19',
+      title: 'Perbendaharaan Johor: Antara Institusi Kewangan Moden Terawal di Malaya',
+      body: `
+        <img class="fact-img cover" src="Assets/bankjohor.png" alt="Bank Johor">
+        <p>Di bawah pimpinan <strong>Sultan Abu Bakar</strong> — dikenali sebagai <em>"Bapa Johor Moden"</em> — pelbagai jabatan kerajaan ditubuhkan pada akhir abad ke-19, antaranya sebuah <strong>Perbendaharaan</strong> rasmi.</p>
+        <p>Ini menjadikan Johor antara <strong>negeri Melayu terawal</strong> yang mempunyai pentadbiran kewangan berstruktur yang dikendalikan kerajaan.</p>
+        <div class="highlight">Baru-baru ini, Sultan Ibrahim Ismail bahkan pernah mengutarakan idea mengenai sebuah <strong>Bank Johor</strong> — meneruskan tradisi panjang negeri ini dalam keazaman dan kemerdekaan kewangan.</div>
+      `
+    }
+  }
+];
+
+// ══════════════════════════════════════════════════
+// I18N
+// ══════════════════════════════════════════════════
+const LANG = {
+  en: {
+    h1:    'Johor Currency &amp; Banking History',
+    sub:   '5 Interesting Facts — Tap any icon to explore',
+    hint:  "Tap an icon to discover Johor's monetary history",
+    factOf: (n, t) => `Fact ${n} of ${t}`,
+  },
+  bm: {
+    h1:    'Sejarah Mata Wang &amp; Perbankan Johor',
+    sub:   '5 Fakta Menarik — Sentuh ikon untuk menerokai',
+    hint:  'Sentuh ikon untuk menerokai sejarah kewangan Johor',
+    factOf: (n, t) => `Fakta ${n} daripada ${t}`,
+  }
+};
+
+// ══════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════
+let activeIdx = -1;
+let currentLang = 'bm';
+
+// ══════════════════════════════════════════════════
+// BUILD PINS
+// ══════════════════════════════════════════════════
+const stage = document.getElementById('map-stage');
+
+FACTS.forEach((f, i) => {
+  const pin = document.createElement('div');
+  pin.className = 'map-pin';
+  pin.id = 'pin-' + i;
+  pin.style.left = f.x + '%';
+  pin.style.top  = f.y + '%';
+  pin.innerHTML = `
+    <div class="pin-icon-wrap">
+      <div class="pin-ring"></div>
+      <div class="pin-ring" style="animation-delay:.9s"></div>
+      <div class="pin-icon" style="animation-delay:${(i * 0.55).toFixed(2)}s;animation-duration:${(3.0 + i * 0.3).toFixed(1)}s">
+        <img src="${f.icon}" alt="${f[currentLang].label}">
+        <div class="pin-num">${f.id}</div>
+      </div>
+    </div>
+    <div class="pin-label">${f[currentLang].label}</div>
+  `;
+  pin.addEventListener('click', () => openPanel(i));
+  // touch support
+  pin.addEventListener('touchend', e => { e.preventDefault(); openPanel(i); });
+  stage.appendChild(pin);
+});
+
+
+// ══════════════════════════════════════════════════
+// PANEL OPEN / CLOSE
+// ══════════════════════════════════════════════════
+function openPanel(idx) {
+  const f = FACTS[idx];
+  const d = f[currentLang];
+  activeIdx = idx;
+
+  document.getElementById('card-icon').src = f.icon;
+  document.getElementById('card-num').textContent = LANG[currentLang].factOf(f.id, FACTS.length);
+  document.getElementById('card-title').textContent = d.title;
+  document.getElementById('card-period').textContent = '🗓  ' + d.period;
+  document.getElementById('card-body').innerHTML = d.body;
+
+  // highlight active pin
+  document.querySelectorAll('.map-pin').forEach((p, i) => {
+    p.querySelector('.pin-icon').style.borderColor = i === idx ? 'rgba(255,215,0,.8)' : 'rgba(0,229,255,.55)';
+  });
+
+  document.getElementById('info-overlay').classList.add('open');
+  document.getElementById('info-card').scrollTop = 0;
+  playSfx();
+}
+
+function closePanel() {
+  document.getElementById('info-overlay').classList.remove('open');
+  document.querySelectorAll('.map-pin .pin-icon').forEach(p => {
+    p.style.borderColor = 'rgba(0,229,255,.55)';
+  });
+  activeIdx = -1;
+}
+
+// ══════════════════════════════════════════════════
+// LANGUAGE TOGGLE
+// ══════════════════════════════════════════════════
+function setLang(l) {
+  currentLang = l;
+  document.getElementById('btn-bm').classList.toggle('active', l === 'bm');
+  document.getElementById('btn-en').classList.toggle('active', l === 'en');
+  const L = LANG[l];
+  document.getElementById('header-h1').innerHTML = L.h1;
+  document.getElementById('header-sub').textContent = L.sub;
+  document.getElementById('hint').textContent = L.hint;
+  // update pin labels
+  FACTS.forEach((f, i) => {
+    const pin = document.getElementById('pin-' + i);
+    if (pin) {
+      pin.querySelector('.pin-label').textContent = f[l].label;
+      pin.querySelector('img').alt = f[l].label;
+    }
+  });
+  // refresh panel if open
+  if (activeIdx >= 0) openPanel(activeIdx);
+}
+
+// close on overlay background click
+document.getElementById('info-overlay').addEventListener('click', function(e) {
+  if (e.target === this) closePanel();
+});
+
+// ══════════════════════════════════════════════════
+// KEYBOARD
+// ══════════════════════════════════════════════════
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closePanel();
+});
+
+// ══════════════════════════════════════════════════
+// FULLSCREEN
+// ══════════════════════════════════════════════════
+function requestFullscreen() {
+  const el = document.documentElement;
+  const fn = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen;
+  if (fn) fn.call(el).catch(() => {});
+}
+// Auto-fullscreen on first interaction (browsers require user gesture)
+document.addEventListener('click', requestFullscreen, { once: true });
+document.addEventListener('touchend', requestFullscreen, { once: true });
+
+// ══════════════════════════════════════════════════
+// DISABLE LONG-PRESS / CONTEXT MENU
+// ══════════════════════════════════════════════════
+document.addEventListener('contextmenu', e => e.preventDefault());
+document.addEventListener('touchstart', e => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
+// prevent long-press image save on mobile
+document.querySelectorAll('img').forEach(img => img.addEventListener('dragstart', e => e.preventDefault()));
+
+// ══════════════════════════════════════════════════
+// SFX
+// ══════════════════════════════════════════════════
+const _ac = (() => { try { return new (window.AudioContext || window.webkitAudioContext)(); } catch(e){} return null; })();
+function tone({freq=440,type='sine',dur=.15,vol=.15,delay=0,slide=0}={}) {
+  if (!_ac) return;
+  const g = _ac.createGain();
+  g.gain.setValueAtTime(.001, _ac.currentTime + delay);
+  g.gain.linearRampToValueAtTime(vol, _ac.currentTime + delay + .01);
+  g.gain.exponentialRampToValueAtTime(.001, _ac.currentTime + delay + dur);
+  const o = _ac.createOscillator(); o.type = type;
+  o.frequency.setValueAtTime(freq, _ac.currentTime + delay);
+  if (slide) o.frequency.linearRampToValueAtTime(slide, _ac.currentTime + delay + dur);
+  o.connect(g); g.connect(_ac.destination);
+  o.start(_ac.currentTime + delay); o.stop(_ac.currentTime + delay + dur + .05);
+}
+function playSfx() {
+  tone({freq:622, type:'sine',     dur:.12, vol:.18});
+  tone({freq:830, type:'sine',     dur:.16, vol:.20, delay:.10});
+  tone({freq:1046,type:'triangle', dur:.26, vol:.18, delay:.22});
+}
+
+// ══════════════════════════════════════════════════
+// AMBIENT PARTICLES
+// ══════════════════════════════════════════════════
+(function(){
+  const cont = document.getElementById('p6-particles');
+  for (let i = 0; i < 22; i++) {
+    const p = document.createElement('div'); p.className = 'p6-part';
+    const sz = 2 + Math.random() * 4;
+    p.style.cssText = `width:${sz}px;height:${sz}px;left:${Math.random()*100}vw;top:${Math.random()*100}vh;opacity:${.04+Math.random()*.06};animation:pa${i} ${9+Math.random()*11}s ease-in-out infinite alternate`;
+    const st = document.createElement('style');
+    st.textContent = `@keyframes pa${i}{from{transform:translate(0,0)}to{transform:translate(${(Math.random()-.5)*120}px,${(Math.random()-.5)*80}px)}}`;
+    document.head.appendChild(st);
+    cont.appendChild(p);
+  }
+})();
+</script>
+</body>
+</html>

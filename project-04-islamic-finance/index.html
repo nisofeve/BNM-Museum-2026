@@ -220,7 +220,7 @@
     width: 100%;
     flex: 1;
     min-height: 0;
-    --char-h: 38vh;
+    --char-h: 49.4vh;
   }
 
   .presenter-char {
@@ -299,6 +299,16 @@
     0%   { transform: scaleY(0.35); }
     100% { transform: scaleY(1); }
   }
+
+  /* ── Aisyah PNG sprite system ── */
+  .aisyah-sp{display:none;position:absolute;bottom:0;left:50%;transform:translateX(-50%);max-height:100%;max-width:100%;object-fit:contain;}
+  .aisyah-sp.sp-idle{display:block;}
+  .presenter-char.is-blinking .sp-idle{display:none;}
+  .presenter-char.is-blinking .sp-blink{display:block;}
+  .presenter-char.is-talking .sp-idle,.presenter-char.is-talking .sp-blink{display:none;}
+  .presenter-char.is-talking .sp-talk{display:block;}
+  .presenter-char.is-happy .sp-idle,.presenter-char.is-happy .sp-blink,.presenter-char.is-happy .sp-talk{display:none;}
+  .presenter-char.is-happy .sp-happy{display:block;}
 
   /* character name tag */
   .presenter-tag {
@@ -646,7 +656,7 @@
 
   /* presenter stage inside quiz */
   #stage-quiz {
-    --char-h: 32vh;
+    --char-h: 41.6vh;
     flex-shrink: 0;
   }
 
@@ -823,7 +833,7 @@
   }
 
   .result-char-side .presenter-char {
-    height: calc(500 * var(--u));
+    height: calc(650 * var(--u));
     left: 50%;
   }
 
@@ -1056,6 +1066,10 @@
     0%, 100% { box-shadow: 0 calc(8 * var(--u)) calc(32 * var(--u)) rgba(212,175,55,0.4); }
     50% { box-shadow: 0 calc(12 * var(--u)) calc(48 * var(--u)) rgba(212,175,55,0.7); }
   }
+/* ═══ P06-STYLE VFX ═══ */
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,71,171,.007) 3px,rgba(0,71,171,.007) 4px);}
+.p6-particles{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0;}
+.p6-part{position:absolute;border-radius:50%;background:radial-gradient(circle,rgba(0,229,255,.7),rgba(0,71,171,.3));opacity:.08;}
 </style>
 </head>
 <body>
@@ -1084,89 +1098,13 @@
 </div>
 
 <!-- ══════════════════════════════════════════════════════
-     SVG CHARACTER TEMPLATE (same Aisyah from P3)
+     PNG SPRITE CHARACTER TEMPLATE
 ══════════════════════════════════════════════════════ -->
-<template id="presenter-svg-template">
-<svg class="presenter-svg" viewBox="0 0 360 520" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-  <!-- ground shadow -->
-  <ellipse cx="180" cy="508" rx="118" ry="11" fill="rgba(0,71,171,0.10)"/>
-  <g id="ch-root">
-    <!-- ── TORSO (breathes) ── -->
-    <g id="ch-torso">
-      <!-- skirt -->
-      <path d="M122 376 L238 376 L254 520 L106 520 Z" fill="#00337A"/>
-      <!-- blazer body -->
-      <path d="M116 252 C116 220 142 202 180 202 C218 202 244 220 244 252 L250 388 L110 388 Z" fill="#0047AB"/>
-      <!-- inner shirt -->
-      <path d="M158 206 L202 206 L197 272 L163 272 Z" fill="#EAF0FB"/>
-      <!-- lapels -->
-      <path d="M158 206 L180 246 L150 284 L140 224 Z" fill="#00337A"/>
-      <path d="M202 206 L180 246 L210 284 L220 224 Z" fill="#00337A"/>
-      <!-- gold brooch -->
-      <circle cx="180" cy="262" r="7.5" fill="#F5A623"/>
-      <circle cx="180" cy="262" r="3" fill="#FFCB6B"/>
-      <!-- teal pocket square -->
-      <rect x="204" y="306" width="24" height="11" rx="3" fill="#00B4A6"/>
-      <!-- blazer buttons -->
-      <circle cx="180" cy="306" r="4" fill="#F5A623"/>
-      <circle cx="180" cy="334" r="4" fill="#F5A623"/>
-
-      <!-- left arm — always resting -->
-      <g id="arm-left-rest">
-        <path d="M126 250 C104 278 98 318 104 354 C106 366 122 366 125 354 C131 322 134 290 144 262 Z" fill="#0047AB"/>
-        <circle cx="111" cy="362" r="11" fill="#C98A5E"/>
-      </g>
-
-      <!-- right arm — resting -->
-      <g id="arm-right-rest">
-        <path d="M234 250 C256 278 262 318 256 354 C254 366 238 366 235 354 C229 322 226 290 216 262 Z" fill="#0047AB"/>
-        <circle cx="249" cy="362" r="11" fill="#C98A5E"/>
-      </g>
-
-      <!-- right arm — raised (talking) -->
-      <g id="arm-right-up">
-        <path d="M232 252 C262 246 292 224 308 196 C315 184 302 172 292 180 C272 198 252 214 226 224 Z" fill="#0047AB"/>
-        <circle cx="305" cy="183" r="13" fill="#C98A5E"/>
-        <path d="M299 170 Q304 162 309 170 M308 168 Q313 161 317 169" stroke="#C98A5E" stroke-width="6" stroke-linecap="round" fill="none"/>
-        <path d="M284 184 L296 200 L286 208 L274 192 Z" fill="#00337A"/>
-      </g>
-    </g>
-
-    <!-- ── HEAD (sways) ── -->
-    <g id="ch-head">
-      <!-- hijab back / shoulders drape -->
-      <path d="M180 56 C120 56 96 106 96 158 C96 210 118 244 142 252 L218 252 C242 244 264 210 264 158 C264 106 240 56 180 56 Z" fill="#00B4A6"/>
-      <!-- hijab chest drape -->
-      <path d="M128 210 C120 252 142 276 180 282 C218 276 240 252 232 210 C224 238 204 250 180 250 C156 250 136 238 128 210 Z" fill="#008F83"/>
-      <!-- face -->
-      <ellipse cx="180" cy="152" rx="45" ry="50" fill="#C98A5E"/>
-      <!-- hijab front band -->
-      <path d="M180 84 C146 84 130 110 128 142 C138 106 156 97 180 97 C204 97 222 106 232 142 C230 110 214 84 180 84 Z" fill="#008F83"/>
-      <!-- gold trim -->
-      <path d="M132 132 C142 102 158 94 180 94 C202 94 218 102 228 132" stroke="#F5A623" stroke-width="4" fill="none" stroke-linecap="round"/>
-      <!-- under-chin wrap -->
-      <path d="M138 168 C140 202 158 220 180 220 C202 220 220 202 222 168 C222 200 206 230 180 230 C154 230 138 200 138 168 Z" fill="#00B4A6"/>
-      <!-- eyebrows -->
-      <path d="M148 132 Q159 125 170 130" stroke="#7A4A22" stroke-width="3.5" fill="none" stroke-linecap="round"/>
-      <path d="M190 130 Q201 125 212 132" stroke="#7A4A22" stroke-width="3.5" fill="none" stroke-linecap="round"/>
-      <!-- eyes (blink) -->
-      <g class="ch-eye"><ellipse cx="160" cy="147" rx="5" ry="7" fill="#1A1A2E"/><circle cx="162" cy="144" r="1.8" fill="#FFFFFF"/></g>
-      <g class="ch-eye"><ellipse cx="200" cy="147" rx="5" ry="7" fill="#1A1A2E"/><circle cx="202" cy="144" r="1.8" fill="#FFFFFF"/></g>
-      <!-- blush -->
-      <ellipse cx="146" cy="168" rx="8" ry="4.5" fill="#E07856" opacity="0.32"/>
-      <ellipse cx="214" cy="168" rx="8" ry="4.5" fill="#E07856" opacity="0.32"/>
-      <!-- nose -->
-      <path d="M178 156 Q175 167 181 169" stroke="#A96B3F" stroke-width="3" fill="none" stroke-linecap="round"/>
-      <!-- mouth idle -->
-      <path id="mouth-smile" d="M163 184 Q180 197 197 184" stroke="#8C4A2F" stroke-width="4.5" fill="none" stroke-linecap="round"/>
-      <!-- mouth talking -->
-      <g id="mouth-open">
-        <ellipse cx="180" cy="189" rx="12" ry="9" fill="#7C3A28"/>
-        <path d="M170 185 Q180 191 190 185 L190 183 L170 183 Z" fill="#FFFFFF"/>
-      </g>
-    </g>
-  </g>
-</svg>
+<template id="presenter-img-template">
+  <img class="aisyah-sp sp-idle"  src="../Assets/Aisyah_idle.png"       alt="" aria-hidden="true">
+  <img class="aisyah-sp sp-blink" src="../Assets/Aisyah_close_eyes.png" alt="" aria-hidden="true">
+  <img class="aisyah-sp sp-talk"  src="../Assets/Aisyah_talk.png"       alt="" aria-hidden="true">
+  <img class="aisyah-sp sp-happy" src="../Assets/Aisyah_happy.png"      alt="" aria-hidden="true">
 </template>
 
 <!-- ══════════════════════════════════════════════════════
@@ -1267,7 +1205,12 @@
 // win() correct answer · lose() wrong answer
 // ══════════════════════════════════════════════════════
 const SFX=(()=>{let ctx;const ac=()=>ctx||(ctx=new(window.AudioContext||window.webkitAudioContext)());function tone({freq=440,type='sine',dur=.15,vol=.2,slide=0,delay=0}){try{const c=ac(),t=c.currentTime+delay,o=c.createOscillator(),g=c.createGain();o.type=type;o.frequency.setValueAtTime(freq,t);if(slide)o.frequency.exponentialRampToValueAtTime(Math.max(40,freq+slide),t+dur);g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.connect(g).connect(c.destination);o.start(t);o.stop(t+dur+.05)}catch(e){}}
-return{tap(){tone({freq:1200,type:'square',dur:.06,vol:.1});tone({freq:1800,dur:.08,vol:.07,delay:.02})},swap(){tone({freq:300,type:'sawtooth',dur:.25,vol:.09,slide:900})},win(){[523,659,784,1047].forEach((f,i)=>tone({freq:f,type:'triangle',dur:.18,vol:.15,delay:i*.09}))},lose(){tone({freq:220,type:'sawtooth',dur:.3,vol:.15,slide:-120});tone({freq:110,type:'square',dur:.35,vol:.1,delay:.05})}};})();
+return{
+    tap()  { tone({freq:2200,type:'square',dur:.04,vol:.07}); tone({freq:1400,type:'triangle',dur:.09,vol:.12,delay:.01}); },
+    swap() { tone({freq:180,type:'sawtooth',dur:.18,vol:.07,slide:1400}); tone({freq:700,type:'triangle',dur:.28,vol:.05,delay:.08}); },
+    win()  { [440,660,880,1100,1320,1760].forEach((f,i)=>tone({freq:f,type:'triangle',dur:.22,vol:.16,delay:i*.06})); [880,1320,1760].forEach((f,i)=>tone({freq:f,type:'sine',dur:.45,vol:.11,delay:.38+i*.06})); },
+    lose() { tone({freq:280,type:'sawtooth',dur:.32,vol:.14,slide:-160}); tone({freq:140,type:'square',dur:.38,vol:.09,delay:.06}); }
+};})();
 
 // ══════════════════════════════════════════════════════
 // QUIZ DATA (BM + EN, all 6 questions preserved)
@@ -1475,15 +1418,27 @@ const Presenter = (() => {
     const stage = document.getElementById(stageId);
     if (!stage || stages[stageId]) return;
     const charMount = stage.querySelector('.presenter-char');
-    const tpl = document.getElementById('presenter-svg-template');
+    const tpl = document.getElementById('presenter-img-template');
     charMount.appendChild(tpl.content.cloneNode(true));
     stages[stageId] = {
       stage,
-      svg: charMount.querySelector('svg'),
+      svg: charMount,
       bubble: stage.querySelector('.bubble-main'),
       bubbleContent: stage.querySelector('.bubble-main .bubble-content'),
       talkTimer: null,
     };
+    startBlink(charMount);
+  }
+
+  function startBlink(el) {
+    function doBlink() {
+      if (!el.classList.contains('is-talking') && !el.classList.contains('is-happy')) {
+        el.classList.add('is-blinking');
+        setTimeout(() => el.classList.remove('is-blinking'), 140);
+      }
+      setTimeout(doBlink, 2600 + Math.random() * 3000);
+    }
+    setTimeout(doBlink, 1800 + Math.random() * 1500);
   }
 
   function use(stageId) { activeId = stageId; return stages[stageId]; }
@@ -1519,7 +1474,15 @@ const Presenter = (() => {
     s.svg.classList.remove('is-talking');
   }
 
-  return { mount, use, say, ask, hide };
+  function happy(holdMs) {
+    const s = get();
+    if (!s) return;
+    s.svg.classList.remove('is-talking');
+    s.svg.classList.add('is-happy');
+    if (holdMs) setTimeout(() => s.svg.classList.remove('is-happy'), holdMs);
+  }
+
+  return { mount, use, say, ask, hide, happy };
 })();
 
 // ══════════════════════════════════════════════════════
@@ -1694,6 +1657,7 @@ function handleAnswerTap(id) {
   if (isCorrect) {
     state.score++;
     SFX.win();
+    Presenter.happy(2500);
   } else {
     SFX.lose();
   }
@@ -1955,6 +1919,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 });
+// P06-style ambient particles
+(function(){
+  const cont=document.createElement('div'); cont.className='p6-particles'; document.body.appendChild(cont);
+  for(let i=0;i<18;i++){
+    const p=document.createElement('div'); p.className='p6-part';
+    const sz=2+Math.random()*4;
+    p.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}vw;top:${Math.random()*100}vh;opacity:${.04+Math.random()*.07};animation:p6a${i} ${9+Math.random()*11}s ease-in-out infinite alternate`;
+    const st=document.createElement('style');
+    st.textContent=`@keyframes p6a${i}{from{transform:translate(0,0)}to{transform:translate(${(Math.random()-.5)*130}px,${(Math.random()-.5)*90}px)}}`;
+    document.head.appendChild(st); cont.appendChild(p);
+  }
+})();
 </script>
 </body>
 </html>

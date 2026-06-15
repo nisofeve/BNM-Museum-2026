@@ -24,6 +24,15 @@ html,body{width:100vw;height:100vh;overflow:hidden;font-family:'Poppins',sans-se
   --u: min(0.18519vw, 0.10417vh);
 }
 #wall-particles{position:absolute;inset:0;pointer-events:none;overflow:hidden;}
+/* ── Aisyah PNG sprite system ── */
+.aisyah-sp{display:none;position:absolute;bottom:0;left:50%;transform:translateX(-50%);max-height:100%;max-width:100%;object-fit:contain;}
+.aisyah-sp.sp-idle{display:block;}
+.presenter-char.is-blinking .sp-idle{display:none;}
+.presenter-char.is-blinking .sp-blink{display:block;}
+.presenter-char.is-talking .sp-idle,.presenter-char.is-talking .sp-blink{display:none;}
+.presenter-char.is-talking .sp-talk{display:block;}
+.presenter-char.is-happy .sp-idle,.presenter-char.is-happy .sp-blink,.presenter-char.is-happy .sp-talk{display:none;}
+.presenter-char.is-happy .sp-happy{display:block;}
 .wpart{position:absolute;border-radius:50%;background:white;opacity:.09;}
 #wall-header{flex-shrink:0;padding:calc(18*var(--u)) calc(40*var(--u)) calc(10*var(--u));text-align:center;}
 #main-title{
@@ -167,7 +176,7 @@ html,body{width:100vw;height:100vh;overflow:hidden;font-family:'Poppins',sans-se
 .q-label{font-size:calc(12*var(--u));font-weight:600;color:var(--text-light);text-align:center;margin-top:calc(3*var(--u));}
 
 /* Presenter stage */
-.presenter-stage{position:relative;width:100%;flex:1;min-height:0;--char-h:calc(155*var(--u));z-index:6;}
+.presenter-stage{position:relative;width:100%;flex:1;min-height:0;--char-h:calc(202*var(--u));z-index:6;}
 .presenter-char{
   position:absolute;bottom:0;left:50%;transform:translateX(-50%);
   height:var(--char-h);aspect-ratio:360/520;z-index:2;pointer-events:none;
@@ -721,50 +730,12 @@ html,body{width:100vw;height:100vh;overflow:hidden;font-family:'Poppins',sans-se
   </div><!-- /quiz-inner -->
 </div><!-- /bottom-section -->
 
-<!-- Presenter SVG template -->
-<template id="presenter-svg-template">
-<svg class="presenter-svg" viewBox="0 0 360 520" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-  <ellipse cx="180" cy="508" rx="118" ry="11" fill="rgba(0,71,171,0.10)"/>
-  <g id="ch-root">
-    <g id="ch-torso">
-      <path d="M122 376 L238 376 L254 520 L106 520 Z" fill="#00337A"/>
-      <path d="M116 252 C116 220 142 202 180 202 C218 202 244 220 244 252 L250 388 L110 388 Z" fill="#0047AB"/>
-      <path d="M158 206 L202 206 L197 272 L163 272 Z" fill="#EAF0FB"/>
-      <path d="M158 206 L180 246 L150 284 L140 224 Z" fill="#00337A"/>
-      <path d="M202 206 L180 246 L210 284 L220 224 Z" fill="#00337A"/>
-      <circle cx="180" cy="262" r="7.5" fill="#F5A623"/>
-      <circle cx="180" cy="262" r="3" fill="#FFCB6B"/>
-      <rect x="204" y="306" width="24" height="11" rx="3" fill="#00B4A6"/>
-      <circle cx="180" cy="306" r="4" fill="#F5A623"/>
-      <circle cx="180" cy="334" r="4" fill="#F5A623"/>
-      <g id="arm-left-rest"><path d="M126 250 C104 278 98 318 104 354 C106 366 122 366 125 354 C131 322 134 290 144 262 Z" fill="#0047AB"/><circle cx="111" cy="362" r="11" fill="#C98A5E"/></g>
-      <g id="arm-right-rest"><path d="M234 250 C256 278 262 318 256 354 C254 366 238 366 235 354 C229 322 226 290 216 262 Z" fill="#0047AB"/><circle cx="249" cy="362" r="11" fill="#C98A5E"/></g>
-      <g id="arm-right-up">
-        <path d="M232 252 C262 246 292 224 308 196 C315 184 302 172 292 180 C272 198 252 214 226 224 Z" fill="#0047AB"/>
-        <circle cx="305" cy="183" r="13" fill="#C98A5E"/>
-        <path d="M299 170 Q304 162 309 170 M308 168 Q313 161 317 169" stroke="#C98A5E" stroke-width="6" stroke-linecap="round" fill="none"/>
-        <path d="M284 184 L296 200 L286 208 L274 192 Z" fill="#00337A"/>
-      </g>
-    </g>
-    <g id="ch-head">
-      <path d="M180 56 C120 56 96 106 96 158 C96 210 118 244 142 252 L218 252 C242 244 264 210 264 158 C264 106 240 56 180 56 Z" fill="#00B4A6"/>
-      <path d="M128 210 C120 252 142 276 180 282 C218 276 240 252 232 210 C224 238 204 250 180 250 C156 250 136 238 128 210 Z" fill="#008F83"/>
-      <ellipse cx="180" cy="152" rx="45" ry="50" fill="#C98A5E"/>
-      <path d="M180 84 C146 84 130 110 128 142 C138 106 156 97 180 97 C204 97 222 106 232 142 C230 110 214 84 180 84 Z" fill="#008F83"/>
-      <path d="M132 132 C142 102 158 94 180 94 C202 94 218 102 228 132" stroke="#F5A623" stroke-width="4" fill="none" stroke-linecap="round"/>
-      <path d="M138 168 C140 202 158 220 180 220 C202 220 220 202 222 168 C222 200 206 230 180 230 C154 230 138 200 138 168 Z" fill="#00B4A6"/>
-      <path d="M148 132 Q159 125 170 130" stroke="#7A4A22" stroke-width="3.5" fill="none" stroke-linecap="round"/>
-      <path d="M190 130 Q201 125 212 132" stroke="#7A4A22" stroke-width="3.5" fill="none" stroke-linecap="round"/>
-      <g class="ch-eye"><ellipse cx="160" cy="147" rx="5" ry="7" fill="#1A1A2E"/><circle cx="162" cy="144" r="1.8" fill="#FFFFFF"/></g>
-      <g class="ch-eye"><ellipse cx="200" cy="147" rx="5" ry="7" fill="#1A1A2E"/><circle cx="202" cy="144" r="1.8" fill="#FFFFFF"/></g>
-      <ellipse cx="146" cy="168" rx="8" ry="4.5" fill="#E07856" opacity="0.32"/>
-      <ellipse cx="214" cy="168" rx="8" ry="4.5" fill="#E07856" opacity="0.32"/>
-      <path d="M178 156 Q175 167 181 169" stroke="#A96B3F" stroke-width="3" fill="none" stroke-linecap="round"/>
-      <path id="mouth-smile" d="M163 184 Q180 197 197 184" stroke="#8C4A2F" stroke-width="4.5" fill="none" stroke-linecap="round"/>
-      <g id="mouth-open"><ellipse cx="180" cy="189" rx="12" ry="9" fill="#7C3A28"/><path d="M170 185 Q180 191 190 185 L190 183 L170 183 Z" fill="#FFFFFF"/></g>
-    </g>
-  </g>
-</svg>
+<!-- Presenter PNG sprite template -->
+<template id="presenter-img-template">
+  <img class="aisyah-sp sp-idle"  src="../Assets/Aisyah_idle.png"       alt="" aria-hidden="true">
+  <img class="aisyah-sp sp-blink" src="../Assets/Aisyah_close_eyes.png" alt="" aria-hidden="true">
+  <img class="aisyah-sp sp-talk"  src="../Assets/Aisyah_talk.png"       alt="" aria-hidden="true">
+  <img class="aisyah-sp sp-happy" src="../Assets/Aisyah_happy.png"      alt="" aria-hidden="true">
 </template>
 
 <script>
@@ -1132,13 +1103,26 @@ const Presenter = (()=>{
   function mount(id) {
     const stage=document.getElementById(id); if(!stage||stages[id]) return;
     const charMount=stage.querySelector('.presenter-char');
-    const tpl=document.getElementById('presenter-svg-template');
+    const tpl=document.getElementById('presenter-img-template');
     charMount.appendChild(tpl.content.cloneNode(true));
-    stages[id]={stage,svg:charMount.querySelector('svg'),
+    stages[id]={stage,svg:charMount,
       bubble:stage.querySelector('.bubble-main'),bubbleContent:stage.querySelector('.bubble-main .bubble-content'),
       userBubble:stage.querySelector('.bubble-user'),userContent:stage.querySelector('.bubble-user .bubble-content'),
       talkTimer:null,userTimer:null};
+    startBlink(charMount);
   }
+
+  function startBlink(el) {
+    function doBlink() {
+      if (!el.classList.contains('is-talking') && !el.classList.contains('is-happy')) {
+        el.classList.add('is-blinking');
+        setTimeout(() => el.classList.remove('is-blinking'), 140);
+      }
+      setTimeout(doBlink, 2600 + Math.random() * 3000);
+    }
+    setTimeout(doBlink, 1800 + Math.random() * 1500);
+  }
+
   function use(id){ activeId=id; return stages[id]; }
   function get(){ return stages[activeId]; }
   function say(content,opts){
@@ -1162,7 +1146,8 @@ const Presenter = (()=>{
     s.userTimer=setTimeout(()=>s.userBubble.classList.remove('visible'),holdMs||2200);
   }
   function hide(){ const s=get(); if(!s) return; s.bubble.classList.remove('visible'); s.svg.classList.remove('is-talking'); }
-  return {mount,use,say,userSay,hide};
+  function happy(holdMs){const s=get();if(!s)return;s.svg.classList.remove('is-talking');s.svg.classList.add('is-happy');if(holdMs)setTimeout(()=>s.svg.classList.remove('is-happy'),holdMs);}
+  return {mount,use,say,userSay,hide,happy};
 })();
 
 // ═══ LANG ═══
@@ -1291,7 +1276,7 @@ function handleAnswer(isPositive){
     activateNode(currentQ, null, true);
     if(currentQ>0) connectNodes(currentQ-1, currentQ, true);
 
-    btnA.classList.add('selected'); sessionPositive++; SFX.win();
+    btnA.classList.add('selected'); sessionPositive++; SFX.win(); Presenter.happy(2500);
     Presenter.userSay(lang==='bm'?'✓ Syabas!':'✓ Well done!');
     setTimeout(()=>Presenter.say(lang==='bm'?'✓ Tepat sekali! Pilihan bijak! 🌟':'✓ Exactly right! Smart choice! 🌟',{talkMs:1400}),400);
     sendWS({type:'ANSWER_SUBMITTED',questionIndex:currentQ,isPositive:true});

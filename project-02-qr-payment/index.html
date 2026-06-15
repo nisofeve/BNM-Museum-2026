@@ -954,6 +954,10 @@
     55%  { transform:translate(-50%,-50%) scale(1);    opacity:0.85; }
     100% { transform:translate(-50%,-50%) scale(1.9);  opacity:0; }
   }
+/* ═══ P06-STYLE VFX ═══ */
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,71,171,.007) 3px,rgba(0,71,171,.007) 4px);}
+.p6-particles{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0;}
+.p6-part{position:absolute;border-radius:50%;background:radial-gradient(circle,rgba(0,229,255,.7),rgba(0,71,171,.3));opacity:.08;}
 </style>
 </head>
 <body>
@@ -1263,7 +1267,11 @@
    SFX — synthesized high-tech sounds via Web Audio API
    ============================================================ */
 const SFX=(()=>{let ctx;const ac=()=>ctx||(ctx=new(window.AudioContext||window.webkitAudioContext)());function tone({freq=440,type='sine',dur=.15,vol=.2,slide=0,delay=0}){try{const c=ac(),t=c.currentTime+delay,o=c.createOscillator(),g=c.createGain();o.type=type;o.frequency.setValueAtTime(freq,t);if(slide)o.frequency.exponentialRampToValueAtTime(Math.max(40,freq+slide),t+dur);g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.connect(g).connect(c.destination);o.start(t);o.stop(t+dur+.05)}catch(e){}}
-return{tap(){tone({freq:1200,type:'square',dur:.06,vol:.1});tone({freq:1800,dur:.08,vol:.07,delay:.02})},swap(){tone({freq:300,type:'sawtooth',dur:.25,vol:.09,slide:900})},win(){[523,659,784,1047].forEach((f,i)=>tone({freq:f,type:'triangle',dur:.18,vol:.15,delay:i*.09}))},lose(){tone({freq:220,type:'sawtooth',dur:.3,vol:.15,slide:-120});tone({freq:110,type:'square',dur:.35,vol:.1,delay:.05})},clink(){tone({freq:3200,type:'triangle',dur:.09,vol:.2});tone({freq:2100,type:'sine',dur:.18,vol:.1,delay:.03});tone({freq:4100,type:'triangle',dur:.05,vol:.07,delay:.01})}};})();
+return{tap()  { tone({freq:2200,type:'square',dur:.04,vol:.07}); tone({freq:1400,type:'triangle',dur:.09,vol:.12,delay:.01}); },
+    swap() { tone({freq:180,type:'sawtooth',dur:.18,vol:.07,slide:1400}); tone({freq:700,type:'triangle',dur:.28,vol:.05,delay:.08}); },
+    win()  { [440,660,880,1100,1320,1760].forEach((f,i)=>tone({freq:f,type:'triangle',dur:.22,vol:.16,delay:i*.06})); [880,1320,1760].forEach((f,i)=>tone({freq:f,type:'sine',dur:.45,vol:.11,delay:.38+i*.06})); },
+    lose() { tone({freq:280,type:'sawtooth',dur:.32,vol:.14,slide:-160}); tone({freq:140,type:'square',dur:.38,vol:.09,delay:.06}); },
+    clink(){tone({freq:3200,type:'triangle',dur:.09,vol:.2});tone({freq:2100,type:'sine',dur:.18,vol:.1,delay:.03});tone({freq:4100,type:'triangle',dur:.05,vol:.07,delay:.01})}};})();
 
 /* ============================================================
    STATE
@@ -2418,6 +2426,18 @@ fitStage();
 updateTabungDisplay();
 
 gsap.from('#section-0', { opacity: 0, y: 36, duration: 0.9, ease: 'power2.out', delay: 0.3 });
+// P06-style ambient particles
+(function(){
+  const cont=document.createElement('div'); cont.className='p6-particles'; document.body.appendChild(cont);
+  for(let i=0;i<18;i++){
+    const p=document.createElement('div'); p.className='p6-part';
+    const sz=2+Math.random()*4;
+    p.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}vw;top:${Math.random()*100}vh;opacity:${.04+Math.random()*.07};animation:p6a${i} ${9+Math.random()*11}s ease-in-out infinite alternate`;
+    const st=document.createElement('style');
+    st.textContent=`@keyframes p6a${i}{from{transform:translate(0,0)}to{transform:translate(${(Math.random()-.5)*130}px,${(Math.random()-.5)*90}px)}}`;
+    document.head.appendChild(st); cont.appendChild(p);
+  }
+})();
 </script>
 </body>
 </html>

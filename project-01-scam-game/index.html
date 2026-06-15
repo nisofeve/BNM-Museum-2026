@@ -355,6 +355,9 @@ html, body {
 .choice-btn.correct { border-color: var(--success); background: #e8f8f0; box-shadow: 0 0 20px rgba(39,174,96,0.3); }
 .choice-btn.correct .choice-letter { background: var(--success); color: var(--white); }
 .choice-btn.wrong   { border-color: var(--error); background: #fde8e8; animation: shake 0.4s ease; box-shadow: 0 0 20px rgba(231,76,60,0.3); }
+.choice-btn.gp-selected { border-color: var(--blue); background: #E8EEFF; transform: translateY(-4px); box-shadow: 0 0 22px rgba(0,71,171,0.38); }
+.choice-btn.gp-selected .choice-letter { background: var(--blue); color: var(--white); }
+.btn-retry.gp-selected, .btn-end.gp-selected { outline: 3px solid var(--blue); outline-offset: 3px; }
 .choice-btn.wrong .choice-letter { background: var(--error); color: var(--white); }
 .choice-btn:disabled { cursor: default; }
 
@@ -516,6 +519,11 @@ html, body {
 #idle-overlay.show { display: flex; }
 .idle-title { font-family: 'Poppins', sans-serif; font-weight: 800; font-size: clamp(22px, 3.2vmin, 42px); }
 .idle-sub { font-size: clamp(14px, 1.8vmin, 22px); opacity: 0.8; }
+/* ═══ P06-STYLE VFX ═══ */
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,71,171,.007) 3px,rgba(0,71,171,.007) 4px);}
+.p6-particles{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0;}
+.p6-part{position:absolute;border-radius:50%;background:radial-gradient(circle,rgba(0,229,255,.7),rgba(0,71,171,.3));opacity:.08;}
+@keyframes p6TitleShimmer{0%{background-position:0%}100%{background-position:300%}}
 </style>
 </head>
 <body>
@@ -645,7 +653,13 @@ html, body {
    SFX — synthesized high-tech sound effects (Web Audio API)
    ============================================================== */
 const SFX=(()=>{let ctx;const ac=()=>ctx||(ctx=new(window.AudioContext||window.webkitAudioContext)());function tone({freq=440,type='sine',dur=.15,vol=.2,slide=0,delay=0}){try{const c=ac(),t=c.currentTime+delay,o=c.createOscillator(),g=c.createGain();o.type=type;o.frequency.setValueAtTime(freq,t);if(slide)o.frequency.exponentialRampToValueAtTime(Math.max(40,freq+slide),t+dur);g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.connect(g).connect(c.destination);o.start(t);o.stop(t+dur+.05)}catch(e){}}
-return{tap(){tone({freq:1200,type:'square',dur:.06,vol:.1});tone({freq:1800,dur:.08,vol:.07,delay:.02})},swap(){tone({freq:300,type:'sawtooth',dur:.25,vol:.09,slide:900})},win(){[523,659,784,1047].forEach((f,i)=>tone({freq:f,type:'triangle',dur:.18,vol:.15,delay:i*.09}))},lose(){tone({freq:220,type:'sawtooth',dur:.3,vol:.15,slide:-120});tone({freq:110,type:'square',dur:.35,vol:.1,delay:.05})},crash(){tone({freq:180,type:'sawtooth',dur:.18,vol:.28,slide:-80});tone({freq:90,type:'square',dur:.25,vol:.22,delay:.04});tone({freq:340,type:'sawtooth',dur:.10,vol:.18,slide:-200,delay:.02})},screech(){tone({freq:2600,type:'sawtooth',dur:.65,vol:.13,slide:-1600});tone({freq:2300,type:'sawtooth',dur:.55,vol:.11,slide:-1400,delay:.03});tone({freq:750,type:'square',dur:.7,vol:.07,slide:-350,delay:.06})}};})();
+  return {
+    tap()  { tone({freq:2200,type:'square',dur:.04,vol:.07}); tone({freq:1400,type:'triangle',dur:.09,vol:.12,delay:.01}); },
+    swap() { tone({freq:180,type:'sawtooth',dur:.18,vol:.07,slide:1400}); tone({freq:700,type:'triangle',dur:.28,vol:.05,delay:.08}); },
+    win()  { [440,660,880,1100,1320,1760].forEach((f,i)=>tone({freq:f,type:'triangle',dur:.22,vol:.16,delay:i*.06})); [880,1320,1760].forEach((f,i)=>tone({freq:f,type:'sine',dur:.45,vol:.11,delay:.38+i*.06})); },
+    lose() { tone({freq:280,type:'sawtooth',dur:.32,vol:.14,slide:-160}); tone({freq:140,type:'square',dur:.38,vol:.09,delay:.06}); }
+  };
+})();
 
 /* Engine sound — looping oscillator, frequency tracks car speed */
 const ENGINE = {
@@ -1036,6 +1050,146 @@ const drive = {
 const _keys = {};
 document.addEventListener('keydown', e => { _keys[e.key.toLowerCase()] = true;  }, { passive: true });
 document.addEventListener('keyup',   e => { _keys[e.key.toLowerCase()] = false; }, { passive: true });
+
+/* ---- Logitech G29 Racing Wheel (Gamepad API) ---- */
+let _gpSteer = 0;          // raw wheel axis — proportional steering in step()
+let _gpCursor = -1;        // current UI selection index (-1 = uninitialised)
+let _gpPrevChoiceCnt = 0;  // detect new question load → auto-reset cursor
+
+const G29 = (() => {
+  let idx = null;
+  const prev = [];
+  const prevPedal = [false, false, false]; // axes 1,2,3 = clutch, brake, gas
+  let prevSteerDir = 0;                    // -1|0|1 — wheel edge detection
+  const DZ = 0.08;    // wheel deadzone — G29 has slight centre drift
+  const PEDAL_T = 0.5; // G29 pedals: rest≈1.0, fully pressed≈-1.0; < 0.5 = pressed
+
+  window.addEventListener('gamepadconnected', e => {
+    idx = e.gamepad.index;
+    prev.length = 0;
+    for (let i = 0; i < e.gamepad.buttons.length; i++) prev.push(false);
+    prevPedal.fill(false);
+    prevSteerDir = 0;
+    console.log('[G29] Connected:', e.gamepad.id);
+  });
+  window.addEventListener('gamepaddisconnected', e => {
+    if (e.gamepad.index === idx) {
+      idx = null; _gpSteer = 0;
+      _keys['a'] = false; _keys['d'] = false;
+    }
+  });
+
+  // Returns currently interactive choice buttons (quiz) or result buttons.
+  // #modal-overlay is position:fixed so offsetParent is always null for children —
+  // use the .open class to detect visibility instead.
+  function getActiveChoices() {
+    const modalOpen = document.getElementById('modal-overlay')?.classList.contains('open');
+    if (modalOpen) {
+      const q = [...document.querySelectorAll('.choice-btn')].filter(b => !b.disabled);
+      if (q.length) return q;
+    }
+    return [...document.querySelectorAll('.btn-retry, .btn-end')].filter(b => b.offsetParent !== null);
+  }
+
+  function highlightCursor() {
+    const choices = getActiveChoices();
+    choices.forEach((b, i) => b.classList.toggle('gp-selected', i === _gpCursor));
+  }
+
+  function moveCursor(dir) {
+    const choices = getActiveChoices();
+    if (!choices.length) return;
+    if (_gpCursor < 0) _gpCursor = choices.length === 2 ? 0 : Math.floor(choices.length / 2);
+    _gpCursor = Math.max(0, Math.min(choices.length - 1, _gpCursor + dir));
+    highlightCursor();
+  }
+
+  function onConfirm() {
+    // Post-answer "Teruskan" button inside modal — only when modal is actually open
+    const modalOpen = document.getElementById('modal-overlay')?.classList.contains('open');
+    const cont = document.getElementById('btn-continue');
+    if (modalOpen && cont && cont.classList.contains('show')) { cont.click(); return; }
+    // Quiz choices or result screen buttons
+    const choices = getActiveChoices();
+    if (choices.length) {
+      if (_gpCursor < 0) _gpCursor = choices.length === 2 ? 0 : Math.floor(choices.length / 2);
+      highlightCursor();
+      if (choices[_gpCursor]) { choices[_gpCursor].click(); _gpCursor = -1; return; }
+    }
+    // Intro screen navigation — blocked while actively driving
+    if (gameState === 'GAME') return;
+    const howtoStart = document.querySelector('#screen-howto.active .btn-start');
+    if (howtoStart) { howtoStart.click(); return; }
+    const attractStart = document.querySelector('#screen-attract.active .btn-start');
+    if (attractStart) { attractStart.click(); }
+  }
+
+  function poll() {
+    if (idx === null) return;
+    const gp = navigator.getGamepads()[idx];
+    if (!gp) return;
+
+    // Steering wheel — axis 0 (-1 = full left, +1 = full right)
+    const steer = gp.axes[0] || 0;
+    _gpSteer   = Math.abs(steer) > DZ ? steer : 0;
+    _keys['a'] = steer < -DZ;
+    _keys['d'] = steer >  DZ;
+
+    // D-pad left/right (buttons 14/15) as digital steering backup
+    if (!_keys['a'] && gp.buttons[14]?.pressed) _keys['a'] = true;
+    if (!_keys['d'] && gp.buttons[15]?.pressed) _keys['d'] = true;
+
+    // Wheel edge → cursor move (fires once per direction change, not every frame)
+    const steerDir = steer < -DZ ? -1 : steer > DZ ? 1 : 0;
+    if (steerDir !== prevSteerDir) {
+      if (steerDir !== 0) moveCursor(steerDir);
+      prevSteerDir = steerDir;
+    }
+
+    // Pedal edge detection (axes 1=clutch, 2=brake, 3=gas)
+    for (let p = 0; p < 3; p++) {
+      const axisVal = gp.axes[p + 1] ?? 1;
+      const pressed = axisVal < PEDAL_T;
+      if (pressed && !prevPedal[p]) onConfirm();
+      prevPedal[p] = pressed;
+    }
+
+    // Auto-reset cursor when question changes (choice count changes)
+    const cnt = getActiveChoices().length;
+    if (cnt !== _gpPrevChoiceCnt) {
+      _gpCursor = cnt ? (cnt === 2 ? 0 : Math.floor(cnt / 2)) : -1;
+      _gpPrevChoiceCnt = cnt;
+      if (cnt) highlightCursor();
+    }
+
+    // Button edge detection
+    gp.buttons.forEach((btn, i) => {
+      if (btn.pressed && !prev[i]) onBtn(i);
+      prev[i] = btn.pressed;
+    });
+  }
+
+  function onBtn(i) {
+    // △ (3) → toggle language BM ↔ EN
+    if (i === 3) { setLang(currentLang === 'bm' ? 'en' : 'bm'); return; }
+    // D-pad left (14) / right (15) → move cursor
+    if (i === 14) { moveCursor(-1); return; }
+    if (i === 15) { moveCursor(1);  return; }
+    // X (0), Share (8), Options (9) → confirm selection or proceed
+    if (i === 0 || i === 8 || i === 9) { onConfirm(); return; }
+  }
+
+  return { poll, moveCursor, onConfirm };
+})();
+
+// Keyboard mirrors for G29 cursor (A/D = left/right, Space = confirm)
+document.addEventListener('keydown', e => {
+  const k = e.key.toLowerCase();
+  // moveCursor is a no-op when no active choices exist, so safe during driving
+  if (k === 'a') G29.moveCursor(-1);
+  else if (k === 'd') G29.moveCursor(1);
+  else if (e.key === ' ' && !e.repeat) G29.onConfirm();
+});
 
 let rafId = null, lastT = 0;
 
@@ -1595,6 +1749,7 @@ function tick(ts) {
   rafId = requestAnimationFrame(tick);
   const dt = Math.min((ts - lastT) / 1000, 0.05);
   lastT = ts;
+  G29.poll();
   step(dt);
   W3.renderer.render(W3.scene, W3.camera);
 }
@@ -1632,8 +1787,9 @@ function step(dt) {
   if (drive.phase === 'approach' || drive.phase === 'finish') {
     const STEER_SPEED = 5;     // units/sec while key held
     const ROAD_LIMIT  = 5;     // max lateral offset (road inner edge ≈ ±6)
-    if (_keys['a']) drive.playerX -= STEER_SPEED * dt;
-    if (_keys['d']) drive.playerX += STEER_SPEED * dt;
+    const _ss = _gpSteer !== 0 ? Math.abs(_gpSteer) : 1; // proportional when using G29 wheel
+    if (_keys['a']) drive.playerX -= STEER_SPEED * _ss * dt;
+    if (_keys['d']) drive.playerX += STEER_SPEED * _ss * dt;
     if (!_keys['a'] && !_keys['d']) drive.playerX *= Math.exp(-2.5 * dt); // drift back to centre
     drive.playerX = Math.max(-ROAD_LIMIT, Math.min(ROAD_LIMIT, drive.playerX));
   }
@@ -1991,10 +2147,13 @@ function openModal() {
   if (gameState !== 'GAME') return;
   answered = false;
   lastChoiceIdx = null;
+  _gpCursor = -1;        // reset per-question so cursor starts at middle
+  _gpPrevChoiceCnt = 0;  // reset poll counter too
   renderModal(currentCP);
   gameState = 'CHECKPOINT';
   SFX.swap();
   document.getElementById('modal-overlay').classList.add('open');
+  G29.moveCursor(0); // highlight middle choice immediately
 }
 
 function handleChoice(choiceIdx, btn) {
@@ -2193,6 +2352,18 @@ document.getElementById('screen-attract').addEventListener('click', function(e) 
     goHowTo();
   }
 });
+// P06-style ambient particles
+(function(){
+  const cont=document.createElement('div'); cont.className='p6-particles'; document.body.appendChild(cont);
+  for(let i=0;i<18;i++){
+    const p=document.createElement('div'); p.className='p6-part';
+    const sz=2+Math.random()*4;
+    p.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}vw;top:${Math.random()*100}vh;opacity:${.04+Math.random()*.07};animation:p6a${i} ${9+Math.random()*11}s ease-in-out infinite alternate`;
+    const st=document.createElement('style');
+    st.textContent=`@keyframes p6a${i}{from{transform:translate(0,0)}to{transform:translate(${(Math.random()-.5)*130}px,${(Math.random()-.5)*90}px)}}`;
+    document.head.appendChild(st); cont.appendChild(p);
+  }
+})();
 </script>
 </body>
 </html>
