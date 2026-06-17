@@ -1083,10 +1083,10 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;b
 </div>
 
 <!-- Idle overlay -->
-<div id="idle-overlay" onclick="dismissIdle()">
-  <div class="idle-touch-icon">👆</div>
-  <div class="idle-text" id="idle-title">Sentuh untuk mula semula</div>
-  <div class="idle-sub" id="idle-sub">Tiada aktiviti • Touch to restart</div>
+<div id="idle-overlay">
+  <div class="idle-touch-icon">⏳</div>
+  <div class="idle-text" id="idle-warn-main">Tiada aktiviti dikesan.</div>
+  <div class="idle-sub" id="idle-warn-sub">Kembali ke skrin mula dalam 7 saat...</div>
 </div>
 
 </div><!-- /#stage -->
@@ -1113,6 +1113,7 @@ var currentQuestion = 0;
 var factsShown = true;
 var simCurrentStep = 0;
 var idleTimer = null;
+var idleCountdown = null;
 var convInterval = null;
 var payStep = 0;
 var payTimer = null;
@@ -1760,6 +1761,9 @@ function answerQuiz(choice) {
   }
 
   document.getElementById('btn-next-q').classList.add('show');
+  // Auto-proceed after 3 seconds
+  clearTimeout(window._p02AutoNext);
+  window._p02AutoNext = setTimeout(() => nextQuestion(), 3000);
 }
 
 function restoreAnswerState() {
@@ -2050,16 +2054,41 @@ function restart() {
    ============================================================ */
 function resetIdleTimer() {
   if (idleTimer) clearTimeout(idleTimer);
-  idleTimer = setTimeout(showIdle, 60000);
+  dismissIdle();
+  if (currentSection === 0) return;
+  idleTimer = setTimeout(showIdle, 25000);
 }
 
 function showIdle() {
-  document.getElementById('idle-overlay').classList.add('show');
+  let secs = 7;
+  const overlay = document.getElementById('idle-overlay');
+  const mainEl = document.getElementById('idle-warn-main');
+  const subEl = document.getElementById('idle-warn-sub');
+  const activeLang = document.querySelector('#lang-toggle .lang-btn.active') ? document.querySelector('#lang-toggle .lang-btn.active').dataset.lang : 'bm';
+  function updateText(n) {
+    const bm = (activeLang !== 'en');
+    if (mainEl) mainEl.textContent = bm ? 'Tiada aktiviti dikesan.' : 'No activity detected.';
+    if (subEl) subEl.textContent = bm ? 'Kembali ke skrin mula dalam ' + n + ' saat...' : 'Returning to start screen in ' + n + ' seconds...';
+  }
+  updateText(secs);
+  overlay.classList.add('show');
+  clearInterval(idleCountdown);
+  idleCountdown = setInterval(function() {
+    secs--;
+    updateText(secs);
+    if (secs <= 0) {
+      clearInterval(idleCountdown);
+      idleCountdown = null;
+      overlay.classList.remove('show');
+      restart();
+    }
+  }, 1000);
 }
 
 function dismissIdle() {
+  clearInterval(idleCountdown);
+  idleCountdown = null;
   document.getElementById('idle-overlay').classList.remove('show');
-  restart();
 }
 
 /* ============================================================

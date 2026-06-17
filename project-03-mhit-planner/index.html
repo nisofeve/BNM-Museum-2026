@@ -1757,19 +1757,26 @@
   }
 
   /* ─── IDLE TIMER BAR ─── */
-  #idle-bar {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    height: calc(5 * var(--u));
-    background: var(--teal);
-    box-shadow: 0 0 calc(12 * var(--u)) rgba(0,180,166,0.5);
-    transition: width 1s linear;
-    opacity: 0;
-    z-index: 999;
-  }
+  #idle-bar { display: none; }
 
-  #idle-bar.visible { opacity: 1; }
+  #idle-overlay {
+    position: fixed; inset: 0;
+    background: rgba(4,9,30,0.93);
+    z-index: 9000;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: calc(24 * var(--u));
+    opacity: 0; pointer-events: none; transition: opacity 0.4s;
+  }
+  #idle-overlay.visible { opacity: 1; }
+  #idle-warn-icon { font-size: calc(72 * var(--u)); }
+  #idle-warn-main {
+    font-size: calc(28 * var(--u)); font-weight: 700;
+    color: #fff; text-align: center;
+  }
+  #idle-warn-sub {
+    font-size: calc(20 * var(--u));
+    color: rgba(0,229,255,0.8); text-align: center;
+  }
 /* ═══ P06-STYLE VFX ═══ */
 body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,71,171,.007) 3px,rgba(0,71,171,.007) 4px);}
 .p6-particles{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0;}
@@ -1790,6 +1797,11 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;b
 
 <!-- IDLE BAR -->
 <div id="idle-bar"></div>
+<div id="idle-overlay">
+  <div id="idle-warn-icon">⏳</div>
+  <div id="idle-warn-main">Tiada aktiviti dikesan.</div>
+  <div id="idle-warn-sub">Kembali ke skrin mula dalam 7 saat...</div>
+</div>
 
 <!-- ══════════════════════════════════════════════════════
      ===== CHARACTER PRESENTER SVG (shared P3/P4/P6) =====
@@ -2691,7 +2703,8 @@ let state = {
   coverage: 'basic',   // derived: 'none'|'basic'|'comprehensive'
   chartInstance: null,
   idleTimer: null,
-  idleSeconds: 60,
+  idleCountdown: null,
+  idleSeconds: 25,
   idleRemaining: 60,
 };
 
@@ -2867,23 +2880,38 @@ function runGlitch(screenEl) {
 function stopIdleTimer() {
   clearInterval(state.idleTimer);
   state.idleTimer = null;
-  const bar = document.getElementById('idle-bar');
-  if (bar) { bar.classList.remove('visible'); bar.style.width = '100%'; }
+  clearInterval(state.idleCountdown);
+  state.idleCountdown = null;
+  const ov = document.getElementById('idle-overlay');
+  if (ov) ov.classList.remove('visible');
 }
 
 function startIdleTimer() {
   stopIdleTimer();
-  const bar = document.getElementById('idle-bar');
-  let elapsed = 0;
-  state.idleTimer = setInterval(() => {
-    elapsed++;
-    const frac = Math.max(0, 1 - elapsed / state.idleSeconds);
-    if (bar) {
-      bar.style.width = (frac * 100) + '%';
-      if (elapsed === 5) bar.classList.add('visible');
-    }
-    if (elapsed >= state.idleSeconds) {
-      stopIdleTimer();
+  state.idleTimer = setTimeout(() => {
+    showIdleWarning();
+  }, state.idleSeconds * 1000);
+}
+
+function showIdleWarning() {
+  let secs = 7;
+  const ov = document.getElementById('idle-overlay');
+  const mainEl = document.getElementById('idle-warn-main');
+  const subEl = document.getElementById('idle-warn-sub');
+  function updateText(n) {
+    const bm = (state.lang !== 'en');
+    if (mainEl) mainEl.textContent = bm ? 'Tiada aktiviti dikesan.' : 'No activity detected.';
+    if (subEl) subEl.textContent = bm ? 'Kembali ke skrin mula dalam ' + n + ' saat...' : 'Returning to start screen in ' + n + ' seconds...';
+  }
+  updateText(secs);
+  if (ov) ov.classList.add('visible');
+  state.idleCountdown = setInterval(() => {
+    secs--;
+    updateText(secs);
+    if (secs <= 0) {
+      clearInterval(state.idleCountdown);
+      state.idleCountdown = null;
+      if (ov) ov.classList.remove('visible');
       goToScreen('welcome');
     }
   }, 1000);

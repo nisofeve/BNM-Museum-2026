@@ -536,9 +536,9 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;b
 
 <!-- Idle Overlay -->
 <div id="idle-overlay">
-  <div style="font-size:clamp(48px,7vmin,90px)">💤</div>
-  <div class="idle-title" data-i18n="idle_title">Kembali ke Mula</div>
-  <div class="idle-sub" data-i18n="idle_sub">Tiada aktiviti — memulakan semula...</div>
+  <div style="font-size:clamp(48px,7vmin,90px)">⏳</div>
+  <div class="idle-title" id="idle-warn-main">Tiada aktiviti dikesan.</div>
+  <div class="idle-sub" id="idle-warn-sub">Kembali ke skrin mula dalam 7 saat...</div>
 </div>
 
 <!-- ===================== ATTRACT SCREEN ===================== -->
@@ -906,7 +906,8 @@ let hitCount = 0;
 
 // Idle timer
 let idleTimer = null;
-const IDLE_TIMEOUT = 60000;
+let idleCountdown = null;
+const IDLE_TIMEOUT = 25000;
 
 /* ==============================================================
    LANGUAGE
@@ -2292,20 +2293,37 @@ function renderResult(finalScore, instant) {
    ============================================================== */
 function resetIdle() {
   clearTimeout(idleTimer);
+  clearInterval(idleCountdown);
+  idleCountdown = null;
   document.getElementById('idle-overlay').classList.remove('show');
+  if (document.getElementById('screen-attract').classList.contains('active')) return;
   idleTimer = setTimeout(triggerIdle, IDLE_TIMEOUT);
 }
 
 function triggerIdle() {
+  let secs = 7;
   const overlay = document.getElementById('idle-overlay');
+  const mainEl = document.getElementById('idle-warn-main');
+  const subEl = document.getElementById('idle-warn-sub');
+  function updateIdleText(n) {
+    const bm = (currentLang !== 'en');
+    if (mainEl) mainEl.textContent = bm ? 'Tiada aktiviti dikesan.' : 'No activity detected.';
+    if (subEl) subEl.textContent = bm ? `Kembali ke skrin mula dalam ${n} saat...` : `Returning to start screen in ${n} seconds...`;
+  }
+  updateIdleText(secs);
   overlay.classList.add('show');
-  setLang(currentLang);
-  setTimeout(() => {
-    overlay.classList.remove('show');
-    document.getElementById('modal-overlay').classList.remove('open');
-    resetGame();
-    resetIdle();
-  }, 3000);
+  idleCountdown = setInterval(() => {
+    secs--;
+    updateIdleText(secs);
+    if (secs <= 0) {
+      clearInterval(idleCountdown);
+      idleCountdown = null;
+      overlay.classList.remove('show');
+      document.getElementById('modal-overlay').classList.remove('open');
+      resetGame();
+      resetIdle();
+    }
+  }, 1000);
 }
 
 // Any interaction resets idle

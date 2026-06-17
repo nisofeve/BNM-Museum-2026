@@ -274,16 +274,18 @@ html,body{width:100vw;height:100vh;overflow:hidden;font-family:'Poppins',sans-se
 }
 .btn-text .bm{font-size:calc(14*var(--u));display:block;}
 .btn-text .en{font-size:calc(11*var(--u));opacity:.7;display:block;}
-.answer-a{background:var(--blue);color:white;border-left:calc(5*var(--u)) solid var(--gold);box-shadow:0 calc(3*var(--u)) calc(16*var(--u)) rgba(0,71,171,.25);}
-.answer-a .badge{background:rgba(255,255,255,.2);color:white;}
+.answer-a{background:rgba(255,255,255,.9);color:var(--blue);border:calc(2*var(--u)) solid var(--blue);backdrop-filter:blur(calc(4*var(--u)));}
+.answer-a .badge{background:var(--blue);color:white;}
 .answer-a:hover:not(.disabled){transform:translateY(calc(-2*var(--u)));}
 .answer-b{background:rgba(255,255,255,.9);color:var(--blue);border:calc(2*var(--u)) solid var(--blue);backdrop-filter:blur(calc(4*var(--u)));}
 .answer-b .badge{background:var(--blue);color:white;}
 .answer-b:hover:not(.disabled){transform:translateY(calc(-2*var(--u)));}
-@keyframes flashGreen{0%,100%{background:var(--blue);}50%{background:var(--green);}}
-@keyframes flashBlue{0%,100%{background:rgba(255,255,255,.9);}50%{background:#D8EEFF;}}
-.answer-a.selected{animation:flashGreen .4s ease;}
-.answer-b.selected{animation:flashBlue .4s ease;}
+@keyframes pulseNeonBlue{0%,100%{background:var(--cyan);box-shadow:0 0 calc(16*var(--u)) rgba(0,229,255,.7);}50%{background:#00b8d9;box-shadow:0 0 calc(36*var(--u)) rgba(0,229,255,1);}}
+@keyframes pulseNeonRed{0%,100%{background:#7a1a1a;box-shadow:0 0 calc(12*var(--u)) rgba(255,60,60,.35);}50%{background:#5a1010;box-shadow:0 0 calc(24*var(--u)) rgba(255,60,60,.6);}}
+.answer-btn.selected{animation:pulseNeonBlue .8s ease infinite;color:#fff;border-color:var(--cyan);opacity:1!important;}
+.answer-btn.selected .badge{background:rgba(255,255,255,.25);color:#fff;}
+.answer-btn.wrong-selected{animation:pulseNeonRed .9s ease infinite;color:rgba(255,180,180,.85);border-color:#c03030;opacity:1!important;}
+.answer-btn.wrong-selected .badge{background:rgba(255,60,60,.25);color:rgba(255,180,180,.9);}
 
 /* Thank you */
 #screen-thankyou{background:linear-gradient(160deg,#FFF8F0 0%,#E0F7F5 50%,#EAF0FB 100%);gap:calc(10*var(--u));padding:calc(18*var(--u)) calc(40*var(--u));}
@@ -323,8 +325,12 @@ html,body{width:100vw;height:100vh;overflow:hidden;font-family:'Poppins',sans-se
 }
 #lang-toggle button.active{background:var(--teal);color:white;border-radius:50px;}
 
-#idle-bar{position:fixed;bottom:0;left:0;z-index:999;height:calc(4*var(--u));background:var(--teal);box-shadow:0 0 calc(10*var(--u)) rgba(0,180,166,.6);transition:width 1s linear;opacity:0;}
-#idle-bar.visible{opacity:1;}
+#idle-bar{display:none;}
+#idle-overlay{position:fixed;inset:0;background:rgba(4,9,30,0.93);z-index:9000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:calc(24*var(--u));opacity:0;pointer-events:none;transition:opacity .4s;}
+#idle-overlay.visible{opacity:1;}
+#idle-warn-icon{font-size:calc(72*var(--u));}
+#idle-warn-main{font-size:calc(28*var(--u));font-weight:700;color:#fff;text-align:center;}
+#idle-warn-sub{font-size:calc(20*var(--u));color:rgba(0,229,255,0.8);text-align:center;}
 #scan-sweep{position:fixed;left:0;right:0;top:-14vh;height:12vh;z-index:1200;pointer-events:none;opacity:0;background:linear-gradient(180deg,transparent,rgba(0,180,166,.14) 42%,rgba(0,180,166,.45) 50%,rgba(0,71,171,.16) 58%,transparent);}
 #scan-sweep.run{animation:sweepDown .7s ease-in both;}
 @keyframes sweepDown{0%{top:-14vh;opacity:1;}100%{top:110vh;opacity:0;}}
@@ -602,6 +608,11 @@ html,body{width:100vw;height:100vh;overflow:hidden;font-family:'Poppins',sans-se
 
 
 <div id="idle-bar"></div>
+<div id="idle-overlay">
+  <div id="idle-warn-icon">⏳</div>
+  <div id="idle-warn-main">Tiada aktiviti dikesan.</div>
+  <div id="idle-warn-sub">Kembali ke skrin mula dalam 7 saat...</div>
+</div>
 <div id="scan-sweep"></div>
 
 <!-- TOP: Wall display -->
@@ -955,7 +966,7 @@ const QUESTIONS = [
 // ═══ STATE ═══
 const demoMode=true;
 let currentQ=0, sessionPositive=0, answering=false, countdownTimer=null;
-const appState = { lang:'bm', screen:'welcome', idleTimer:null, idleSeconds:60 };
+const appState = { lang:'bm', screen:'welcome', idleTimer:null,idleCountdown:null, idleSeconds:25 };
 
 // ═══ TABUNG STATE ═══
 let tabungOpen = false;
@@ -1155,6 +1166,8 @@ function setLang(lang) {
   document.getElementById('btn-en').classList.toggle('active',lang==='en');
   const tag=document.getElementById('presenter-tag-q');
   if(tag) tag.textContent=lang==='bm'?'Aisyah — Penasihat Kewangan Anda':'Aisyah — Your Financial Advisor';
+  const qLabel=document.getElementById('q-label');
+  if(qLabel && appState.screen==='question') qLabel.textContent=lang==='bm'?`Soalan ${currentQ+1} daripada 10`:`Question ${currentQ+1} of 10`;
   // Sync wall stats EN spans with current counts
   const ss=document.getElementById('stat-sessions').textContent;
   const sn=document.getElementById('stat-nodes').textContent;
@@ -1203,23 +1216,30 @@ function buildQBubble(q){
   icon.style.cssText='font-size:calc(36*var(--u));text-align:center;margin-bottom:calc(6*var(--u));';
   icon.textContent=q.icon;
   const bm=document.createElement('div');
+  bm.className='lang-bm';
   bm.style.cssText='font-family:Poppins,sans-serif;font-weight:700;font-size:calc(18*var(--u));color:var(--text-dark);text-align:center;line-height:1.4;margin-bottom:calc(4*var(--u));';
   bm.textContent=q.bm;
   const en=document.createElement('div');
+  en.className='lang-en';
   en.style.cssText='font-size:calc(13*var(--u));color:var(--text-light);text-align:center;line-height:1.4;';
   en.textContent=q.en;
   wrap.appendChild(icon); wrap.appendChild(bm); wrap.appendChild(en);
   return wrap;
 }
 
+let answerAIsPositive = true;
+
 function loadQuestion(idx){
   const q=QUESTIONS[idx]; answering=false;
   document.getElementById('progress-fill').style.width=(idx/10*100)+'%';
   document.getElementById('q-label').textContent=appState.lang==='bm'?`Soalan ${idx+1} daripada 10`:`Question ${idx+1} of 10`;
-  document.getElementById('a-bm').textContent=q.a.bm; document.getElementById('a-en').textContent=q.a.en;
-  document.getElementById('b-bm').textContent=q.b.bm; document.getElementById('b-en').textContent=q.b.en;
-  document.getElementById('btn-a').classList.remove('disabled','selected');
-  document.getElementById('btn-b').classList.remove('disabled','selected');
+  answerAIsPositive = Math.random() < 0.5;
+  const slotA = answerAIsPositive ? q.a : q.b;
+  const slotB = answerAIsPositive ? q.b : q.a;
+  document.getElementById('a-bm').textContent=slotA.bm; document.getElementById('a-en').textContent=slotA.en;
+  document.getElementById('b-bm').textContent=slotB.bm; document.getElementById('b-en').textContent=slotB.en;
+  document.getElementById('btn-a').classList.remove('disabled','selected','wrong-selected');
+  document.getElementById('btn-b').classList.remove('disabled','selected','wrong-selected');
   document.getElementById('answer-choices').classList.remove('show');
   Presenter.use('stage-question');
   Presenter.say(buildQBubble(q),{talkMs:3000});
@@ -1227,22 +1247,24 @@ function loadQuestion(idx){
   resetIdle();
 }
 
-function handleAnswer(isPositive){
+function handleAnswer(isPositive, clickedBtn){
   if(answering) return; answering=true;
   const btnA=document.getElementById('btn-a'), btnB=document.getElementById('btn-b');
   btnA.classList.add('disabled'); btnB.classList.add('disabled');
   const lang=appState.lang;
 
   if(isPositive){
+    if(clickedBtn) clickedBtn.classList.add('selected');
     // Light up the corresponding wall node on correct answer only
     activateNode(currentQ, null, true);
     if(currentQ>0) connectNodes(currentQ-1, currentQ, true);
 
-    btnA.classList.add('selected'); sessionPositive++; SFX.win(); Presenter.happy(2500);
+    sessionPositive++; SFX.win(); Presenter.happy(2500);
     Presenter.userSay(lang==='bm'?'✓ Syabas!':'✓ Well done!');
     setTimeout(()=>Presenter.say(lang==='bm'?'✓ Tepat sekali! Pilihan bijak! 🌟':'✓ Exactly right! Smart choice! 🌟',{talkMs:1400}),400);
   } else {
-    btnB.classList.add('selected'); SFX.lose();
+    if(clickedBtn) clickedBtn.classList.add('wrong-selected');
+    SFX.lose();
     Presenter.userSay(lang==='bm'?'💡 Bagus!':'💡 Good thinking!');
     setTimeout(()=>Presenter.say(lang==='bm'?'💡 Bagus! Terus belajar tentang pengurusan kewangan!':'💡 Good effort! Keep learning about financial management!',{talkMs:1400}),400);
   }
@@ -1251,11 +1273,11 @@ function handleAnswer(isPositive){
     currentQ++;
     if(currentQ>=10){ showThankYou(); }
     else { Presenter.hide(); document.getElementById('answer-choices').classList.remove('show'); setTimeout(()=>loadQuestion(currentQ),300); }
-  },1600);
+  },3000);
 }
 
-document.getElementById('btn-a').addEventListener('click',()=>{ SFX.tap(); handleAnswer(true); });
-document.getElementById('btn-b').addEventListener('click',()=>{ SFX.tap(); handleAnswer(false); });
+document.getElementById('btn-a').addEventListener('click',()=>{ SFX.tap(); handleAnswer(answerAIsPositive, document.getElementById('btn-a')); });
+document.getElementById('btn-b').addEventListener('click',()=>{ SFX.tap(); handleAnswer(!answerAIsPositive, document.getElementById('btn-b')); });
 
 // ═══ THANK YOU ═══
 function showThankYou(){
@@ -1278,17 +1300,34 @@ document.getElementById('btn-done').addEventListener('click',()=>{ SFX.tap(); cl
 
 // ═══ IDLE TIMER ═══
 function stopIdleTimer(){
-  clearInterval(appState.idleTimer); appState.idleTimer=null;
-  const bar=document.getElementById('idle-bar'); bar.classList.remove('visible'); bar.style.width='100%';
+  clearTimeout(appState.idleTimer); appState.idleTimer=null;
+  clearInterval(appState.idleCountdown); appState.idleCountdown=null;
+  const ov=document.getElementById('idle-overlay'); if(ov) ov.classList.remove('visible');
 }
 function startIdleTimer(){
-  stopIdleTimer(); let elapsed=0;
-  const bar=document.getElementById('idle-bar');
-  appState.idleTimer=setInterval(()=>{
-    elapsed++;
-    bar.style.width=Math.max(0,(1-elapsed/appState.idleSeconds)*100)+'%';
-    if(elapsed===10) bar.classList.add('visible');
-    if(elapsed>=appState.idleSeconds){ stopIdleTimer(); clearInterval(countdownTimer); returnHome(); }
+  stopIdleTimer();
+  appState.idleTimer=setTimeout(()=>{ showIdleWarning(); }, appState.idleSeconds*1000);
+}
+function showIdleWarning(){
+  let secs=7;
+  const ov=document.getElementById('idle-overlay');
+  const mainEl=document.getElementById('idle-warn-main');
+  const subEl=document.getElementById('idle-warn-sub');
+  function updateText(n){
+    const bm=(appState.lang!=='en');
+    if(mainEl) mainEl.textContent=bm?'Tiada aktiviti dikesan.':'No activity detected.';
+    if(subEl) subEl.textContent=bm?'Kembali ke skrin mula dalam '+n+' saat...':'Returning to start screen in '+n+' seconds...';
+  }
+  updateText(secs);
+  if(ov) ov.classList.add('visible');
+  appState.idleCountdown=setInterval(()=>{
+    secs--;
+    updateText(secs);
+    if(secs<=0){
+      clearInterval(appState.idleCountdown); appState.idleCountdown=null;
+      if(ov) ov.classList.remove('visible');
+      clearInterval(countdownTimer); returnHome();
+    }
   },1000);
 }
 function resetIdle(){ if(appState.screen==='welcome') return; startIdleTimer(); }

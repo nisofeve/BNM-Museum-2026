@@ -194,6 +194,11 @@
   /* ── particles ── */
   .p6-particles{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:1}
   .p6-part{position:absolute;border-radius:50%;background:radial-gradient(circle,rgba(0,229,255,.7),rgba(0,71,171,.3))}
+  #idle-overlay{position:fixed;inset:0;background:rgba(4,9,30,0.93);z-index:9000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:calc(28*var(--u));opacity:0;pointer-events:none;transition:opacity .4s;}
+  #idle-overlay.visible{opacity:1;}
+  #idle-warn-icon{font-size:calc(72*var(--u));}
+  #idle-warn-main{font-size:calc(24*var(--u));font-weight:700;color:#fff;text-align:center;letter-spacing:.05em;}
+  #idle-warn-sub{font-size:calc(16*var(--u));color:rgba(0,229,255,0.8);text-align:center;}
 </style>
 </head>
 <body>
@@ -526,6 +531,51 @@ document.addEventListener('touchstart', e => { if (e.touches.length > 1) e.preve
 document.querySelectorAll('img').forEach(img => img.addEventListener('dragstart', e => e.preventDefault()));
 
 // ══════════════════════════════════════════════════
+// IDLE TIMER — 60s inactivity → 7s countdown → return to map
+// ══════════════════════════════════════════════════
+let idleTimer = null;
+let idleCountdown = null;
+
+function resetIdle() {
+  clearTimeout(idleTimer);
+  clearInterval(idleCountdown);
+  idleCountdown = null;
+  const ov = document.getElementById('idle-overlay');
+  if (ov) ov.classList.remove('visible');
+  if (activeIdx < 0) return;
+  idleTimer = setTimeout(showIdleWarning, 25000);
+}
+
+function showIdleWarning() {
+  let secs = 7;
+  const ov = document.getElementById('idle-overlay');
+  const mainEl = document.getElementById('idle-warn-main');
+  const subEl = document.getElementById('idle-warn-sub');
+  function updateText(n) {
+    const bm = (currentLang !== 'en');
+    if (mainEl) mainEl.textContent = bm ? 'Tiada aktiviti dikesan.' : 'No activity detected.';
+    if (subEl) subEl.textContent = bm ? 'Kembali ke skrin mula dalam ' + n + ' saat...' : 'Returning to start screen in ' + n + ' seconds...';
+  }
+  updateText(secs);
+  if (ov) ov.classList.add('visible');
+  idleCountdown = setInterval(() => {
+    secs--;
+    updateText(secs);
+    if (secs <= 0) {
+      clearInterval(idleCountdown);
+      idleCountdown = null;
+      if (ov) ov.classList.remove('visible');
+      closePanel();
+    }
+  }, 1000);
+}
+
+['click', 'touchstart', 'keydown', 'pointermove'].forEach(ev =>
+  document.addEventListener(ev, resetIdle, { passive: true })
+);
+resetIdle();
+
+// ══════════════════════════════════════════════════
 // SFX
 // ══════════════════════════════════════════════════
 const _ac = (() => { try { return new (window.AudioContext || window.webkitAudioContext)(); } catch(e){} return null; })();
@@ -563,5 +613,10 @@ function playSfx() {
   }
 })();
 </script>
+<div id="idle-overlay">
+  <div id="idle-warn-icon">⏳</div>
+  <div id="idle-warn-main">Tiada aktiviti dikesan.</div>
+  <div id="idle-warn-sub">Kembali ke skrin mula dalam 7 saat...</div>
+</div>
 </body>
 </html>
