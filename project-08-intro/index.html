@@ -10,7 +10,7 @@
   *{margin:0;padding:0;box-sizing:border-box;
     -webkit-user-select:none;user-select:none;
     -webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
-  html,body{width:100%;height:100%;overflow:hidden;background:#02030a;cursor:none}
+  html,body{width:100%;height:100%;overflow:hidden;background:#ffffff;cursor:none}
   body{font-family:"Century Gothic","Futura","Trebuchet MS","Segoe UI",sans-serif;
        color:#eaf6ff}
 
@@ -24,17 +24,17 @@
     pointer-events:none;opacity:0;transition:opacity .9s ease}
   #narr.show{opacity:1}
   .nline{
-    font-size:2.65vmin;font-weight:400;line-height:1.5;letter-spacing:.06em;
-    color:rgba(238,248,255,.94);
-    text-shadow:0 0 14px rgba(120,200,255,.55),0 0 40px rgba(90,150,255,.30);
+    font-size:2.65vmin;font-weight:500;line-height:1.5;letter-spacing:.06em;
+    color:#0a0e16;
+    text-shadow:0 0 16px rgba(255,255,255,.65),0 0 4px rgba(255,255,255,.9);
     min-height:1.2em}
-  .nline.first{font-size:3.7vmin;letter-spacing:.10em;font-weight:500;
-    color:#fff;text-shadow:0 0 18px rgba(160,220,255,.75),0 0 50px rgba(120,180,255,.4);
+  .nline.first{font-size:3.7vmin;letter-spacing:.10em;font-weight:700;
+    color:#000;text-shadow:0 0 18px rgba(255,255,255,.8),0 0 5px rgba(255,255,255,1);
     margin-bottom:.6vmin}
-  .nline.accent{color:#bfe8ff;letter-spacing:.16em;text-transform:uppercase;
+  .nline.accent{color:#101820;letter-spacing:.16em;text-transform:uppercase;
     font-size:2.4vmin}
-  #cursor{display:inline-block;width:.5ch;color:#bfe8ff;
-    animation:blink 1s steps(2) infinite;text-shadow:0 0 12px #7cc7ff}
+  #cursor{display:inline-block;width:.5ch;color:#0a0e16;
+    animation:blink 1s steps(2) infinite;text-shadow:0 0 8px rgba(255,255,255,.8)}
   @keyframes blink{0%,50%{opacity:1}51%,100%{opacity:0}}
 
   /* ── touch hint ── */
@@ -45,17 +45,27 @@
   #hint.show{opacity:1;animation:hintPulse 2.4s ease-in-out infinite}
   #hint .ico{
     width:5vmin;height:5vmin;margin:0 auto 1.4vmin;border-radius:50%;
-    border:1px solid rgba(150,210,255,.6);
-    box-shadow:0 0 22px rgba(110,190,255,.45),inset 0 0 18px rgba(110,190,255,.25);
+    border:1px solid rgba(0,0,0,.4);
+    box-shadow:0 0 20px rgba(0,0,0,.12),inset 0 0 16px rgba(0,0,0,.06);
     display:flex;align-items:center;justify-content:center}
   #hint .ico::after{content:"";width:1.5vmin;height:1.5vmin;border-radius:50%;
-    background:radial-gradient(circle,#dff3ff,#7cc7ff);
-    box-shadow:0 0 14px #7cc7ff}
+    background:radial-gradient(circle,#333,#000);
+    box-shadow:0 0 10px rgba(0,0,0,.35)}
   #hint .txt{font-size:2.1vmin;letter-spacing:.42em;text-transform:uppercase;
-    color:rgba(214,238,255,.9);text-shadow:0 0 16px rgba(110,190,255,.6);
+    color:#0a0e16;text-shadow:0 0 12px rgba(255,255,255,.6);
     padding-left:.42em}
   @keyframes hintPulse{0%,100%{opacity:.45;transform:translateX(-50%) translateY(0)}
     50%{opacity:1;transform:translateX(-50%) translateY(-1vmin)}}
+
+  /* ── language toggle ── */
+  #lang{position:fixed;top:3vmin;right:3vmin;z-index:6;display:flex;
+    border:1px solid rgba(0,0,0,.35);border-radius:999px;overflow:hidden;
+    background:rgba(255,255,255,.55);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+    box-shadow:0 2px 14px rgba(0,0,0,.12);pointer-events:auto}
+  #lang button{appearance:none;-webkit-appearance:none;border:0;background:transparent;
+    cursor:pointer;font-family:inherit;font-size:1.9vmin;letter-spacing:.14em;
+    color:#0a0e16;padding:1.1vmin 2.6vmin;transition:background .25s,color .25s}
+  #lang button.active{background:#0a0e16;color:#fff}
 
   /* ── white flash / fade ── */
   #white{position:fixed;inset:0;z-index:9;background:#ffffff;opacity:0;
@@ -69,6 +79,11 @@
 </head>
 <body>
   <canvas id="gl"></canvas>
+
+  <div id="lang">
+    <button data-l="bm" class="active">BM</button>
+    <button data-l="en">EN</button>
+  </div>
 
   <div id="narr"></div>
 
@@ -160,8 +175,8 @@ float gTime; float gDisp; float gRot;
 
 float mapBlob(vec3 p){
   p = rotY(gRot)*rotX(gRot*0.6)*p;
-  float base = length(p) - 0.92;
-  float n = fbm3(p*1.45 + vec3(0.0,0.0,gTime*0.55));
+  float base = length(p) - 0.46;                       // half radius (50% smaller)
+  float n = fbm3(p*2.9 + vec3(0.0,0.0,gTime*0.30));     // doubled freq, slower evolution
   return base - n*gDisp;
 }
 vec3 calcNormal(vec3 p){
@@ -175,31 +190,28 @@ vec3 calcNormal(vec3 p){
 void main(){
   vec2 uv=(gl_FragCoord.xy - 0.5*uRes)/uRes.y;
   gTime=uTime;
-  gDisp=0.30 + 0.11*sin(uTime*0.6) + uSpin*0.40;
-  gRot =uTime*(0.22 + uSpin*9.0);
+  gDisp=0.15 + 0.055*sin(uTime*0.4) + uSpin*0.20;   // half amplitude (smaller blob)
+  gRot =uTime*(0.10 + uSpin*9.0);                    // slower idle spin, same fast peak
 
-  // ── mystic nebula background ──
+  // ── mystic background (white with drifting pastel hue) ──
   vec2 q=uv*1.15;
   float warp=fbm3(vec3(q*1.4, uTime*0.05));
   float neb =fbm3(vec3(q*2.6 + warp*1.3, uTime*0.045));
-  vec3 deep=vec3(0.012,0.02,0.06);
-  vec3 cA=pal(uHue)*0.55;
-  vec3 cB=pal(uHue+0.55)*0.45;
-  vec3 mystic=mix(deep, mix(cA,cB,neb), smoothstep(-0.35,0.85,neb)*0.85);
-  // faint stars
-  float st=hash21(floor(uv*240.0));
-  mystic += step(0.992,st)*vec3(0.8,0.9,1.0)*(0.6+0.4*sin(uTime*3.0+st*60.0));
-  mystic *= 1.0 - 0.55*dot(uv,uv);
+  vec3 tintA=pal(uHue)*0.5+0.5;       // pastel
+  vec3 tintB=pal(uHue+0.55)*0.5+0.5;
+  vec3 tint=mix(tintA,tintB,neb);
+  vec3 mystic=mix(vec3(1.0), tint, 0.12 + 0.12*smoothstep(-0.30,0.80,neb));
+  mystic=mix(mystic, vec3(1.0), smoothstep(1.10,0.0,length(uv))*0.28); // bright center
 
   // ── halo rings background (middle screen) ──
   float r=length(uv);
   float ring=sin(r*24.0 - uTime*uHalo*3.0);
   ring=smoothstep(0.35,1.0,ring);
   vec3 haloTint=pal(uHue*0.4+0.12)*0.5+0.5;
-  vec3 halo = vec3(0.92,0.96,1.0)*smoothstep(0.55,0.0,r);     // bright core
-  halo += haloTint*ring*0.55*smoothstep(1.25,0.05,r);          // tinted rings
-  halo += vec3(1.0)*0.18;                                      // overall wash
-  halo = clamp(halo,0.0,1.4);
+  vec3 halo = vec3(1.0)*smoothstep(0.80,0.0,r);               // large bright core
+  halo += haloTint*ring*0.30*smoothstep(1.30,0.10,r);          // faint tinted rings
+  halo += vec3(1.0)*0.58;                                      // strong white wash
+  halo = clamp(halo,0.0,1.6);
 
   vec3 bg=mix(mystic, halo, uHaloOn);
 
@@ -291,6 +303,7 @@ void main(){
   const U={ time:0, spin:0, blob:1, haloOn:0, halo:1, hue:0 };
   const tweens=[];
   const easeInCubic=t=>t*t*t;
+  const easeInQuart=t=>t*t*t*t;
   const easeOutCubic=t=>1-Math.pow(1-t,3);
   const easeInQuad=t=>t*t;
   function tween(key,to,dur,ease){
@@ -383,6 +396,28 @@ void main(){
     o.connect(g); g.connect(AC.destination); o.start(t0); o.stop(t0+0.1);
   }
 
+  // ── enter BGM (post-narration transition) ──
+  const bgm=new Audio('Assets/enter_bgm.mp3');
+  bgm.preload='auto';
+  let bgmFade=null;
+  function playBgm(){
+    if(bgmFade){ clearInterval(bgmFade); bgmFade=null; }
+    try{ bgm.currentTime=0; }catch(e){}
+    bgm.volume=1; bgm.play().catch(()=>{});
+  }
+  function fadeBgmOut(dur){
+    if(bgmFade) clearInterval(bgmFade);
+    const step=50, dec=bgm.volume/(dur/step);
+    bgmFade=setInterval(()=>{
+      bgm.volume=Math.max(0,bgm.volume-dec);
+      if(bgm.volume<=0){ clearInterval(bgmFade); bgmFade=null; bgm.pause(); }
+    }, step);
+  }
+  function stopBgm(){
+    if(bgmFade){ clearInterval(bgmFade); bgmFade=null; }
+    bgm.pause(); try{ bgm.currentTime=0; }catch(e){}
+  }
+
   // ══════════════════════════════════════════════
   //  WHITE FADE
   // ══════════════════════════════════════════════
@@ -396,20 +431,24 @@ void main(){
   //  NARRATION
   // ══════════════════════════════════════════════
   const narr=document.getElementById('narr');
+  let lang='bm';
+  const HINTS={bm:'Sentuh Skrin', en:'Touch Screen'};
   const LINES=[
-    {t:"Selamat datang, Pengembara Masa.", c:"first"},
-    {t:"Ini adalah sebuah Kapsul Masa: Kisah, Refleksi dan Kewangan"},
-    {t:"oleh Muzium dan Galeri Seni Bank Negara Malaysia"},
-    {t:"yang menyimpan kisah perjalanan"},
-    {t:"bagaimana kewangan dan budaya berkembang"},
-    {t:"seiiring dalam membentuk"},
-    {t:"sebuah negara yang bersatu."},
-    {t:"Aktifkan kapsul masa..", c:"accent"},
-    {t:"kembali ke Masa Lalu,"},
-    {t:"Masa Kini"},
-    {t:"dan Masa Hadapan"},
-    {t:"Sentuh Skrin untuk membuka portal masa", c:"accent"},
-    {t:"Pengembaraan masa anda bermula sekarang."}
+    {c:"first", bm:"Selamat datang, Pengembara Masa.",            en:"Welcome, Time Traveller."},
+    {bm:"Ini adalah sebuah Kapsul Masa: Kisah, Refleksi dan Kewangan",
+     en:"This is a Time Capsule: Stories, Reflections and Finance"},
+    {bm:"oleh Muzium dan Galeri Seni Bank Negara Malaysia",
+     en:"by the Bank Negara Malaysia Museum and Art Gallery"},
+    {bm:"yang menyimpan kisah perjalanan",                   en:"that holds the story of a journey"},
+    {bm:"bagaimana kewangan dan budaya berkembang seiiring", en:"of how finance and culture evolved together"},
+    {bm:"dalam membentuk sebuah negara yang bersatu.",       en:"in shaping a united nation."},
+    {c:"accent", bm:"Aktifkan kapsul masa..",                en:"Activate the time capsule.."},
+    {bm:"kembali ke Masa Lalu,",                             en:"back to the Past,"},
+    {bm:"Masa Kini",                                          en:"the Present"},
+    {bm:"dan Masa Hadapan",                                   en:"and the Future"},
+    {c:"accent", bm:"Sentuh Skrin untuk membuka portal masa",
+     en:"Touch the Screen to open the portal of time"},
+    {bm:"Pengembaraan masa anda bermula sekarang.",  en:"Your journey through time begins now."}
   ];
   const sleep=ms=>new Promise(r=>setTimeout(r,ms));
   function charDelay(ch){
@@ -427,7 +466,7 @@ void main(){
       const line=document.createElement('div');
       line.className='nline'+(LINES[i].c?(' '+LINES[i].c):'');
       narr.appendChild(line); line.appendChild(cursor);
-      const txt=LINES[i].t;
+      const txt=LINES[i][lang];
       for(let c=0;c<txt.length;c++){
         if(mine!==narrToken) return;
         line.insertBefore(document.createTextNode(txt[c]), cursor);
@@ -447,8 +486,32 @@ void main(){
   //  HINT
   // ══════════════════════════════════════════════
   const hint=document.getElementById('hint');
-  function showHint(txt){ document.getElementById('hint-txt').textContent=txt; hint.classList.add('show'); }
+  const hintTxt=document.getElementById('hint-txt');
+  function updateHint(){ hintTxt.textContent=HINTS[lang]; }
+  function showHint(){ updateHint(); hint.classList.add('show'); }
   function hideHint(){ hint.classList.remove('show'); }
+
+  // ── language toggle ──
+  const langEl=document.getElementById('lang');
+  function renderAllLines(){               // fill narration instantly in current lang
+    narr.innerHTML='';
+    for(const ln of LINES){
+      const d=document.createElement('div');
+      d.className='nline'+(ln.c?(' '+ln.c):'');
+      d.textContent=ln[lang]; narr.appendChild(d);
+    }
+  }
+  function setLang(l){
+    if(l===lang) return;
+    lang=l;
+    langEl.querySelectorAll('button').forEach(b=>b.classList.toggle('active', b.dataset.l===lang));
+    updateHint();
+    if(state==='MIDDLE') startNarration();        // re-type in new lang
+    else if(state==='MIDDLE_WAIT') renderAllLines(); // swap completed text
+  }
+  langEl.addEventListener('pointerdown', e=>e.stopPropagation()); // don't trigger tap
+  langEl.querySelectorAll('button').forEach(b=>
+    b.addEventListener('click', ()=>setLang(b.dataset.l)));
 
   // ══════════════════════════════════════════════
   //  STATE MACHINE
@@ -462,36 +525,39 @@ void main(){
     state='START'; locked=false;
     narrToken++; narr.classList.remove('show'); narr.innerHTML='';
     U.haloOn=0; U.blob=1; U.spin=0; U.halo=1;
-    showHint('Sentuh Skrin');
+    showHint();
   }
 
   function transitionIn(){
     state='TRANS_IN'; locked=true; hideHint(); whoosh(true);
-    tween('spin',1,1700,easeInCubic);
-    later(()=>fadeWhite(1,650), 1150);
-    later(()=>{                       // white fully covers ~1800ms
+    tween('spin',1,2800,easeInQuart);   // longer buildup: slow start → fast spin
+    later(()=>fadeWhite(1,700), 2150);
+    later(()=>{                       // white fully covers ~2850ms
       // reconfigure for middle screen under cover of white
       U.haloOn=1; U.blob=0; U.spin=0; U.halo=1;
       state='MIDDLE';
       fadeWhite(0,850);
       ramp(droneGain&&droneGain.gain,0.12,2.0);
       startNarration();
-    }, 1850);
+    }, 2850);
   }
 
   function narrationDone(){
     state='MIDDLE_WAIT';
     tween('blob',1,1300,easeOutCubic);   // blob re-materialises over halo
-    later(()=>{ showHint('Sentuh Skrin'); locked=false; }, 700);
+    later(()=>{ showHint(); locked=false; }, 700);
   }
 
   function transitionOut(){
     state='TRANS_OUT'; locked=true; hideHint(); whoosh(true);
     narrToken++; narr.classList.remove('show');
-    tween('spin',1,1400,easeInCubic);
+    playBgm();                              // enter BGM for the blob transition
+    ramp(droneGain&&droneGain.gain,0.0,0.5); // duck synth drone under BGM
+    tween('spin',1,2600,easeInQuart);    // longer buildup: slow start → fast spin
     tween('halo',7,5000,easeInQuad);     // rings accelerate over 5s
-    later(()=>fadeWhite(1,800), 5000);   // after 5s, fade to white
+    later(()=>{ fadeWhite(1,800); fadeBgmOut(2800); }, 5000); // after 5s, fade to white + BGM
     later(()=>{                          // 3s after fade-to-white begins
+      stopBgm();
       toStart();
       fadeWhite(0,950);
       ramp(droneGain&&droneGain.gain,0.18,2.0);
@@ -508,10 +574,18 @@ void main(){
   addEventListener('pointerdown', onTap);
 
   // ── kiosk hardening ──
-  function goFull(){ const el=document.documentElement;
+  function goFull(){
+    if(document.fullscreenElement) return;
+    const el=document.documentElement;
     const fn=el.requestFullscreen||el.webkitRequestFullscreen||el.msRequestFullscreen;
-    if(fn) fn.call(el).catch(()=>{}); }
-  addEventListener('pointerdown', goFull, {once:true});
+    if(fn){ const p=fn.call(el); if(p&&p.catch) p.catch(()=>{}); }
+  }
+  // best-effort immediate (works when launched with a fullscreen-capable context);
+  // browsers without a gesture will ignore it — gesture fallback below covers that.
+  goFull();
+  addEventListener('load', goFull, {once:true});
+  ['pointerdown','touchstart','keydown'].forEach(ev=>
+    addEventListener(ev, goFull, {once:true}));
   addEventListener('contextmenu', e=>e.preventDefault());
   addEventListener('touchstart', e=>{ if(e.touches.length>1) e.preventDefault(); }, {passive:false});
   addEventListener('gesturestart', e=>e.preventDefault());
