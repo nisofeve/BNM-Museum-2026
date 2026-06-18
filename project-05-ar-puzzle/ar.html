@@ -163,8 +163,8 @@
 
     <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-    <!-- A01-1399 is index 1 in targets.mind -->
-    <a-entity mindar-image-target="targetIndex: 1" id="marker-0">
+    <!-- targets.mind index 0 = A01-1399 (verified: 2102x2560) -->
+    <a-entity mindar-image-target="targetIndex: 0" id="marker-0">
       <!-- Plane matches A01-1399.jpg aspect: 2102×2560 → width:height = 1:1.2179 -->
       <a-plane
         src="#ar-video"
@@ -176,8 +176,8 @@
       ></a-plane>
     </a-entity>
 
-    <!-- A01-1883 is index 0 in targets.mind -->
-    <a-entity mindar-image-target="targetIndex: 0" id="marker-1">
+    <!-- targets.mind index 1 = A01-1883 (verified: 2560x1788) -->
+    <a-entity mindar-image-target="targetIndex: 1" id="marker-1">
       <!-- Plane matches A01-1883.jpg aspect: 2560×1788 → width:height = 1:0.6984 -->
       <a-plane
         src="#ar-video-2"
