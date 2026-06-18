@@ -2841,6 +2841,7 @@ const Presenter = (() => {
     rescueStoredPanels(s.bubbleContent);
     s.bubble.classList.remove('visible');
     s.svg.classList.remove('is-talking');
+    s.svg.classList.remove('is-happy');   // return to neutral idle (clears stuck happy pose)
   }
 
   function happy(holdMs) {
