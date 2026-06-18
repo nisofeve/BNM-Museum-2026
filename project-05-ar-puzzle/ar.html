@@ -151,12 +151,12 @@
     <a-assets>
       <video id="ar-video"
         src="Assets/Animated-1399.mp4"
-        loop muted playsinline webkit-playsinline
+        autoplay loop muted playsinline webkit-playsinline
         crossorigin="anonymous"
       ></video>
       <video id="ar-video-2"
         src="Assets/Animated-1883.mp4"
-        loop muted playsinline webkit-playsinline
+        autoplay loop muted playsinline webkit-playsinline
         crossorigin="anonymous"
       ></video>
     </a-assets>
@@ -224,6 +224,13 @@
         if (v) v.pause();
       });
     });
+
+    // kick playback on first user gesture (some browsers defer muted autoplay)
+    const kickPlay = () => {
+      document.querySelectorAll('video').forEach(v => { v.muted = true; v.play().catch(() => {}); });
+    };
+    window.addEventListener('touchend', kickPlay, { once: true });
+    window.addEventListener('click', kickPlay, { once: true });
   </script>
 
 </body>
