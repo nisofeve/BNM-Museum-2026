@@ -14,7 +14,8 @@
   body{font-family:"Century Gothic","Futura","Trebuchet MS","Segoe UI",sans-serif;
        color:#eaf6ff}
 
-  #gl{position:fixed;inset:0;width:100%;height:100%;display:block;z-index:1}
+  #gl{position:fixed;inset:0;width:100%;height:100%;display:block;z-index:1;
+      background:#ffffff;transition:opacity .4s ease}
 
   /* ── narrator text ── */
   #narr{
@@ -102,6 +103,13 @@ void main(){ gl_Position = vec4(aPos,0.0,1.0); }
 
 <script id="frag" type="x-shader/x-fragment">
 precision highp float;
+//__DEFINES__
+#ifndef OCT
+#define OCT 3
+#endif
+#ifndef STEPS
+#define STEPS 64
+#endif
 
 uniform vec2  uRes;
 uniform float uTime;   // seconds
@@ -158,7 +166,7 @@ float snoise(vec3 v){
 }
 float fbm3(vec3 p){
   float a=0.5,f=0.0;
-  for(int i=0;i<3;i++){ f+=a*snoise(p); p*=2.02; a*=0.5; }
+  for(int i=0;i<OCT;i++){ f+=a*snoise(p); p*=2.02; a*=0.5; }
   return f;
 }
 float hash21(vec2 p){
@@ -219,7 +227,7 @@ void main(){
   vec3 ro=vec3(0.0,0.0,3.0);
   vec3 rd=normalize(vec3(uv,-1.7));
   float t=0.0; float hit=0.0; float glow=0.0; vec3 pos=ro;
-  for(int i=0;i<64;i++){
+  for(int i=0;i<STEPS;i++){
     pos=ro+rd*t;
     float d=mapBlob(pos);
     glow += 0.018/(0.02+d*d);          // soft volumetric bloom
@@ -259,9 +267,21 @@ void main(){
 (() => {
   "use strict";
   const cv = document.getElementById('gl');
-  const gl = cv.getContext('webgl', {antialias:false, alpha:false, powerPreference:'high-performance'})
-          || cv.getContext('experimental-webgl');
+  // alpha:true → if the GPU drops the context (common on heavy iOS shaders),
+  // the canvas becomes transparent and the white CSS background shows instead of black.
+  const glOpts={antialias:false, alpha:true, premultipliedAlpha:false, powerPreference:'high-performance'};
+  const gl = cv.getContext('webgl', glOpts) || cv.getContext('experimental-webgl', glOpts);
   if(!gl){ document.getElementById('fallback').style.display='flex'; return; }
+
+  // mobile / iOS get a lighter shader so Safari doesn't kill the GPU process → black screen
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
+                || (window.matchMedia && matchMedia('(pointer:coarse)').matches);
+  const OCT = isMobile ? 2 : 3;
+  const STEPS = isMobile ? 40 : 64;
+  const RSCALE = isMobile ? 0.45 : 0.62;
+
+  // if the context is lost, hide the canvas so the white page shows (black text stays readable)
+  cv.addEventListener('webglcontextlost', e=>{ e.preventDefault(); cv.style.opacity='0'; }, false);
 
   // ── compile ──
   function sh(type, src){
@@ -269,9 +289,11 @@ void main(){
     if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s));
     return s;
   }
+  const fragSrc = document.getElementById('frag').textContent
+    .replace('//__DEFINES__', `#define OCT ${OCT}\n#define STEPS ${STEPS}`);
   const prog=gl.createProgram();
   gl.attachShader(prog, sh(gl.VERTEX_SHADER,   document.getElementById('vert').textContent));
-  gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, document.getElementById('frag').textContent));
+  gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, fragSrc));
   gl.linkProgram(prog);
   if(!gl.getProgramParameter(prog,gl.LINK_STATUS)){
     document.getElementById('fallback').style.display='flex'; return;
@@ -290,8 +312,7 @@ void main(){
             haloOn:gl.getUniformLocation(prog,'uHaloOn'), halo:gl.getUniformLocation(prog,'uHalo'),
             hue:gl.getUniformLocation(prog,'uHue') };
 
-  // render at reduced backing res — bloom/softness hides it, big perf win
-  const RSCALE=0.62;
+  // render at reduced backing res — bloom/softness hides it, big perf win (RSCALE set above)
   function resize(){
     const w=Math.max(2,Math.floor(innerWidth*RSCALE));
     const h=Math.max(2,Math.floor(innerHeight*RSCALE));
