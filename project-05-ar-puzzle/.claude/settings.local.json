@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Get-ChildItem \"F:\\\\Work\\\\AR_Test\" -ErrorAction SilentlyContinue; if \\(-not \\(Test-Path \"F:\\\\Work\\\\AR_Test\"\\)\\) { New-Item -ItemType Directory -Path \"F:\\\\Work\\\\AR_Test\" -Force })"
+    ]
+  }
+}
