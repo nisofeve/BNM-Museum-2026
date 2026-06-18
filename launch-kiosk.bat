@@ -40,7 +40,7 @@ start "MHIT HTTP Server" /min cmd /c "%PYTHON% -m http.server 8765 --directory "
 :: Wait a moment for server to start
 timeout /t 2 /nobreak >nul
 
-:: Open project-02 in Chrome kiosk mode
+:: Open project-08 intro in Chrome kiosk mode
 :: Try common Chrome install locations
 set CHROME=""
 if exist "C:\Program Files\Google\Chrome\Application\chrome.exe" set CHROME="C:\Program Files\Google\Chrome\Application\chrome.exe"
@@ -49,10 +49,10 @@ if exist "%LOCALAPPDATA%\Google\Chrome\Application\chrome.exe" set CHROME="%LOCA
 
 if %CHROME%=="" (
     echo  Chrome not found. Opening in default browser...
-    start http://localhost:8765/project-02-qr-payment/
+    start http://localhost:8765/project-08-intro/
 ) else (
-    echo  Opening project-02 in Chrome kiosk mode...
-    start "" %CHROME% --kiosk --app=http://localhost:8765/project-02-qr-payment/ --disable-features=TranslateUI --no-first-run --disable-pinch
+    echo  Opening project-08 in Chrome kiosk mode...
+    start "" %CHROME% --kiosk --app=http://localhost:8765/project-08-intro/ --disable-features=TranslateUI --no-first-run --disable-pinch
 )
 
 echo.
