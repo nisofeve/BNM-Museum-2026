@@ -1975,6 +1975,24 @@
 
 <script>
 // ══════════════════════════════════════════════════════
+// BGM — looping background music for the quiz
+// ══════════════════════════════════════════════════════
+const BGM=(()=>{
+  let a=null, cur=null;
+  // single reused element stays autoplay-unlocked after the first gesture-driven play
+  function play(src){
+    if(!a){ a=new Audio(); a.loop=true; a.volume=0.45; }
+    if(cur!==src){ a.src=src; cur=src; }
+    try{ a.currentTime=0; }catch(e){}
+    a.play().catch(()=>{});
+  }
+  function stop(){ if(a){ a.pause(); try{a.currentTime=0;}catch(e){} } }
+  return { play, stop };
+})();
+const BGM_QUIZ='Assets/arcade_adventure_bgm.mp3';
+const BGM_RESULT='Assets/arcade_result_bgm.mp3';
+
+// ══════════════════════════════════════════════════════
 // SFX — chiptune voices (Web Audio API, no files). 8-bit square/pulse waves.
 // tap() buttons · swap() screen change · coin() correct · jump() leap
 // hurt() wrong/damage · win()/lose() result jingles
@@ -2469,6 +2487,7 @@ function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   state.screen = id.replace('-screen', '');
+  if (id !== 'quiz-screen') BGM.stop();   // stop quiz BGM when leaving the quiz
   SFX.swap();
   runScanSweep();
 }
@@ -2568,6 +2587,7 @@ function startQuiz() {
   var sq = document.getElementById('scene-quiz');
   if (sq) sq.classList.add('is-running');     // start parallax scroll
   renderCurrentQuestion(true);
+  BGM.play(BGM_QUIZ);                          // quiz background music
   resetIdle();
 }
 
@@ -2723,7 +2743,8 @@ function nextQuestion() {
 // SHOW RESULTS
 // ══════════════════════════════════════════════════════
 function showResults() {
-  showScreen('result-screen');
+  showScreen('result-screen');           // stops quiz BGM (id !== quiz-screen)
+  BGM.play(BGM_RESULT);                   // result background music
   var sq = document.getElementById('scene-quiz');
   if (sq) sq.classList.remove('is-running');
 
