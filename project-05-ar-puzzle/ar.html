@@ -151,20 +151,38 @@
     <a-assets>
       <video id="ar-video"
         src="Assets/Animated-1399.mp4"
-        autoplay loop muted playsinline webkit-playsinline
+        loop muted playsinline webkit-playsinline
+        crossorigin="anonymous"
+      ></video>
+      <video id="ar-video-2"
+        src="Assets/Animated-1883.mp4"
+        loop muted playsinline webkit-playsinline
         crossorigin="anonymous"
       ></video>
     </a-assets>
 
     <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-    <!-- targetIndex: 0 = A01-1399 (first image in targets.mind) -->
-    <a-entity mindar-image-target="targetIndex: 0" id="main-marker">
-      <!-- Plane sized to match A01-1399.jpg aspect ratio: 6000×4000 = width:height = 1:0.6667 -->
+    <!-- A01-1399 is index 1 in targets.mind -->
+    <a-entity mindar-image-target="targetIndex: 1" id="marker-0">
+      <!-- Plane matches A01-1399.jpg aspect: 2102×2560 → width:height = 1:1.2179 -->
       <a-plane
         src="#ar-video"
         width="1"
-        height="0.6667"
+        height="1.2179"
+        position="0 0 0"
+        rotation="0 0 0"
+        material="shader: flat; transparent: true;"
+      ></a-plane>
+    </a-entity>
+
+    <!-- A01-1883 is index 0 in targets.mind -->
+    <a-entity mindar-image-target="targetIndex: 0" id="marker-1">
+      <!-- Plane matches A01-1883.jpg aspect: 2560×1788 → width:height = 1:0.6984 -->
+      <a-plane
+        src="#ar-video-2"
+        width="1"
+        height="0.6984"
         position="0 0 0"
         rotation="0 0 0"
         material="shader: flat; transparent: true;"
@@ -176,26 +194,35 @@
   </a-scene>
 
   <script>
-    const marker = document.getElementById('main-marker');
-    const hint   = document.getElementById('hint-text');
-    const flash  = document.getElementById('found-flash');
-    const badge  = document.getElementById('status-badge');
-    const video  = document.getElementById('ar-video');
+    const hint  = document.getElementById('hint-text');
+    const flash = document.getElementById('found-flash');
+    const badge = document.getElementById('status-badge');
 
-    marker.addEventListener('targetFound', () => {
-      hint.textContent = 'Image detected!';
-      flash.classList.add('active');
-      badge.textContent = 'AR TRACKING';
-      badge.style.borderColor = 'rgba(0,229,255,0.8)';
-      setTimeout(() => flash.classList.remove('active'), 400);
-      video.play();
-    });
+    // map each target to its video
+    const TARGETS = [
+      { marker: 'marker-0', video: 'ar-video'   }, // A01-1399 → Animated-1399
+      { marker: 'marker-1', video: 'ar-video-2' }  // A01-1883 → Animated-1883
+    ];
 
-    marker.addEventListener('targetLost', () => {
-      hint.textContent = 'Point camera at the target image';
-      badge.textContent = 'AR SCANNER';
-      badge.style.borderColor = 'rgba(0,229,255,0.3)';
-      video.pause();
+    TARGETS.forEach(({ marker, video }) => {
+      const m = document.getElementById(marker);
+      const v = document.getElementById(video);
+
+      m.addEventListener('targetFound', () => {
+        hint.textContent = 'Image detected!';
+        flash.classList.add('active');
+        badge.textContent = 'AR TRACKING';
+        badge.style.borderColor = 'rgba(0,229,255,0.8)';
+        setTimeout(() => flash.classList.remove('active'), 400);
+        if (v) { v.currentTime = 0; v.play().catch(() => {}); }
+      });
+
+      m.addEventListener('targetLost', () => {
+        hint.textContent = 'Point camera at the target image';
+        badge.textContent = 'AR SCANNER';
+        badge.style.borderColor = 'rgba(0,229,255,0.3)';
+        if (v) v.pause();
+      });
     });
   </script>
 

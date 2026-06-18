@@ -41,6 +41,19 @@
       gap: 20px;
     }
 
+    .targets-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 28px;
+      justify-content: center;
+    }
+    .target-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
     .marker-label {
       font-size: 12px;
       letter-spacing: 3px;
@@ -107,19 +120,34 @@
 </head>
 <body>
 
-  <h1>AR Target Image</h1>
-  <p class="sub">Show this image to the camera to trigger the AR experience</p>
+  <h1>AR Target Images</h1>
+  <p class="sub">Show either image to the camera to trigger its AR experience</p>
 
   <div class="marker-wrapper">
-    <div class="marker-label">AR Target Image — A01-1399</div>
+    <div class="targets-row">
+      <div class="target-card">
+        <div class="marker-label">A01-1399</div>
+        <div class="hiro-container">
+          <img
+            src="Assets/A01-1399.jpg"
+            width="280" height="280"
+            alt="AR Target Image A01-1399"
+            style="object-fit: cover; border-radius: 4px;"
+          >
+        </div>
+      </div>
 
-    <div class="hiro-container">
-      <img
-        src="Assets/A01-1399.jpg"
-        width="280" height="280"
-        alt="AR Target Image A01-1399"
-        style="object-fit: cover; border-radius: 4px;"
-      >
+      <div class="target-card">
+        <div class="marker-label">A01-1883</div>
+        <div class="hiro-container">
+          <img
+            src="Assets/A01-1883.jpg"
+            width="280" height="280"
+            alt="AR Target Image A01-1883"
+            style="object-fit: cover; border-radius: 4px;"
+          >
+        </div>
+      </div>
     </div>
 
     <div class="instructions">
@@ -127,12 +155,12 @@
       <ol>
         <li>Open the AR scanner app on your phone</li>
         <li>Allow camera access when prompted</li>
-        <li>Point camera at this marker</li>
+        <li>Point camera at either marker</li>
         <li>Hold steady — animation appears!</li>
       </ol>
     </div>
 
-    <button class="print-btn" onclick="window.print()">Print Marker</button>
+    <button class="print-btn" onclick="window.print()">Print Markers</button>
   </div>
 
 </body>
