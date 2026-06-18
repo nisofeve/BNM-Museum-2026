@@ -163,11 +163,11 @@
 
     <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-    <!-- targets.mind index 0 = A01-1399 (verified: 2102x2560) -->
+    <!-- targets.mind index 0 = A01-1399 (verified: 2102x2560) → plays Animated-1883 -->
     <a-entity mindar-image-target="targetIndex: 0" id="marker-0">
       <!-- Plane matches A01-1399.jpg aspect: 2102×2560 → width:height = 1:1.2179 -->
       <a-plane
-        src="#ar-video"
+        src="#ar-video-2"
         width="1"
         height="1.2179"
         position="0 0 0"
@@ -176,11 +176,11 @@
       ></a-plane>
     </a-entity>
 
-    <!-- targets.mind index 1 = A01-1883 (verified: 2560x1788) -->
+    <!-- targets.mind index 1 = A01-1883 (verified: 2560x1788) → plays Animated-1399 -->
     <a-entity mindar-image-target="targetIndex: 1" id="marker-1">
       <!-- Plane matches A01-1883.jpg aspect: 2560×1788 → width:height = 1:0.6984 -->
       <a-plane
-        src="#ar-video-2"
+        src="#ar-video"
         width="1"
         height="0.6984"
         position="0 0 0"
@@ -200,8 +200,8 @@
 
     // map each target to its video
     const TARGETS = [
-      { marker: 'marker-0', video: 'ar-video'   }, // A01-1399 → Animated-1399
-      { marker: 'marker-1', video: 'ar-video-2' }  // A01-1883 → Animated-1883
+      { marker: 'marker-0', video: 'ar-video-2' }, // A01-1399 → Animated-1883
+      { marker: 'marker-1', video: 'ar-video'   }  // A01-1883 → Animated-1399
     ];
 
     TARGETS.forEach(({ marker, video }) => {
