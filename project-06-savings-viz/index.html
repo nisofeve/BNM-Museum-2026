@@ -701,7 +701,7 @@ html,body{width:100vw;height:100vh;overflow:hidden;font-family:'Poppins',sans-se
       <div class="bubble bubble-main"><div class="bubble-content"></div></div>
       <div class="bubble bubble-user"><div class="bubble-content"></div></div>
       <div class="presenter-char"></div>
-      <div class="presenter-tag" id="presenter-tag-q">Aisyah — Penasihat Kewangan Anda</div>
+      <div class="presenter-tag" id="presenter-tag-q">Si Kijang — Penasihat Kewangan Anda</div>
     </div>
     <div id="q-answer-area">
       <div class="answer-panel" id="answer-choices">
@@ -740,10 +740,10 @@ html,body{width:100vw;height:100vh;overflow:hidden;font-family:'Poppins',sans-se
 
 <!-- Presenter PNG sprite template -->
 <template id="presenter-img-template">
-  <img class="aisyah-sp sp-idle"  src="../Assets/Aisyah_idle.png"       alt="" aria-hidden="true">
-  <img class="aisyah-sp sp-blink" src="../Assets/Aisyah_close_eyes.png" alt="" aria-hidden="true">
-  <img class="aisyah-sp sp-talk"  src="../Assets/Aisyah_talk.png"       alt="" aria-hidden="true">
-  <img class="aisyah-sp sp-happy" src="../Assets/Aisyah_happy.png"      alt="" aria-hidden="true">
+  <img class="aisyah-sp sp-idle"  src="../Assets/kijang_idle.png"       alt="" aria-hidden="true">
+  <img class="aisyah-sp sp-blink" src="../Assets/kijang_close_eyes.png" alt="" aria-hidden="true">
+  <img class="aisyah-sp sp-talk"  src="../Assets/kijang_talk.png"       alt="" aria-hidden="true">
+  <img class="aisyah-sp sp-happy" src="../Assets/kijang_happy.png"      alt="" aria-hidden="true">
 </template>
 
 <script>
@@ -1165,7 +1165,7 @@ function setLang(lang) {
   document.getElementById('btn-bm').classList.toggle('active',lang==='bm');
   document.getElementById('btn-en').classList.toggle('active',lang==='en');
   const tag=document.getElementById('presenter-tag-q');
-  if(tag) tag.textContent=lang==='bm'?'Aisyah — Penasihat Kewangan Anda':'Aisyah — Your Financial Advisor';
+  if(tag) tag.textContent=lang==='bm'?'Si Kijang — Penasihat Kewangan Anda':'Si Kijang — Your Financial Advisor';
   const qLabel=document.getElementById('q-label');
   if(qLabel && appState.screen==='question') qLabel.textContent=lang==='bm'?`Soalan ${currentQ+1} daripada 10`:`Question ${currentQ+1} of 10`;
   // Sync wall stats EN spans with current counts
