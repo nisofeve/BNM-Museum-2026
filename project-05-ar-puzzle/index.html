@@ -1,569 +1,292 @@
 <!DOCTYPE html>
-<html lang="ms">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-  <title>Imbas & Hidup — IMD 2026 BNM Museum</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AR Experience</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --cream: #FFF8F0;
-      --dark: #0A0A0A;
-      --blue: #0047AB;
-      --blue-dark: #003588;
-      --gold: #F5A623;
-      --teal: #00B4A6;
-      --white: #FFFFFF;
-      --card-bg: #FFFFFF;
-      --text: #1A1A1A;
-      --text-muted: #666666;
-      --radius: 16px;
-      --shadow: 0 4px 24px rgba(0,0,0,0.10);
-    }
-    html, body {
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #080c14;
+      color: #fff;
+      font-family: 'Arial', sans-serif;
       min-height: 100vh;
-      background: var(--cream);
-      font-family: 'Nunito', sans-serif;
-      color: var(--text);
-    }
-    body { padding-bottom: 40px; }
-
-    /* ── HEADER ── */
-    .header {
-      background: var(--blue);
-      padding: 20px 20px 16px;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      box-shadow: 0 2px 12px rgba(0,71,171,0.25);
-    }
-    .header-inner {
-      max-width: 430px;
-      margin: 0 auto;
       display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .header-title { color: var(--white); }
-    .header-title h1 {
-      font-family: 'Poppins', sans-serif;
-      font-size: 1.25rem;
-      font-weight: 800;
-      line-height: 1.2;
-    }
-    .header-title .subtitle {
-      font-size: 0.72rem;
-      font-weight: 400;
-      opacity: 0.8;
-      margin-top: 2px;
-      letter-spacing: 0.03em;
-    }
-    .lang-toggle {
-      display: flex;
-      background: rgba(255,255,255,0.15);
-      border-radius: 24px;
-      overflow: hidden;
-    }
-    .lang-btn {
-      padding: 8px 14px;
-      font-family: 'Poppins', sans-serif;
-      font-size: 0.78rem;
-      font-weight: 700;
-      border: none;
-      background: transparent;
-      color: rgba(255,255,255,0.7);
-      cursor: pointer;
-      min-height: 36px;
-      transition: all 0.2s;
-    }
-    .lang-btn.active {
-      background: var(--gold);
-      color: var(--dark);
-      border-radius: 24px;
-    }
-
-    /* ── CONTENT ── */
-    .content {
-      max-width: 430px;
-      margin: 0 auto;
-      padding: 20px 16px 0;
-    }
-
-    /* ── EVENT BADGE ── */
-    .event-badge {
-      text-align: center;
-      margin-bottom: 16px;
-    }
-    .event-badge span {
-      display: inline-block;
-      background: linear-gradient(135deg, var(--blue) 0%, var(--teal) 100%);
-      color: white;
-      font-family: 'Poppins', sans-serif;
-      font-size: 0.72rem;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      padding: 6px 18px;
-      border-radius: 20px;
-      text-transform: uppercase;
-    }
-
-    /* ── INSTRUCTION CARD ── */
-    .instruction-card {
-      background: var(--card-bg);
-      border-radius: var(--radius);
-      padding: 20px;
-      box-shadow: var(--shadow);
-      margin-bottom: 20px;
-      border-left: 5px solid var(--gold);
-    }
-    .instruction-card h2 {
-      font-family: 'Poppins', sans-serif;
-      font-size: 0.95rem;
-      font-weight: 700;
-      color: var(--blue);
-      margin-bottom: 14px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .instruction-card h2 .icon { font-size: 1.1rem; }
-    .steps { list-style: none; }
-    .steps li {
-      display: flex;
-      gap: 12px;
-      align-items: flex-start;
-      margin-bottom: 10px;
-    }
-    .steps li:last-child { margin-bottom: 0; }
-    .step-num {
-      min-width: 28px;
-      height: 28px;
-      background: var(--blue);
-      color: white;
-      border-radius: 50%;
-      font-family: 'Poppins', sans-serif;
-      font-weight: 700;
-      font-size: 0.78rem;
-      display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
-      flex-shrink: 0;
-    }
-    .step-text {
-      font-size: 0.88rem;
-      line-height: 1.5;
-      color: var(--text);
-    }
-    .step-text .en {
-      display: block;
-      color: var(--text-muted);
-      font-size: 0.80rem;
-      margin-top: 2px;
-    }
-
-    /* ── ARTWORK CARDS ── */
-    .section-label {
-      font-family: 'Poppins', sans-serif;
-      font-size: 0.78rem;
-      font-weight: 700;
-      color: var(--text-muted);
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      margin-bottom: 12px;
-    }
-    .artwork-card {
-      background: var(--card-bg);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      margin-bottom: 20px;
-      overflow: hidden;
-    }
-    .artwork-preview {
-      width: 100%;
-      height: 160px;
-      position: relative;
+      padding: 24px;
       overflow: hidden;
     }
 
-    /* ARTWORK 1 PREVIEW — fabric stripes */
-    .preview-art1 {
-      background: #1A1A1A;
-      display: flex;
-      align-items: flex-end;
-      justify-content: center;
-      gap: 2px;
-      padding-top: 20px;
-    }
-    .preview-art1 .rope {
-      position: absolute;
-      top: 20px;
-      left: 10%;
-      right: 10%;
-      height: 4px;
-      background: #8B4513;
-      border-radius: 2px;
-      z-index: 2;
-    }
-    .preview-art1 .strip {
-      width: 11%;
-      height: 110px;
-      border-radius: 0 0 4px 4px;
-      position: relative;
-      top: 4px;
-    }
-    .s1 { background: repeating-linear-gradient(135deg, #CC2200 0px, #CC2200 6px, #fff 6px, #fff 12px); }
-    .s2 { background: repeating-linear-gradient(60deg, #F5A623 0px, #F5A623 8px, #FFD700 8px, #FFD700 16px); }
-    .s3 { background: radial-gradient(circle, #fff 3px, transparent 3px) 0 0 / 12px 12px #2E7D32; }
-    .s4 { background: repeating-linear-gradient(0deg, #0047AB 0px, #0047AB 5px, #66B3FF 5px, #66B3FF 10px); }
-    .s5 { background: repeating-linear-gradient(45deg, #7B1FA2 0px, #7B1FA2 6px, #CE93D8 6px, #CE93D8 12px); }
-    .s6 { background: repeating-linear-gradient(90deg, #E65100 0px, #E65100 4px, #FFB300 4px, #FFB300 8px); }
-    .s7 { background: repeating-linear-gradient(0deg, #00695C 0px, #00695C 5px, #80CBC4 5px, #80CBC4 10px), repeating-linear-gradient(90deg, #00695C 0px, #00695C 5px, transparent 5px, transparent 10px); background-blend-mode: overlay; }
-    .s8 { background: repeating-linear-gradient(135deg, #E91E63 0px, #E91E63 5px, #F8BBD9 5px, #F8BBD9 10px); }
-
-    /* ARTWORK 2 PREVIEW — Jalur Gemilang */
-    .preview-art2 {
-      background: #001A5C;
-      position: relative;
-      overflow: hidden;
-    }
-    .preview-art2 .flag-stripes {
-      position: absolute;
-      bottom: 0; left: 0; right: 0;
-      height: 55%;
-    }
-    .preview-art2 .flag-stripes .stripe {
-      height: 14.28%;
-    }
-    .stripe-r { background: #CC0001; }
-    .stripe-w { background: #FFFFFF; }
-    .preview-art2 .moon-star {
-      position: absolute;
-      top: 18px;
-      right: 30%;
-    }
-    .preview-art2 .crescent {
-      width: 32px; height: 32px;
-      background: #FFCC00;
-      border-radius: 50%;
-      position: relative;
-    }
-    .preview-art2 .crescent::after {
+    /* Animated background grid */
+    body::before {
       content: '';
-      position: absolute;
-      width: 24px; height: 24px;
-      background: #001A5C;
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0,229,255,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,229,255,0.04) 1px, transparent 1px);
+      background-size: 40px 40px;
+      z-index: 0;
+      animation: grid-drift 20s linear infinite;
+    }
+    @keyframes grid-drift {
+      from { background-position: 0 0; }
+      to   { background-position: 40px 40px; }
+    }
+
+    /* Glow blobs */
+    .blob {
+      position: fixed;
       border-radius: 50%;
-      top: 2px; left: 6px;
+      filter: blur(80px);
+      opacity: 0.15;
+      z-index: 0;
     }
-    .preview-art2 .star-text {
-      color: #FFCC00;
-      font-size: 1.6rem;
-      position: absolute;
-      top: -4px;
-      left: 38px;
-    }
-    .preview-art2 .malaysia-text {
-      position: absolute;
-      top: 10px;
-      left: 0; right: 0;
+    .blob-1 { width: 400px; height: 400px; background: #00e5ff; top: -100px; left: -100px; animation: blob-move1 12s ease-in-out infinite alternate; }
+    .blob-2 { width: 300px; height: 300px; background: #7c4dff; bottom: -80px; right: -80px; animation: blob-move2 15s ease-in-out infinite alternate; }
+    @keyframes blob-move1 { to { transform: translate(60px, 80px); } }
+    @keyframes blob-move2 { to { transform: translate(-60px, -80px); } }
+
+    .card {
+      position: relative;
+      z-index: 1;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(0,229,255,0.15);
+      border-radius: 20px;
+      padding: 40px 32px;
+      max-width: 380px;
+      width: 100%;
       text-align: center;
-      font-family: 'Poppins', sans-serif;
-      font-weight: 800;
-      font-size: 1rem;
-      color: #FFCC00;
-      letter-spacing: 0.1em;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 0 60px rgba(0,229,255,0.06), inset 0 1px 0 rgba(255,255,255,0.05);
     }
 
-    .artwork-info { padding: 16px; }
-    .artwork-num {
-      font-family: 'Poppins', sans-serif;
-      font-size: 0.68rem;
-      font-weight: 700;
-      color: var(--teal);
-      letter-spacing: 0.08em;
+    .badge {
+      display: inline-block;
+      font-size: 11px;
+      letter-spacing: 3px;
       text-transform: uppercase;
-      margin-bottom: 4px;
+      color: #00e5ff;
+      background: rgba(0,229,255,0.08);
+      border: 1px solid rgba(0,229,255,0.2);
+      border-radius: 20px;
+      padding: 5px 14px;
+      margin-bottom: 20px;
     }
-    .artwork-title {
-      font-family: 'Poppins', sans-serif;
-      font-size: 1rem;
-      font-weight: 700;
-      color: var(--text);
-      line-height: 1.3;
-      margin-bottom: 3px;
-    }
-    .artwork-artist {
-      font-size: 0.85rem;
-      color: var(--blue);
-      font-weight: 600;
-      margin-bottom: 3px;
-    }
-    .artwork-medium {
-      font-size: 0.78rem;
-      color: var(--text-muted);
-      margin-bottom: 14px;
-    }
-    .card-actions { display: flex; flex-direction: column; gap: 10px; }
-    .btn-scan {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      background: var(--blue);
-      color: white;
-      font-family: 'Poppins', sans-serif;
-      font-weight: 700;
-      font-size: 0.92rem;
-      padding: 16px 20px;
-      border-radius: 12px;
-      text-decoration: none;
-      min-height: 60px;
-      transition: background 0.2s, transform 0.1s;
-      border: none;
-      cursor: pointer;
-    }
-    .btn-scan:active { transform: scale(0.98); background: var(--blue-dark); }
-    .btn-ref {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      color: var(--text-muted);
-      font-size: 0.82rem;
-      font-weight: 600;
-      text-decoration: none;
-      padding: 12px;
-      border-radius: 10px;
-      border: 1.5px solid #E0E0E0;
-      min-height: 48px;
-      transition: background 0.15s;
-    }
-    .btn-ref:active { background: #F5F5F5; }
 
-    /* ── FOOTER ── */
-    .footer {
-      max-width: 430px;
-      margin: 24px auto 0;
-      padding: 0 16px;
-      text-align: center;
-      font-size: 0.72rem;
-      color: var(--text-muted);
+    h1 {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, #fff 0%, #00e5ff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      color: rgba(255,255,255,0.45);
+      font-size: 14px;
+      margin-bottom: 32px;
       line-height: 1.6;
     }
-    .footer strong { color: var(--blue); font-weight: 700; }
 
-    /* ── LANGUAGE STATES ── */
-    .bm-text { display: block; }
-    .en-text { display: none; }
-    body.lang-en .bm-text { display: none; }
-    body.lang-en .en-text { display: block; }
-    body.lang-en .bm-title { display: none; }
-    body.lang-en .en-title { display: block; }
-    .bm-title { display: block; }
-    .en-title { display: none; }
-    .bilingual .bm-text,
-    .bilingual .en-text { display: inline; }
-    .bilingual .bm-text::after { content: ' / '; }
-/* ═══ P06-STYLE VFX ═══ */
-body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,71,171,.007) 3px,rgba(0,71,171,.007) 4px);}
-.p6-particles{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0;}
-.p6-part{position:absolute;border-radius:50%;background:radial-gradient(circle,rgba(0,229,255,.7),rgba(0,71,171,.3));opacity:.08;}
+    /* Steps */
+    .steps {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 32px;
+      text-align: left;
+    }
+    .step {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px;
+      padding: 14px;
+    }
+    .step-num {
+      width: 28px; height: 28px;
+      min-width: 28px;
+      border-radius: 50%;
+      background: rgba(0,229,255,0.1);
+      border: 1px solid rgba(0,229,255,0.3);
+      color: #00e5ff;
+      font-size: 12px;
+      font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .step-text {
+      font-size: 13px;
+      color: rgba(255,255,255,0.7);
+      line-height: 1.5;
+      padding-top: 4px;
+    }
+    .step-text strong { color: #fff; }
+
+    /* Buttons */
+    .btn-primary {
+      display: block;
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(135deg, #00b8d9, #00e5ff);
+      color: #000;
+      font-weight: 700;
+      font-size: 15px;
+      letter-spacing: 0.5px;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      text-decoration: none;
+      margin-bottom: 12px;
+      transition: transform 0.15s, box-shadow 0.15s;
+      box-shadow: 0 4px 20px rgba(0,229,255,0.3);
+    }
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 28px rgba(0,229,255,0.45);
+    }
+    .btn-primary:active { transform: translateY(0); }
+
+    .btn-secondary {
+      display: block;
+      width: 100%;
+      padding: 13px;
+      background: transparent;
+      color: rgba(255,255,255,0.6);
+      font-size: 13px;
+      letter-spacing: 0.5px;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .btn-secondary:hover {
+      border-color: rgba(0,229,255,0.3);
+      color: #00e5ff;
+    }
+
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+      margin: 24px 0;
+    }
+
+    .compat-note {
+      font-size: 11px;
+      color: rgba(255,255,255,0.25);
+      margin-top: 16px;
+    }
+    .compat-note span { color: rgba(0,229,255,0.5); }
+
+    .qr-section {
+      margin-top: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+    .qr-label {
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.3);
+    }
+    .qr-box {
+      background: #fff;
+      padding: 10px;
+      border-radius: 10px;
+      box-shadow: 0 0 24px rgba(0,229,255,0.2);
+      display: inline-block;
+    }
+    .qr-box canvas, .qr-box img { display: block; border-radius: 4px; }
+    .qr-sublabel {
+      font-size: 11px;
+      color: rgba(255,255,255,0.2);
+    }
+
+    /* Pulse dot indicator */
+    .live-dot {
+      display: inline-block;
+      width: 7px; height: 7px;
+      background: #00e5ff;
+      border-radius: 50%;
+      margin-right: 6px;
+      vertical-align: middle;
+      animation: dot-pulse 1.5s ease-in-out infinite;
+    }
+    @keyframes dot-pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.7); }
+    }
   </style>
 </head>
 <body>
-  <!-- HEADER -->
-  <header class="header">
-    <div class="header-inner">
-      <div class="header-title">
-        <h1>
-          <span class="bm-title">Imbas &amp; Hidup</span>
-          <span class="en-title">Scan &amp; Come Alive</span>
-        </h1>
-        <div class="subtitle">IMD 2026 · Bank Negara Malaysia Museum</div>
+
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+
+  <div class="card">
+    <div class="badge"><span class="live-dot"></span>Interactive AR</div>
+    <h1>AR Experience</h1>
+    <p class="subtitle">Point your camera at the AR marker to unlock an interactive 3D animation overlay.</p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-text"><strong>Get the marker</strong> — print it or display it on another screen</div>
       </div>
-      <div class="lang-toggle">
-        <button class="lang-btn active" id="btnBM" onclick="setLang('bm')">BM</button>
-        <button class="lang-btn" id="btnEN" onclick="setLang('en')">EN</button>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-text"><strong>Launch scanner</strong> — allow camera access when prompted</div>
       </div>
-    </div>
-  </header>
-
-  <!-- MAIN CONTENT -->
-  <main class="content">
-    <!-- Event badge -->
-    <div class="event-badge">
-      <span>International Museum Day 2026</span>
-    </div>
-
-    <!-- INSTRUCTION CARD -->
-    <div class="instruction-card">
-      <h2>
-        <span class="icon">📋</span>
-        <span class="bm-text">Cara Bermain</span>
-        <span class="en-text">How To Play</span>
-      </h2>
-      <ol class="steps">
-        <li>
-          <div class="step-num">1</div>
-          <div class="step-text">
-            <span class="bm-text">Susun semula jalur magnetik untuk membentuk gambar lukisan.</span>
-            <span class="en-text">Rearrange the magnetic strips to form the artwork.</span>
-          </div>
-        </li>
-        <li>
-          <div class="step-num">2</div>
-          <div class="step-text">
-            <span class="bm-text">Padankan dan laraskan gambar dengan teliti.</span>
-            <span class="en-text">Carefully match and align the image.</span>
-          </div>
-        </li>
-        <li>
-          <div class="step-num">3</div>
-          <div class="step-text">
-            <span class="bm-text">Apabila gambar lengkap, tekan butang 'Imbas'.</span>
-            <span class="en-text">When the image is complete, press the 'Scan' button.</span>
-          </div>
-        </li>
-        <li>
-          <div class="step-num">4</div>
-          <div class="step-text">
-            <span class="bm-text">Lihat lukisan ini menjadi hidup melalui animasi!</span>
-            <span class="en-text">Watch the artwork come alive through animation!</span>
-          </div>
-        </li>
-      </ol>
-    </div>
-
-    <!-- ARTWORKS HEADING -->
-    <div class="section-label">
-      <span class="bm-text">Pilih Lukisan</span>
-      <span class="en-text">Choose Artwork</span>
-    </div>
-
-    <!-- ARTWORK 1 CARD -->
-    <div class="artwork-card">
-      <div class="artwork-preview preview-art1">
-        <div class="rope"></div>
-        <div class="strip s1"></div>
-        <div class="strip s2"></div>
-        <div class="strip s3"></div>
-        <div class="strip s4"></div>
-        <div class="strip s5"></div>
-        <div class="strip s6"></div>
-        <div class="strip s7"></div>
-        <div class="strip s8"></div>
-      </div>
-      <div class="artwork-info">
-        <div class="artwork-num">
-          <span class="bm-text">Lukisan 1</span>
-          <span class="en-text">Artwork 1</span>
-        </div>
-        <div class="artwork-title">Rhythm of Nationality</div>
-        <div class="artwork-artist">Kong Kien Choong · 2004</div>
-        <div class="artwork-medium">
-          <span class="bm-text">Media campuran atas kanvas</span>
-          <span class="en-text">Mixed media on canvas</span>
-        </div>
-        <div class="card-actions">
-          <a href="artwork1.html" class="btn-scan">
-            <span>▶</span>
-            <span class="bm-text">Imbas Lukisan 1</span>
-            <span class="en-text">Scan Artwork 1</span>
-          </a>
-          <a href="ref1.html" class="btn-ref">
-            <span>🔍</span>
-            <span class="bm-text">Bantuan Puzzle</span>
-            <span class="en-text">Puzzle Help</span>
-          </a>
-        </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-text"><strong>Aim &amp; hold</strong> — keep the marker fully in frame</div>
       </div>
     </div>
 
-    <!-- ARTWORK 2 CARD -->
-    <div class="artwork-card">
-      <div class="artwork-preview preview-art2">
-        <div class="malaysia-text">MALAYSIA</div>
-        <div class="flag-stripes">
-          <div class="stripe stripe-r"></div>
-          <div class="stripe stripe-w"></div>
-          <div class="stripe stripe-r"></div>
-          <div class="stripe stripe-w"></div>
-          <div class="stripe stripe-r"></div>
-          <div class="stripe stripe-w"></div>
-          <div class="stripe stripe-r"></div>
-        </div>
-        <div class="moon-star">
-          <div class="crescent"></div>
-          <div class="star-text">✦</div>
-        </div>
-      </div>
-      <div class="artwork-info">
-        <div class="artwork-num">
-          <span class="bm-text">Lukisan 2</span>
-          <span class="en-text">Artwork 2</span>
-        </div>
-        <div class="artwork-title">Unity in Diversity Series 2</div>
-        <div class="artwork-artist">ArtJamila · 2017</div>
-        <div class="artwork-medium">
-          <span class="bm-text">Dakwat</span>
-          <span class="en-text">Ink</span>
-        </div>
-        <div class="card-actions">
-          <a href="artwork2.html" class="btn-scan">
-            <span>▶</span>
-            <span class="bm-text">Imbas Lukisan 2</span>
-            <span class="en-text">Scan Artwork 2</span>
-          </a>
-          <a href="ref2.html" class="btn-ref">
-            <span>🔍</span>
-            <span class="bm-text">Bantuan Puzzle</span>
-            <span class="en-text">Puzzle Help</span>
-          </a>
-        </div>
-      </div>
+    <a href="ar.html" class="btn-primary">Launch AR Scanner</a>
+    <a href="marker.html" class="btn-secondary">View / Print Marker</a>
+
+    <div class="divider"></div>
+
+    <div class="qr-section">
+      <div class="qr-label">Scan to open AR scanner</div>
+      <div class="qr-box" id="qrcode"></div>
+      <div class="qr-sublabel" id="qr-url"></div>
     </div>
 
-    <!-- FOOTER -->
-    <div class="footer">
-      <strong>Bank Negara Malaysia Museum &amp; Art Gallery</strong><br />
-      International Museum Day 2026 · Festival Hari Museum Antarabangsa
-    </div>
-  </main>
+    <div class="divider"></div>
+
+    <p class="compat-note">
+      Works on <span>Chrome / Safari</span> with camera access.
+      Best on mobile. Requires HTTPS or localhost.
+    </p>
+  </div>
 
   <script>
-    function setLang(lang) {
-      if (lang === 'en') {
-        document.body.classList.add('lang-en');
-        document.getElementById('btnEN').classList.add('active');
-        document.getElementById('btnBM').classList.remove('active');
-        document.documentElement.lang = 'en';
-        localStorage.setItem('imd_lang', 'en');
-      } else {
-        document.body.classList.remove('lang-en');
-        document.getElementById('btnBM').classList.add('active');
-        document.getElementById('btnEN').classList.remove('active');
-        document.documentElement.lang = 'ms';
-        localStorage.setItem('imd_lang', 'bm');
-      }
-    }
-    // Restore saved language
-    const savedLang = localStorage.getItem('imd_lang');
-    if (savedLang === 'en') setLang('en');
-  // P06-style ambient particles
-(function(){
-  const cont=document.createElement('div'); cont.className='p6-particles'; document.body.appendChild(cont);
-  for(let i=0;i<18;i++){
-    const p=document.createElement('div'); p.className='p6-part';
-    const sz=2+Math.random()*4;
-    p.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}vw;top:${Math.random()*100}vh;opacity:${.04+Math.random()*.07};animation:p6a${i} ${9+Math.random()*11}s ease-in-out infinite alternate`;
-    const st=document.createElement('style');
-    st.textContent=`@keyframes p6a${i}{from{transform:translate(0,0)}to{transform:translate(${(Math.random()-.5)*130}px,${(Math.random()-.5)*90}px)}}`;
-    document.head.appendChild(st); cont.appendChild(p);
-  }
-})();
+    // Point QR at ar.html on whatever host this page is served from
+    const arURL = window.location.origin + window.location.pathname.replace(/\/[^/]*$/, '/ar.html');
+    document.getElementById('qr-url').textContent = arURL;
+    new QRCode(document.getElementById('qrcode'), {
+      text: arURL,
+      width: 160,
+      height: 160,
+      colorDark: '#000000',
+      colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.M
+    });
   </script>
+
 </body>
 </html>

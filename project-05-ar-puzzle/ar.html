@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>AR Experience</title>
+
+  <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { overflow: hidden; background: #000; font-family: 'Arial', sans-serif; }
+
+    #ui-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      pointer-events: none;
+      z-index: 999;
+    }
+
+    #scan-ring {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 240px; height: 240px;
+      border: 2px solid rgba(255,255,255,0.15);
+      border-radius: 12px;
+      animation: pulse-border 2s ease-in-out infinite;
+    }
+    #scan-ring::before, #scan-ring::after {
+      content: '';
+      position: absolute;
+      width: 30px; height: 30px;
+      border-color: #00e5ff;
+      border-style: solid;
+    }
+    #scan-ring::before {
+      top: -2px; left: -2px;
+      border-width: 3px 0 0 3px;
+      border-radius: 4px 0 0 0;
+    }
+    #scan-ring::after {
+      bottom: -2px; right: -2px;
+      border-width: 0 3px 3px 0;
+      border-radius: 0 0 4px 0;
+    }
+
+    #scan-line {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 220px; height: 2px;
+      background: linear-gradient(90deg, transparent, #00e5ff, transparent);
+      animation: scan-move 2.5s ease-in-out infinite;
+      box-shadow: 0 0 8px #00e5ff;
+    }
+
+    #corner-tl { top: -2px; left: -2px; border-width: 3px 0 0 3px; border-radius: 4px 0 0 0; }
+    #corner-tr { top: -2px; right: -2px; border-width: 3px 3px 0 0; border-radius: 0 4px 0 0; }
+    #corner-bl { bottom: -2px; left: -2px; border-width: 0 0 3px 3px; border-radius: 0 0 0 4px; }
+    #corner-br { bottom: -2px; right: -2px; border-width: 0 3px 3px 0; border-radius: 0 0 4px 0; }
+
+    .corner { position: absolute; width: 30px; height: 30px; border-color: #00e5ff; border-style: solid; }
+
+    #hint-text {
+      position: absolute;
+      bottom: 80px; left: 50%;
+      transform: translateX(-50%);
+      color: rgba(255,255,255,0.8);
+      font-size: 14px;
+      letter-spacing: 1px;
+      text-align: center;
+      text-shadow: 0 0 10px rgba(0,229,255,0.5);
+      animation: fade-pulse 2s ease-in-out infinite;
+      white-space: nowrap;
+    }
+
+    #status-badge {
+      position: absolute;
+      top: 30px; left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.5);
+      border: 1px solid rgba(0,229,255,0.3);
+      border-radius: 20px;
+      padding: 6px 16px;
+      color: #00e5ff;
+      font-size: 12px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      backdrop-filter: blur(4px);
+    }
+
+    #found-flash {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,229,255,0.15);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 998;
+      transition: opacity 0.2s;
+    }
+    #found-flash.active { opacity: 1; }
+
+    @keyframes pulse-border {
+      0%, 100% { border-color: rgba(255,255,255,0.1); }
+      50% { border-color: rgba(0,229,255,0.3); }
+    }
+    @keyframes scan-move {
+      0% { top: calc(50% - 110px); }
+      50% { top: calc(50% + 110px); }
+      100% { top: calc(50% - 110px); }
+    }
+    @keyframes fade-pulse {
+      0%, 100% { opacity: 0.6; }
+      50% { opacity: 1; }
+    }
+
+    .a-loader-title { display: none !important; }
+    .a-enter-vr-button { display: none !important; }
+    canvas { display: block; }
+  </style>
+</head>
+<body>
+
+  <div id="found-flash"></div>
+
+  <div id="ui-overlay">
+    <div id="status-badge">AR SCANNER</div>
+    <div id="scan-ring">
+      <div class="corner" id="corner-tl"></div>
+      <div class="corner" id="corner-tr"></div>
+      <div class="corner" id="corner-bl"></div>
+      <div class="corner" id="corner-br"></div>
+    </div>
+    <div id="scan-line"></div>
+    <div id="hint-text">Point camera at the target image</div>
+  </div>
+
+  <a-scene
+    mindar-image="imageTargetSrc: Assets/targets.mind; autoStart: true;"
+    renderer="colorManagement: true; logarithmicDepthBuffer: true; precision: medium;"
+    vr-mode-ui="enabled: false"
+    device-orientation-permission-ui="enabled: false"
+    loading-screen="enabled: false"
+    id="arscene"
+  >
+
+    <a-assets>
+      <video id="ar-video"
+        src="Assets/Animated-1399.mp4"
+        autoplay loop muted playsinline webkit-playsinline
+        crossorigin="anonymous"
+      ></video>
+    </a-assets>
+
+    <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+    <!-- targetIndex: 0 = A01-1399 (first image in targets.mind) -->
+    <a-entity mindar-image-target="targetIndex: 0" id="main-marker">
+      <!-- Plane sized to match A01-1399.jpg aspect ratio: 6000×4000 = width:height = 1:0.6667 -->
+      <a-plane
+        src="#ar-video"
+        width="1"
+        height="0.6667"
+        position="0 0 0"
+        rotation="0 0 0"
+        material="shader: flat; transparent: true;"
+      ></a-plane>
+    </a-entity>
+
+    <a-light type="ambient" color="#ffffff" intensity="1"></a-light>
+
+  </a-scene>
+
+  <script>
+    const marker = document.getElementById('main-marker');
+    const hint   = document.getElementById('hint-text');
+    const flash  = document.getElementById('found-flash');
+    const badge  = document.getElementById('status-badge');
+    const video  = document.getElementById('ar-video');
+
+    marker.addEventListener('targetFound', () => {
+      hint.textContent = 'Image detected!';
+      flash.classList.add('active');
+      badge.textContent = 'AR TRACKING';
+      badge.style.borderColor = 'rgba(0,229,255,0.8)';
+      setTimeout(() => flash.classList.remove('active'), 400);
+      video.play();
+    });
+
+    marker.addEventListener('targetLost', () => {
+      hint.textContent = 'Point camera at the target image';
+      badge.textContent = 'AR SCANNER';
+      badge.style.borderColor = 'rgba(0,229,255,0.3)';
+      video.pause();
+    });
+  </script>
+
+</body>
+</html>

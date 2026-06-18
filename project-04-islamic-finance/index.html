@@ -59,8 +59,8 @@
     --dmg-2: #8bac0f;
     --dmg-3: #9bbc0f;
 
-    /* Fluid scale — 1u ≈ 1px on 1920×1080, scales 1280×720 → 4K */
-    --u: min(0.05208vw, 0.09259vh);
+    /* Fluid scale — 1u = 1px in 1080×1440 stage; fitStage() handles viewport scaling */
+    --u: 1px;
     --radius-sm: calc(12 * var(--u));
     --radius-md: calc(20 * var(--u));
     --radius-lg: calc(28 * var(--u));
@@ -281,7 +281,7 @@
     width: 100%;
     flex: 1;
     min-height: 0;
-    --char-h: 49.4vh;
+    --char-h: calc(711 * var(--u));
   }
 
   .presenter-char {
@@ -298,7 +298,7 @@
   }
 
   @keyframes char-arrive {
-    0%   { opacity: 0; transform: translateX(-50%) translateY(4vh) scale(0.9); }
+    0%   { opacity: 0; transform: translateX(-50%) translateY(calc(58 * var(--u))) scale(0.9); }
     100% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
   }
 
@@ -392,9 +392,9 @@
 
   .bubble-main {
     left: 50%;
-    bottom: calc(var(--char-h) - 1.5vh);
+    bottom: calc(var(--char-h) - calc(22 * var(--u)));
     transform: translateX(-50%);
-    width: min(80vw, calc(1400 * var(--u)));
+    width: calc(864 * var(--u));
     border-radius: calc(26 * var(--u));
     background: linear-gradient(135deg, rgba(255,255,255,0.92), rgba(255,248,200,0.82));
     backdrop-filter: blur(calc(12 * var(--u)));
@@ -450,7 +450,7 @@
   .bubble-main .bubble-content {
     position: relative;
     padding: calc(28 * var(--u)) calc(36 * var(--u)) calc(16 * var(--u));
-    max-height: 40vh;
+    max-height: calc(576 * var(--u));
     overflow-y: auto;
     font-size: calc(19 * var(--u));
     color: var(--text-dark);
@@ -720,16 +720,16 @@
 
   /* presenter stage inside quiz */
   #stage-quiz {
-    --char-h: 41.6vh;
+    --char-h: calc(599 * var(--u));
     flex-shrink: 0;
   }
 
   #stage-quiz .bubble-main {
-    width: min(72vw, calc(1260 * var(--u)));
+    width: calc(778 * var(--u));
   }
 
   #stage-quiz .bubble-main .bubble-content {
-    max-height: 32vh;
+    max-height: calc(461 * var(--u));
   }
 
   /* answer buttons below the stage */
@@ -1281,7 +1281,7 @@
   #result-game-area .scene { position: absolute; inset: 0; }
 
   /* mascot sits on the ground strip */
-  #stage-result { position: absolute; inset: 0; --char-h: 10.7vh; }
+  #stage-result { position: absolute; inset: 0; --char-h: calc(154 * var(--u)); }
   #stage-result .presenter-char { bottom: calc(var(--ground-h) - 8 * var(--u)); }
 
   /* Gameboy pixel textbox — top block inside result-panel */
@@ -1483,8 +1483,8 @@
 
   /* mascot stands on the ground strip */
   .presenter-stage { --ground-h: calc(70 * var(--u)); }
-  #stage-quiz { --char-h: 10.7vh; }
-  #stage-intro { --char-h: 10.7vh; }
+  #stage-quiz { --char-h: calc(154 * var(--u)); }
+  #stage-intro { --char-h: calc(154 * var(--u)); }
   #stage-quiz .presenter-char,
   #stage-intro .presenter-char,
   #stage-result .presenter-char { bottom: calc(var(--ground-h) - 8 * var(--u)); }
@@ -1587,7 +1587,7 @@
   }
   #quiz-question {
     font-family: 'Nunito', sans-serif; font-weight: 800; color: var(--ink);
-    font-size: clamp(calc(16 * var(--u)), 2.2vw, calc(24 * var(--u))); line-height: 1.3; text-align: center;
+    font-size: calc(22 * var(--u)); line-height: 1.3; text-align: center;
     display: flex; align-items: center; justify-content: center; gap: calc(10 * var(--u));
     flex-shrink: 0; overflow: hidden;
     container-type: inline-size;
@@ -1620,7 +1620,7 @@
      M5 — COINS · OBSTACLES · HEARTS
   ═══════════════════════════════════════════════════════════ */
   .hearts { display: flex; gap: calc(6 * var(--u)); align-items: center; }
-  .heart { width: 3.4vh; height: 3.1vh; display: inline-block; transform-origin: center; }
+  .heart { width: calc(49 * var(--u)); height: calc(45 * var(--u)); display: inline-block; transform-origin: center; }
   .heart .hsvg { width: 100%; height: 100%; display: block; }
   .heart .hsvg path { fill: var(--hud-red); stroke: var(--ink); stroke-width: 2.5; stroke-linejoin: round; }
   .heart.lost .hsvg path { fill: #5b5b5b; stroke: #2a2a2a; }
@@ -1633,8 +1633,8 @@
 
   .coin, .obstacle { position: absolute; z-index: 4; pointer-events: none; image-rendering: pixelated; }
   .coin, .coin *, .obstacle, .obstacle * { image-rendering: pixelated !important; }
-  .coin { width: 4vh; height: 4vh; bottom: calc(var(--ground-h) + 11vh); filter: drop-shadow(0 calc(3*var(--u)) calc(3*var(--u)) rgba(120,80,0,0.45)); }
-  .obstacle { width: 5.6vh; height: 5.6vh; bottom: calc(var(--ground-h) - 0.5vh); filter: drop-shadow(0 calc(3*var(--u)) calc(4*var(--u)) rgba(40,10,10,0.45)); }
+  .coin { width: calc(58 * var(--u)); height: calc(58 * var(--u)); bottom: calc(var(--ground-h) + 158 * var(--u)); filter: drop-shadow(0 calc(3*var(--u)) calc(3*var(--u)) rgba(120,80,0,0.45)); }
+  .obstacle { width: calc(80 * var(--u)); height: calc(80 * var(--u)); bottom: calc(var(--ground-h) - calc(7 * var(--u))); filter: drop-shadow(0 calc(3*var(--u)) calc(4*var(--u)) rgba(40,10,10,0.45)); }
   .coin > svg, .obstacle > svg { width: 100%; height: 100%; display: block; }
   .coin > svg { animation: coinSpin .5s linear infinite; transform-origin: center; }
   .obstacle > svg { animation: obSpin 1.4s linear infinite; transform-origin: center; }
