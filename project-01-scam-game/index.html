@@ -1139,6 +1139,31 @@ let score = 0;
 let currentCP = 0;
 let answered = false;
 let lastChoiceIdx = null;       // remembered so language switch re-renders correctly
+
+// ── auto-advance countdown (after answering, proceed in N seconds) ──
+const AUTO_ADVANCE_SECS = 5;
+let autoAdvanceInt = null;
+let autoAdvanceLeft = 0;
+function setContinueLabel() {
+  const cont = document.getElementById('btn-continue');
+  if (!cont) return;
+  const base = i18n[currentLang].btn_continue;
+  cont.textContent = autoAdvanceLeft > 0 ? `${base} (${autoAdvanceLeft})` : base;
+}
+function clearAutoAdvance() {
+  if (autoAdvanceInt) { clearInterval(autoAdvanceInt); autoAdvanceInt = null; }
+  autoAdvanceLeft = 0;
+}
+function startAutoAdvance() {
+  clearAutoAdvance();
+  autoAdvanceLeft = AUTO_ADVANCE_SECS;
+  setContinueLabel();
+  autoAdvanceInt = setInterval(() => {
+    autoAdvanceLeft--;
+    if (autoAdvanceLeft <= 0) { clearAutoAdvance(); continueGame(); }
+    else setContinueLabel();
+  }, 1000);
+}
 let gameState = 'ATTRACT';      // ATTRACT | HOW_TO | GAME | CHECKPOINT | RESULT
 let hitCount = 0;
 
@@ -1236,6 +1261,7 @@ function showG29Legend(duration) {
 
 function resetGame() {
   // Tamat — go back to attract screen
+  clearAutoAdvance();
   resetIdle();
   BGM.stop();
   SFXCAR.stop();
@@ -2392,7 +2418,7 @@ function renderModal(idx) {
   // Feedback + continue (restored after a language switch mid-question)
   const fb   = document.getElementById('feedback-box');
   const cont = document.getElementById('btn-continue');
-  cont.textContent = i18n[lang].btn_continue;
+  setContinueLabel();
   if (answered) {
     const wasCorrect = lastChoiceIdx === cp.correct;
     fb.textContent = wasCorrect
@@ -2411,6 +2437,7 @@ function renderModal(idx) {
 
 function openModal() {
   if (gameState !== 'GAME') return;
+  clearAutoAdvance();
   answered = false;
   lastChoiceIdx = null;
   _gpCursor = -1;        // reset per-question so cursor starts at middle
@@ -2457,6 +2484,7 @@ function handleChoice(choiceIdx, btn) {
 
   updateHUD();
   document.getElementById('btn-continue').classList.add('show');
+  startAutoAdvance();
 }
 
 function showFeedback(msg, isCorrect) {
@@ -2487,6 +2515,7 @@ function spawnFlyingMoney() {
 }
 
 function continueGame() {
+  clearAutoAdvance();
   SFX.tap();
   resetIdle();
   document.getElementById('modal-overlay').classList.remove('open');
