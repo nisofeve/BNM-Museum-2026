@@ -1211,11 +1211,37 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;b
               <feGaussianBlur stdDeviation="2.5" result="blur"/>
               <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
             </filter>
-            <path id="arcPath" d="M10 105 C75 20, 225 20, 290 105"/>
+            <!-- Arc 1: high -->
+            <path id="arcPath" d="M10 108 C75 18, 225 18, 290 108"/>
+            <!-- Arc 2: medium -->
+            <path id="arcPath2" d="M10 108 C75 55, 225 55, 290 108"/>
+            <!-- Arc 3: low -->
+            <path id="arcPath3" d="M10 108 C75 85, 225 85, 290 108"/>
           </defs>
-          <!-- Arc trail (dashed) -->
-          <path d="M10 105 C75 20, 225 20, 290 105" fill="none" stroke="url(#arcGrad)" stroke-width="2.5" stroke-dasharray="10 7" opacity="0.55"/>
-          <!-- Animated dots along the arc -->
+
+          <!-- Arc 2 trail + dots (blue, medium) -->
+          <path d="M10 108 C75 55, 225 55, 290 108" fill="none" stroke="#0047AB" stroke-width="2" stroke-dasharray="8 8" opacity="0.4"/>
+          <circle r="5.5" fill="#0047AB" filter="url(#dotGlow)">
+            <animateMotion dur="2.2s" repeatCount="indefinite" begin="0.4s"><mpath href="#arcPath2"/></animateMotion>
+          </circle>
+          <circle r="4" fill="#0047AB" opacity="0.6" filter="url(#dotGlow)">
+            <animateMotion dur="2.2s" repeatCount="indefinite" begin="1.1s"><mpath href="#arcPath2"/></animateMotion>
+          </circle>
+          <circle r="3" fill="#0047AB" opacity="0.4">
+            <animateMotion dur="2.2s" repeatCount="indefinite" begin="1.8s"><mpath href="#arcPath2"/></animateMotion>
+          </circle>
+
+          <!-- Arc 3 trail + dots (teal, low) -->
+          <path d="M10 108 C75 85, 225 85, 290 108" fill="none" stroke="#00B4A6" stroke-width="2" stroke-dasharray="6 9" opacity="0.35"/>
+          <circle r="5" fill="#00B4A6" filter="url(#dotGlow)">
+            <animateMotion dur="2.6s" repeatCount="indefinite" begin="0.8s"><mpath href="#arcPath3"/></animateMotion>
+          </circle>
+          <circle r="3.5" fill="#00B4A6" opacity="0.6">
+            <animateMotion dur="2.6s" repeatCount="indefinite" begin="1.65s"><mpath href="#arcPath3"/></animateMotion>
+          </circle>
+
+          <!-- Arc 1 trail + dots (gold, high — drawn last to appear on top) -->
+          <path d="M10 108 C75 18, 225 18, 290 108" fill="none" stroke="url(#arcGrad)" stroke-width="2.5" stroke-dasharray="10 7" opacity="0.55"/>
           <circle r="7" fill="#F5A623" filter="url(#dotGlow)">
             <animateMotion dur="1.8s" repeatCount="indefinite" begin="0s"><mpath href="#arcPath"/></animateMotion>
           </circle>
