@@ -427,24 +427,37 @@ button {
   border-top-color: var(--panel);
 }
 
-.bubble-user {
-  position: relative;
-  align-self: flex-end;
+/* ─── USER ANSWER TOAST ─── */
+#toast-container {
+  position: fixed;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: calc(8 * var(--u));
+  align-items: flex-end;
+  z-index: 9999;
+  pointer-events: none;
+  padding-right: calc(6 * var(--u));
+}
+.user-toast {
   background: var(--ac-green);
   border: calc(3 * var(--u)) solid var(--ac-green-dark);
-  border-radius: var(--radius-lg);
-  border-bottom-right-radius: calc(6 * var(--u));
-  padding: calc(9 * var(--u)) calc(15 * var(--u));
-  box-shadow: 0 calc(3 * var(--u)) calc(10 * var(--u)) rgba(78,158,32,0.32);
-  margin-right: calc(20 * var(--u));
+  border-radius: calc(20 * var(--u)) 0 0 calc(20 * var(--u));
+  padding: calc(10 * var(--u)) calc(20 * var(--u)) calc(10 * var(--u)) calc(18 * var(--u));
+  color: white;
+  font-family: 'Fredoka One', cursive;
+  font-size: calc(16 * var(--u));
+  box-shadow: calc(-4 * var(--u)) calc(4 * var(--u)) calc(16 * var(--u)) rgba(78,158,32,0.40);
+  white-space: nowrap;
+  max-width: calc(280 * var(--u));
+  transform: translateX(110%);
+  transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
+  pointer-events: none;
 }
-.bubble-user::after {
-  content: '';
-  position: absolute;
-  bottom: calc(10 * var(--u)); right: calc(-12 * var(--u));
-  border: calc(7 * var(--u)) solid transparent;
-  border-left-color: var(--ac-green);
-}
+.user-toast.in  { transform: translateX(0); }
+.user-toast.out { transform: translateX(110%); transition: transform 0.28s ease-in; }
 
 .bubble-content {
   font-size: calc(17 * var(--u));
@@ -878,6 +891,9 @@ button {
 <!-- LEAF SWEEP TRANSITION -->
 <div id="leaf-sweep"></div>
 
+<!-- USER ANSWER TOASTS -->
+<div id="toast-container"></div>
+
 <!-- IDLE BAR -->
 <div id="idle-bar"></div>
 <div id="idle-overlay">
@@ -932,7 +948,6 @@ button {
     </div>
     <div class="bubble-col">
       <div class="bubble bubble-main"><div class="bubble-content"></div></div>
-      <div class="bubble bubble-user"><div class="bubble-content"></div></div>
     </div>
   </div>
 
@@ -1191,6 +1206,10 @@ const SFX=(()=>{
       marimba({freq:N.C5,dur:0.17,vol:0.21});
       marimba({freq:N.E5,dur:0.21,vol:0.21,delay:0.10});
       marimba({freq:N.G5,dur:0.30,vol:0.24,delay:0.21});
+    },
+    ting(){
+      marimba({freq:N.A5,dur:0.09,vol:0.20});
+      marimba({freq:N.G5,dur:0.12,vol:0.13,delay:0.06});
     }
   };
 })();
@@ -1397,10 +1416,7 @@ const Presenter = (() => {
       svg: charMount,
       bubble: stage.querySelector('.bubble-main'),
       bubbleContent: stage.querySelector('.bubble-main .bubble-content'),
-      userBubble: stage.querySelector('.bubble-user'),
-      userContent: stage.querySelector('.bubble-user .bubble-content'),
       talkTimer: null,
-      userTimer: null,
     };
     startBlink(charMount);
   }
@@ -1448,15 +1464,34 @@ const Presenter = (() => {
 
   function ask(content, opts) { say(content, opts); }
 
-  function userSay(text, holdMs) {
-    const s = get();
-    if (!s) return;
-    s.userContent.textContent = text;
-    s.userBubble.classList.remove('visible');
-    void s.userBubble.offsetWidth;
-    s.userBubble.classList.add('visible');
-    clearTimeout(s.userTimer);
-    s.userTimer = setTimeout(() => s.userBubble.classList.remove('visible'), holdMs || 2200);
+  // ── toast queue ──
+  const _toastQ = [];
+  let _toastBusy = false;
+  function _nextToast() {
+    if (_toastBusy || !_toastQ.length) return;
+    _toastBusy = true;
+    const text = _toastQ.shift();
+    const cont = document.getElementById('toast-container');
+    const el = document.createElement('div');
+    el.className = 'user-toast';
+    el.textContent = text;
+    cont.appendChild(el);
+    void el.offsetWidth;
+    el.classList.add('in');
+    SFX.ting();
+    setTimeout(() => {
+      el.classList.remove('in');
+      el.classList.add('out');
+      setTimeout(() => {
+        el.remove();
+        _toastBusy = false;
+        _nextToast();
+      }, 300);
+    }, 3000);
+  }
+  function userSay(text) {
+    _toastQ.push(text);
+    _nextToast();
   }
 
   function hide() {
