@@ -58,15 +58,6 @@
   @keyframes hintPulse{0%,100%{opacity:.45;transform:translateX(-50%) translateY(0)}
     50%{opacity:1;transform:translateX(-50%) translateY(-1vmin)}}
 
-  /* ── language toggle ── */
-  #lang{position:fixed;top:3vmin;right:3vmin;z-index:6;display:flex;
-    border:1px solid rgba(0,0,0,.35);border-radius:999px;overflow:hidden;
-    background:rgba(255,255,255,.55);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
-    box-shadow:0 2px 14px rgba(0,0,0,.12);pointer-events:auto}
-  #lang button{appearance:none;-webkit-appearance:none;border:0;background:transparent;
-    cursor:pointer;font-family:inherit;font-size:1.9vmin;letter-spacing:.14em;
-    color:#0a0e16;padding:1.1vmin 2.6vmin;transition:background .25s,color .25s}
-  #lang button.active{background:#0a0e16;color:#fff}
 
   /* ── white flash / fade ── */
   #white{position:fixed;inset:0;z-index:9;background:#ffffff;opacity:0;
@@ -81,10 +72,6 @@
 <body>
   <canvas id="gl"></canvas>
 
-  <div id="lang">
-    <button data-l="bm" class="active">BM</button>
-    <button data-l="en">EN</button>
-  </div>
 
   <div id="narr"></div>
 
@@ -512,27 +499,6 @@ void main(){
   function showHint(){ updateHint(); hint.classList.add('show'); }
   function hideHint(){ hint.classList.remove('show'); }
 
-  // ── language toggle ──
-  const langEl=document.getElementById('lang');
-  function renderAllLines(){               // fill narration instantly in current lang
-    narr.innerHTML='';
-    for(const ln of LINES){
-      const d=document.createElement('div');
-      d.className='nline'+(ln.c?(' '+ln.c):'');
-      d.textContent=ln[lang]; narr.appendChild(d);
-    }
-  }
-  function setLang(l){
-    if(l===lang) return;
-    lang=l;
-    langEl.querySelectorAll('button').forEach(b=>b.classList.toggle('active', b.dataset.l===lang));
-    updateHint();
-    if(state==='MIDDLE') startNarration();        // re-type in new lang
-    else if(state==='MIDDLE_WAIT') renderAllLines(); // swap completed text
-  }
-  langEl.addEventListener('pointerdown', e=>e.stopPropagation()); // don't trigger tap
-  langEl.querySelectorAll('button').forEach(b=>
-    b.addEventListener('click', ()=>setLang(b.dataset.l)));
 
   // ══════════════════════════════════════════════
   //  STATE MACHINE
