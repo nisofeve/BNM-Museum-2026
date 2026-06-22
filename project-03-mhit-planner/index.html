@@ -176,8 +176,13 @@ html, body {
 /* Input screen: hide verbose header; Si Kijang's bubble serves as intro */
 #screen-input .info-header { display: none; }
 #screen-input {
-  justify-content: center;
-  gap: calc(14 * var(--u));
+  justify-content: flex-start;
+  gap: 0;
+  overflow-y: auto;
+  padding-top: calc(10 * var(--u));
+}
+#screen-input #planner-answers {
+  padding: calc(10 * var(--u)) calc(28 * var(--u)) calc(20 * var(--u));
 }
 .screen.active {
   opacity: 1;
@@ -349,27 +354,34 @@ button {
   margin-top: calc(4 * var(--u));
 }
 
-/* ─── PRESENTER STAGE — landscape row layout ─── */
+/* ─── PRESENTER STAGE — top section, fixed viewport height ─── */
 .presenter-stage {
   position: relative;
   width: 100%;
   max-width: min(calc(920 * var(--u)), 96vw);
+  height: 54vh;
+  flex-shrink: 0;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: calc(22 * var(--u));
+  justify-content: flex-end; /* char anchored at bottom of top section */
   margin-bottom: 0;
 }
 
-/* bubble column: stacks bubbles vertically on the right of char */
+/* bubble column: floats absolutely at top of stage above character */
 .bubble-col {
-  flex: 1;
+  position: absolute;
+  top: calc(8 * var(--u));
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(calc(580 * var(--u)), 72vw);
   display: flex;
   flex-direction: column;
   gap: calc(7 * var(--u));
-  max-width: min(calc(500 * var(--u)), 58vw);
+  z-index: 15;
+  pointer-events: none;
 }
+.bubble-col > * { pointer-events: all; }
 
 /* ─── SPEECH BUBBLES ─── */
 .bubble {
@@ -393,26 +405,26 @@ button {
   padding: calc(12 * var(--u)) calc(20 * var(--u));
   box-shadow: 0 calc(4 * var(--u)) calc(16 * var(--u)) rgba(0,0,0,0.13);
 }
-/* tail points LEFT toward character */
+/* tail points DOWN toward character below */
 .bubble-main::before {
   content: '';
   position: absolute;
-  top: calc(18 * var(--u));
-  left: calc(-16 * var(--u));
-  bottom: auto;
-  transform: none;
+  bottom: calc(-18 * var(--u));
+  left: 50%;
+  top: auto;
+  transform: translateX(-50%);
   border: calc(9 * var(--u)) solid transparent;
-  border-right-color: var(--wood);
+  border-top-color: var(--wood);
 }
 .bubble-main::after {
   content: '';
   position: absolute;
-  top: calc(19 * var(--u));
-  left: calc(-10 * var(--u));
-  bottom: auto;
-  transform: none;
+  bottom: calc(-11 * var(--u));
+  left: 50%;
+  top: auto;
+  transform: translateX(-50%);
   border: calc(7 * var(--u)) solid transparent;
-  border-right-color: var(--panel);
+  border-top-color: var(--panel);
 }
 
 .bubble-user {
@@ -454,8 +466,9 @@ button {
 }
 .presenter-char {
   position: relative;
-  width: calc(177 * var(--u));
-  height: calc(261 * var(--u));
+  width: auto;
+  height: min(calc(261 * var(--u)), 38vh);
+  aspect-ratio: 177 / 261;
 }
 .aisyah-sp {
   position: absolute; inset: 0;
