@@ -1788,7 +1788,7 @@ function renderTexts() {
   document.getElementById('s1-c2-body').textContent = l.s1_c2_body;
   // S2
   // S3
-  document.getElementById('s3-title').textContent = l.s3_title;
+  var s3t = document.getElementById('s3-title'); if (s3t) s3t.textContent = l.s3_title;
   l.ic_titles.forEach(function(tt, i) {
     var el = document.getElementById('ic' + i + '-title');
     if (el) el.textContent = tt;
@@ -1798,7 +1798,7 @@ function renderTexts() {
     if (el) el.textContent = bt;
   });
   // S4
-  document.getElementById('s4-title').innerHTML = l.s4_title;
+  var s4t = document.getElementById('s4-title'); if (s4t) s4t.innerHTML = l.s4_title;
   l.safety_items.forEach(function(txt, i) {
     var el = document.getElementById('si' + i + '-text');
     if (el) el.textContent = txt;
