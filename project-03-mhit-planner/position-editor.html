@@ -3,11 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>P03 Position Editor — Si Kijang</title>
+<title>P03 Position Editor</title>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
 body {
   font-family: 'Nunito', sans-serif;
   background: #1a1a2e;
@@ -17,98 +16,72 @@ body {
   overflow: hidden;
 }
 
-/* ── LEFT PANEL: controls ── */
+/* ── CONTROLS ── */
 #controls {
-  width: 300px;
+  width: 290px;
   flex-shrink: 0;
   background: #16213e;
   border-right: 2px solid #0f3460;
-  padding: 20px 16px;
+  padding: 16px 14px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 18px;
 }
-
 #controls h1 {
   font-family: 'Fredoka One', cursive;
-  font-size: 18px;
+  font-size: 17px;
   color: #6DC83A;
-  letter-spacing: 0.5px;
 }
-
-.section-title {
+.sec {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.sec-title {
   font-family: 'Fredoka One', cursive;
-  font-size: 13px;
+  font-size: 12px;
   color: #A8D8EA;
   text-transform: uppercase;
   letter-spacing: 1px;
-  margin-bottom: 4px;
-  padding-bottom: 4px;
   border-bottom: 1px solid #0f3460;
+  padding-bottom: 3px;
 }
-
-.control-group {
+.row {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 4px;
 }
-
-.control-row {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.control-row label {
+.row label {
   font-size: 12px;
   color: #aaa;
   display: flex;
   justify-content: space-between;
-  align-items: center;
 }
-
-.control-row label span {
+.row label b {
   font-family: 'Fredoka One', cursive;
   font-size: 14px;
   color: #FFF8E1;
-  min-width: 48px;
-  text-align: right;
 }
-
-.control-row input[type=range] {
+input[type=range] {
   width: 100%;
   accent-color: #6DC83A;
-  height: 4px;
   cursor: pointer;
 }
 
-.control-row input[type=number] {
-  width: 80px;
-  background: #0f3460;
-  border: 1px solid #6DC83A;
-  border-radius: 6px;
-  color: #FFF8E1;
-  font-family: 'Fredoka One', cursive;
-  font-size: 14px;
-  padding: 4px 8px;
-  text-align: center;
-}
-
 /* CSS output */
-#css-output-box {
-  background: #0f3460;
-  border: 1px solid #A8D8EA44;
+#css-out {
+  background: #0f1e3d;
+  border: 1px solid #A8D8EA33;
   border-radius: 8px;
-  padding: 12px;
+  padding: 10px;
   font-family: 'Courier New', monospace;
-  font-size: 11px;
+  font-size: 10.5px;
   color: #A8D8EA;
-  line-height: 1.7;
+  line-height: 1.75;
   white-space: pre;
   overflow-x: auto;
 }
-
 #copy-btn {
   background: #6DC83A;
   color: white;
@@ -116,280 +89,150 @@ body {
   font-size: 14px;
   border: none;
   border-radius: 8px;
-  padding: 8px 16px;
+  padding: 8px;
   cursor: pointer;
-  transition: background 0.15s;
   width: 100%;
+  transition: background 0.15s;
 }
 #copy-btn:hover { background: #4E9E20; }
-#copy-btn.copied { background: #C8934A; }
+#copy-btn.ok { background: #C8934A; }
 
-/* ── RIGHT PANEL: preview ── */
+#status {
+  font-size: 11px;
+  color: #888;
+  text-align: center;
+  min-height: 16px;
+}
+
+/* ── PREVIEW (iframe) ── */
 #preview-wrap {
   flex: 1;
-  background: #A8D8EA;
   position: relative;
   overflow: hidden;
-  display: flex;
-  flex-direction: column;
 }
-
-#preview-label {
-  position: absolute;
-  top: 8px; left: 50%; transform: translateX(-50%);
-  background: rgba(0,0,0,0.5);
-  color: #fff;
-  font-size: 11px;
-  padding: 3px 10px;
-  border-radius: 20px;
-  z-index: 100;
-  white-space: nowrap;
-}
-
-/* sky clouds */
-#prev-sky {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, #A8D8EA 0%, #D6EEFF 100%);
-  overflow: hidden;
-}
-.p-cloud {
-  position: absolute;
-  background: white;
-  border-radius: 50px;
-  opacity: 0.82;
-}
-.p-cloud::before, .p-cloud::after {
-  content: '';
-  position: absolute;
-  background: white;
-  border-radius: 50%;
-}
-
-/* grass strip at bottom of preview */
-#prev-grass {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  height: 18%;
-  background: #5CB85C;
-  border-top: 4px solid #3A9E3A;
-}
-
-/* ── presenter stage in preview ── */
-#prev-stage {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  top: 0;
-  height: 54vh;
-  width: min(920px, 96%);
-  /* reference box — does not clip */
-  outline: 1px dashed rgba(255,255,255,0.3);
-}
-
-#prev-bubble-col {
-  position: absolute;
-  top: 8px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: min(580px, 72%);
-  display: flex;
-  flex-direction: column;
-  gap: 7px;
-  z-index: 15;
-}
-
-.prev-bubble {
-  background: #FFFBF0;
-  border: 3px solid #C8934A;
-  border-radius: 20px;
-  border-bottom-left-radius: 6px;
-  padding: 12px 20px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.13);
-  position: relative;
-  font-family: 'Nunito', sans-serif;
-  font-size: 15px;
-  color: #4a3520;
-}
-/* tail down */
-.prev-bubble::before {
-  content: '';
-  position: absolute;
-  bottom: -18px;
-  left: 50%;
-  transform: translateX(-50%);
-  border: 9px solid transparent;
-  border-top-color: #C8934A;
-}
-.prev-bubble::after {
-  content: '';
-  position: absolute;
-  bottom: -11px;
-  left: 50%;
-  transform: translateX(-50%);
-  border: 7px solid transparent;
-  border-top-color: #FFFBF0;
-}
-
-#prev-char-wrap {
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0;
-}
-
-#prev-char {
-  position: relative;
-  width: auto;
-  height: min(261px, 38vh);
-  aspect-ratio: 177 / 261;
-}
-#prev-char img {
-  position: absolute;
-  inset: 0;
+#preview-wrap iframe {
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  border: none;
+  display: block;
 }
-
-#prev-tag {
-  background: #6DC83A;
-  color: white;
+#iframe-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(22,33,62,0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-family: 'Fredoka One', cursive;
-  font-size: 14px;
-  padding: 3px 14px;
-  border-radius: 14px;
-  white-space: nowrap;
-  box-shadow: 0 3px 8px rgba(78,158,32,0.3);
-}
-
-/* divider line showing 54vh */
-#stage-divider {
-  position: absolute;
-  left: 0; right: 0;
-  top: 54vh;
-  border-top: 2px dashed rgba(255,255,255,0.6);
-  z-index: 50;
+  font-size: 18px;
+  color: #A8D8EA;
   pointer-events: none;
+  transition: opacity 0.4s;
 }
-#stage-divider::after {
-  content: '── answer panel starts here ──';
-  position: absolute;
-  top: 4px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 11px;
-  color: rgba(255,255,255,0.7);
-  white-space: nowrap;
-  background: rgba(0,0,0,0.3);
-  padding: 1px 8px;
-  border-radius: 10px;
-}
+#iframe-overlay.hidden { opacity: 0; }
 </style>
 </head>
 <body>
 
-<!-- ══ CONTROLS ══ -->
 <div id="controls">
   <h1>Position Editor</h1>
+  <div id="status">Loading…</div>
 
-  <div>
-    <div class="section-title">Bubble Col</div>
-    <div class="control-group">
-      <div class="control-row">
-        <label>translateY <span id="val-bubble-y">100</span>px</label>
-        <input type="range" id="sl-bubble-y" min="-100" max="300" value="100" step="1">
-      </div>
+  <div class="sec">
+    <div class="sec-title">Speech Bubble</div>
+    <div class="row">
+      <label>translateY <b id="v-by">167</b>px</label>
+      <input type="range" id="sl-by" min="-50" max="400" value="167" step="1">
     </div>
   </div>
 
-  <div>
-    <div class="section-title">Char Wrap</div>
-    <div class="control-group">
-      <div class="control-row">
-        <label>translateY <span id="val-char-y">100</span>px</label>
-        <input type="range" id="sl-char-y" min="-100" max="300" value="100" step="1">
-      </div>
+  <div class="sec">
+    <div class="sec-title">Char Wrap</div>
+    <div class="row">
+      <label>translateY <b id="v-cy">-2</b>px</label>
+      <input type="range" id="sl-cy" min="-100" max="300" value="-2" step="1">
     </div>
   </div>
 
-  <div>
-    <div class="section-title">Nameplate (presenter-tag)</div>
-    <div class="control-group">
-      <div class="control-row">
-        <label>margin-top <span id="val-tag-mt">0</span>px</label>
-        <input type="range" id="sl-tag-mt" min="-150" max="80" value="0" step="1">
-      </div>
+  <div class="sec">
+    <div class="sec-title">Nameplate</div>
+    <div class="row">
+      <label>margin-top <b id="v-mt">-41</b>px</label>
+      <input type="range" id="sl-mt" min="-150" max="80" value="-41" step="1">
     </div>
   </div>
 
-  <div>
-    <div class="section-title">CSS Output</div>
-    <pre id="css-output-box"></pre>
+  <div class="sec">
+    <div class="sec-title">CSS Output</div>
+    <pre id="css-out"></pre>
     <button id="copy-btn" onclick="copyCSS()">Copy CSS</button>
   </div>
 </div>
 
-<!-- ══ PREVIEW ══ -->
 <div id="preview-wrap">
-  <div id="prev-sky">
-    <div class="p-cloud" style="width:180px;height:50px;top:8%;left:10%"></div>
-    <div class="p-cloud" style="width:130px;height:38px;top:18%;left:55%"></div>
-    <div class="p-cloud" style="width:100px;height:30px;top:5%;left:70%"></div>
-  </div>
-  <div id="prev-grass"></div>
-  <div id="stage-divider"></div>
-
-  <div id="prev-stage">
-    <!-- bubbles -->
-    <div id="prev-bubble-col">
-      <div class="prev-bubble">Berapa umur anda?</div>
-    </div>
-    <!-- character -->
-    <div id="prev-char-wrap">
-      <div id="prev-char">
-        <img src="../Assets/kijang_idle.png" alt="Si Kijang">
-      </div>
-      <div id="prev-tag">Si Kijang</div>
-    </div>
-  </div>
-
-  <div id="preview-label">Live Preview — drag sliders on the left</div>
+  <iframe id="frame" src="./index.html"></iframe>
+  <div id="iframe-overlay">Loading real preview…</div>
 </div>
 
 <script>
-const slBubbleY = document.getElementById('sl-bubble-y');
-const slCharY   = document.getElementById('sl-char-y');
-const slTagMt   = document.getElementById('sl-tag-mt');
+const frame    = document.getElementById('frame');
+const overlay  = document.getElementById('iframe-overlay');
+const statusEl = document.getElementById('status');
 
-const valBubbleY = document.getElementById('val-bubble-y');
-const valCharY   = document.getElementById('val-char-y');
-const valTagMt   = document.getElementById('val-tag-mt');
+const slBy = document.getElementById('sl-by');
+const slCy = document.getElementById('sl-cy');
+const slMt = document.getElementById('sl-mt');
 
-const prevBubbleCol  = document.getElementById('prev-bubble-col');
-const prevCharWrap   = document.getElementById('prev-char-wrap');
-const prevTag        = document.getElementById('prev-tag');
-const cssOut         = document.getElementById('css-output-box');
+let ready = false;
+let styleEl = null;
 
-function update() {
-  const by  = parseInt(slBubbleY.value);
-  const cy  = parseInt(slCharY.value);
-  const tmt = parseInt(slTagMt.value);
+frame.addEventListener('load', () => {
+  try {
+    const win = frame.contentWindow;
+    const doc = frame.contentDocument;
 
-  valBubbleY.textContent = by;
-  valCharY.textContent   = cy;
-  valTagMt.textContent   = tmt;
+    // Inject override style tag
+    styleEl = doc.createElement('style');
+    styleEl.id = 'pos-editor-overrides';
+    doc.head.appendChild(styleEl);
 
-  prevBubbleCol.style.transform = `translateX(-50%) translateY(${by}px)`;
-  prevCharWrap.style.transform  = `translateX(-50%) translateY(${cy}px)`;
-  prevTag.style.marginTop       = tmt + 'px';
+    // Navigate to input screen
+    if (typeof win.goToScreen === 'function') {
+      win.goToScreen('input');
+    }
 
-  cssOut.textContent =
+    ready = true;
+    overlay.classList.add('hidden');
+    statusEl.textContent = 'Live — drag sliders';
+    applyCSS();
+  } catch(e) {
+    statusEl.textContent = 'Error: ' + e.message;
+  }
+});
+
+function applyCSS() {
+  const by = parseInt(slBy.value);
+  const cy = parseInt(slCy.value);
+  const mt = parseInt(slMt.value);
+
+  document.getElementById('v-by').textContent = by;
+  document.getElementById('v-cy').textContent = cy;
+  document.getElementById('v-mt').textContent = mt;
+
+  const css = `
+.bubble-col {
+  transform: translateX(-50%) translateY(${by}px) !important;
+}
+.char-wrap {
+  transform: translateY(${cy}px) !important;
+}
+.presenter-tag {
+  margin-top: ${mt}px !important;
+}`;
+
+  if (styleEl) styleEl.textContent = css;
+
+  document.getElementById('css-out').textContent =
 `.bubble-col {
   transform: translateX(-50%) translateY(${by}px);
 }
@@ -399,21 +242,21 @@ function update() {
 }
 
 .presenter-tag {
-  margin-top: ${tmt}px;
+  margin-top: ${mt}px;
 }`;
 }
 
-slBubbleY.addEventListener('input', update);
-slCharY.addEventListener('input', update);
-slTagMt.addEventListener('input', update);
-update();
+slBy.addEventListener('input', applyCSS);
+slCy.addEventListener('input', applyCSS);
+slMt.addEventListener('input', applyCSS);
+applyCSS();
 
 function copyCSS() {
-  navigator.clipboard.writeText(cssOut.textContent).then(() => {
+  navigator.clipboard.writeText(document.getElementById('css-out').textContent).then(() => {
     const btn = document.getElementById('copy-btn');
     btn.textContent = 'Copied!';
-    btn.classList.add('copied');
-    setTimeout(() => { btn.textContent = 'Copy CSS'; btn.classList.remove('copied'); }, 1500);
+    btn.classList.add('ok');
+    setTimeout(() => { btn.textContent = 'Copy CSS'; btn.classList.remove('ok'); }, 1500);
   });
 }
 </script>
