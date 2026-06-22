@@ -2102,7 +2102,8 @@ function closeSummaryAndRestart() {
   factsShown = true;
   quizJustCompleted = false;
   SFX.swap();
-  goTo(1);
+  goTo(0);
+  setTimeout(initSlider, 400);
 }
 
 /* ============================================================
