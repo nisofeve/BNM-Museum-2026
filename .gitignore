@@ -2,3 +2,11 @@ node_modules/
 %ASKPASS_FILE%
 *.bat.tmp
 Backup/
+
+# Large source files — not for git
+Documents/socmed posting_Final_CO.ai
+Documents/socmed_extracted/img_p01_01.png
+Documents/socmed_extracted/img_p01_02.png
+Documents/socmed_extracted/img_p01_03.png
+Documents/socmed_extracted/img_p01_14.png
+Documents/socmed_extracted/img_p01_16.png

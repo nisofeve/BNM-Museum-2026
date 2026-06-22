@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<link rel="stylesheet" href="../_fonts/fonts.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1920">
+<title>Bina Semula Simpanan Bersama — Wall Display — IMD 2026</title>
+
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    background: #020818;
+    font-family: 'Poppins', sans-serif;
+    color: white;
+    user-select: none;
+  }
+
+  body {
+    background: radial-gradient(ellipse at center, #051020 0%, #020818 100%);
+  }
+
+  /* ---- PARTICLES ---- */
+  #particles {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+  }
+  .particle {
+    position: absolute;
+    border-radius: 50%;
+    background: white;
+    opacity: 0.12;
+  }
+
+  /* ---- LAYOUT ---- */
+  #layout {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 1;
+  }
+
+  /* ---- TOP BAR ---- */
+  #top-bar {
+    width: 100%;
+    padding: 28px 40px 0;
+    text-align: center;
+    position: relative;
+  }
+  #main-title {
+    font-size: clamp(28px, 3.5vw, 52px);
+    font-weight: 800;
+    background: linear-gradient(90deg, #00E5FF, #ffffff, #00E5FF);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: titleShimmer 4s linear infinite;
+    letter-spacing: 0.5px;
+  }
+  @keyframes titleShimmer {
+    0%   { background-position: 0% center; }
+    100% { background-position: 200% center; }
+  }
+  #stats-bar {
+    margin-top: 8px;
+    font-size: clamp(13px, 1.4vw, 20px);
+    color: #00E5FF;
+    font-weight: 600;
+    letter-spacing: 1px;
+    opacity: 0.85;
+  }
+
+  /* ---- CONNECTION STATUS ---- */
+  #conn-status {
+    position: fixed;
+    top: 16px;
+    left: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: rgba(255,255,255,0.4);
+    z-index: 999;
+  }
+  #conn-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #555;
+    transition: background 0.3s;
+  }
+  #conn-dot.connected    { background: #27AE60; box-shadow: 0 0 8px #27AE60; }
+  #conn-dot.disconnected { background: #E74C3C; }
+  #conn-dot.demo         { background: #F5A623; }
+
+  /* ---- NETWORK AREA ---- */
+  #network-area {
+    position: relative;
+    width: 1200px;
+    height: 500px;
+    margin: auto;
+    flex-shrink: 0;
+  }
+
+  /* SVG lines behind nodes */
+  #svg-lines {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* ---- NODES ---- */
+  .node {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: border-color 0.4s, background 0.4s;
+    z-index: 2;
+    cursor: default;
+  }
+
+  .node.inactive {
+    background: #0A1929;
+    border: 2px solid #1A3A5C;
+    box-shadow: none;
+  }
+
+  .node.activated {
+    animation: nodeGlow 2.5s ease-in-out infinite;
+  }
+
+  @keyframes nodeGlow {
+    0%, 100% {
+      box-shadow:
+        0 0 20px var(--nc),
+        0 0 40px color-mix(in srgb, var(--nc) 40%, transparent);
+    }
+    50% {
+      box-shadow:
+        0 0 35px var(--nc),
+        0 0 70px color-mix(in srgb, var(--nc) 60%, transparent),
+        0 0 100px color-mix(in srgb, var(--nc) 20%, transparent);
+    }
+  }
+
+  .node-icon {
+    font-size: 32px;
+    line-height: 1;
+    filter: drop-shadow(0 0 4px rgba(255,255,255,0.3));
+    transition: filter 0.4s;
+  }
+  .node.activated .node-icon {
+    filter: drop-shadow(0 0 8px var(--nc));
+  }
+
+  .node-count {
+    font-size: 11px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.5);
+    margin-top: 4px;
+    transition: color 0.4s;
+  }
+  .node.activated .node-count {
+    color: var(--nc);
+  }
+
+  /* ---- RIPPLE ---- */
+  @keyframes rippleOut {
+    0%   { transform: translate(-50%,-50%) scale(0.8); opacity: 0.6; }
+    100% { transform: translate(-50%,-50%) scale(2.8); opacity: 0; }
+  }
+  .ripple-ring {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    border: 3px solid currentColor;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    pointer-events: none;
+    animation: rippleOut 1s ease-out forwards;
+  }
+
+  /* ---- BOTTOM ---- */
+  #bottom-bar {
+    width: 100%;
+    padding: 0 40px 20px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    position: relative;
+  }
+  #closing-msg {
+    font-size: clamp(11px, 1.2vw, 16px);
+    color: rgba(255,255,255,0.2);
+    text-align: center;
+    letter-spacing: 0.3px;
+  }
+
+  #reset-btn {
+    position: fixed;
+    bottom: 16px;
+    right: 20px;
+    background: rgba(255,255,255,0.07);
+    color: rgba(255,255,255,0.25);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 12px;
+    font-family: 'Poppins', sans-serif;
+    cursor: pointer;
+    z-index: 999;
+    transition: background 0.2s, color 0.2s;
+  }
+  #reset-btn:hover {
+    background: rgba(255,255,255,0.14);
+    color: rgba(255,255,255,0.5);
+  }
+
+  /* ---- CONNECTION LINE ANIMATION ---- */
+  .conn-line {
+    stroke-width: 3;
+    stroke-dasharray: 8 4;
+    fill: none;
+    stroke-linecap: round;
+    animation: dashFlow 1.5s linear infinite;
+  }
+  @keyframes dashFlow {
+    from { stroke-dashoffset: 36; }
+    to   { stroke-dashoffset: 0; }
+  }
+
+  /* Line appear animation */
+  @keyframes lineAppear {
+    from { stroke-dashoffset: 300; stroke-dasharray: 300 0; opacity: 0; }
+    to   { stroke-dashoffset: 0;   stroke-dasharray: 8 4;   opacity: 1; }
+  }
+  .conn-line.appearing {
+    animation: lineAppear 0.8s ease-out forwards, dashFlow 1.5s linear 0.8s infinite;
+  }
+</style>
+</head>
+<body>
+
+<div id="particles"></div>
+
+<div id="conn-status">
+  <div id="conn-dot"></div>
+  <span id="conn-label">Menghubung...</span>
+</div>
+
+<div id="layout">
+
+  <div id="top-bar">
+    <div id="main-title">Bina Semula Simpanan Bersama</div>
+    <div id="stats-bar">Sesi: <span id="stat-sessions">0</span> &nbsp;|&nbsp; Kapsul Aktif: <span id="stat-nodes">0</span>/10</div>
+  </div>
+
+  <div id="network-area">
+
+    <svg id="svg-lines" viewBox="0 0 1200 500" preserveAspectRatio="none">
+      <defs id="svg-defs"></defs>
+    </svg>
+
+  </div>
+
+  <div id="bottom-bar">
+    <div id="closing-msg">Bersama kita membina komuniti yang lebih berdaya tahan melalui kesedaran kewangan.</div>
+  </div>
+
+</div>
+
+<button id="reset-btn" title="Double-click to reset">Reset</button>
+
+<script>
+// =====================================================
+// NODE LAYOUT
+// =====================================================
+const NODE_DATA = [
+  { id: 0, icon: '🛡️', label: 'Simpanan Kecemasan' },
+  { id: 1, icon: '📊', label: 'Kawalan Perbelanjaan' },
+  { id: 2, icon: '📝', label: 'Rekod Kewangan' },
+  { id: 3, icon: '🏦', label: 'Urus Simpanan' },
+  { id: 4, icon: '📱', label: 'Aplikasi Digital' },
+  { id: 5, icon: '🛒', label: 'Keputusan Bijak' },
+  { id: 6, icon: '🎯', label: 'Matlamat Simpanan' },
+  { id: 7, icon: '🚨', label: 'Bersedia Kecemasan' },
+  { id: 8, icon: '💡', label: 'Kepentingan Simpanan' },
+  { id: 9, icon: '🤝', label: 'Kewangan Bersama' }
+];
+
+const COLORS = ['#00E5FF','#F5A623','#7B5EA7','#27AE60','#FF6B5B','#00B4A6','#F5A623','#0047AB','#27AE60','#00E5FF'];
+
+// Positions in the 1200×500 container
+// Row 1 (y=160): nodes 0-4 at x = 120, 360, 600, 840, 1080
+// Row 2 (y=360): nodes 5-9 at x = 120, 360, 600, 840, 1080
+const NODE_POSITIONS = [
+  { x: 120,  y: 160 },
+  { x: 360,  y: 160 },
+  { x: 600,  y: 160 },
+  { x: 840,  y: 160 },
+  { x: 1080, y: 160 },
+  { x: 120,  y: 360 },
+  { x: 360,  y: 360 },
+  { x: 600,  y: 360 },
+  { x: 840,  y: 360 },
+  { x: 1080, y: 360 }
+];
+
+// =====================================================
+// BUILD NODES
+// =====================================================
+const networkArea = document.getElementById('network-area');
+const nodeElements = [];
+
+NODE_DATA.forEach((nd, i) => {
+  const pos = NODE_POSITIONS[i];
+  const el = document.createElement('div');
+  el.className = 'node inactive';
+  el.id = 'node-' + i;
+  el.style.left  = pos.x + 'px';
+  el.style.top   = pos.y + 'px';
+  el.style.setProperty('--nc', COLORS[i]);
+  el.innerHTML = `<span class="node-icon">${nd.icon}</span><span class="node-count" id="nc-${i}">×0</span>`;
+  networkArea.appendChild(el);
+  nodeElements.push(el);
+});
+
+// =====================================================
+// PARTICLES
+// =====================================================
+(function initParticles() {
+  const container = document.getElementById('particles');
+  for (let i = 0; i < 30; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    const size = 3 + Math.random() * 3;
+    p.style.cssText = [
+      `width:${size}px`,
+      `height:${size}px`,
+      `left:${Math.random() * 100}vw`,
+      `top:${Math.random() * 100}vh`,
+      `opacity:${0.05 + Math.random() * 0.12}`,
+      `animation: drift${i} ${8 + Math.random() * 14}s ease-in-out infinite alternate`
+    ].join(';');
+
+    const dx = (Math.random() - 0.5) * 120;
+    const dy = (Math.random() - 0.5) * 80;
+    const style = document.createElement('style');
+    style.textContent = `@keyframes drift${i} {
+      from { transform: translate(0,0); }
+      to   { transform: translate(${dx}px,${dy}px); }
+    }`;
+    document.head.appendChild(style);
+    container.appendChild(p);
+  }
+})();
+
+// =====================================================
+// SVG HELPERS
+// =====================================================
+const svgEl   = document.getElementById('svg-lines');
+const svgDefs = document.getElementById('svg-defs');
+const drawnConnections = new Set();
+
+function gradientId(from, to) { return `lg-${from}-${to}`; }
+
+function addGradient(from, to) {
+  const id  = gradientId(from, to);
+  if (svgDefs.querySelector('#' + id)) return;
+  const pf  = NODE_POSITIONS[from];
+  const pt  = NODE_POSITIONS[to];
+  const grad = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
+  grad.setAttribute('id', id);
+  grad.setAttribute('gradientUnits', 'userSpaceOnUse');
+  grad.setAttribute('x1', pf.x); grad.setAttribute('y1', pf.y);
+  grad.setAttribute('x2', pt.x); grad.setAttribute('y2', pt.y);
+  const s0 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+  s0.setAttribute('offset', '0%');   s0.setAttribute('stop-color', COLORS[from]);
+  const s1 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+  s1.setAttribute('offset', '100%'); s1.setAttribute('stop-color', COLORS[to]);
+  grad.appendChild(s0); grad.appendChild(s1);
+  svgDefs.appendChild(grad);
+}
+
+function drawConnection(from, to, animated) {
+  const key = `${from}-${to}`;
+  if (drawnConnections.has(key)) return;
+  drawnConnections.add(key);
+
+  addGradient(from, to);
+
+  const pf = NODE_POSITIONS[from];
+  const pt = NODE_POSITIONS[to];
+
+  const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+  line.setAttribute('x1', pf.x); line.setAttribute('y1', pf.y);
+  line.setAttribute('x2', pt.x); line.setAttribute('y2', pt.y);
+  line.setAttribute('stroke', `url(#${gradientId(from, to)})`);
+  line.classList.add('conn-line');
+  if (animated) line.classList.add('appearing');
+  svgEl.appendChild(line);
+}
+
+// =====================================================
+// NODE ACTIVATION
+// =====================================================
+function activateNode(nodeId, nodeData, animated) {
+  const el = nodeElements[nodeId];
+  const color = nodeData ? nodeData.color : COLORS[nodeId];
+  el.style.setProperty('--nc', color);
+  el.style.background = color + '22';
+  el.style.border = `2px solid ${color}`;
+  el.classList.remove('inactive');
+  el.classList.add('activated');
+
+  const count = nodeData ? nodeData.activatedCount : 1;
+  document.getElementById('nc-' + nodeId).textContent = '×' + count;
+
+  if (animated) {
+    el.animate([
+      { transform: 'translate(-50%,-50%) scale(0.5)', opacity: 0.5 },
+      { transform: 'translate(-50%,-50%) scale(1.35)', opacity: 1 },
+      { transform: 'translate(-50%,-50%) scale(1.0)', opacity: 1 }
+    ], { duration: 600, easing: 'cubic-bezier(0.34,1.56,0.64,1)', fill: 'forwards' });
+
+    createRipple(el, color);
+  }
+}
+
+function createRipple(el, color) {
+  const ring = document.createElement('div');
+  ring.className = 'ripple-ring';
+  ring.style.color = color;
+  ring.style.borderColor = color;
+  el.appendChild(ring);
+  setTimeout(() => ring.remove(), 1100);
+}
+
+function updateStats(state) {
+  document.getElementById('stat-sessions').textContent = state.totalSessions || 0;
+  const active = state.nodes ? state.nodes.filter(n => n.activated).length : 0;
+  document.getElementById('stat-nodes').textContent = active;
+}
+
+function syncState(state) {
+  updateStats(state);
+  // Render nodes
+  state.nodes.forEach((node, i) => {
+    if (node.activated) activateNode(i, node, false);
+  });
+  // Render connections
+  state.connections.forEach(c => drawConnection(c.from, c.to, false));
+}
+
+// =====================================================
+// WEBSOCKET
+// =====================================================
+let ws = null;
+let wsRetryTimer = null;
+
+function connectWS() {
+  if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) return;
+
+  const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+  const host     = window.location.hostname || 'localhost';
+  const url      = `${protocol}//${host}:3000`;
+
+  try { ws = new WebSocket(url); } catch(e) { scheduleRetry(); return; }
+
+  ws.onopen = () => {
+    setConnStatus('connected', 'Online');
+  };
+
+  ws.onmessage = (evt) => {
+    try {
+      const data = JSON.parse(evt.data);
+
+      if (data.type === 'STATE_SYNC') {
+        syncState(data.state);
+      }
+
+      if (data.type === 'NODE_ACTIVATED') {
+        activateNode(data.nodeId, data.node, true);
+        // Update count
+        const active = nodeElements.filter(el => el.classList.contains('activated')).length;
+        document.getElementById('stat-nodes').textContent = active;
+      }
+
+      if (data.type === 'CONNECTION_DRAWN') {
+        const { from, to } = data.connection;
+        drawConnection(from, to, true);
+      }
+
+      if (data.type === 'SESSION_START') {
+        document.getElementById('stat-sessions').textContent = data.total;
+      }
+
+    } catch(e) {}
+  };
+
+  ws.onerror  = () => {};
+  ws.onclose  = () => {
+    setConnStatus('disconnected', 'Offline');
+    scheduleRetry();
+  };
+}
+
+function scheduleRetry() {
+  clearTimeout(wsRetryTimer);
+  wsRetryTimer = setTimeout(connectWS, 3000);
+}
+
+function setConnStatus(state, label) {
+  document.getElementById('conn-dot').className = state;
+  document.getElementById('conn-label').textContent = label;
+}
+
+// =====================================================
+// RESET
+// =====================================================
+let resetClickTimer = null;
+const resetBtn = document.getElementById('reset-btn');
+
+resetBtn.addEventListener('dblclick', () => {
+  if (confirm('Reset all state? / Padam semua data?')) {
+    fetch('/api/reset', { method: 'POST' })
+      .then(r => r.json())
+      .then(() => console.log('State reset'))
+      .catch(e => console.error('Reset error:', e));
+  }
+});
+
+// Keyboard shortcut: Ctrl+Shift+R
+document.addEventListener('keydown', (e) => {
+  if (e.ctrlKey && e.shiftKey && e.key === 'R') {
+    e.preventDefault();
+    if (confirm('Reset all state? / Padam semua data?')) {
+      fetch('/api/reset', { method: 'POST' }).catch(console.error);
+    }
+  }
+});
+
+// =====================================================
+// INIT
+// =====================================================
+connectWS();
+
+// Also fetch initial state via REST as backup
+fetch('/api/state')
+  .then(r => r.json())
+  .then(s => syncState(s))
+  .catch(() => {});
+</script>
+
+<style id="kiosk-hardening">html,body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;}a{pointer-events:none;}</style><script id="kiosk-block">document.addEventListener("contextmenu",function(e){e.preventDefault();},true);document.addEventListener("dragstart",function(e){e.preventDefault();},true);</script>
+</body>
+</html>

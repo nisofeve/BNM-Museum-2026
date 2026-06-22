@@ -1,0 +1,57 @@
+{
+  "booth_build": "2026-06-22",
+  "kiosk_launch_flags": "--kiosk --disable-pinch --overscroll-history-navigation=0 --disable-features=TranslateUI --noerrdialogs --disable-infobars",
+  "projects": [
+    {
+      "id": "P01",
+      "path": "P01/index.html",
+      "chrome_kiosk_cmd": "chrome.exe --kiosk --disable-pinch --overscroll-history-navigation=0 --disable-features=TranslateUI --noerrdialogs --disable-infobars \"file:///F:/Projects/External/Festival Hari Museum Antarabangsa/Booth Games/P01/index.html\""
+    },
+    {
+      "id": "P01b",
+      "path": "P01b/index.html",
+      "chrome_kiosk_cmd": "chrome.exe --kiosk --disable-pinch --overscroll-history-navigation=0 --disable-features=TranslateUI --noerrdialogs --disable-infobars \"file:///F:/Projects/External/Festival Hari Museum Antarabangsa/Booth Games/P01b/index.html\""
+    },
+    {
+      "id": "P02",
+      "path": "P02/index.html",
+      "chrome_kiosk_cmd": "chrome.exe --kiosk --disable-pinch --overscroll-history-navigation=0 --disable-features=TranslateUI --noerrdialogs --disable-infobars \"file:///F:/Projects/External/Festival Hari Museum Antarabangsa/Booth Games/P02/index.html\""
+    },
+    {
+      "id": "P03",
+      "path": "P03/index.html",
+      "chrome_kiosk_cmd": "chrome.exe --kiosk --disable-pinch --overscroll-history-navigation=0 --disable-features=TranslateUI --noerrdialogs --disable-infobars \"file:///F:/Projects/External/Festival Hari Museum Antarabangsa/Booth Games/P03/index.html\""
+    },
+    {
+      "id": "P04",
+      "path": "P04/index.html",
+      "chrome_kiosk_cmd": "chrome.exe --kiosk --disable-pinch --overscroll-history-navigation=0 --disable-features=TranslateUI --noerrdialogs --disable-infobars \"file:///F:/Projects/External/Festival Hari Museum Antarabangsa/Booth Games/P04/index.html\""
+    },
+    {
+      "id": "P05",
+      "path": "P05/index.html",
+      "chrome_kiosk_cmd": "chrome.exe --kiosk --disable-pinch --overscroll-history-navigation=0 --disable-features=TranslateUI --noerrdialogs --disable-infobars \"file:///F:/Projects/External/Festival Hari Museum Antarabangsa/Booth Games/P05/index.html\""
+    },
+    {
+      "id": "P06",
+      "path": "P06/index.html",
+      "chrome_kiosk_cmd": "chrome.exe --kiosk --disable-pinch --overscroll-history-navigation=0 --disable-features=TranslateUI --noerrdialogs --disable-infobars \"file:///F:/Projects/External/Festival Hari Museum Antarabangsa/Booth Games/P06/index.html\"",
+      "note": "Run node server.js first; use http://localhost:3000 not file:// for wall display"
+    },
+    {
+      "id": "P07",
+      "path": "P07/index.html",
+      "chrome_kiosk_cmd": "chrome.exe --kiosk --disable-pinch --overscroll-history-navigation=0 --disable-features=TranslateUI --noerrdialogs --disable-infobars \"file:///F:/Projects/External/Festival Hari Museum Antarabangsa/Booth Games/P07/index.html\""
+    },
+    {
+      "id": "P08",
+      "path": "P08/index.html",
+      "chrome_kiosk_cmd": "chrome.exe --kiosk --disable-pinch --overscroll-history-navigation=0 --disable-features=TranslateUI --noerrdialogs --disable-infobars \"file:///F:/Projects/External/Festival Hari Museum Antarabangsa/Booth Games/P08/index.html\""
+    },
+    {
+      "id": "P08b",
+      "path": "P08b/index.html",
+      "chrome_kiosk_cmd": "chrome.exe --kiosk --disable-pinch --overscroll-history-navigation=0 --disable-features=TranslateUI --noerrdialogs --disable-infobars \"file:///F:/Projects/External/Festival Hari Museum Antarabangsa/Booth Games/P08b/index.html\""
+    }
+  ]
+}

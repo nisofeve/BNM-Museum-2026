@@ -1,0 +1,4 @@
+P06 Wall Sync
+Run start-server.bat (requires Node.js)
+Kiosk screen: file:///[path]/P06/index.html
+Wall display: http://localhost:3000/wall.html

@@ -1,0 +1,2089 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<link rel="stylesheet" href="../_fonts/fonts.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Perancang Bajet Penjagaan Kesihatan | Health Budget Planner</title>
+
+<style>
+/* ─── AC:NH ROOT VARS ─── */
+:root {
+  --sky: #A8D8EA;
+  --sky-light: #D6EEFF;
+  --grass: #5CB85C;
+  --grass-dark: #3A9E3A;
+  --cream: #FFF8E1;
+  --panel: #FFFBF0;
+  --wood: #C8934A;
+  --wood-dark: #8B5E2C;
+  --ac-green: #6DC83A;
+  --ac-green-dark: #4E9E20;
+  --ac-blue: #3B9FD9;
+  --ac-red: #E87070;
+  --ac-yellow: #FFD93D;
+  --text: #4A2E0A;
+  --text-mid: #7A5030;
+  --text-light: #A08060;
+  --white: #FFFFFF;
+  --u: min(0.09114vw, 0.16205vh);
+  --radius: calc(24 * var(--u));
+  --radius-lg: calc(36 * var(--u));
+  --radius-xl: calc(60 * var(--u));
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+* {
+  margin: 0; padding: 0; box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none; user-select: none;
+  touch-action: manipulation;
+}
+
+html, body {
+  width: 100vw; height: 100vh; overflow: hidden;
+  font-family: 'Nunito', sans-serif;
+  font-size: calc(18 * var(--u));
+  color: var(--text);
+  overscroll-behavior: none;
+  background: linear-gradient(180deg,
+    var(--sky-light) 0%,
+    var(--sky) 62%,
+    var(--grass) 62%,
+    var(--grass-dark) 100%);
+}
+
+/* ─── CLOUDS ─── */
+#ac-sky {
+  position: fixed;
+  inset: 0 0 38% 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.cloud {
+  position: absolute;
+  background: rgba(255,255,255,0.9);
+  border-radius: 50px;
+}
+.cloud::before, .cloud::after {
+  content: '';
+  position: absolute;
+  background: rgba(255,255,255,0.9);
+  border-radius: 50%;
+}
+.cloud-1 {
+  width: calc(140 * var(--u)); height: calc(44 * var(--u));
+  top: 8%; left: 6%;
+  animation: cloud-drift 22s ease-in-out infinite alternate;
+}
+.cloud-1::before { width: calc(80 * var(--u)); height: calc(66 * var(--u)); top: calc(-34 * var(--u)); left: calc(16 * var(--u)); }
+.cloud-1::after  { width: calc(58 * var(--u)); height: calc(50 * var(--u)); top: calc(-24 * var(--u)); left: calc(52 * var(--u)); }
+
+.cloud-2 {
+  width: calc(180 * var(--u)); height: calc(54 * var(--u));
+  top: 20%; right: 9%;
+  animation: cloud-drift 28s ease-in-out infinite alternate-reverse;
+}
+.cloud-2::before { width: calc(90 * var(--u)); height: calc(72 * var(--u)); top: calc(-38 * var(--u)); left: calc(22 * var(--u)); }
+.cloud-2::after  { width: calc(66 * var(--u)); height: calc(55 * var(--u)); top: calc(-28 * var(--u)); left: calc(70 * var(--u)); }
+
+.cloud-3 {
+  width: calc(110 * var(--u)); height: calc(38 * var(--u));
+  top: 6%; left: 42%;
+  animation: cloud-drift 18s ease-in-out infinite alternate;
+}
+.cloud-3::before { width: calc(60 * var(--u)); height: calc(52 * var(--u)); top: calc(-28 * var(--u)); left: calc(12 * var(--u)); }
+.cloud-3::after  { width: calc(48 * var(--u)); height: calc(42 * var(--u)); top: calc(-20 * var(--u)); left: calc(40 * var(--u)); }
+
+@keyframes cloud-drift {
+  from { transform: translateX(0); }
+  to   { transform: translateX(calc(35 * var(--u))); }
+}
+
+/* ─── GRASS STRIP ─── */
+#ac-grass {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  height: 38%;
+  z-index: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg, var(--grass) 0%, var(--grass-dark) 100%);
+  clip-path: polygon(
+    0% 8%,4% 2%,8% 7%,12% 1%,16% 8%,20% 2%,24% 7%,28% 1%,
+    32% 7%,36% 2%,40% 8%,44% 1%,48% 7%,52% 2%,56% 8%,60% 1%,
+    64% 7%,68% 2%,72% 8%,76% 1%,80% 7%,84% 2%,88% 8%,92% 1%,96% 7%,100% 3%,
+    100% 100%,0% 100%
+  );
+}
+#ac-grass::after {
+  content: '🌸  🌷  🌺  🌼  🌻  🌹';
+  position: absolute;
+  top: 10%;
+  left: 0; right: 0;
+  text-align: center;
+  font-size: calc(20 * var(--u));
+  letter-spacing: calc(10 * var(--u));
+  opacity: 0.65;
+  pointer-events: none;
+}
+
+/* ─── LEAF SWEEP TRANSITION ─── */
+#leaf-sweep {
+  position: fixed; inset: 0;
+  z-index: 1200;
+  pointer-events: none;
+  opacity: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+#leaf-sweep.run {
+  animation: leaf-wipe 0.6s ease-out forwards;
+}
+#leaf-sweep::after {
+  content: '🍃🍂🌿🍃🍂';
+  font-size: calc(56 * var(--u));
+  opacity: 0;
+  transform: scale(0.3);
+}
+#leaf-sweep.run::after {
+  animation: leaves-burst 0.6s ease-out forwards;
+}
+@keyframes leaf-wipe {
+  0%   { background: rgba(255,248,225,0); }
+  28%  { background: rgba(255,248,225,0.72); }
+  100% { background: rgba(255,248,225,0); }
+}
+@keyframes leaves-burst {
+  0%   { opacity: 0;   transform: scale(0.3); }
+  35%  { opacity: 1;   transform: scale(1.2); }
+  100% { opacity: 0;   transform: scale(1.9); }
+}
+
+/* ─── SCREENS ─── */
+.screen {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: calc(20 * var(--u)) calc(28 * var(--u));
+  opacity: 0;
+  overflow: hidden;
+  transform: translateY(calc(28 * var(--u))) scale(0.96);
+  pointer-events: none;
+  transition: opacity 0.4s var(--ease-bounce), transform 0.4s var(--ease-bounce);
+  z-index: 10;
+}
+/* Input screen: hide verbose header; Si Kijang's bubble serves as intro */
+#screen-input .info-header { display: none; }
+#screen-input {
+  justify-content: flex-start;
+  gap: 0;
+  overflow-y: auto;
+  padding-top: calc(10 * var(--u));
+}
+#screen-input #planner-answers {
+  padding: calc(10 * var(--u)) calc(28 * var(--u)) calc(20 * var(--u));
+}
+.screen.active {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: all;
+}
+
+/* ─── IDLE BAR + OVERLAY ─── */
+#idle-bar {
+  position: fixed; bottom: 0; left: 0;
+  height: calc(4 * var(--u)); width: 100%;
+  background: var(--ac-green); opacity: 0.45;
+  z-index: 900; pointer-events: none;
+}
+#idle-overlay {
+  position: fixed; inset: 0;
+  z-index: 2000;
+  background: rgba(200, 238, 248, 0.92);
+  backdrop-filter: blur(6px);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: calc(14 * var(--u));
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.3s;
+}
+#idle-overlay.visible { opacity: 1; pointer-events: all; }
+#idle-warn-icon {
+  font-size: calc(80 * var(--u));
+  animation: bounce-idle 0.9s ease-in-out infinite alternate;
+}
+@keyframes bounce-idle {
+  from { transform: translateY(0); }
+  to   { transform: translateY(calc(-10 * var(--u))); }
+}
+#idle-warn-main {
+  font-family: 'Fredoka One', cursive;
+  font-size: calc(30 * var(--u));
+  color: var(--wood-dark);
+  text-align: center;
+}
+#idle-warn-sub {
+  font-size: calc(19 * var(--u));
+  color: var(--text-mid);
+  text-align: center;
+}
+
+/* ─── BUTTONS ─── */
+button {
+  cursor: pointer;
+  font-family: 'Fredoka One', cursive;
+  font-size: calc(20 * var(--u));
+  border: none; outline: none;
+  transition: transform 0.1s, filter 0.1s;
+}
+.btn-primary {
+  background: var(--ac-green);
+  color: white;
+  padding: calc(14 * var(--u)) calc(50 * var(--u));
+  border-radius: var(--radius-xl);
+  border-bottom: calc(5 * var(--u)) solid var(--ac-green-dark);
+  box-shadow: 0 calc(4 * var(--u)) calc(18 * var(--u)) rgba(109,200,58,0.38);
+  text-shadow: 0 1px 3px rgba(0,0,0,0.22);
+  letter-spacing: calc(0.5 * var(--u));
+}
+.btn-primary:active {
+  transform: translateY(calc(4 * var(--u)));
+  border-bottom-width: calc(1 * var(--u));
+  filter: brightness(0.93);
+}
+.btn-secondary {
+  background: var(--cream);
+  color: var(--wood-dark);
+  padding: calc(12 * var(--u)) calc(42 * var(--u));
+  border-radius: var(--radius-xl);
+  border: calc(3 * var(--u)) solid var(--wood);
+  border-bottom: calc(6 * var(--u)) solid var(--wood-dark);
+  box-shadow: 0 calc(3 * var(--u)) calc(10 * var(--u)) rgba(0,0,0,0.1);
+}
+.btn-secondary:active {
+  transform: translateY(calc(4 * var(--u)));
+  border-bottom-width: calc(2 * var(--u));
+}
+
+/* ─── WELCOME SCREEN ─── */
+#screen-welcome { gap: 0; }
+
+.floating-emoji {
+  position: absolute;
+  font-size: calc(38 * var(--u));
+  animation: float-ac 3.8s ease-in-out infinite;
+  pointer-events: none; user-select: none;
+  z-index: 11;
+  filter: drop-shadow(0 3px 8px rgba(0,0,0,0.18));
+}
+.fe-1 { top: 9%;  left: 8%;  animation-delay: 0s; }
+.fe-2 { top: 11%; right: 10%; animation-delay: 0.55s; }
+.fe-3 { top: 44%; left: 5%;  animation-delay: 1.1s; }
+.fe-4 { top: 41%; right: 6%; animation-delay: 0.3s; }
+.fe-5 { bottom: 40%; left: 11%; animation-delay: 0.8s; }
+.fe-6 { bottom: 42%; right: 12%; animation-delay: 1.4s; }
+@keyframes float-ac {
+  0%,100% { transform: translateY(0) rotate(-5deg); }
+  50%      { transform: translateY(calc(-18 * var(--u))) rotate(5deg); }
+}
+
+.welcome-content {
+  display: flex; flex-direction: column;
+  align-items: center;
+  gap: calc(14 * var(--u));
+  text-align: center;
+  z-index: 12;
+  background: var(--panel);
+  border: calc(5 * var(--u)) solid var(--wood);
+  border-bottom: calc(10 * var(--u)) solid var(--wood-dark);
+  border-radius: var(--radius-lg);
+  padding: calc(40 * var(--u)) calc(64 * var(--u)) calc(44 * var(--u));
+  box-shadow:
+    0 calc(14 * var(--u)) calc(44 * var(--u)) rgba(0,0,0,0.2),
+    inset 0 1px 0 rgba(255,255,255,0.85);
+  max-width: calc(650 * var(--u));
+  position: relative;
+}
+.welcome-content::before {
+  content: '';
+  position: absolute;
+  top: calc(-32 * var(--u));
+  left: 50%; transform: translateX(-50%);
+  width: calc(8 * var(--u)); height: calc(30 * var(--u));
+  background: var(--wood);
+  border-radius: calc(4 * var(--u)) calc(4 * var(--u)) 0 0;
+}
+.welcome-logo {
+  font-size: calc(70 * var(--u));
+  animation: logo-bob 2.2s ease-in-out infinite;
+  filter: drop-shadow(0 4px 10px rgba(0,0,0,0.22));
+}
+@keyframes logo-bob {
+  0%,100% { transform: translateY(0); }
+  50%      { transform: translateY(calc(-9 * var(--u))); }
+}
+.welcome-title-bm {
+  font-family: 'Fredoka One', cursive;
+  font-size: calc(36 * var(--u));
+  color: var(--wood-dark);
+  line-height: 1.2;
+  text-shadow: 0 2px 4px rgba(139,94,44,0.18);
+}
+.welcome-tagline {
+  font-size: calc(17 * var(--u));
+  color: var(--text-mid);
+  line-height: 1.55;
+}
+
+/* ─── INPUT SCREEN HEADER ─── */
+.info-header {
+  margin-bottom: calc(12 * var(--u));
+  text-align: center;
+}
+.info-header h2, .info-header h2.glitch {
+  font-family: 'Fredoka One', cursive;
+  font-size: calc(30 * var(--u));
+  color: var(--wood-dark);
+  animation: none !important;
+  text-shadow: none !important;
+}
+.info-header p {
+  font-size: calc(15 * var(--u));
+  color: var(--text-mid);
+  margin-top: calc(4 * var(--u));
+}
+
+/* ─── PRESENTER STAGE — top section, fixed viewport height ─── */
+.presenter-stage {
+  position: relative;
+  width: 100%;
+  max-width: min(calc(920 * var(--u)), 96vw);
+  height: 54vh;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end; /* char anchored at bottom of top section */
+  margin-bottom: 0;
+}
+
+/* bubble column: floats absolutely at top of stage above character */
+.bubble-col {
+  position: absolute;
+  top: calc(8 * var(--u));
+  left: 50%;
+  transform: translateX(-50%) translateY(72px);
+  width: min(calc(580 * var(--u)), 72vw);
+  display: flex;
+  flex-direction: column;
+  gap: calc(7 * var(--u));
+  z-index: 15;
+  pointer-events: none;
+}
+.bubble-col > * { pointer-events: all; }
+
+/* ─── SPEECH BUBBLES ─── */
+.bubble {
+  width: 100%;
+  opacity: 0;
+  transform: scale(0.84) translateY(calc(10 * var(--u)));
+  transition: opacity 0.3s var(--ease-bounce), transform 0.3s var(--ease-bounce);
+  pointer-events: none;
+}
+.bubble.visible {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+}
+
+.bubble-main {
+  position: relative;
+  background: var(--panel);
+  border: calc(3 * var(--u)) solid var(--wood);
+  border-radius: var(--radius-lg);
+  border-bottom-left-radius: calc(6 * var(--u));
+  padding: calc(12 * var(--u)) calc(20 * var(--u));
+  box-shadow: 0 calc(4 * var(--u)) calc(16 * var(--u)) rgba(0,0,0,0.13);
+}
+/* tail points DOWN toward character below */
+.bubble-main::before {
+  content: '';
+  position: absolute;
+  bottom: calc(-18 * var(--u));
+  left: 50%;
+  top: auto;
+  transform: translateX(-50%);
+  border: calc(9 * var(--u)) solid transparent;
+  border-top-color: var(--wood);
+}
+.bubble-main::after {
+  content: '';
+  position: absolute;
+  bottom: calc(-11 * var(--u));
+  left: 50%;
+  top: auto;
+  transform: translateX(-50%);
+  border: calc(7 * var(--u)) solid transparent;
+  border-top-color: var(--panel);
+}
+
+/* ─── USER ANSWER TOAST ─── */
+#toast-container {
+  position: fixed;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: calc(8 * var(--u));
+  align-items: flex-end;
+  z-index: 9999;
+  pointer-events: none;
+  padding-right: calc(6 * var(--u));
+}
+.user-toast {
+  background: var(--ac-green);
+  border: calc(3 * var(--u)) solid var(--ac-green-dark);
+  border-radius: calc(20 * var(--u)) 0 0 calc(20 * var(--u));
+  padding: calc(10 * var(--u)) calc(20 * var(--u)) calc(10 * var(--u)) calc(18 * var(--u));
+  color: white;
+  font-family: 'Fredoka One', cursive;
+  font-size: calc(16 * var(--u));
+  box-shadow: calc(-4 * var(--u)) calc(4 * var(--u)) calc(16 * var(--u)) rgba(78,158,32,0.40);
+  white-space: nowrap;
+  max-width: calc(280 * var(--u));
+  transform: translateX(110%);
+  transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
+  pointer-events: none;
+}
+.user-toast.in  { transform: translateX(0); }
+.user-toast.out { transform: translateX(110%); transition: transform 0.28s ease-in; }
+
+.bubble-content {
+  font-size: calc(17 * var(--u));
+  color: var(--text);
+  line-height: 1.5;
+  max-height: calc(130 * var(--u));
+  overflow-y: auto;
+}
+.bubble-user .bubble-content { color: white; font-weight: 700; }
+.bubble-line { margin-bottom: calc(3 * var(--u)); }
+
+/* ─── CHARACTER + TAG ─── */
+.char-wrap {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  transform: translateY(10px);
+}
+.presenter-char {
+  position: relative;
+  width: auto;
+  height: min(calc(261 * var(--u)), 38vh);
+  aspect-ratio: 177 / 261;
+}
+.aisyah-sp {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: contain;
+  opacity: 0;
+  transition: opacity 0.08s;
+}
+.aisyah-sp.sp-idle { opacity: 1; }
+.presenter-char.is-blinking .sp-idle { opacity: 0; }
+.presenter-char.is-blinking .sp-blink { opacity: 1; }
+.presenter-char.is-talking .sp-idle  { opacity: 0; }
+.presenter-char.is-talking .sp-talk  { opacity: 1; }
+.presenter-char.is-happy   .sp-idle  { opacity: 0; }
+.presenter-char.is-happy   .sp-happy { opacity: 1; }
+
+.presenter-tag {
+  position: relative;
+  z-index: 5;
+  background: var(--ac-green);
+  color: white;
+  font-family: 'Fredoka One', cursive;
+  font-size: calc(14 * var(--u));
+  padding: calc(3 * var(--u)) calc(14 * var(--u));
+  border-radius: calc(14 * var(--u));
+  letter-spacing: calc(0.5 * var(--u));
+  white-space: nowrap;
+  box-shadow: 0 calc(3 * var(--u)) calc(8 * var(--u)) rgba(78,158,32,0.3);
+  margin-top: -56px;
+}
+
+/* ─── PLANNER ANSWERS CONTAINER ─── */
+#planner-answers {
+  width: 100%;
+  max-width: min(calc(920 * var(--u)), 96vw);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+/* ─── ANSWER PANELS ─── */
+.answer-panel {
+  width: 100%;
+  max-width: calc(740 * var(--u));
+  background: var(--panel);
+  border: calc(4 * var(--u)) solid var(--wood);
+  border-bottom: calc(8 * var(--u)) solid var(--wood-dark);
+  border-radius: var(--radius-lg);
+  padding: calc(22 * var(--u)) calc(26 * var(--u));
+  box-shadow: 0 calc(8 * var(--u)) calc(28 * var(--u)) rgba(0,0,0,0.15);
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(15 * var(--u));
+  animation: panel-pop 0.38s var(--ease-bounce);
+}
+.holo-panel { /* neutralised — styles come from .answer-panel */ }
+.answer-panel.show { display: flex; }
+@keyframes panel-pop {
+  from { opacity: 0; transform: translateY(calc(18 * var(--u))) scale(0.92); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ─── AGE CONTROL ─── */
+.age-control {
+  display: flex;
+  align-items: center;
+  gap: calc(18 * var(--u));
+}
+.age-display {
+  font-family: 'Fredoka One', cursive;
+  font-size: calc(72 * var(--u));
+  color: var(--wood-dark);
+  min-width: calc(120 * var(--u));
+  text-align: center;
+  line-height: 1;
+}
+.age-unit {
+  font-size: calc(17 * var(--u));
+  color: var(--text-mid);
+  font-weight: 700;
+}
+.age-btn {
+  width: calc(52 * var(--u)); height: calc(52 * var(--u));
+  border-radius: 50%;
+  background: var(--ac-green);
+  color: white;
+  font-size: calc(28 * var(--u));
+  font-weight: 700;
+  font-family: 'Nunito', sans-serif;
+  border-bottom: calc(4 * var(--u)) solid var(--ac-green-dark);
+  display: flex; align-items: center; justify-content: center;
+  transition: transform 0.1s;
+}
+.age-btn:active {
+  transform: translateY(calc(3 * var(--u)));
+  border-bottom-width: calc(1 * var(--u));
+}
+.age-bands {
+  display: flex;
+  gap: calc(8 * var(--u));
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.age-band {
+  padding: calc(7 * var(--u)) calc(16 * var(--u));
+  border-radius: var(--radius);
+  background: var(--cream);
+  border: calc(2 * var(--u)) solid var(--wood);
+  border-bottom: calc(4 * var(--u)) solid var(--wood-dark);
+  font-size: calc(15 * var(--u));
+  font-weight: 700;
+  color: var(--text-mid);
+  cursor: pointer;
+  transition: all 0.2s var(--ease-bounce);
+}
+.age-band.active {
+  background: var(--ac-green);
+  border-color: var(--ac-green-dark);
+  color: white;
+  transform: scale(1.08);
+}
+.age-band:active { transform: scale(0.96); }
+
+/* ─── COVERAGE / SELECTION CARDS ─── */
+.coverage-cards {
+  display: flex;
+  gap: calc(14 * var(--u));
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.coverage-card {
+  background: var(--panel);
+  border: calc(4 * var(--u)) solid var(--wood);
+  border-bottom: calc(7 * var(--u)) solid var(--wood-dark);
+  border-radius: var(--radius-lg);
+  padding: calc(20 * var(--u)) calc(22 * var(--u));
+  min-width: calc(132 * var(--u));
+  max-width: calc(175 * var(--u));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(7 * var(--u));
+  cursor: pointer;
+  transition: transform 0.22s var(--ease-bounce), box-shadow 0.22s;
+  position: relative;
+  overflow: hidden;
+}
+.coverage-card::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.42) 0%, transparent 58%);
+  pointer-events: none;
+}
+.coverage-card:active, .coverage-card:hover {
+  transform: translateY(calc(-6 * var(--u))) scale(1.05);
+  box-shadow: 0 calc(14 * var(--u)) calc(34 * var(--u)) rgba(0,0,0,0.2);
+}
+.coverage-card.selected {
+  background: var(--ac-green);
+  border-color: var(--ac-green-dark);
+  border-bottom-color: var(--ac-green-dark);
+}
+.coverage-card.selected .coverage-name,
+.coverage-card.selected .coverage-limit { color: white; }
+
+/* Hide sci-fi card decorations */
+.tarot-corner { display: none; }
+.tarot-divider {
+  width: 75%;
+  height: calc(2 * var(--u));
+  background: var(--wood);
+  opacity: 0.22;
+  border-radius: 2px;
+}
+.coverage-card.selected .tarot-divider { background: rgba(255,255,255,0.35); }
+
+.card-tick { display: none; }
+
+.coverage-icon {
+  font-size: calc(38 * var(--u));
+  line-height: 1;
+}
+.coverage-name {
+  font-family: 'Fredoka One', cursive;
+  font-size: calc(16 * var(--u));
+  color: var(--text);
+  text-align: center;
+  line-height: 1.2;
+}
+.coverage-limit {
+  font-size: calc(12 * var(--u));
+  color: var(--text-mid);
+  font-weight: 700;
+  text-align: center;
+}
+
+/* ─── CO-PAY DETAILS ─── */
+.copay-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: calc(10 * var(--u));
+  width: 100%;
+}
+.copay-field {
+  background: var(--cream);
+  border: calc(2 * var(--u)) solid var(--wood);
+  border-radius: var(--radius);
+  padding: calc(10 * var(--u)) calc(10 * var(--u));
+  display: flex; flex-direction: column;
+  align-items: center;
+  gap: calc(6 * var(--u));
+}
+.copay-label {
+  font-family: 'Fredoka One', cursive;
+  font-size: calc(13 * var(--u));
+  color: var(--text);
+  text-align: center;
+}
+.copay-sublabel {
+  font-size: calc(10 * var(--u));
+  color: var(--text-light);
+  text-align: center;
+  line-height: 1.3;
+}
+/* compact controls inside copay columns */
+.copay-grid .age-control { gap: calc(8 * var(--u)); flex-wrap: wrap; justify-content: center; }
+.copay-grid .age-display  { font-size: calc(26 * var(--u)) !important; min-width: 0; }
+.copay-grid .age-btn      { width: calc(36 * var(--u)); height: calc(36 * var(--u)); font-size: calc(20 * var(--u)); }
+
+/* ─── CALCULATING SCREEN ─── */
+#screen-calculating { gap: calc(22 * var(--u)); }
+
+.calc-cross {
+  width: calc(96 * var(--u));
+  height: calc(96 * var(--u));
+  display: flex; align-items: center; justify-content: center;
+  font-size: calc(62 * var(--u));
+  animation: leaf-spin 1.6s ease-in-out infinite;
+}
+.calc-cross::after { content: '🌿'; }
+@keyframes leaf-spin {
+  0%   { transform: rotate(0deg) scale(1); }
+  50%  { transform: rotate(180deg) scale(1.12); }
+  100% { transform: rotate(360deg) scale(1); }
+}
+
+.calc-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: calc(27 * var(--u));
+  color: var(--wood-dark);
+  text-align: center;
+  background: var(--panel);
+  border: calc(3 * var(--u)) solid var(--wood);
+  border-bottom: calc(6 * var(--u)) solid var(--wood-dark);
+  border-radius: var(--radius-lg);
+  padding: calc(16 * var(--u)) calc(34 * var(--u));
+  box-shadow: 0 calc(4 * var(--u)) calc(18 * var(--u)) rgba(0,0,0,0.12);
+}
+.calc-subtitle {
+  font-size: calc(15 * var(--u));
+  color: var(--text-mid);
+  text-align: center;
+  opacity: 0.75;
+}
+.progress-bar-wrap {
+  width: calc(430 * var(--u));
+  height: calc(18 * var(--u));
+  background: var(--cream);
+  border-radius: calc(12 * var(--u));
+  border: calc(2 * var(--u)) solid var(--wood);
+  overflow: hidden;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.08);
+}
+.progress-bar-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--ac-green), var(--ac-yellow));
+  border-radius: calc(12 * var(--u));
+  animation: progress-fill 2s ease-in-out forwards;
+}
+@keyframes progress-fill {
+  from { width: 0%; }
+  to   { width: 100%; }
+}
+
+/* ─── RESULTS SCREEN ─── */
+#screen-results { gap: calc(18 * var(--u)); }
+
+.results-header {
+  text-align: center;
+  display: flex; flex-direction: column;
+  align-items: center;
+  gap: calc(10 * var(--u));
+}
+.results-title, .results-title.glitch {
+  font-family: 'Fredoka One', cursive;
+  font-size: calc(33 * var(--u));
+  color: var(--wood-dark);
+  animation: none !important;
+  text-shadow: 0 2px 5px rgba(139,94,44,0.18) !important;
+}
+.profile-badges {
+  display: flex; gap: calc(8 * var(--u));
+  flex-wrap: wrap; justify-content: center;
+}
+.badge {
+  padding: calc(5 * var(--u)) calc(18 * var(--u));
+  border-radius: var(--radius-xl);
+  font-family: 'Fredoka One', cursive;
+  font-size: calc(14 * var(--u));
+  border: calc(2 * var(--u)) solid var(--wood);
+  background: var(--cream);
+  color: var(--text);
+}
+.badge-plan-none         { background: #FFE0E0; border-color: #D06060; color: #B03030; }
+.badge-plan-basic        { background: #FFF3D0; border-color: var(--wood); color: var(--wood-dark); }
+.badge-plan-comprehensive{ background: #E0FFD8; border-color: var(--ac-green-dark); color: var(--ac-green-dark); }
+
+.result-cards {
+  display: flex; gap: calc(20 * var(--u));
+  justify-content: center; flex-wrap: wrap;
+}
+.result-card {
+  background: var(--panel);
+  border: calc(4 * var(--u)) solid var(--wood);
+  border-bottom: calc(8 * var(--u)) solid var(--wood-dark);
+  border-radius: var(--radius-lg);
+  padding: calc(26 * var(--u)) calc(34 * var(--u));
+  min-width: calc(250 * var(--u));
+  max-width: calc(310 * var(--u));
+  display: flex; flex-direction: column;
+  align-items: center;
+  gap: calc(8 * var(--u));
+  box-shadow: 0 calc(8 * var(--u)) calc(26 * var(--u)) rgba(0,0,0,0.13);
+  transition: transform 0.3s var(--ease-bounce);
+}
+.result-card:hover { transform: translateY(calc(-6 * var(--u))); }
+.result-card-icon  { font-size: calc(46 * var(--u)); line-height: 1; }
+.result-card-label {
+  font-family: 'Fredoka One', cursive;
+  font-size: calc(15 * var(--u));
+  color: var(--text-mid);
+  text-align: center;
+}
+.result-card-amount {
+  font-family: 'Fredoka One', cursive;
+  font-size: calc(40 * var(--u));
+  color: var(--wood-dark);
+  line-height: 1;
+  text-align: center;
+}
+.result-monthly .result-card-amount { color: var(--ac-green-dark); }
+.result-bill    .result-card-amount { color: var(--wood-dark); }
+.result-card-sub {
+  font-size: calc(13 * var(--u));
+  color: var(--text-light);
+  text-align: center;
+  line-height: 1.45;
+}
+.result-note {
+  background: var(--cream);
+  border: calc(2 * var(--u)) solid var(--wood);
+  border-radius: var(--radius);
+  padding: calc(12 * var(--u)) calc(20 * var(--u));
+  font-size: calc(14 * var(--u));
+  color: var(--text);
+  text-align: center;
+  max-width: calc(600 * var(--u));
+  line-height: 1.5;
+}
+.results-footer {
+  display: flex; gap: calc(16 * var(--u));
+  justify-content: center; flex-wrap: wrap;
+}
+
+/* ─── FALLING LEAF PARTICLES ─── */
+.leaf-particles {
+  position: fixed; inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+}
+.leaf-part {
+  position: absolute;
+  top: -6%;
+  animation: leaf-fall linear forwards;
+  pointer-events: none;
+  opacity: 0.72;
+}
+@keyframes leaf-fall {
+  0%   { transform: translateY(0) rotate(0deg); opacity: 0.72; }
+  80%  { opacity: 0.55; }
+  100% { transform: translateY(112vh) rotate(720deg); opacity: 0; }
+}
+
+/* ─── SUPPRESS ALL SCI-FI REMNANTS ─── */
+#holo-grid { display: none !important; }
+#scan-sweep { display: none !important; }
+.glitch, .glitch-in { animation: none !important; text-shadow: none !important; }
+.neon-pulse { animation: none !important; box-shadow: none !important; }
+</style>
+</head>
+<body>
+
+<div id="ac-sky">
+  <div class="cloud cloud-1"></div>
+  <div class="cloud cloud-2"></div>
+  <div class="cloud cloud-3"></div>
+</div>
+<div id="ac-grass"></div>
+
+<div id="leaf-sweep"></div>
+
+<div id="toast-container"></div>
+
+<div id="idle-bar"></div>
+<div id="idle-overlay">
+  <div id="idle-warn-icon">🍃</div>
+  <div id="idle-warn-main">Tiada aktiviti dikesan.</div>
+  <div id="idle-warn-sub">Kembali ke skrin mula dalam 7 saat...</div>
+</div>
+
+<template id="presenter-img-template">
+  <img class="aisyah-sp sp-idle"  src="../Assets/kijang_idle.png"       alt="" aria-hidden="true">
+  <img class="aisyah-sp sp-blink" src="../Assets/kijang_close_eyes.png" alt="" aria-hidden="true">
+  <img class="aisyah-sp sp-talk"  src="../Assets/kijang_talk.png"       alt="" aria-hidden="true">
+  <img class="aisyah-sp sp-happy" src="../Assets/kijang_happy.png"      alt="" aria-hidden="true">
+</template>
+
+<div id="screen-welcome" class="screen active">
+  <span class="floating-emoji fe-1">🌿</span>
+  <span class="floating-emoji fe-2">🍃</span>
+  <span class="floating-emoji fe-3">🌸</span>
+  <span class="floating-emoji fe-4">🦋</span>
+  <span class="floating-emoji fe-5">🔔</span>
+  <span class="floating-emoji fe-6">🍀</span>
+
+  <div class="welcome-content">
+    <div class="welcome-logo">🏥</div>
+    <div class="welcome-title-bm" data-i18n="welcome_title_bm"></div>
+    <div class="welcome-tagline" data-i18n="welcome_tagline"></div>
+    <button class="btn-primary" onclick="goToScreen('input')" style="margin-top:calc(16 * var(--u));" data-i18n="welcome_start"></button>
+  </div>
+</div>
+
+<div id="screen-input" class="screen">
+  <div class="info-header">
+    <h2 class="glitch" data-i18n="input_title"></h2>
+    <p data-i18n="input_subtitle"></p>
+  </div>
+
+  <div class="presenter-stage" id="stage-planner">
+    <div class="char-wrap">
+      <div class="presenter-char"></div>
+      <div class="presenter-tag" data-i18n="mascot_label"></div>
+    </div>
+    <div class="bubble-col">
+      <div class="bubble bubble-main"><div class="bubble-content"></div></div>
+    </div>
+  </div>
+
+  <div id="planner-answers">
+
+    <div id="answer-age" class="answer-panel holo-panel">
+      <div class="age-control">
+        <button class="age-btn minus" onclick="changeAge(-1)">−</button>
+        <div class="age-display" id="age-display">30</div>
+        <div class="age-unit" data-i18n="age_unit"></div>
+        <button class="age-btn plus" onclick="changeAge(1)">+</button>
+      </div>
+      <div class="age-bands" id="age-bands">
+        <div class="age-band" data-min="18" data-max="25">18–25</div>
+        <div class="age-band" data-min="26" data-max="35">26–35</div>
+        <div class="age-band" data-min="36" data-max="45">36–45</div>
+        <div class="age-band" data-min="46" data-max="55">46–55</div>
+        <div class="age-band" data-min="56" data-max="70">56–70</div>
+      </div>
+      <button class="btn-primary" onclick="confirmAge()" data-i18n="age_confirm"></button>
+    </div>
+
+    <div id="answer-coverage" class="answer-panel holo-panel">
+      <div class="coverage-cards">
+        <div class="coverage-card none" onclick="answerCoverage('none')">
+          <div class="coverage-icon">🚫</div>
+          <div class="tarot-divider"></div>
+          <div class="coverage-name" data-i18n="cov_none_name"></div>
+          <span class="coverage-limit" data-i18n="cov_none_limit"></span>
+        </div>
+        <div class="coverage-card basic" onclick="answerCoverage('basic')">
+          <div class="coverage-icon">🛡️</div>
+          <div class="tarot-divider"></div>
+          <div class="coverage-name" data-i18n="cov_basic_name"></div>
+          <span class="coverage-limit" data-i18n="cov_basic_limit"></span>
+        </div>
+        <div class="coverage-card comprehensive" onclick="answerCoverage('comprehensive')">
+          <div class="coverage-icon">⭐</div>
+          <div class="tarot-divider"></div>
+          <div class="coverage-name" data-i18n="cov_comp_name"></div>
+          <span class="coverage-limit" data-i18n="cov_comp_limit"></span>
+        </div>
+      </div>
+    </div>
+
+    <div id="answer-gender" class="answer-panel holo-panel">
+      <div class="coverage-cards">
+        <div class="coverage-card" onclick="answerGender('male')">
+          <div class="coverage-icon">👨</div>
+          <div class="tarot-divider"></div>
+          <div class="coverage-name" data-i18n="gender_male"></div>
+        </div>
+        <div class="coverage-card" onclick="answerGender('female')">
+          <div class="coverage-icon">👩</div>
+          <div class="tarot-divider"></div>
+          <div class="coverage-name" data-i18n="gender_female"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="answer-target-age" class="answer-panel holo-panel">
+      <div class="coverage-cards">
+        <div class="coverage-card" onclick="answerTargetAge(65)">
+          <div class="coverage-icon">🗓️</div>
+          <div class="tarot-divider"></div>
+          <div class="coverage-name">65</div>
+          <span class="coverage-limit" data-i18n="age_unit"></span>
+        </div>
+        <div class="coverage-card" onclick="answerTargetAge(75)">
+          <div class="coverage-icon">🗓️</div>
+          <div class="tarot-divider"></div>
+          <div class="coverage-name">75</div>
+          <span class="coverage-limit" data-i18n="age_unit"></span>
+        </div>
+      </div>
+    </div>
+
+    <div id="answer-has-mhit" class="answer-panel holo-panel">
+      <div class="coverage-cards">
+        <div class="coverage-card" onclick="answerHasMhit(true)">
+          <div class="coverage-icon">✅</div>
+          <div class="tarot-divider"></div>
+          <div class="coverage-name" data-i18n="yn_yes"></div>
+        </div>
+        <div class="coverage-card" onclick="answerHasMhit(false)">
+          <div class="coverage-icon">❌</div>
+          <div class="tarot-divider"></div>
+          <div class="coverage-name" data-i18n="yn_no"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="answer-premium" class="answer-panel holo-panel">
+      <div class="age-control">
+        <button class="age-btn minus" onclick="changePremium(-10)">−</button>
+        <div class="age-display" id="premium-display">RM 101</div>
+        <button class="age-btn plus" onclick="changePremium(10)">+</button>
+      </div>
+      <div class="age-bands">
+        <div class="age-band premium-band" onclick="setPremium(50)">RM 50</div>
+        <div class="age-band premium-band" onclick="setPremium(100)">RM 100</div>
+        <div class="age-band premium-band" onclick="setPremium(200)">RM 200</div>
+        <div class="age-band premium-band" onclick="setPremium(350)">RM 350</div>
+        <div class="age-band premium-band" onclick="setPremium(500)">RM 500</div>
+      </div>
+      <button class="btn-primary" onclick="confirmPremium()" data-i18n="age_confirm"></button>
+    </div>
+
+    <div id="answer-has-copay" class="answer-panel holo-panel">
+      <div class="coverage-cards">
+        <div class="coverage-card" onclick="answerHasCoPay(true)">
+          <div class="coverage-icon">✅</div>
+          <div class="tarot-divider"></div>
+          <div class="coverage-name" data-i18n="yn_yes"></div>
+        </div>
+        <div class="coverage-card" onclick="answerHasCoPay(false)">
+          <div class="coverage-icon">❌</div>
+          <div class="tarot-divider"></div>
+          <div class="coverage-name" data-i18n="yn_no"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="answer-copay-details" class="answer-panel holo-panel">
+      <div class="copay-grid">
+        <div class="copay-field">
+          <div class="copay-label" data-i18n="copay_deductible_label"></div>
+          <div class="copay-sublabel" data-i18n="copay_deductible_sub"></div>
+          <div class="age-control">
+            <button class="age-btn minus" onclick="changeDeductible(-100)">−</button>
+            <div class="age-display" id="deductible-display">RM 0</div>
+            <button class="age-btn plus" onclick="changeDeductible(100)">+</button>
+          </div>
+        </div>
+        <div class="copay-field">
+          <div class="copay-label" data-i18n="copay_coins_label"></div>
+          <div class="copay-sublabel" data-i18n="copay_coins_sub"></div>
+          <div class="age-control">
+            <button class="age-btn minus" onclick="changeCoIns(-5)">−</button>
+            <div class="age-display" id="coins-display">0%</div>
+            <button class="age-btn plus" onclick="changeCoIns(5)">+</button>
+          </div>
+        </div>
+        <div class="copay-field">
+          <div class="copay-label" data-i18n="copay_cap_label"></div>
+          <div class="copay-sublabel" data-i18n="copay_cap_sub"></div>
+          <div class="age-control">
+            <button class="age-btn minus" onclick="changeCoPayCap(-500)">−</button>
+            <div class="age-display" id="copaycap-display">RM 0</div>
+            <button class="age-btn plus" onclick="changeCoPayCap(500)">+</button>
+          </div>
+        </div>
+      </div>
+      <button class="btn-primary" onclick="confirmCoPayDetails()" data-i18n="age_confirm"></button>
+    </div>
+
+  </div>
+</div>
+
+<div id="screen-calculating" class="screen">
+  <div class="calc-cross"></div>
+  <div class="calc-title" data-i18n="calc_title"></div>
+  <div class="calc-subtitle" data-i18n="calc_subtitle"></div>
+  <div class="progress-bar-wrap">
+    <div class="progress-bar-fill" id="progress-fill"></div>
+  </div>
+</div>
+
+<div id="screen-results" class="screen">
+  <div class="results-header">
+    <div class="results-title glitch">Anggaran Kos Kesihatan Anda</div>
+    <div class="profile-badges">
+      <div class="badge badge-age" id="badge-age">👤 –</div>
+      <div class="badge" id="badge-plan"><span id="badge-plan-text"></span></div>
+    </div>
+  </div>
+
+  <div class="result-cards">
+    <div class="result-card result-monthly">
+      <div class="result-card-icon">💰</div>
+      <div class="result-card-label">Simpan Setiap Bulan</div>
+      <div class="result-card-amount" id="result-monthly-amt">RM –</div>
+      <div class="result-card-sub" id="result-monthly-sub">Anggaran simpanan bulanan yang diperlukan</div>
+    </div>
+    <div class="result-card result-bill">
+      <div class="result-card-icon">🏥</div>
+      <div class="result-card-label">Anggaran 1 Bil Hospital</div>
+      <div class="result-card-amount" id="result-bill-amt">RM –</div>
+      <div class="result-card-sub" id="result-bill-sub">Kos hospitalisasi semasa berdasarkan umur anda</div>
+    </div>
+  </div>
+
+  <div class="result-note" id="result-note"></div>
+
+  <div class="results-footer">
+    <button class="btn-secondary" onclick="goToScreen('input')" data-i18n="btn_recalculate"></button>
+    <button class="btn-primary" onclick="goToScreen('welcome')" data-i18n="btn_finish"></button>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════
+// SFX — AC:NH marimba style (triangle wave, pentatonic C major)
+// ══════════════════════════════════════════════════════
+const SFX=(()=>{
+  let ctx;
+  const ac=()=>ctx||(ctx=new(window.AudioContext||window.webkitAudioContext)());
+  const N={C4:261.63,D4:293.66,E4:329.63,G4:392,A4:440,C5:523.25,E5:659.25,G5:784,A5:880};
+  function marimba({freq=440,dur=0.3,vol=0.24,delay=0}){
+    try{
+      const c=ac(),t=c.currentTime+delay;
+      const o=c.createOscillator(),g=c.createGain();
+      o.type='triangle';
+      o.frequency.setValueAtTime(freq,t);
+      g.gain.setValueAtTime(vol,t);
+      g.gain.exponentialRampToValueAtTime(0.001,t+dur);
+      o.connect(g).connect(c.destination);
+      o.start(t);o.stop(t+dur+0.05);
+    }catch(e){}
+  }
+  return{
+    tap(){
+      marimba({freq:N.G5,dur:0.11,vol:0.16});
+      marimba({freq:N.E5,dur:0.08,vol:0.09,delay:0.05});
+    },
+    swap(){
+      marimba({freq:N.C4,dur:0.17,vol:0.19});
+      marimba({freq:N.E4,dur:0.17,vol:0.19,delay:0.09});
+      marimba({freq:N.G4,dur:0.22,vol:0.21,delay:0.18});
+    },
+    win(){
+      [N.C4,N.E4,N.G4,N.C5,N.E5,N.G5].forEach((f,i)=>
+        marimba({freq:f,dur:0.24,vol:0.21,delay:i*0.08})
+      );
+      marimba({freq:N.A5,dur:0.5,vol:0.26,delay:0.52});
+    },
+    lose(){
+      marimba({freq:N.E4,dur:0.21,vol:0.19});
+      marimba({freq:N.C4,dur:0.27,vol:0.17,delay:0.13});
+    },
+    confirm(){
+      marimba({freq:N.C5,dur:0.17,vol:0.21});
+      marimba({freq:N.E5,dur:0.21,vol:0.21,delay:0.10});
+      marimba({freq:N.G5,dur:0.30,vol:0.24,delay:0.21});
+    },
+    ting(){
+      marimba({freq:N.A5,dur:0.09,vol:0.20});
+      marimba({freq:N.G5,dur:0.12,vol:0.13,delay:0.06});
+    }
+  };
+})();
+
+// ══════════════════════════════════════════════════════
+// I18N STRINGS
+// ══════════════════════════════════════════════════════
+const STRINGS = {
+  bm: {
+    welcome_title_bm: "Perancang Bajet Penjagaan Kesihatan",
+    welcome_title_en: "Health Budget Planner",
+    welcome_tagline: "Rancang kesihatan anda hari ini, jimat lebih banyak esok!",
+    welcome_start: "Mulakan",
+
+    info_header_title: "Kenali MHIT",
+    info_header_sub: "Insurans/Takaful Perubatan & Kesihatan — tanya penasihat kami!",
+    tab_a_label: "Apa itu MHIT?",
+    tab_a_card_sub: "Definisi & Skop Perlindungan",
+    tab_b_card_sub: "Kepentingan Insurans Kesihatan",
+    tab_c_card_sub: "Cara Kerja Sistem MHIT",
+    tab_d_card_sub: "Panduan Sebelum Membeli",
+    tab_b_label: "Kenapa Penting?",
+    tab_c_label: "Bagaimana Berfungsi?",
+    tab_d_label: "ABC Sebelum Beli",
+
+    presenter_name: "Si Kijang — Penasihat MHIT Anda",
+    info_greet: "Hai! Saya Si Kijang 👋 Penasihat kesihatan anda. Tanya saya tentang MHIT — sentuh soalan di bawah!",
+
+    tab_a_title: "Apa itu MHIT?",
+    tab_a_def: "MHIT = Insurans/Takaful Perubatan & Kesihatan. Pelan perlindungan yang membantu bayar kos rawatan bila anda sakit atau masuk hospital.",
+    tab_a_covers_label: "Melindungi:",
+    tab_a_c1: "Bil hospital",
+    tab_a_c2: "Kos rawatan",
+    tab_a_c3: "Ubat-ubatan",
+    tab_a_c4: "Pembedahan & penyakit serius",
+    tab_a_side_title: "Perlindungan Menyeluruh",
+    tab_a_side_body: "Anda tidak perlu tanggung kos perubatan seorang diri.",
+    tab_a_pill1_title: "Ketenangan Fikiran",
+    tab_a_pill1_body: "Fokus untuk sembuh, bukan risau bil",
+    tab_a_pill2_title: "Perlindungan Kewangan",
+    tab_a_pill2_body: "Simpanan anda kekal selamat",
+
+    tab_b_title: "Kenapa MHIT Penting?",
+    tab_b_p1_title: "Kos Perubatan Mahal",
+    tab_b_p1_body: "Kos perubatan semakin mahal — satu rawatan boleh mencecah ribuan ringgit.",
+    tab_b_p2_title: "Simpanan Boleh Habis",
+    tab_b_p2_body: "Tanpa perlindungan, duit simpanan boleh habis atau terpaksa berhutang.",
+    tab_b_p3_title: "Ketenangan Fikiran",
+    tab_b_p3_body: "Ketenangan fikiran — fokus untuk sembuh, bukan risau bil.",
+    tab_b_stat_title: "Tahukah Anda?",
+    tab_b_stat1: "Kos perubatan meningkat setiap tahun",
+    tab_b_stat2: "Kos rawatan serius bagi warga emas",
+
+    tab_c_title: "Bagaimana MHIT Berfungsi?",
+    tab_c_step1: "Bayar premium/caruman",
+    tab_c_step2: "Dikumpul dalam tabung bersama",
+    tab_c_step3: "Bayar tuntutan anda",
+    tab_c_label: "Perkongsian Risiko / Risk Pooling",
+    tab_c_side_title: "Bersama Lebih Kuat",
+    tab_c_side_body: "Apabila ramai orang bergabung, risiko dikongsi bersama. Ini menjadikan perlindungan lebih mampu milik untuk semua.",
+    tab_c_example_title: "Contoh",
+    tab_c_example_body: "1,000 orang bayar RM100/bulan = RM100,000 terkumpul. Jika 10 orang sakit dan perlukan RM8,000 setiap satu = RM80,000 — semua ditanggung!",
+
+    tab_d_title: "ABC Sebelum Beli MHIT",
+    tab_d_a_title: "Anggar keperluan anda",
+    tab_d_a_body: "Termasuk kondisi kesihatan semasa anda",
+    tab_d_b_title: "Bandingkan pilihan",
+    tab_d_b_body: "Lihat semua pilihan yang ada di pasaran",
+    tab_d_c_title: "Cari pelan yang sesuai",
+    tab_d_c_body: "Mengikut bajet dan keperluan anda",
+    tab_d_q_title: "Soalan yang perlu ditanya:",
+    tab_d_q1: "Apa perlindungan yang ditawarkan?",
+    tab_d_q2: "Berapa premium yang perlu dibayar?",
+    tab_d_q3: "Adakah premium akan meningkat dengan usia?",
+    info_continue_btn: "Teruskan ke Perancang →",
+
+    input_title_bm: "Beritahu Kami Tentang Anda",
+    input_title_en: "Tell Us About You",
+    input_title: "Beritahu Kami Tentang Anda",
+    input_subtitle: "Perancang Bajet Penjagaan Kesihatan",
+    mascot_label: "Si Kijang",
+    age_label: "Berapa umur anda?",
+    age_unit: "tahun",
+    age_confirm: "Sahkan →",
+    ack_age: "Baik, terima kasih! Soalan seterusnya…",
+    gender_label: "Apakah jantina anda?",
+    gender_male: "Lelaki",
+    gender_female: "Perempuan",
+    ack_gender_male: "Terima kasih!",
+    ack_gender_female: "Terima kasih!",
+    target_age_label: "Anggaran simpanan diperlukan sehingga umur berapa?",
+    ack_target_age: "Baik, kami akan kira sehingga umur",
+    has_mhit_label: "Adakah anda mempunyai pelan MHIT?",
+    yn_yes: "Ya",
+    yn_no: "Tidak",
+    ack_has_mhit_yes: "Bagus! Beritahu kami butiran pelan anda.",
+    ack_has_mhit_no: "Tiada pelan MHIT — mari kita lihat risiko kewangan anda.",
+    premium_label: "Berapakah caruman/premium MHIT anda sebulan?",
+    ack_premium: "Terima kasih! Seterusnya…",
+    copay_q_label: "Adakah pelan anda mempunyai co-payment (deductible atau co-insurans)?",
+    ack_copay_yes: "Baik, sila isikan butiran co-payment anda.",
+    ack_copay_no: "Okay! Mari kita kira unjuran anda.",
+    copay_details_label: "Isikan butiran co-payment anda:",
+    copay_deductible_label: "Deductible (RM)",
+    copay_deductible_sub: "Jumlah dibayar sebelum insurans aktif",
+    copay_coins_label: "Co-insurans (%)",
+    copay_coins_sub: "Bahagian kos selepas deductible",
+    copay_cap_label: "Had Co-payment (RM)",
+    copay_cap_sub: "Jumlah maksimum setiap episod",
+    coverage_label: "Pelan MHIT anda sekarang:",
+    ack_cov_none: "Baik, jangan risau — mari kita lihat unjuran anda!",
+    ack_cov_basic: "Bagus! Mari kita kira unjuran anda.",
+    ack_cov_comprehensive: "Hebat! Mari kita semak unjuran anda.",
+    cov_none_name: "Tiada Perlindungan",
+    cov_none_en: "No Coverage",
+    cov_none_limit: "Tiada",
+    cov_basic_name: "Perlindungan Asas",
+    cov_basic_en: "Basic Coverage",
+    cov_comp_name: "Perlindungan Komprehensif",
+    cov_comp_en: "Comprehensive Coverage",
+    calculate_btn: "Kira Sekarang!",
+
+    calc_title: "Menganalisa profil kesihatan anda...",
+    calc_subtitle: "Analysing your health profile...",
+
+    results_title: "Unjuran Kos Penjagaan Kesihatan Anda",
+    results_years: "tahun",
+    chart_title: "Unjuran Kos Perubatan (10 Tahun)",
+    advice_heading: "Nasihat Peribadi",
+
+    alert_none_heading: "Amaran: Tiada Perlindungan!",
+    alert_none_body: "Anda menanggung kos perubatan tanpa perlindungan dalam 10 tahun! Pertimbangkan untuk mendapatkan MHIT sekarang.",
+    alert_basic_heading: "Semak Perlindungan Anda",
+    alert_basic_body: "Anda mungkin memerlukan top-up perlindungan dalam beberapa tahun. Semak had pelan anda.",
+    alert_comp_heading: "Perlindungan Baik!",
+    alert_comp_body: "Perlindungan anda agak mencukupi untuk jangka pendek. Tetap semak pelan tahunan.",
+
+    plan_none: "Tiada Perlindungan",
+    plan_basic: "Perlindungan Asas",
+    plan_comp: "Perlindungan Komprehensif",
+
+    advice_abc: "⭐ ABC — Anggar, Bandingkan, Cari pelan yang sesuai untuk anda!",
+
+    btn_recalculate: "← Kira Semula",
+    btn_finish: "Tamat",
+    step_num_1: "LANGKAH 1",  step_num_2: "LANGKAH 2",  step_num_3: "LANGKAH 3",
+    chart_year_1: "Tahun 1",  chart_year_3: "Tahun 3",  chart_year_5: "Tahun 5",  chart_year_10: "Tahun 10",
+    cov_basic_limit: "RM50,000/tahun",  cov_comp_limit: "RM200,000/tahun",
+
+    chart_covered: "Ditanggung MHIT",
+    chart_gap: "Kos Sendiri",
+    tooltip_rm: "RM",
+  }
+};
+
+// ══════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════
+let state = {
+  lang: 'bm',
+  screen: 'welcome',
+  age: 30,
+  gender: null,
+  targetAge: 65,
+  hasMhit: null,
+  premium: 101,
+  hasCoPayment: false,
+  deductible: 0,
+  coInsurance: 0,
+  coPayCap: 0,
+  coverage: 'basic',
+  idleTimer: null,
+  idleCountdown: null,
+  idleSeconds: 25,
+  idleRemaining: 60,
+};
+
+function t(key) {
+  return (STRINGS.bm && STRINGS.bm[key]) || key;
+}
+
+function renderI18n() {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    el.textContent = t(key);
+  });
+}
+
+// ══════════════════════════════════════════════════════
+// PRESENTER MODULE
+// ══════════════════════════════════════════════════════
+const Presenter = (() => {
+  const stages = {};
+  let activeId = null;
+
+  function mount(stageId) {
+    const stage = document.getElementById(stageId);
+    if (!stage || stages[stageId]) return;
+    const charMount = stage.querySelector('.presenter-char');
+    const tpl = document.getElementById('presenter-img-template');
+    charMount.appendChild(tpl.content.cloneNode(true));
+    stages[stageId] = {
+      stage,
+      svg: charMount,
+      bubble: stage.querySelector('.bubble-main'),
+      bubbleContent: stage.querySelector('.bubble-main .bubble-content'),
+      talkTimer: null,
+    };
+    startBlink(charMount);
+  }
+
+  function startBlink(el) {
+    function doBlink() {
+      if (!el.classList.contains('is-talking') && !el.classList.contains('is-happy')) {
+        el.classList.add('is-blinking');
+        setTimeout(() => el.classList.remove('is-blinking'), 140);
+      }
+      setTimeout(doBlink, 2600 + Math.random() * 3000);
+    }
+    setTimeout(doBlink, 1800 + Math.random() * 1500);
+  }
+
+  function use(stageId) { activeId = stageId; return stages[stageId]; }
+  function get() { return stages[activeId]; }
+
+  function rescueStoredPanels(container) {
+    const store = document.getElementById('info-store');
+    if (!store) return;
+    container.querySelectorAll('.tab-panel').forEach(p => store.appendChild(p));
+  }
+
+  function say(content, opts) {
+    const s = get();
+    if (!s) return;
+    const o = opts || {};
+    const talkMs = o.talkMs || 2800;
+    s.bubble.classList.remove('visible');
+    void s.bubble.offsetWidth;
+    rescueStoredPanels(s.bubbleContent);
+    if (typeof content === 'string') {
+      s.bubbleContent.innerHTML = '<div class="bubble-line">' + content + '</div>';
+    } else {
+      s.bubbleContent.innerHTML = '';
+      s.bubbleContent.appendChild(content);
+    }
+    s.bubbleContent.scrollTop = 0;
+    s.bubble.classList.add('visible');
+    s.svg.classList.add('is-talking');
+    clearTimeout(s.talkTimer);
+    s.talkTimer = setTimeout(() => s.svg.classList.remove('is-talking'), talkMs);
+  }
+
+  function ask(content, opts) { say(content, opts); }
+
+  // ── toast queue ──
+  const _toastQ = [];
+  let _toastBusy = false;
+  function _nextToast() {
+    if (_toastBusy || !_toastQ.length) return;
+    _toastBusy = true;
+    const text = _toastQ.shift();
+    const cont = document.getElementById('toast-container');
+    const el = document.createElement('div');
+    el.className = 'user-toast';
+    el.textContent = text;
+    cont.appendChild(el);
+    void el.offsetWidth;
+    el.classList.add('in');
+    SFX.ting();
+    setTimeout(() => {
+      el.classList.remove('in');
+      el.classList.add('out');
+      setTimeout(() => {
+        el.remove();
+        _toastBusy = false;
+        _nextToast();
+      }, 300);
+    }, 3000);
+  }
+  function userSay(text) {
+    _toastQ.push(text);
+    _nextToast();
+  }
+
+  function hide() {
+    const s = get();
+    if (!s) return;
+    rescueStoredPanels(s.bubbleContent);
+    s.bubble.classList.remove('visible');
+    s.svg.classList.remove('is-talking');
+    s.svg.classList.remove('is-happy');
+  }
+
+  function happy(holdMs) {
+    const s = get();
+    if (!s) return;
+    s.svg.classList.remove('is-talking');
+    s.svg.classList.add('is-happy');
+    if (holdMs) setTimeout(() => s.svg.classList.remove('is-happy'), holdMs);
+  }
+
+  return { mount, use, say, ask, userSay, hide, happy };
+})();
+
+// ══════════════════════════════════════════════════════
+// SCREEN NAV — AC:NH leaf burst transition
+// ══════════════════════════════════════════════════════
+function runLeafWipe() {
+  const w = document.getElementById('leaf-sweep');
+  w.classList.remove('run');
+  void w.offsetWidth;
+  w.classList.add('run');
+}
+
+function runGlitch(screenEl) {
+  // AC:NH — no glitch; CSS bounce transition handles it
+}
+
+// ══════════════════════════════════════════════════════
+// IDLE TIMER
+// ══════════════════════════════════════════════════════
+function stopIdleTimer() {
+  clearInterval(state.idleTimer);
+  state.idleTimer = null;
+  clearInterval(state.idleCountdown);
+  state.idleCountdown = null;
+  const ov = document.getElementById('idle-overlay');
+  if (ov) ov.classList.remove('visible');
+}
+
+function startIdleTimer() {
+  stopIdleTimer();
+  state.idleTimer = setTimeout(() => {
+    showIdleWarning();
+  }, state.idleSeconds * 1000);
+}
+
+function showIdleWarning() {
+  let secs = 7;
+  const ov = document.getElementById('idle-overlay');
+  const mainEl = document.getElementById('idle-warn-main');
+  const subEl = document.getElementById('idle-warn-sub');
+  function updateText(n) {
+    if (mainEl) mainEl.textContent = 'Tiada aktiviti dikesan.';
+    if (subEl) subEl.textContent = 'Kembali ke skrin mula dalam ' + n + ' saat...';
+  }
+  updateText(secs);
+  if (ov) ov.classList.add('visible');
+  state.idleCountdown = setInterval(() => {
+    secs--;
+    updateText(secs);
+    if (secs <= 0) {
+      clearInterval(state.idleCountdown);
+      state.idleCountdown = null;
+      if (ov) ov.classList.remove('visible');
+      goToScreen('welcome');
+    }
+  }, 1000);
+}
+
+function resetIdle() {
+  if (state.screen === 'welcome') return;
+  startIdleTimer();
+}
+
+function goToScreen(name) {
+  const screens = ['welcome','input','calculating','results'];
+  screens.forEach(s => {
+    document.getElementById('screen-' + s).classList.remove('active');
+  });
+  const scr = document.getElementById('screen-' + name);
+  scr.classList.add('active');
+  state.screen = name;
+  if (name !== 'welcome') {
+    SFX.swap();
+    runLeafWipe();
+  }
+  resetIdle();
+  if (name === 'input') { startPlanner(); }
+  if (name === 'results') {
+    setTimeout(() => { renderResults(); SFX.win(); Presenter.happy(0); }, 100);
+  }
+  if (name !== 'welcome') startIdleTimer();
+  else stopIdleTimer();
+}
+
+function startCalculation() {
+  goToScreen('calculating');
+  const fill = document.getElementById('progress-fill');
+  fill.style.animation = 'none';
+  fill.offsetHeight;
+  fill.style.animation = 'progress-fill 2s ease-in-out forwards';
+  setTimeout(() => goToScreen('results'), 2200);
+}
+
+// ══════════════════════════════════════════════════════
+// HEALTH PLANNER — ADVISOR INTERVIEW
+// ══════════════════════════════════════════════════════
+function showAnswerPanel(id) {
+  const covPanel = document.getElementById('answer-coverage');
+  if (covPanel) delete covPanel.dataset.locked;
+  document.querySelectorAll('.answer-panel').forEach(p => p.classList.remove('show'));
+  if (id) {
+    const p = document.getElementById(id);
+    p.classList.remove('show');
+    void p.offsetWidth;
+    p.classList.add('show');
+  }
+}
+
+function startPlanner() {
+  Presenter.use('stage-planner');
+  Presenter.hide();
+  state.gender = null; state.targetAge = 65; state.hasMhit = null;
+  state.premium = 101; state.hasCoPayment = false;
+  state.deductible = 0; state.coInsurance = 0; state.coPayCap = 0;
+  showAnswerPanel(null);
+  setTimeout(() => {
+    Presenter.ask(t('age_label'));
+    showAnswerPanel('answer-age');
+  }, 500);
+}
+
+function confirmAge() {
+  Presenter.use('stage-planner');
+  Presenter.userSay(state.age + ' ' + t('age_unit'));
+  showAnswerPanel(null);
+  setTimeout(() => Presenter.say(t('ack_age'), { talkMs: 1400 }), 450);
+  setTimeout(() => {
+    SFX.swap();
+    Presenter.ask(t('gender_label'));
+    showAnswerPanel('answer-gender');
+  }, 1800);
+}
+
+function answerGender(g) {
+  state.gender = g;
+  SFX.confirm();
+  Presenter.use('stage-planner');
+  Presenter.userSay(t('gender_' + g));
+  showAnswerPanel(null);
+  setTimeout(() => Presenter.say(t('ack_gender_' + g), { talkMs: 1200 }), 450);
+  setTimeout(() => {
+    SFX.swap();
+    Presenter.ask(t('target_age_label'));
+    showAnswerPanel('answer-target-age');
+  }, 1700);
+}
+
+function answerTargetAge(age) {
+  state.targetAge = age;
+  SFX.confirm();
+  Presenter.use('stage-planner');
+  Presenter.userSay(age + ' ' + t('age_unit'));
+  showAnswerPanel(null);
+  setTimeout(() => Presenter.say(t('ack_target_age') + ' ' + age + '.', { talkMs: 1300 }), 450);
+  setTimeout(() => {
+    SFX.swap();
+    Presenter.ask(t('has_mhit_label'));
+    showAnswerPanel('answer-has-mhit');
+  }, 1800);
+}
+
+function answerHasMhit(has) {
+  state.hasMhit = has;
+  SFX.confirm();
+  Presenter.use('stage-planner');
+  Presenter.userSay(t(has ? 'yn_yes' : 'yn_no'));
+  showAnswerPanel(null);
+  const ack = has ? 'ack_has_mhit_yes' : 'ack_has_mhit_no';
+  setTimeout(() => Presenter.say(t(ack), { talkMs: 1400 }), 450);
+  if (has) {
+    state.premium = 101;
+    document.getElementById('premium-display').textContent = 'RM ' + state.premium;
+    updatePremiumBands();
+    setTimeout(() => {
+      SFX.swap();
+      Presenter.ask(t('premium_label'));
+      showAnswerPanel('answer-premium');
+    }, 1900);
+  } else {
+    state.coverage = 'none';
+    setTimeout(() => { showAnswerPanel(null); startCalculation(); }, 1900);
+  }
+}
+
+function changePremium(delta) {
+  state.premium = Math.max(30, Math.min(1000, state.premium + delta));
+  document.getElementById('premium-display').textContent = 'RM ' + state.premium;
+  updatePremiumBands();
+  resetIdle();
+}
+
+function setPremium(val) {
+  state.premium = val;
+  document.getElementById('premium-display').textContent = 'RM ' + val;
+  updatePremiumBands();
+  SFX.tap(); resetIdle();
+}
+
+function updatePremiumBands() {
+  document.querySelectorAll('.premium-band').forEach(b => {
+    const val = parseInt(b.textContent.replace('RM ', ''));
+    b.classList.toggle('active', val === state.premium);
+  });
+}
+
+function confirmPremium() {
+  SFX.tap();
+  Presenter.userSay('RM ' + state.premium + '/bulan');
+  showAnswerPanel(null);
+  setTimeout(() => Presenter.say(t('ack_premium'), { talkMs: 1200 }), 450);
+  setTimeout(() => {
+    SFX.swap();
+    Presenter.ask(t('copay_q_label'));
+    showAnswerPanel('answer-has-copay');
+  }, 1700);
+}
+
+function answerHasCoPay(has) {
+  state.hasCoPayment = has;
+  SFX.confirm();
+  Presenter.use('stage-planner');
+  Presenter.userSay(t(has ? 'yn_yes' : 'yn_no'));
+  showAnswerPanel(null);
+  const ack = has ? 'ack_copay_yes' : 'ack_copay_no';
+  setTimeout(() => Presenter.say(t(ack), { talkMs: 1300 }), 450);
+  if (has) {
+    state.deductible = 0; state.coInsurance = 0; state.coPayCap = 0;
+    document.getElementById('deductible-display').textContent = 'RM 0';
+    document.getElementById('coins-display').textContent = '0%';
+    document.getElementById('copaycap-display').textContent = 'RM 0';
+    setTimeout(() => {
+      SFX.swap();
+      Presenter.ask(t('copay_details_label'));
+      showAnswerPanel('answer-copay-details');
+    }, 1800);
+  } else {
+    deriveCoverageFromInputs();
+    setTimeout(() => { showAnswerPanel(null); startCalculation(); }, 1800);
+  }
+}
+
+function changeDeductible(delta) {
+  state.deductible = Math.max(0, Math.min(5000, state.deductible + delta));
+  document.getElementById('deductible-display').textContent = 'RM ' + state.deductible;
+  resetIdle();
+}
+
+function changeCoIns(delta) {
+  state.coInsurance = Math.max(0, Math.min(50, state.coInsurance + delta));
+  document.getElementById('coins-display').textContent = state.coInsurance + '%';
+  resetIdle();
+}
+
+function changeCoPayCap(delta) {
+  state.coPayCap = Math.max(0, Math.min(10000, state.coPayCap + delta));
+  document.getElementById('copaycap-display').textContent = 'RM ' + state.coPayCap;
+  resetIdle();
+}
+
+function confirmCoPayDetails() {
+  SFX.tap();
+  deriveCoverageFromInputs();
+  showAnswerPanel(null);
+  startCalculation();
+}
+
+function deriveCoverageFromInputs() {
+  if (!state.hasMhit) { state.coverage = 'none'; return; }
+  if (state.premium < 100) state.coverage = 'basic';
+  else state.coverage = 'comprehensive';
+}
+
+function answerCoverage(type) {
+  const cards = document.getElementById('answer-coverage');
+  if (cards && cards.dataset.locked) return;
+  if (cards) cards.dataset.locked = '1';
+  selectCoverage(type);
+  SFX.confirm();
+  Presenter.use('stage-planner');
+  const nameKey = { none: 'cov_none_name', basic: 'cov_basic_name', comprehensive: 'cov_comp_name' }[type];
+  Presenter.userSay(t(nameKey));
+  setTimeout(() => Presenter.say(t('ack_cov_' + type), { talkMs: 1500 }), 450);
+  setTimeout(() => { showAnswerPanel(null); startCalculation(); }, 1900);
+}
+
+// ══════════════════════════════════════════════════════
+// AGE CONTROL
+// ══════════════════════════════════════════════════════
+function changeAge(delta) {
+  const prev = state.age;
+  state.age = Math.max(18, Math.min(70, state.age + delta));
+  if (state.age === prev) SFX.lose();
+  document.getElementById('age-display').textContent = state.age;
+  updateAgeBands();
+  resetIdle();
+}
+
+function updateAgeBands() {
+  document.querySelectorAll('.age-band').forEach(band => {
+    const min = parseInt(band.dataset.min);
+    const max = parseInt(band.dataset.max);
+    band.classList.toggle('active', state.age >= min && state.age <= max);
+  });
+}
+
+// ══════════════════════════════════════════════════════
+// COVERAGE
+// ══════════════════════════════════════════════════════
+function selectCoverage(type) {
+  state.coverage = type;
+  document.querySelectorAll('.coverage-card').forEach(c => c.classList.remove('selected'));
+  document.querySelector('.coverage-card.' + type).classList.add('selected');
+  resetIdle();
+}
+
+// ══════════════════════════════════════════════════════
+// CALCULATION
+// ══════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════
+// ACTUARIAL DATA TABLES (source: calculator.fenetwork.my)
+// ══════════════════════════════════════════════════════
+const uninsuredMedianBillByAge = {
+  18:6333.03,19:6333.03,
+  20:6333.03,21:6384.70,22:6384.70,23:6384.70,24:6384.70,25:6384.70,
+  26:6604.20,27:6604.20,28:6604.20,29:6604.20,30:6604.20,
+  31:6997.21,32:6997.21,33:6997.21,34:6997.21,35:6997.21,
+  36:7392.00,37:7392.00,38:7392.00,39:7392.00,40:7392.00,
+  41:7611.53,42:7611.53,43:7611.53,44:7611.53,45:7611.53,
+  46:7647.47,47:7647.47,48:7647.47,49:7647.47,50:7647.47,
+  51:7590.45,52:7590.45,53:7590.45,54:7590.45,55:7590.45,
+  56:7638.50,57:7638.50,58:7638.50,59:7638.50,60:7638.50,
+  61:7683.75,62:7683.75,63:7683.75,64:7683.75,65:7683.75,
+  66:7653.00,67:7653.00,68:7653.00,69:7653.00,70:7653.00,
+  71:7648.30,72:7648.30,73:7648.30,74:7648.30,75:7648.30,
+  76:7648.30,77:7648.30,78:7648.30,79:7648.30,80:7648.30,
+  100:7648.30
+};
+const uninsuredAvgBillByAge = {
+  18:11234.12,19:11234.12,
+  20:11234.12,21:11353.20,22:11353.20,23:11353.20,24:11353.20,25:11353.20,
+  26:11536.73,27:11536.73,28:11536.73,29:11536.73,30:11536.73,
+  31:12144.69,32:12144.69,33:12144.69,34:12144.69,35:12144.69,
+  36:12790.33,37:12790.33,38:12790.33,39:12790.33,40:12790.33,
+  41:13411.97,42:13411.97,43:13411.97,44:13411.97,45:13411.97,
+  46:13647.18,47:13647.18,48:13647.18,49:13647.18,50:13647.18,
+  51:13789.08,52:13789.08,53:13789.08,54:13789.08,55:13789.08,
+  56:14037.46,57:14037.46,58:14037.46,59:14037.46,60:14037.46,
+  61:14453.64,62:14453.64,63:14453.64,64:14453.64,65:14453.64,
+  66:15330.21,67:15330.21,68:15330.21,69:15330.21,70:15330.21,
+  71:11764.03,72:11764.03,73:11764.03,74:11764.03,75:11764.03,
+  100:11764.03
+};
+const uninsuredFrequencyByAge = {
+  18:0.056788,19:0.056788,
+  20:0.056788,21:0.070067,22:0.070067,23:0.070067,24:0.070067,25:0.070067,
+  26:0.073779,27:0.073779,28:0.073779,29:0.073779,30:0.073779,
+  31:0.078509,32:0.078509,33:0.078509,34:0.078509,35:0.078509,
+  36:0.086289,37:0.086289,38:0.086289,39:0.086289,40:0.086289,
+  41:0.096474,42:0.096474,43:0.096474,44:0.096474,45:0.096474,
+  46:0.113769,47:0.113769,48:0.113769,49:0.113769,50:0.113769,
+  51:0.141446,52:0.141446,53:0.141446,54:0.141446,55:0.141446,
+  56:0.187275,57:0.187275,58:0.187275,59:0.187275,60:0.187275,
+  61:0.251453,62:0.251453,63:0.251453,64:0.251453,65:0.251453,
+  66:0.319141,67:0.319141,68:0.319141,69:0.319141,70:0.319141,
+  71:0.343862,72:0.343862,73:0.343862,74:0.343862,75:0.343862,
+  100:0.343862
+};
+const insuredAvgClaimByAge = {
+  18:14878.35,19:14878.35,
+  20:14878.35,21:15421.27,22:15421.27,23:15421.27,24:15421.27,25:15421.27,
+  26:16381.31,27:16381.31,28:16381.31,29:16381.31,30:16381.31,
+  31:18167.26,32:18167.26,33:18167.26,34:18167.26,35:18167.26,
+  36:20363.29,37:20363.29,38:20363.29,39:20363.29,40:20363.29,
+  41:22743.97,42:22743.97,43:22743.97,44:22743.97,45:22743.97,
+  46:24104.35,47:24104.35,48:24104.35,49:24104.35,50:24104.35,
+  51:24527.36,52:24527.36,53:24527.36,54:24527.36,55:24527.36,
+  56:25033.96,57:25033.96,58:25033.96,59:25033.96,60:25033.96,
+  61:25922.71,62:25922.71,63:25922.71,64:25922.71,65:25922.71,
+  66:25960.62,67:25960.62,68:25960.62,69:25960.62,70:25960.62,
+  71:27268.75,72:27268.75,73:27268.75,74:27268.75,75:27268.75,
+  100:27268.75
+};
+const insuredFrequencyByAge = {
+  18:0.040139,19:0.040139,
+  20:0.040139,21:0.048551,22:0.048551,23:0.048551,24:0.048551,25:0.048551,
+  26:0.049270,27:0.049270,28:0.049270,29:0.049270,30:0.049270,
+  31:0.049618,32:0.049618,33:0.049618,34:0.049618,35:0.049618,
+  36:0.050982,37:0.050982,38:0.050982,39:0.050982,40:0.050982,
+  41:0.052760,42:0.052760,43:0.052760,44:0.052760,45:0.052760,
+  46:0.058805,47:0.058805,48:0.058805,49:0.058805,50:0.058805,
+  51:0.071340,52:0.071340,53:0.071340,54:0.071340,55:0.071340,
+  56:0.092138,57:0.092138,58:0.092138,59:0.092138,60:0.092138,
+  61:0.119953,62:0.119953,63:0.119953,64:0.119953,65:0.119953,
+  66:0.148507,67:0.148507,68:0.148507,69:0.148507,70:0.148507,
+  71:0.158298,72:0.158298,73:0.158298,74:0.158298,75:0.158298,
+  100:0.158298
+};
+const medianPremiumByAge = {
+  18:69.11,19:69.11,
+  20:69.11,21:81.94,22:81.94,23:81.94,24:81.94,25:81.94,
+  26:91.31,27:91.31,28:91.31,29:91.31,30:91.31,
+  31:101.44,32:101.44,33:101.44,34:101.44,35:101.44,
+  36:117.10,37:117.10,38:117.10,39:117.10,40:117.10,
+  41:137.47,42:137.47,43:137.47,44:137.47,45:137.47,
+  46:163.69,47:163.69,48:163.69,49:163.69,50:163.69,
+  51:202.30,52:202.30,53:202.30,54:202.30,55:202.30,
+  56:249.56,57:249.56,58:249.56,59:249.56,60:249.56,
+  61:297.88,62:297.88,63:297.88,64:297.88,65:297.88,
+  66:357.41,67:357.41,68:357.41,69:357.41,70:357.41,
+  71:421.78,72:421.78,73:421.78,74:421.78,75:421.78,
+  76:522.34,77:522.34,78:522.34,79:522.34,80:522.34,
+  100:691.13
+};
+
+function lookupAge(table, age) {
+  const a = Math.max(18, Math.min(100, Math.round(age)));
+  if (table[a] !== undefined) return table[a];
+  for (let i = a - 1; i >= 18; i--) { if (table[i] !== undefined) return table[i]; }
+  const vals = Object.values(table);
+  return vals[vals.length - 1];
+}
+
+function pmtCalc(rate, nper, pv, fv) {
+  fv = fv || 0;
+  if (rate === 0) return -(pv + fv) / nper;
+  const pvif = Math.pow(1 + rate, nper);
+  return -(rate * (pv * pvif + fv) / (pvif - 1));
+}
+
+function getHospitalizationCost(age) {
+  return Math.round(lookupAge(uninsuredMedianBillByAge, Math.max(20, Math.min(100, age))));
+}
+
+function calculateRequiredMonthlySaving(currentAge) {
+  const yearsToHorizon = state.targetAge - currentAge;
+  if (yearsToHorizon <= 0) return 0;
+  let totalCost = 0;
+  for (let t = 0; t <= yearsToHorizon; t++) {
+    const ageAtT = currentAge + t;
+    if (ageAtT > 100) break;
+    const utilAge = Math.min(20 + t, 75);
+    const baseClaim = lookupAge(uninsuredAvgBillByAge, utilAge);
+    const baseFreq  = lookupAge(uninsuredFrequencyByAge, ageAtT);
+    totalCost += baseClaim * Math.pow(1.06, t) * baseFreq;
+  }
+  return Math.max(0, Math.round(pmtCalc(0.055, yearsToHorizon, 0, -totalCost) / 12));
+}
+
+function calculateInsuredMonthlySaving(currentAge, monthlyPremium, deductible, coinsurancePct, copaymentCap) {
+  const yearsToHorizon = state.targetAge - currentAge;
+  if (yearsToHorizon <= 0) return 0;
+  const deduc     = deductible    || 500;
+  const coinsRate = (coinsurancePct || 0) / 100;
+  const coinsCap  = copaymentCap  || 3000;
+  const baseMedPrem = lookupAge(medianPremiumByAge, currentAge) || 91;
+  let totalPremiums = 0, totalOOP = 0;
+  for (let t = 0; t <= yearsToHorizon; t++) {
+    const ageAtT = currentAge + t;
+    if (ageAtT > 100) break;
+    const ageFactor = lookupAge(medianPremiumByAge, Math.min(ageAtT, 100)) / baseMedPrem;
+    totalPremiums += 12 * monthlyPremium * ageFactor * Math.pow(1.05, t);
+    const utilAge   = Math.min(20 + t, 75);
+    const avgClaimAtT = lookupAge(insuredAvgClaimByAge, utilAge) * Math.pow(1.06, t);
+    const oopPerEp  = Math.min(
+      avgClaimAtT,
+      deduc + Math.min(coinsRate * Math.max(avgClaimAtT - deduc, 0), coinsCap)
+    );
+    totalOOP += lookupAge(insuredFrequencyByAge, utilAge) * oopPerEp;
+  }
+  return Math.max(0, Math.round(pmtCalc(0.055, yearsToHorizon, 0, -(totalPremiums + totalOOP)) / 12));
+}
+
+function fmtRM(val) {
+  return 'RM ' + Math.round(val).toLocaleString('en-MY');
+}
+
+// ══════════════════════════════════════════════════════
+// RESULTS RENDER
+// ══════════════════════════════════════════════════════
+function renderResults() {
+  const billCost = getHospitalizationCost(state.age);
+  let monthlyNeeded;
+  if (state.hasMhit) {
+    monthlyNeeded = calculateInsuredMonthlySaving(
+      state.age, state.premium, state.deductible, state.coInsurance, state.coPayCap
+    );
+  } else {
+    monthlyNeeded = calculateRequiredMonthlySaving(state.age);
+  }
+  const yearsToHorizon = state.targetAge - state.age;
+
+  document.getElementById('badge-age').textContent = '👤 ' + state.age + ' tahun';
+  const planLabelMap = { none: '🚫 Tiada Perlindungan', basic: '🛡️ Perlindungan Asas', comprehensive: '⭐ Perlindungan Komprehensif' };
+  const planClassMap = { none: 'badge badge-plan-none', basic: 'badge badge-plan-basic', comprehensive: 'badge badge-plan-comprehensive' };
+  const badgePlan = document.getElementById('badge-plan');
+  badgePlan.className = planClassMap[state.coverage];
+  document.getElementById('badge-plan-text').textContent = planLabelMap[state.coverage];
+
+  document.getElementById('result-monthly-amt').textContent = fmtRM(monthlyNeeded);
+  document.getElementById('result-bill-amt').textContent = fmtRM(billCost);
+
+  document.getElementById('result-monthly-sub').textContent =
+    'Anggaran simpanan untuk menampung kos perubatan anda selama ' + yearsToHorizon + ' tahun akan datang';
+  document.getElementById('result-bill-sub').textContent =
+    'Kos hospitalisasi semasa bagi pesakit berumur ' + state.age + ' tahun di Malaysia';
+
+  const noteEl = document.getElementById('result-note');
+  if (state.coverage === 'none') {
+    noteEl.textContent = '⚠️ Tanpa pelan MHIT, anda menanggung sepenuhnya kos perubatan. Pertimbangkan untuk mendapatkan perlindungan MHIT sekarang bagi mengurangkan beban kewangan anda.';
+  } else if (state.coverage === 'basic') {
+    noteEl.textContent = '💡 Pelan asas anda menampung sebahagian kos. Semak had perlindungan tahunan dan pertimbangkan naik taraf ke pelan komprehensif apabila mampu.';
+  } else {
+    noteEl.textContent = '✅ Perlindungan komprehensif anda membantu mengurangkan kos poket dengan ketara. Teruskan mengekalkan pelan anda dan semak semula setiap tahun.';
+  }
+
+  document.querySelectorAll('.result-card').forEach((card, i) => {
+    card.style.opacity = '0';
+    card.style.transform = 'translateY(calc(20 * var(--u)))';
+    setTimeout(() => {
+      card.style.transition = 'opacity 0.5s ease, transform 0.5s var(--ease-bounce)';
+      card.style.opacity = '1';
+      card.style.transform = 'none';
+    }, 200 + i * 220);
+  });
+}
+
+// ══════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════
+document.addEventListener('pointerdown', e => {
+  if (e.target.closest('button, .chip, .coverage-card, .age-btn')) SFX.tap();
+}, { passive: true });
+
+document.addEventListener('pointerdown', resetIdle, { passive: true });
+
+Presenter.mount('stage-planner');
+renderI18n();
+updateAgeBands();
+
+goToScreen('welcome');
+
+// position-editor bridge — postMessage listener (works across file:// origins)
+(function(){
+  let _edStyle = null;
+  window.addEventListener('message', function(e){
+    const d = e.data;
+    if (!d || d.type !== 'pos-editor') return;
+    // inject/update override style
+    if (!_edStyle) {
+      _edStyle = document.createElement('style');
+      _edStyle.id = 'pos-editor-style';
+      document.head.appendChild(_edStyle);
+    }
+    if (d.css !== undefined) _edStyle.textContent = d.css;
+    // navigate to screen
+    if (d.goto) { stopIdleTimer(); goToScreen(d.goto); stopIdleTimer(); }
+  });
+})();
+
+function enterFullscreen() {
+  const el = document.documentElement;
+  const req = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen;
+  if (req) req.call(el).catch(() => {});
+}
+enterFullscreen();
+document.addEventListener('pointerdown', function _fsRetry() {
+  if (!document.fullscreenElement && !document.webkitFullscreenElement) enterFullscreen();
+  document.removeEventListener('pointerdown', _fsRetry);
+}, { once: true });
+
+// ──── FALLING LEAVES AMBIENT (replaces sci-fi particles) ────
+(function(){
+  const leaves=['🍃','🍂','🌿','🍀','🌸'];
+  const cont=document.createElement('div');
+  cont.className='leaf-particles';
+  document.body.appendChild(cont);
+  function spawnLeaf(){
+    const el=document.createElement('span');
+    el.className='leaf-part';
+    el.textContent=leaves[Math.floor(Math.random()*leaves.length)];
+    const sz=13+Math.random()*18;
+    const dur=5+Math.random()*7;
+    el.style.cssText='left:'+(Math.random()*108-4)+'vw;font-size:'+sz+'px;animation-duration:'+dur+'s;animation-delay:'+(Math.random()*2)+'s';
+    cont.appendChild(el);
+    el.addEventListener('animationend',()=>el.remove());
+  }
+  for(let i=0;i<5;i++) setTimeout(spawnLeaf,i*280);
+  setInterval(spawnLeaf,900);
+})();
+</script>
+
+<style id="kiosk-hardening">html,body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;}a{pointer-events:none;}</style><script id="kiosk-block">document.addEventListener("contextmenu",function(e){e.preventDefault();},true);document.addEventListener("dragstart",function(e){e.preventDefault();},true);</script>
+</body>
+</html>

@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="../_fonts/fonts.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AR Experience</title>
+  <script src="../_vendor/qrcode.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #080c14;
+      color: #fff;
+      font-family: 'Arial', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      overflow: hidden;
+    }
+
+    /* Animated background grid */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0,229,255,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,229,255,0.04) 1px, transparent 1px);
+      background-size: 40px 40px;
+      z-index: 0;
+      animation: grid-drift 20s linear infinite;
+    }
+    @keyframes grid-drift {
+      from { background-position: 0 0; }
+      to   { background-position: 40px 40px; }
+    }
+
+    /* Glow blobs */
+    .blob {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.15;
+      z-index: 0;
+    }
+    .blob-1 { width: 400px; height: 400px; background: #00e5ff; top: -100px; left: -100px; animation: blob-move1 12s ease-in-out infinite alternate; }
+    .blob-2 { width: 300px; height: 300px; background: #7c4dff; bottom: -80px; right: -80px; animation: blob-move2 15s ease-in-out infinite alternate; }
+    @keyframes blob-move1 { to { transform: translate(60px, 80px); } }
+    @keyframes blob-move2 { to { transform: translate(-60px, -80px); } }
+
+    .card {
+      position: relative;
+      z-index: 1;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(0,229,255,0.15);
+      border-radius: 20px;
+      padding: 40px 32px;
+      max-width: 380px;
+      width: 100%;
+      text-align: center;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 0 60px rgba(0,229,255,0.06), inset 0 1px 0 rgba(255,255,255,0.05);
+    }
+
+    .badge {
+      display: inline-block;
+      font-size: 11px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #00e5ff;
+      background: rgba(0,229,255,0.08);
+      border: 1px solid rgba(0,229,255,0.2);
+      border-radius: 20px;
+      padding: 5px 14px;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, #fff 0%, #00e5ff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      color: rgba(255,255,255,0.45);
+      font-size: 14px;
+      margin-bottom: 32px;
+      line-height: 1.6;
+    }
+
+    /* Steps */
+    .steps {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 32px;
+      text-align: left;
+    }
+    .step {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px;
+      padding: 14px;
+    }
+    .step-num {
+      width: 28px; height: 28px;
+      min-width: 28px;
+      border-radius: 50%;
+      background: rgba(0,229,255,0.1);
+      border: 1px solid rgba(0,229,255,0.3);
+      color: #00e5ff;
+      font-size: 12px;
+      font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .step-text {
+      font-size: 13px;
+      color: rgba(255,255,255,0.7);
+      line-height: 1.5;
+      padding-top: 4px;
+    }
+    .step-text strong { color: #fff; }
+
+    /* Buttons */
+    .btn-primary {
+      display: block;
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(135deg, #00b8d9, #00e5ff);
+      color: #000;
+      font-weight: 700;
+      font-size: 15px;
+      letter-spacing: 0.5px;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      text-decoration: none;
+      margin-bottom: 12px;
+      transition: transform 0.15s, box-shadow 0.15s;
+      box-shadow: 0 4px 20px rgba(0,229,255,0.3);
+    }
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 28px rgba(0,229,255,0.45);
+    }
+    .btn-primary:active { transform: translateY(0); }
+
+    .btn-secondary {
+      display: block;
+      width: 100%;
+      padding: 13px;
+      background: transparent;
+      color: rgba(255,255,255,0.6);
+      font-size: 13px;
+      letter-spacing: 0.5px;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .btn-secondary:hover {
+      border-color: rgba(0,229,255,0.3);
+      color: #00e5ff;
+    }
+
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+      margin: 24px 0;
+    }
+
+    .compat-note {
+      font-size: 11px;
+      color: rgba(255,255,255,0.25);
+      margin-top: 16px;
+    }
+    .compat-note span { color: rgba(0,229,255,0.5); }
+
+    .qr-section {
+      margin-top: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+    .qr-label {
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.3);
+    }
+    .qr-box {
+      background: #fff;
+      padding: 10px;
+      border-radius: 10px;
+      box-shadow: 0 0 24px rgba(0,229,255,0.2);
+      display: inline-block;
+    }
+    .qr-box canvas, .qr-box img { display: block; border-radius: 4px; }
+    .qr-sublabel {
+      font-size: 11px;
+      color: rgba(255,255,255,0.2);
+    }
+
+    /* Pulse dot indicator */
+    .live-dot {
+      display: inline-block;
+      width: 7px; height: 7px;
+      background: #00e5ff;
+      border-radius: 50%;
+      margin-right: 6px;
+      vertical-align: middle;
+      animation: dot-pulse 1.5s ease-in-out infinite;
+    }
+    @keyframes dot-pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.7); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+
+  <div class="card">
+    <div class="badge"><span class="live-dot"></span>Interactive AR</div>
+    <h1>AR Experience</h1>
+    <p class="subtitle">Point your camera at the AR marker to unlock an interactive 3D animation overlay.</p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-text"><strong>Get the marker</strong> — print it or display it on another screen</div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-text"><strong>Launch scanner</strong> — allow camera access when prompted</div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-text"><strong>Aim &amp; hold</strong> — keep the marker fully in frame</div>
+      </div>
+    </div>
+
+    <a href="ar.html" class="btn-primary">Launch AR Scanner</a>
+    <a href="marker.html" class="btn-secondary">View / Print Marker</a>
+
+    <div class="divider"></div>
+
+    <div class="qr-section">
+      <div class="qr-label">Scan to open AR scanner</div>
+      <div class="qr-box" id="qrcode"></div>
+      <div class="qr-sublabel" id="qr-url"></div>
+    </div>
+
+    <div class="divider"></div>
+
+    <p class="compat-note">
+      Works on <span>Chrome / Safari</span> with camera access.
+      Best on mobile. Requires HTTPS or localhost.
+    </p>
+  </div>
+
+  <script>
+    // Point QR at ar.html on whatever host this page is served from
+    const arURL = window.location.origin + window.location.pathname.replace(/\/[^/]*$/, '/ar.html');
+    document.getElementById('qr-url').textContent = arURL;
+    new QRCode(document.getElementById('qrcode'), {
+      text: arURL,
+      width: 160,
+      height: 160,
+      colorDark: '#000000',
+      colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.M
+    });
+  </script>
+
+<style id="kiosk-hardening">html,body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;}a{pointer-events:none;}</style><script id="kiosk-block">document.addEventListener("contextmenu",function(e){e.preventDefault();},true);document.addEventListener("dragstart",function(e){e.preventDefault();},true);</script>
+</body>
+</html>

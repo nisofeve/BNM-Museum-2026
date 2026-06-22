@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="../_fonts/fonts.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>AR Experience</title>
+
+  <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { overflow: hidden; background: #000; font-family: 'Arial', sans-serif; }
+
+    #ui-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      pointer-events: none;
+      z-index: 999;
+    }
+
+    #scan-ring {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 240px; height: 240px;
+      border: 2px solid rgba(255,255,255,0.15);
+      border-radius: 12px;
+      animation: pulse-border 2s ease-in-out infinite;
+    }
+    #scan-ring::before, #scan-ring::after {
+      content: '';
+      position: absolute;
+      width: 30px; height: 30px;
+      border-color: #00e5ff;
+      border-style: solid;
+    }
+    #scan-ring::before {
+      top: -2px; left: -2px;
+      border-width: 3px 0 0 3px;
+      border-radius: 4px 0 0 0;
+    }
+    #scan-ring::after {
+      bottom: -2px; right: -2px;
+      border-width: 0 3px 3px 0;
+      border-radius: 0 0 4px 0;
+    }
+
+    #scan-line {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 220px; height: 2px;
+      background: linear-gradient(90deg, transparent, #00e5ff, transparent);
+      animation: scan-move 2.5s ease-in-out infinite;
+      box-shadow: 0 0 8px #00e5ff;
+    }
+
+    #corner-tl { top: -2px; left: -2px; border-width: 3px 0 0 3px; border-radius: 4px 0 0 0; }
+    #corner-tr { top: -2px; right: -2px; border-width: 3px 3px 0 0; border-radius: 0 4px 0 0; }
+    #corner-bl { bottom: -2px; left: -2px; border-width: 0 0 3px 3px; border-radius: 0 0 0 4px; }
+    #corner-br { bottom: -2px; right: -2px; border-width: 0 3px 3px 0; border-radius: 0 0 4px 0; }
+
+    .corner { position: absolute; width: 30px; height: 30px; border-color: #00e5ff; border-style: solid; }
+
+    #hint-text {
+      position: absolute;
+      bottom: 80px; left: 50%;
+      transform: translateX(-50%);
+      color: rgba(255,255,255,0.8);
+      font-size: 14px;
+      letter-spacing: 1px;
+      text-align: center;
+      text-shadow: 0 0 10px rgba(0,229,255,0.5);
+      animation: fade-pulse 2s ease-in-out infinite;
+      white-space: nowrap;
+    }
+
+    #status-badge {
+      position: absolute;
+      top: 30px; left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.5);
+      border: 1px solid rgba(0,229,255,0.3);
+      border-radius: 20px;
+      padding: 6px 16px;
+      color: #00e5ff;
+      font-size: 12px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      backdrop-filter: blur(4px);
+    }
+
+    #found-flash {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,229,255,0.15);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 998;
+      transition: opacity 0.2s;
+    }
+    #found-flash.active { opacity: 1; }
+
+    @keyframes pulse-border {
+      0%, 100% { border-color: rgba(255,255,255,0.1); }
+      50% { border-color: rgba(0,229,255,0.3); }
+    }
+    @keyframes scan-move {
+      0% { top: calc(50% - 110px); }
+      50% { top: calc(50% + 110px); }
+      100% { top: calc(50% - 110px); }
+    }
+    @keyframes fade-pulse {
+      0%, 100% { opacity: 0.6; }
+      50% { opacity: 1; }
+    }
+
+    .a-loader-title { display: none !important; }
+    .a-enter-vr-button { display: none !important; }
+    canvas { display: block; }
+  </style>
+</head>
+<body>
+
+  <pre id="vid-debug" style="position:fixed;top:8px;left:8px;z-index:1000;margin:0;
+       padding:8px 10px;background:rgba(0,0,0,.65);color:#0f0;font:12px/1.4 monospace;
+       border-radius:6px;display:none;pointer-events:none;white-space:pre"></pre>
+
+  <div id="found-flash"></div>
+
+  <div id="ui-overlay">
+    <div id="status-badge">AR SCANNER</div>
+    <div id="scan-ring">
+      <div class="corner" id="corner-tl"></div>
+      <div class="corner" id="corner-tr"></div>
+      <div class="corner" id="corner-bl"></div>
+      <div class="corner" id="corner-br"></div>
+    </div>
+    <div id="scan-line"></div>
+    <div id="hint-text">Point camera at the target image</div>
+  </div>
+
+  <a-scene
+    mindar-image="imageTargetSrc: Assets/targets.mind; autoStart: true;"
+    renderer="colorManagement: true; logarithmicDepthBuffer: true; precision: medium;"
+    vr-mode-ui="enabled: false"
+    device-orientation-permission-ui="enabled: false"
+    loading-screen="enabled: false"
+    id="arscene"
+  >
+
+    <a-assets>
+      <video id="ar-video"
+        src="Assets/Animated-1399.mp4"
+        autoplay loop muted playsinline webkit-playsinline
+        crossorigin="anonymous"
+      ></video>
+      <video id="ar-video-2"
+        src="Assets/Animated-1883.mp4"
+        autoplay loop muted playsinline webkit-playsinline
+        crossorigin="anonymous"
+      ></video>
+    </a-assets>
+
+    <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+    <a-entity mindar-image-target="targetIndex: 0" id="marker-0">
+
+      <a-plane
+        src="#ar-video"
+        width="1"
+        height="1.2179"
+        position="0 0 0"
+        rotation="0 0 0"
+        material="shader: flat; transparent: true;"
+      ></a-plane>
+    </a-entity>
+
+    <a-entity mindar-image-target="targetIndex: 1" id="marker-1">
+
+      <a-plane
+        src="#ar-video-2"
+        width="1"
+        height="0.6984"
+        position="0 0 0"
+        rotation="0 0 0"
+        material="shader: flat; transparent: true;"
+      ></a-plane>
+    </a-entity>
+
+    <a-light type="ambient" color="#ffffff" intensity="1"></a-light>
+
+  </a-scene>
+
+  <script>
+    const hint  = document.getElementById('hint-text');
+    const flash = document.getElementById('found-flash');
+    const badge = document.getElementById('status-badge');
+
+    // map each target to its video
+    const TARGETS = [
+      { marker: 'marker-0', video: 'ar-video'   }, // A01-1399 → Animated-1399
+      { marker: 'marker-1', video: 'ar-video-2' }  // A01-1883 → Animated-1883
+    ];
+
+    TARGETS.forEach(({ marker, video }) => {
+      const m = document.getElementById(marker);
+      const v = document.getElementById(video);
+
+      m.addEventListener('targetFound', () => {
+        hint.textContent = 'Image detected!';
+        flash.classList.add('active');
+        badge.textContent = 'AR TRACKING';
+        badge.style.borderColor = 'rgba(0,229,255,0.8)';
+        setTimeout(() => flash.classList.remove('active'), 400);
+        if (v) { v.currentTime = 0; v.play().catch(() => {}); }
+      });
+
+      m.addEventListener('targetLost', () => {
+        hint.textContent = 'Point camera at the target image';
+        badge.textContent = 'AR SCANNER';
+        badge.style.borderColor = 'rgba(0,229,255,0.3)';
+        if (v) v.pause();
+      });
+    });
+
+    // kick playback on first user gesture (some browsers defer muted autoplay)
+    const kickPlay = () => {
+      document.querySelectorAll('video').forEach(v => { v.muted = true; v.play().catch(() => {}); });
+    };
+    window.addEventListener('touchend', kickPlay, { once: true });
+    window.addEventListener('click', kickPlay, { once: true });
+
+    // ── autoplay debug HUD (?debug) ──
+    if (location.search.indexOf('debug') !== -1) {
+      const dbg = document.getElementById('vid-debug');
+      dbg.style.display = 'block';
+      const v1 = document.getElementById('ar-video');
+      const v2 = document.getElementById('ar-video-2');
+      const line = (label, v) =>
+        `${label}: ${v.paused ? 'PAUSED' : 'PLAYING'}  t=${v.currentTime.toFixed(2)}` +
+        `  ready=${v.readyState}  ${v.videoWidth}x${v.videoHeight}` +
+        (v.error ? `  ERR=${v.error.code}` : '');
+      setInterval(() => {
+        dbg.textContent =
+          line('1399(#ar-video)', v1) + '\n' +
+          line('1883(#ar-video-2)', v2);
+        dbg.style.color = (!v1.paused && !v2.paused) ? '#0f0' : '#ff5';
+      }, 250);
+    }
+  </script>
+
+<style id="kiosk-hardening">html,body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;}a{pointer-events:none;}</style><script id="kiosk-block">document.addEventListener("contextmenu",function(e){e.preventDefault();},true);document.addEventListener("dragstart",function(e){e.preventDefault();},true);</script>
+</body>
+</html>

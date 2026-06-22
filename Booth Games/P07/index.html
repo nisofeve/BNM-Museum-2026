@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<link rel="stylesheet" href="../_fonts/fonts.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kenali Wang Anda — Wang Kertas Malaysia</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:100%;height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-serif;background:#04050a}
+  /* disable long-press / selection */
+  *{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
+  :root{--u:min(0.18519vw,0.10417vh);--cyan:#00e5ff;--gold:#ffd700;--navy:#04091e}
+
+  /* ── scanline overlay ── */
+  body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
+    background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,71,171,.007) 3px,rgba(0,71,171,.007) 4px)}
+
+  /* ── map background ── */
+  #map-bg{position:fixed;inset:0;
+    background:url('Assets/Malaysia_mlbb_map.png') center/cover no-repeat;
+    filter:brightness(.9) saturate(.95)}
+  #map-vignette{position:fixed;inset:0;
+    background:radial-gradient(ellipse at 50% 50%,rgba(4,9,30,.12) 0%,rgba(4,9,30,.62) 100%)}
+
+  /* ── header ── */
+  #header{
+    position:fixed;top:0;left:0;right:0;z-index:100;
+    padding:calc(14*var(--u)) calc(36*var(--u));
+    display:flex;align-items:center;justify-content:space-between;
+    background:linear-gradient(to bottom,rgba(4,9,30,.92) 60%,transparent)}
+  #header-left h1{
+    font-size:calc(21*var(--u));font-weight:700;letter-spacing:.08em;
+    color:#fff;text-transform:uppercase;line-height:1.2}
+  #header-left p{
+    font-size:calc(11*var(--u));color:rgba(0,229,255,.65);letter-spacing:.2em;
+    text-transform:uppercase;margin-top:calc(3*var(--u))}
+  .header-badge{
+    background:rgba(0,229,255,.07);border:1px solid rgba(0,229,255,.25);
+    border-radius:calc(6*var(--u));padding:calc(7*var(--u)) calc(16*var(--u));
+    font-size:calc(11*var(--u));color:rgba(0,229,255,.75);letter-spacing:.12em;text-transform:uppercase}
+
+  /* ── map stage (sized by JS to match the cover-scaled map image) ── */
+  #map-stage{position:fixed;left:0;top:0}
+
+  /* ── connection lines svg ── */
+  #svg-lines{position:fixed;inset:0;pointer-events:none;z-index:10}
+
+  /* ── pins ── */
+  .map-pin{
+    position:absolute;transform:translate(-50%,-50%);
+    cursor:pointer;display:flex;flex-direction:column;align-items:center;
+    z-index:50;user-select:none}
+  .pin-icon-wrap{
+    position:relative;display:flex;align-items:center;justify-content:center}
+  .pin-ring{
+    position:absolute;border-radius:50%;
+    border:2px solid rgba(0,229,255,.3);pointer-events:none;
+    animation:pinRipple 2.8s ease-out infinite}
+  .pin-ring:nth-child(2){animation-delay:.9s}
+  .pin-icon{
+    width:calc(72*var(--u));height:calc(72*var(--u));border-radius:50%;
+    background:rgba(4,9,30,.9);
+    border:2px solid rgba(0,229,255,.55);
+    box-shadow:0 0 calc(12*var(--u)) rgba(0,229,255,.35),inset 0 0 calc(8*var(--u)) rgba(0,71,171,.25);
+    display:flex;align-items:center;justify-content:center;overflow:hidden;
+    transition:transform .2s,box-shadow .2s;
+    animation:pinFloat 3.2s ease-in-out infinite alternate}
+  .map-pin:hover .pin-icon{
+    transform:scale(1.12);
+    box-shadow:0 0 calc(22*var(--u)) rgba(0,229,255,.6),inset 0 0 calc(10*var(--u)) rgba(0,71,171,.3)}
+  .map-pin:active .pin-icon{transform:scale(.94)}
+  .pin-icon img{width:100%;height:100%;object-fit:cover}
+  .pin-label{
+    margin-top:calc(7*var(--u));
+    background:rgba(4,9,30,.88);border:1px solid rgba(0,229,255,.28);
+    border-radius:calc(4*var(--u));padding:calc(4*var(--u)) calc(10*var(--u));
+    text-align:center;max-width:calc(160*var(--u));
+    display:flex;flex-direction:column;align-items:center;gap:calc(1*var(--u))}
+  .pl-state{font-size:calc(11*var(--u));font-weight:700;letter-spacing:.08em;
+    color:var(--cyan);text-transform:uppercase;white-space:nowrap}
+  .pl-motif{font-size:calc(9*var(--u));letter-spacing:.03em;
+    color:rgba(255,255,255,.72);line-height:1.25}
+
+  @keyframes pinFloat{from{transform:translateY(0)}to{transform:translateY(calc(-7*var(--u)))}}
+  @keyframes pinRipple{
+    0%{width:calc(72*var(--u));height:calc(72*var(--u));opacity:.55}
+    100%{width:calc(160*var(--u));height:calc(160*var(--u));opacity:0}}
+
+  /* ── info overlay ── */
+  #info-overlay{
+    position:fixed;inset:0;z-index:200;
+    background:rgba(4,9,30,.78);backdrop-filter:blur(6px);
+    display:flex;align-items:center;justify-content:center;
+    opacity:0;pointer-events:none;transition:opacity .3s ease}
+  #info-overlay.open{opacity:1;pointer-events:all}
+
+  /* ── info card ── */
+  #info-card{
+    position:relative;
+    background:linear-gradient(140deg,rgba(4,9,30,.98) 0%,rgba(0,25,60,.96) 100%);
+    border:1px solid rgba(0,229,255,.32);
+    border-radius:calc(14*var(--u));
+    box-shadow:0 0 calc(50*var(--u)) rgba(0,229,255,.12),0 0 calc(100*var(--u)) rgba(0,71,171,.08);
+    width:min(88vw,calc(880*var(--u)));max-height:82vh;
+    padding:calc(36*var(--u)) calc(40*var(--u)) calc(28*var(--u));
+    overflow-y:auto;
+    transform:translateY(calc(24*var(--u))) scale(.95);
+    transition:transform .38s cubic-bezier(.175,.885,.32,1.275)}
+  #info-overlay.open #info-card{transform:translateY(0) scale(1)}
+  #info-card::-webkit-scrollbar{width:4px}
+  #info-card::-webkit-scrollbar-thumb{background:rgba(0,229,255,.25);border-radius:2px}
+
+  .c-corner{position:absolute;width:calc(18*var(--u));height:calc(18*var(--u));border-color:rgba(0,229,255,.45);border-style:solid}
+  .c-corner.tl{top:calc(8*var(--u));left:calc(8*var(--u));border-width:2px 0 0 2px}
+  .c-corner.tr{top:calc(8*var(--u));right:calc(8*var(--u));border-width:2px 2px 0 0}
+  .c-corner.bl{bottom:calc(8*var(--u));left:calc(8*var(--u));border-width:0 0 2px 2px}
+  .c-corner.br{bottom:calc(8*var(--u));right:calc(8*var(--u));border-width:0 2px 2px 0}
+
+  /* ── card header ── */
+  .card-header{
+    display:flex;align-items:flex-start;gap:calc(20*var(--u));
+    margin-bottom:calc(18*var(--u));padding-bottom:calc(16*var(--u));
+    border-bottom:1px solid rgba(0,229,255,.13)}
+  .card-icon-wrap{
+    flex-shrink:0;width:calc(76*var(--u));height:calc(76*var(--u));border-radius:50%;
+    background:rgba(0,229,255,.07);border:2px solid rgba(0,229,255,.28);
+    display:flex;align-items:center;justify-content:center;overflow:hidden}
+  .card-icon-wrap img{width:100%;height:100%;object-fit:cover}
+  .card-meta{flex:1}
+  .card-num{
+    font-size:calc(10.5*var(--u));letter-spacing:.2em;text-transform:uppercase;
+    color:rgba(0,229,255,.58);margin-bottom:calc(4*var(--u))}
+  .card-title{
+    font-size:calc(19*var(--u));font-weight:700;color:#fff;line-height:1.3;
+    letter-spacing:.02em}
+  .card-period{
+    font-size:calc(11*var(--u));color:rgba(255,215,0,.72);
+    margin-top:calc(5*var(--u));letter-spacing:.08em}
+
+  /* ── card tabs ── */
+  .card-tabs{display:flex;gap:calc(8*var(--u));margin-bottom:calc(16*var(--u))}
+  .card-tab{
+    flex:1;background:rgba(0,229,255,.05);border:1px solid rgba(0,229,255,.2);
+    border-radius:calc(6*var(--u));padding:calc(9*var(--u)) calc(10*var(--u));
+    font-size:calc(11.5*var(--u));color:rgba(0,229,255,.5);letter-spacing:.07em;
+    text-transform:uppercase;cursor:pointer;font-family:inherit;transition:.18s;text-align:center}
+  .card-tab.active{background:rgba(0,229,255,.15);border-color:var(--cyan);color:var(--cyan);font-weight:700}
+
+  /* ── card body ── */
+  .card-body{font-size:calc(14.5*var(--u));color:rgba(255,255,255,.82);line-height:1.8}
+  .card-page{display:none}
+  .card-page.active{display:block}
+  .fact-img{width:100%;max-height:calc(230*var(--u));object-fit:contain;
+    border-radius:calc(8*var(--u));margin-bottom:calc(14*var(--u));
+    border:1px solid rgba(0,229,255,.15);background:rgba(0,0,0,.3)}
+  /* ── security features (Page 2) ── */
+  .sec-head{font-size:calc(12*var(--u));letter-spacing:.14em;text-transform:uppercase;
+    color:var(--cyan);font-weight:700;margin-bottom:calc(12*var(--u));
+    display:flex;align-items:center;gap:calc(9*var(--u))}
+  .sec-head::before{content:'';width:calc(20*var(--u));height:calc(2*var(--u));background:var(--cyan)}
+  .sec-sheet{width:100%;display:block;border-radius:calc(10*var(--u));
+    border:1px solid rgba(0,229,255,.3);
+    box-shadow:0 0 calc(26*var(--u)) rgba(0,229,255,.12)}
+  .card-body p{margin-bottom:calc(12*var(--u))}
+  .card-body strong{color:#fff;font-weight:600}
+  .card-body em{color:rgba(0,229,255,.85);font-style:italic}
+  .tag{
+    display:inline-block;
+    background:rgba(255,215,0,.1);border:1px solid rgba(255,215,0,.32);
+    border-radius:calc(4*var(--u));padding:calc(1*var(--u)) calc(7*var(--u));
+    color:rgba(255,215,0,.9);font-size:calc(12*var(--u));font-weight:600;margin:0 calc(2*var(--u))}
+
+  /* ── close button ── */
+  #btn-close{
+    position:absolute;top:calc(14*var(--u));right:calc(14*var(--u));
+    width:calc(34*var(--u));height:calc(34*var(--u));border-radius:50%;
+    border:1px solid rgba(0,229,255,.28);background:rgba(0,229,255,.07);
+    color:rgba(0,229,255,.75);font-size:calc(14*var(--u));cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    transition:background .2s,color .2s;z-index:10}
+  #btn-close:hover{background:rgba(0,229,255,.18);color:#fff}
+
+  /* ── hint bar ── */
+  #hint{
+    position:fixed;bottom:calc(18*var(--u));left:50%;transform:translateX(-50%);z-index:100;
+    background:rgba(4,9,30,.82);border:1px solid rgba(0,229,255,.18);
+    border-radius:calc(50*var(--u));padding:calc(7*var(--u)) calc(22*var(--u));
+    font-size:calc(11*var(--u));color:rgba(0,229,255,.6);letter-spacing:.1em;
+    text-transform:uppercase;white-space:nowrap;
+    animation:hintPulse 3s ease-in-out infinite}
+  @keyframes hintPulse{0%,100%{opacity:.55}50%{opacity:1}}
+
+  /* ── particles ── */
+  .p6-particles{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:1}
+  .p6-part{position:absolute;border-radius:50%;background:radial-gradient(circle,rgba(0,229,255,.7),rgba(0,71,171,.3))}
+  #idle-overlay{position:fixed;inset:0;background:rgba(4,9,30,0.93);z-index:9000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:calc(28*var(--u));opacity:0;pointer-events:none;transition:opacity .4s;}
+  #idle-overlay.visible{opacity:1;}
+  #idle-warn-icon{font-size:calc(72*var(--u));}
+  #idle-warn-main{font-size:calc(24*var(--u));font-weight:700;color:#fff;text-align:center;letter-spacing:.05em;}
+  #idle-warn-sub{font-size:calc(16*var(--u));color:rgba(0,229,255,0.8);text-align:center;}
+</style>
+</head>
+<body>
+
+<div id="map-bg"></div>
+<div id="map-vignette"></div>
+<svg id="svg-lines" xmlns="http://www.w3.org/2000/svg"></svg>
+
+<div id="header">
+  <div id="header-left">
+    <h1 id="header-h1">Kenali Wang Anda</h1>
+    <p id="header-sub">Wang Kertas Malaysia</p>
+  </div>
+</div>
+
+<div id="map-stage"></div>
+
+<div id="info-overlay">
+  <div id="info-card">
+    <span class="c-corner tl"></span><span class="c-corner tr"></span>
+    <span class="c-corner bl"></span><span class="c-corner br"></span>
+    <button id="btn-close" onclick="closePanel()">✕</button>
+    <div class="card-header">
+      <div class="card-icon-wrap"><img id="card-icon" src="" alt=""></div>
+      <div class="card-meta">
+        <div class="card-num" id="card-num"></div>
+        <div class="card-title" id="card-title"></div>
+        <div class="card-period" id="card-period"></div>
+      </div>
+    </div>
+    <div class="card-tabs">
+      <button class="card-tab active" id="tab-1" onclick="showCardPage(1)">Imej</button>
+      <button class="card-tab" id="tab-2" onclick="showCardPage(2)">Ciri Keselamatan</button>
+    </div>
+    <div class="card-body">
+      <div class="card-page active" id="page-1">
+        <img class="fact-img" id="page1-img" src="" alt="">
+        <div id="page1-text"></div>
+      </div>
+      <div class="card-page" id="page-2">
+        <div id="page2-body"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="hint">Sentuh sebuah negeri untuk menerokai wang kertas Malaysia</div>
+<div class="p6-particles" id="p6-particles"></div>
+
+<script>
+// ══════════════════════════════════════════════════
+// DATA — 6 wang kertas BNM, dipetakan ke negeri
+// ══════════════════════════════════════════════════
+const FACTS = [
+  {
+    id: 1, denom: 'RM1', state: 'Kelantan', x: 26.3, y: 32.1,
+    note:     'Assets-malaysia/notes/RM1_kelantan_note.png',
+    security: [
+      { method:'Sentuh', icon:'✋', items:[
+        {t:"Cetakan timbul", d:"Sentuh kesan cetakan timbul pada wang kertas."} ]},
+      { method:'Cahaya Putih', icon:'💡', items:[
+        {t:"Tingkap pandang telus", d:"Tingkap lutsinar dengan angka 1 dicetak timbul."},
+        {t:"Imej tanda bayang", d:"Imej lengkap bayangan motif songket."},
+        {t:"Tingkap tidak telus", d:"Bulan sabit dan bintang dicetak dalam warna putih pada bahagian belakang wang polimer."},
+        {t:"Tanda pandang telus", d:"Bentuk lengkap angka 1."} ]},
+      { method:'Cahaya Ultraungu', icon:'🔦', items:[
+        {t:"Huruf mikro", d:"Cetakan timbul tulisan huruf mikro."},
+        {t:"Unsur cahaya pendarfluor dua warna", d:"Imej Wau Bulan dan angka 1 dalam warna merah dan kuning."},
+        {t:"Teks dan logo", d:"Motif kijang dan kotak segi empat tepat dengan teks 'BNM 1'."} ]}
+    ],
+    subject: 'Wau Bulan',
+    caption: `<p>Wang kertas RM1 memaparkan imej Wau Bulan, iaitu sejenis permainan tradisional yang paling ikonik dan terkenal di Malaysia, terutamanya di Kelantan dan Terengganu.</p>
+      <p>Secara tradisinya, permainan wau juga menjadi satu acara untuk meraikan hasil tuaian yang baik, sekali gus merapatkan hubungan masyarakat setempat di negeri-negeri tersebut.</p>
+      <p>Wau Bulan buatan tangan yang diperbuat daripada buluh dan kertas turut menjadi hiasan popular di rumah-rumah di Malaysia.</p>`
+  },
+  {
+    id: 2, denom: 'RM5', state: 'Sarawak', x: 58.0, y: 48.5,
+    note:     'Assets-malaysia/notes/RM5_sarawak_note.png',
+    security: [
+      { method:'Sentuh', icon:'✋', items:[
+        {t:"Cetakan timbul", d:"Sentuh kesan cetakan timbul pada wang kertas."} ]},
+      { method:'Cahaya Putih', icon:'💡', items:[
+        {t:"Tingkap pandang telus", d:"Tingkap lutsinar dengan angka 5 dicetak timbul."},
+        {t:"Imej tanda bayang", d:"Bayangan lengkap motif burung enggang."},
+        {t:"Tingkap tidak telus", d:"Bulan sabit dan bintang dicetak dalam warna putih pada bahagian belakang wang polimer."},
+        {t:"Tanda pandang telus", d:"Bentuk lengkap angka 5."},
+        {t:"Petak berubah warna", d:"Motif berubah daripada hijau kepada ungu apabila disengetkan."} ]},
+      { method:'Cahaya Ultraungu', icon:'🔦', items:[
+        {t:"Huruf mikro", d:"Cetakan timbul tulisan huruf mikro."},
+        {t:"Unsur cahaya pendarfluor dua warna", d:"Imej burung enggang dan angka 5 dalam warna merah dan kuning."},
+        {t:"Teks dan logo", d:"Motif kijang dan kotak segi empat tepat dengan teks 'BNM 5'."} ]}
+    ],
+    subject: 'Enggang Badak',
+    caption: `<p>Wang kertas polimer RM5 memaparkan Burung Enggang Badak (Buceros rhinoceros), salah satu spesies enggang terbesar dan paling menonjol di dunia.</p>
+      <p>Burung hutan ini mempunyai sayap yang lebar dan ekor yang panjang serta biasanya ditemui dalam kumpulan kecil di hutan hujan di seluruh negara.</p>
+      <p>Ia turut memainkan peranan penting dalam budaya serta upacara tradisional di Sarawak, yang dikenali sebagai 'Bumi Kenyalang'. Selain itu, burung enggang merupakan simbol kekuatan dan keberanian bagi masyarakat asli Sarawak.</p>`
+  },
+  {
+    id: 3, denom: 'RM10', state: 'Perak', x: 18.8, y: 43.6,
+    iconPos: '22% 50%',
+    note:     'Assets-malaysia/notes/RM10_perak_note.png',
+    security: [
+      { method:'Sentuh', icon:'✋', items:[
+        {t:"Cetakan timbul", d:"Sentuh kesan cetakan timbul pada wang kertas."} ]},
+      { method:'Cahaya Putih', icon:'💡', items:[
+        {t:"Tanda air", d:"Potret tera air dan angka 10."},
+        {t:"Tanda pandang telus", d:"Bentuk lengkap angka 10."},
+        {t:"Benang keselamatan berubah warna", d:"Benang keselamatan yang dijalin berubah warna daripada biru kepada merah, dengan garisan gelap dan huruf mikro 'BNM10'."},
+        {t:"Petak kilat berwarna", d:"Jalur berwarna emas dengan teks 'RM10'."} ]},
+      { method:'Cahaya Ultraungu', icon:'🔦', items:[
+        {t:"Huruf mikro", d:"Cetakan timbul tulisan huruf mikro."},
+        {t:"Unsur cahaya pendarfluor dua warna", d:"Imej bunga Rafflesia dan angka 10 dalam warna merah dan kuning."},
+        {t:"Teks dan logo", d:"Motif kijang dan kotak segi empat tepat dengan teks 'BNM 10'."},
+        {t:"Benang serat keselamatan", d:"Kelihatan bertaburan dalam warna merah, kuning dan biru."} ]}
+    ],
+    subject: 'Rafflesia Azlanii',
+    caption: `<p>Tahukah anda bunga Rafflesia yang dipaparkan pada wang kertas RM10 bukanlah spesies bunga yang terdapat di Borneo?</p>
+      <p>Hutan hujan tropika Malaysia yang tumbuh subur, iaitu antara hutan hujan tertua di dunia, mempunyai pelbagai jenis tumbuhan berbunga, dan salah satu yang paling ikonik ialah bunga terbesar di dunia, iaitu bunga Rafflesia.</p>
+      <p>Bunga Rafflesia Azlanii yang dipaparkan pada wang kertas RM10 ini merupakan spesies asli Semenanjung Malaysia dan pertama kali ditemui di Hutan Simpan Royal Belum di negeri Perak pada tahun 2003. Bagi memperingati penemuan ini, bunga yang mengagumkan ini dinamakan sempena Sultan Perak, Sultan Azlan Muhibbuddin Shah ibni Almarhum Sultan Yusuff Izzuddin Shah Ghafarullahu-Lah.</p>`
+  },
+  {
+    id: 4, denom: 'RM20', state: 'Terengganu', x: 40.4, y: 35.5,
+    note:     'Assets-malaysia/notes/RM20_terengganu_note.png',
+    security: [
+      { method:'Sentuh', icon:'✋', items:[
+        {t:"Cetakan timbul", d:"Sentuh kesan cetakan timbul pada wang kertas."} ]},
+      { method:'Cahaya Putih', icon:'💡', items:[
+        {t:"Tanda air", d:"Potret tera air dan angka 20."},
+        {t:"Tanda pandang telus", d:"Bentuk lengkap angka 20."},
+        {t:"Benang keselamatan berubah warna", d:"Benang keselamatan yang dijalin berubah warna daripada emas kepada hijau, dengan garisan gelap dan huruf mikro 'BNM20'."},
+        {t:"Petak kilat berwarna", d:"Jalur berwarna emas dengan teks 'RM20'."} ]},
+      { method:'Cahaya Ultraungu', icon:'🔦', items:[
+        {t:"Huruf mikro", d:"Cetakan timbul tulisan huruf mikro."},
+        {t:"Unsur cahaya pendarfluor dua warna", d:"Imej penyu dan angka 20 dalam warna merah dan kuning."},
+        {t:"Teks dan logo", d:"Motif kijang dan kotak segi empat tepat dengan teks 'BNM 20'."},
+        {t:"Benang serat keselamatan", d:"Kelihatan bertaburan dalam warna merah, kuning dan biru."} ]}
+    ],
+    subject: 'Penyu Karah & Penyu Belimbing',
+    caption: `<p>Wang kertas <span class="tag">RM20</span> memaparkan dua spesies penyu terkenal yang ditemui di perairan Malaysia, iaitu <strong>Penyu Karah</strong> (<em>Eretmochelys imbricata</em>) dan <strong>Penyu Belimbing</strong> (<em>Dermochelys coriacea</em>).</p>
+      <p>Penyu Karah mudah dikenali melalui muncungnya yang melengkung dan kulitnya yang bersisik, manakala Penyu Belimbing pula mempunyai kulit yang keras dan <strong>tujuh jaluran</strong> pada cangkerangnya.</p>
+      <p>Kewujudan penyu-penyu ini memberi peringatan bahawa kehidupan mereka bergantung pada imbangan aktiviti manusia dan pemuliharaan hidupan laut yang perlu dikendalikan dengan bijaksana.</p>`
+  },
+  {
+    id: 5, denom: 'RM50', state: 'Selangor', x: 22.3, y: 60.1,
+    note:     'Assets-malaysia/notes/RM50_selangor_note.png',
+    security: [
+      { method:'Sentuh', icon:'✋', items:[
+        {t:"Cetakan timbul", d:"Sentuh kesan cetakan timbul pada wang kertas."} ]},
+      { method:'Cahaya Putih', icon:'💡', items:[
+        {t:"Tanda air", d:"Potret tera air dan angka 50."},
+        {t:"Tanda pandang telus", d:"Bentuk lengkap grafik songket."},
+        {t:"Benang keselamatan berubah warna", d:"Benang keselamatan yang dijalin berubah warna daripada merah kepada hijau."},
+        {t:"Jalur holografik", d:"Angka 50 dan bunga raya berwarna berbelau; imej pendam pelbagai warna apabila disengetkan."} ]},
+      { method:'Cahaya Ultraungu', icon:'🔦', items:[
+        {t:"Huruf mikro", d:"Cetakan timbul tulisan huruf mikro."},
+        {t:"Unsur cahaya pendarfluor dua warna", d:"Imej bunga raya dan angka 50 dalam warna merah dan kuning."},
+        {t:"Teks dan logo", d:"Motif kijang dan kotak segi empat tepat dengan teks 'BNM 50'."},
+        {t:"Benang serat keselamatan", d:"Kelihatan bertaburan dalam warna merah, kuning dan biru."} ]}
+    ],
+    subject: 'Kelapa Sawit · Tema "Misi Negara"',
+    caption: `<p>Reka bentuk wang kertas <span class="tag">RM50</span> berteraskan tema <strong>"Misi Negara"</strong>, yang menekankan usaha memacu ekonomi Malaysia ke arah rantaian nilai yang lebih tinggi dalam sektor pertanian, pembuatan dan perkhidmatan.</p>
+      <p>Pada bahagian hadapan, potret <strong>Yang di-Pertuan Agong pertama, Tuanku Abdul Rahman ibni Tuanku Muhammad</strong>, ditampilkan melalui teknik cetakan intaglio, manakala <em>bunga raya</em> sebagai bunga kebangsaan diperagakan sebagai simbol identiti nasional, dihiasi motif tenunan <strong>songket</strong>.</p>
+      <p>Bahagian belakang menampilkan detik bersejarah pengisytiharan kemerdekaan oleh Perdana Menteri pertama, <strong>Tunku Abdul Rahman Putra Al-Haj</strong>, bersama logo Ulang Tahun Kemerdekaan ke-50.</p>`
+  },
+  {
+    id: 6, denom: 'RM100', state: 'Sabah', x: 74.3, y: 25.0,
+    note:     'Assets-malaysia/notes/RM100_sabah_note.png',
+    security: [
+      { method:'Sentuh', icon:'✋', items:[
+        {t:"Cetakan timbul", d:"Sentuh kesan cetakan timbul pada wang kertas."} ]},
+      { method:'Cahaya Putih', icon:'💡', items:[
+        {t:"Tanda air", d:"Potret tera air dan angka 100."},
+        {t:"Tanda pandang telus", d:"Bentuk lengkap angka 100."},
+        {t:"Benang keselamatan berubah warna", d:"Benang keselamatan yang dijalin berubah warna, dengan garisan gelap dan huruf mikro 'BNM100'."},
+        {t:"Petak kilat berwarna", d:"Jalur berwarna emas dengan teks 'RM100'."} ]},
+      { method:'Cahaya Ultraungu', icon:'🔦', items:[
+        {t:"Huruf mikro", d:"Cetakan timbul tulisan huruf mikro."},
+        {t:"Unsur cahaya pendarfluor dua warna", d:"Imej Gunung Kinabalu dan angka 100 dalam warna biru dan kuning."},
+        {t:"Teks dan logo", d:"Motif kijang dan kotak segi empat tepat dengan teks 'BNM 100'."},
+        {t:"Benang serat keselamatan", d:"Kelihatan bertaburan dalam warna merah, kuning dan biru."} ]}
+    ],
+    subject: 'Gunung Kinabalu & Lembah Gunung Api',
+    caption: `<p>Wang kertas <span class="tag">RM100</span> menampilkan dua keajaiban alam semula jadi terulung di Malaysia yang diiktiraf sebagai <strong>Tapak Warisan Dunia UNESCO</strong>.</p>
+      <p>Antaranya ialah <strong>Taman Kinabalu</strong> di Sabah, yang menempatkan <em>Gunung Kinabalu</em> — gunung tertinggi di Asia Tenggara — sebagai simbol keagungan landskap negara.</p>
+      <p>Turut dipaparkan ialah formasi batu kapur yang dramatik di <strong>lembah Gunung Api</strong>, dalam kawasan Taman Negara Mulu di Sarawak. Kedua-dua tapak ini memperlihat kekayaan biodiversiti dan keunikan geologi Malaysia.</p>`
+  }
+];
+
+// ══════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════
+let activeIdx = -1;
+let currentPage = 1;
+
+// ══════════════════════════════════════════════════
+// BUILD PINS
+// ══════════════════════════════════════════════════
+const stage = document.getElementById('map-stage');
+
+FACTS.forEach((f, i) => {
+  const pin = document.createElement('div');
+  pin.className = 'map-pin';
+  pin.id = 'pin-' + i;
+  pin.style.left = f.x + '%';
+  pin.style.top  = f.y + '%';
+  pin.innerHTML = `
+    <div class="pin-icon-wrap">
+      <div class="pin-ring"></div>
+      <div class="pin-ring" style="animation-delay:.9s"></div>
+      <div class="pin-icon" style="animation-delay:${(i * 0.55).toFixed(2)}s;animation-duration:${(3.0 + i * 0.3).toFixed(1)}s">
+        <img src="${f.note}" alt="${f.denom}" style="object-position:${f.iconPos || '50% 50%'}">
+      </div>
+    </div>
+    <div class="pin-label">
+      <span class="pl-state">${f.state}</span>
+      <span class="pl-motif">${f.subject}</span>
+    </div>
+  `;
+  pin.addEventListener('click', () => openPanel(i));
+  // touch support
+  pin.addEventListener('touchend', e => { e.preventDefault(); openPanel(i); });
+  stage.appendChild(pin);
+});
+
+// ══════════════════════════════════════════════════
+// ANCHOR PINS TO THE MAP IMAGE
+// Size/position #map-stage to exactly match the cover-scaled
+// background image, so pins stay locked to their map location
+// regardless of screen size or aspect ratio.
+// ══════════════════════════════════════════════════
+const MAP_W = 1536, MAP_H = 1024;   // Malaysia_mlbb_map.png native size
+function layoutStage() {
+  const vw = window.innerWidth, vh = window.innerHeight;
+  const scale = Math.max(vw / MAP_W, vh / MAP_H);   // matches background-size:cover
+  const w = MAP_W * scale, h = MAP_H * scale;
+  stage.style.width  = w + 'px';
+  stage.style.height = h + 'px';
+  stage.style.left   = ((vw - w) / 2) + 'px';
+  stage.style.top    = ((vh - h) / 2) + 'px';
+}
+window.addEventListener('resize', layoutStage);
+window.addEventListener('orientationchange', layoutStage);
+layoutStage();
+
+// ══════════════════════════════════════════════════
+// PANEL OPEN / CLOSE
+// ══════════════════════════════════════════════════
+function openPanel(idx) {
+  const f = FACTS[idx];
+  activeIdx = idx;
+
+  document.getElementById('card-icon').src = f.note;
+  document.getElementById('card-icon').style.objectPosition = f.iconPos || '50% 50%';
+  document.getElementById('card-num').textContent = 'Wang Kertas ' + f.id + ' daripada ' + FACTS.length;
+  document.getElementById('card-title').textContent = f.denom + ' · ' + f.state;
+  document.getElementById('card-period').textContent = '🖼  Imej: ' + f.subject;
+
+  document.getElementById('page1-img').src = f.note;
+  document.getElementById('page1-text').innerHTML = f.caption;
+  document.getElementById('page2-body').innerHTML = buildSecurity(f);
+
+  showCardPage(1);
+
+  // highlight active pin
+  document.querySelectorAll('.map-pin').forEach((p, i) => {
+    p.querySelector('.pin-icon').style.borderColor = i === idx ? 'rgba(255,215,0,.8)' : 'rgba(0,229,255,.55)';
+  });
+
+  document.getElementById('info-overlay').classList.add('open');
+  document.getElementById('info-card').scrollTop = 0;
+  playSfx();
+}
+
+function showCardPage(n) {
+  currentPage = n;
+  document.getElementById('page-1').classList.toggle('active', n === 1);
+  document.getElementById('page-2').classList.toggle('active', n === 2);
+  document.getElementById('tab-1').classList.toggle('active', n === 1);
+  document.getElementById('tab-2').classList.toggle('active', n === 2);
+  const card = document.getElementById('info-card');
+  if (card) card.scrollTop = 0;
+}
+
+// build the themed security-features panel from a fact's `security` groups
+function buildSecurity(f) {
+  const sheet = f.note.replace('/notes/', '/security/').replace('_note.png', '_security.png');
+  return `<div class="sec-head">Ciri-ciri Keselamatan · ${f.denom}</div>` +
+         `<img class="sec-sheet" src="${sheet}" alt="Ciri keselamatan ${f.denom}">`;
+}
+
+function closePanel() {
+  document.getElementById('info-overlay').classList.remove('open');
+  document.querySelectorAll('.map-pin .pin-icon').forEach(p => {
+    p.style.borderColor = 'rgba(0,229,255,.55)';
+  });
+  activeIdx = -1;
+}
+
+// close on overlay background click
+document.getElementById('info-overlay').addEventListener('click', function(e) {
+  if (e.target === this) closePanel();
+});
+
+// ══════════════════════════════════════════════════
+// KEYBOARD
+// ══════════════════════════════════════════════════
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closePanel();
+});
+
+// ══════════════════════════════════════════════════
+// FULLSCREEN
+// ══════════════════════════════════════════════════
+function requestFullscreen() {
+  const el = document.documentElement;
+  const fn = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen;
+  if (fn) fn.call(el).catch(() => {});
+}
+// Auto-fullscreen on first interaction (browsers require user gesture)
+document.addEventListener('click', requestFullscreen, { once: true });
+document.addEventListener('touchend', requestFullscreen, { once: true });
+
+// ══════════════════════════════════════════════════
+// DISABLE LONG-PRESS / CONTEXT MENU
+// ══════════════════════════════════════════════════
+document.addEventListener('contextmenu', e => e.preventDefault());
+document.addEventListener('touchstart', e => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
+// prevent long-press image save on mobile
+document.querySelectorAll('img').forEach(img => img.addEventListener('dragstart', e => e.preventDefault()));
+
+// ══════════════════════════════════════════════════
+// IDLE TIMER — inactivity → 7s countdown → return to map
+// ══════════════════════════════════════════════════
+let idleTimer = null;
+let idleCountdown = null;
+
+function resetIdle() {
+  clearTimeout(idleTimer);
+  clearInterval(idleCountdown);
+  idleCountdown = null;
+  const ov = document.getElementById('idle-overlay');
+  if (ov) ov.classList.remove('visible');
+  if (activeIdx < 0) return;
+  idleTimer = setTimeout(showIdleWarning, 25000);
+}
+
+function showIdleWarning() {
+  let secs = 7;
+  const ov = document.getElementById('idle-overlay');
+  const mainEl = document.getElementById('idle-warn-main');
+  const subEl = document.getElementById('idle-warn-sub');
+  function updateText(n) {
+    if (mainEl) mainEl.textContent = 'Tiada aktiviti dikesan.';
+    if (subEl) subEl.textContent = 'Kembali ke skrin mula dalam ' + n + ' saat...';
+  }
+  updateText(secs);
+  if (ov) ov.classList.add('visible');
+  idleCountdown = setInterval(() => {
+    secs--;
+    updateText(secs);
+    if (secs <= 0) {
+      clearInterval(idleCountdown);
+      idleCountdown = null;
+      if (ov) ov.classList.remove('visible');
+      closePanel();
+    }
+  }, 1000);
+}
+
+['click', 'touchstart', 'keydown', 'pointermove'].forEach(ev =>
+  document.addEventListener(ev, resetIdle, { passive: true })
+);
+resetIdle();
+
+// ══════════════════════════════════════════════════
+// SFX
+// ══════════════════════════════════════════════════
+const _ac = (() => { try { return new (window.AudioContext || window.webkitAudioContext)(); } catch(e){} return null; })();
+function tone({freq=440,type='sine',dur=.15,vol=.15,delay=0,slide=0}={}) {
+  if (!_ac) return;
+  const g = _ac.createGain();
+  g.gain.setValueAtTime(.001, _ac.currentTime + delay);
+  g.gain.linearRampToValueAtTime(vol, _ac.currentTime + delay + .01);
+  g.gain.exponentialRampToValueAtTime(.001, _ac.currentTime + delay + dur);
+  const o = _ac.createOscillator(); o.type = type;
+  o.frequency.setValueAtTime(freq, _ac.currentTime + delay);
+  if (slide) o.frequency.linearRampToValueAtTime(slide, _ac.currentTime + delay + dur);
+  o.connect(g); g.connect(_ac.destination);
+  o.start(_ac.currentTime + delay); o.stop(_ac.currentTime + delay + dur + .05);
+}
+function playSfx() {
+  tone({freq:622, type:'sine',     dur:.12, vol:.18});
+  tone({freq:830, type:'sine',     dur:.16, vol:.20, delay:.10});
+  tone({freq:1046,type:'triangle', dur:.26, vol:.18, delay:.22});
+}
+
+// ══════════════════════════════════════════════════
+// AMBIENT PARTICLES
+// ══════════════════════════════════════════════════
+(function(){
+  const cont = document.getElementById('p6-particles');
+  for (let i = 0; i < 22; i++) {
+    const p = document.createElement('div'); p.className = 'p6-part';
+    const sz = 2 + Math.random() * 4;
+    p.style.cssText = `width:${sz}px;height:${sz}px;left:${Math.random()*100}vw;top:${Math.random()*100}vh;opacity:${.04+Math.random()*.06};animation:pa${i} ${9+Math.random()*11}s ease-in-out infinite alternate`;
+    const st = document.createElement('style');
+    st.textContent = `@keyframes pa${i}{from{transform:translate(0,0)}to{transform:translate(${(Math.random()-.5)*120}px,${(Math.random()-.5)*80}px)}}`;
+    document.head.appendChild(st);
+    cont.appendChild(p);
+  }
+})();
+</script>
+<div id="idle-overlay">
+  <div id="idle-warn-icon">⏳</div>
+  <div id="idle-warn-main">Tiada aktiviti dikesan.</div>
+  <div id="idle-warn-sub">Kembali ke skrin mula dalam 7 saat...</div>
+</div>
+
+<style id="kiosk-hardening">html,body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;}a{pointer-events:none;}</style><script id="kiosk-block">document.addEventListener("contextmenu",function(e){e.preventDefault();},true);document.addEventListener("dragstart",function(e){e.preventDefault();},true);</script>
+</body>
+</html>
