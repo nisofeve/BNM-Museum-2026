@@ -347,14 +347,12 @@ button {
   position: relative;
   width: 100%;
   max-width: calc(760 * var(--u));
-  min-height: calc(330 * var(--u));
-  padding-bottom: calc(278 * var(--u));
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
   gap: calc(7 * var(--u));
-  margin-bottom: calc(10 * var(--u));
+  margin-bottom: 0;
 }
 
 /* ─── SPEECH BUBBLES ─── */
@@ -426,11 +424,14 @@ button {
 .bubble-line { margin-bottom: calc(3 * var(--u)); }
 
 /* ─── CHARACTER + TAG ─── */
+.char-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(4 * var(--u));
+}
 .presenter-char {
-  position: absolute;
-  bottom: calc(20 * var(--u));
-  left: 50%;
-  transform: translateX(-50%);
+  position: relative;
   width: calc(177 * var(--u));
   height: calc(261 * var(--u));
 }
@@ -450,10 +451,6 @@ button {
 .presenter-char.is-happy   .sp-happy { opacity: 1; }
 
 .presenter-tag {
-  position: absolute;
-  bottom: calc(2 * var(--u));
-  left: 50%;
-  transform: translateX(-50%);
   background: var(--ac-green);
   color: white;
   font-family: 'Fredoka One', cursive;
@@ -471,7 +468,6 @@ button {
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  min-height: calc(160 * var(--u));
 }
 
 /* ─── ANSWER PANELS ─── */
@@ -896,8 +892,10 @@ button {
   <div class="presenter-stage" id="stage-planner">
     <div class="bubble bubble-main"><div class="bubble-content"></div></div>
     <div class="bubble bubble-user"><div class="bubble-content"></div></div>
-    <div class="presenter-char"></div>
-    <div class="presenter-tag" data-i18n="mascot_label"></div>
+    <div class="char-wrap">
+      <div class="presenter-char"></div>
+      <div class="presenter-tag" data-i18n="mascot_label"></div>
+    </div>
   </div>
 
   <!-- answer area: touch buttons for the current question -->
