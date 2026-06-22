@@ -214,16 +214,17 @@ if(typeof gsap==='undefined'){
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 5rem 4.5rem 5rem;
+    padding: min(5rem, 5vh) min(4.5rem, 5vw);
     opacity: 0;
     pointer-events: none;
+    overflow: hidden;
   }
   .section.active { opacity: 1; pointer-events: all; }
 
   /* ========================================================
      SECTION 1 — OPENING
   ======================================================== */
-  #section-0 { gap: 2.25rem; }
+  #section-0 { gap: min(2.25rem, 2.5vh); }
 
   .skyline-container {
     width: 100%;
@@ -234,7 +235,9 @@ if(typeof gsap==='undefined'){
     align-items: flex-end;
     justify-content: center;
     gap: 0;
-    padding-bottom: 2.75rem;
+    padding-bottom: min(2.75rem, 3vh);
+    flex-shrink: 1;
+    min-height: 0;
   }
   .skyline { display: flex; align-items: flex-end; gap: 0.3125rem; }
   .sky-building { border-radius: 0.25rem 0.25rem 0 0; }
@@ -242,11 +245,11 @@ if(typeof gsap==='undefined'){
     width: 38%;
     max-width: 26rem;
     height: auto;
-    max-height: 14rem;
+    max-height: min(14rem, 18vh);
     object-fit: contain;
     object-position: bottom center;
     mix-blend-mode: multiply;
-    flex-shrink: 0;
+    flex-shrink: 1;
     filter: drop-shadow(0 4px 16px rgba(0,71,171,0.15));
   }
 
@@ -273,9 +276,9 @@ if(typeof gsap==='undefined'){
     min-width: 18%;
     max-width: 22rem;
     position: relative;
-    height: 10rem;
+    height: min(10rem, 12vh);
     align-self: center;
-    margin-bottom: 1rem;
+    margin-bottom: min(1rem, 1.2vh);
     overflow: visible;
   }
   .flow-arc-svg { width: 100%; height: 100%; overflow: visible; display: block; }
@@ -294,7 +297,7 @@ if(typeof gsap==='undefined'){
   #section-0 h1 {
     font-family: 'Poppins', sans-serif;
     font-weight: 800;
-    font-size: 4rem;
+    font-size: min(4rem, 6vh);
     text-align: center;
     background: linear-gradient(135deg, var(--blue), var(--teal));
     -webkit-background-clip: text;
@@ -957,12 +960,14 @@ if(typeof gsap==='undefined'){
 
 /* ========== SLIDE-TO-UNLOCK ========== */
 .slide-unlock {
-  width: 43.75rem;
+  width: min(43.75rem, 88vw);
+  max-width: 90vw;
   position: relative;
+  flex-shrink: 0;
 }
 .slide-track {
   width: 100%;
-  height: 10.25rem;
+  height: min(10.25rem, 13vh);
   background: rgba(255,255,255,0.22);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
@@ -983,10 +988,10 @@ if(typeof gsap==='undefined'){
 }
 .slide-thumb {
   position: absolute;
-  left: 0.625rem;
-  top: 0.625rem;
-  width: 9rem;
-  height: 9rem;
+  left: min(0.625rem, 0.8vh);
+  top: min(0.625rem, 0.8vh);
+  width: min(9rem, 11.4vh);
+  height: min(9rem, 11.4vh);
   border-radius: 50%;
   background: linear-gradient(135deg, var(--blue), var(--teal));
   display: flex;
