@@ -1954,6 +1954,24 @@ updateAgeBands();
 
 goToScreen('welcome');
 
+// position-editor bridge — postMessage listener (works across file:// origins)
+(function(){
+  let _edStyle = null;
+  window.addEventListener('message', function(e){
+    const d = e.data;
+    if (!d || d.type !== 'pos-editor') return;
+    // inject/update override style
+    if (!_edStyle) {
+      _edStyle = document.createElement('style');
+      _edStyle.id = 'pos-editor-style';
+      document.head.appendChild(_edStyle);
+    }
+    if (d.css !== undefined) _edStyle.textContent = d.css;
+    // navigate to screen
+    if (d.goto) { stopIdleTimer(); goToScreen(d.goto); stopIdleTimer(); }
+  });
+})();
+
 function enterFullscreen() {
   const el = document.documentElement;
   const req = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen;

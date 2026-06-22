@@ -16,7 +16,6 @@ body {
   overflow: hidden;
 }
 
-/* ── CONTROLS ── */
 #controls {
   width: 290px;
   flex-shrink: 0;
@@ -33,11 +32,7 @@ body {
   font-size: 17px;
   color: #6DC83A;
 }
-.sec {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
+.sec { display: flex; flex-direction: column; gap: 10px; }
 .sec-title {
   font-family: 'Fredoka One', cursive;
   font-size: 12px;
@@ -47,11 +42,7 @@ body {
   border-bottom: 1px solid #0f3460;
   padding-bottom: 3px;
 }
-.row {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
+.row { display: flex; flex-direction: column; gap: 4px; }
 .row label {
   font-size: 12px;
   color: #aaa;
@@ -63,13 +54,8 @@ body {
   font-size: 14px;
   color: #FFF8E1;
 }
-input[type=range] {
-  width: 100%;
-  accent-color: #6DC83A;
-  cursor: pointer;
-}
+input[type=range] { width: 100%; accent-color: #6DC83A; cursor: pointer; }
 
-/* CSS output */
 #css-out {
   background: #0f1e3d;
   border: 1px solid #A8D8EA33;
@@ -97,6 +83,19 @@ input[type=range] {
 #copy-btn:hover { background: #4E9E20; }
 #copy-btn.ok { background: #C8934A; }
 
+#refresh-btn {
+  background: #0f3460;
+  color: #A8D8EA;
+  font-family: 'Fredoka One', cursive;
+  font-size: 13px;
+  border: 1px solid #A8D8EA44;
+  border-radius: 8px;
+  padding: 6px;
+  cursor: pointer;
+  width: 100%;
+}
+#refresh-btn:hover { background: #1a4a80; }
+
 #status {
   font-size: 11px;
   color: #888;
@@ -104,7 +103,6 @@ input[type=range] {
   min-height: 16px;
 }
 
-/* ── PREVIEW (iframe) ── */
 #preview-wrap {
   flex: 1;
   position: relative;
@@ -116,20 +114,6 @@ input[type=range] {
   border: none;
   display: block;
 }
-#iframe-overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(22,33,62,0.7);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: 'Fredoka One', cursive;
-  font-size: 18px;
-  color: #A8D8EA;
-  pointer-events: none;
-  transition: opacity 0.4s;
-}
-#iframe-overlay.hidden { opacity: 0; }
 </style>
 </head>
 <body>
@@ -137,6 +121,7 @@ input[type=range] {
 <div id="controls">
   <h1>Position Editor</h1>
   <div id="status">Loading…</div>
+  <button id="refresh-btn" onclick="initFrame()">↺ Reload Preview</button>
 
   <div class="sec">
     <div class="sec-title">Speech Bubble</div>
@@ -171,55 +156,28 @@ input[type=range] {
 
 <div id="preview-wrap">
   <iframe id="frame" src="./index.html"></iframe>
-  <div id="iframe-overlay">Loading real preview…</div>
 </div>
 
 <script>
 const frame    = document.getElementById('frame');
-const overlay  = document.getElementById('iframe-overlay');
 const statusEl = document.getElementById('status');
 
 const slBy = document.getElementById('sl-by');
 const slCy = document.getElementById('sl-cy');
 const slMt = document.getElementById('sl-mt');
 
-let ready = false;
-let styleEl = null;
+function post(msg) {
+  try { frame.contentWindow.postMessage(msg, '*'); } catch(e) {}
+}
 
-frame.addEventListener('load', () => {
-  try {
-    const win = frame.contentWindow;
-    const doc = frame.contentDocument;
-
-    // Inject override style tag
-    styleEl = doc.createElement('style');
-    styleEl.id = 'pos-editor-overrides';
-    doc.head.appendChild(styleEl);
-
-    // Navigate to input screen
-    if (typeof win.goToScreen === 'function') {
-      win.goToScreen('input');
-    }
-
-    ready = true;
-    overlay.classList.add('hidden');
-    statusEl.textContent = 'Live — drag sliders';
-    applyCSS();
-  } catch(e) {
-    statusEl.textContent = 'Error: ' + e.message;
-  }
-});
-
-function applyCSS() {
+function buildCSS() {
   const by = parseInt(slBy.value);
   const cy = parseInt(slCy.value);
   const mt = parseInt(slMt.value);
-
   document.getElementById('v-by').textContent = by;
   document.getElementById('v-cy').textContent = cy;
   document.getElementById('v-mt').textContent = mt;
-
-  const css = `
+  return `
 .bubble-col {
   transform: translateX(-50%) translateY(${by}px) !important;
 }
@@ -229,9 +187,12 @@ function applyCSS() {
 .presenter-tag {
   margin-top: ${mt}px !important;
 }`;
+}
 
-  if (styleEl) styleEl.textContent = css;
-
+function updateOutput() {
+  const by = parseInt(slBy.value);
+  const cy = parseInt(slCy.value);
+  const mt = parseInt(slMt.value);
   document.getElementById('css-out').textContent =
 `.bubble-col {
   transform: translateX(-50%) translateY(${by}px);
@@ -246,18 +207,51 @@ function applyCSS() {
 }`;
 }
 
+function applyCSS() {
+  post({ type: 'pos-editor', css: buildCSS() });
+  updateOutput();
+}
+
+function initFrame() {
+  statusEl.textContent = 'Loading…';
+  frame.src = './index.html?' + Date.now(); // bust cache
+}
+
+frame.addEventListener('load', () => {
+  statusEl.textContent = 'Navigating to input…';
+  // give the app JS time to finish init, then navigate + apply
+  setTimeout(() => {
+    post({ type: 'pos-editor', goto: 'input', css: buildCSS() });
+    statusEl.textContent = 'Live — drag sliders';
+    updateOutput();
+  }, 600);
+});
+
 slBy.addEventListener('input', applyCSS);
 slCy.addEventListener('input', applyCSS);
 slMt.addEventListener('input', applyCSS);
-applyCSS();
+updateOutput();
 
 function copyCSS() {
-  navigator.clipboard.writeText(document.getElementById('css-out').textContent).then(() => {
-    const btn = document.getElementById('copy-btn');
-    btn.textContent = 'Copied!';
-    btn.classList.add('ok');
-    setTimeout(() => { btn.textContent = 'Copy CSS'; btn.classList.remove('ok'); }, 1500);
-  });
+  const text = document.getElementById('css-out').textContent;
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(() => flash());
+  } else {
+    // fallback for file:// where clipboard API may be restricted
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    ta.remove();
+    flash();
+  }
+}
+function flash() {
+  const btn = document.getElementById('copy-btn');
+  btn.textContent = 'Copied!';
+  btn.classList.add('ok');
+  setTimeout(() => { btn.textContent = 'Copy CSS'; btn.classList.remove('ok'); }, 1500);
 }
 </script>
 </body>
