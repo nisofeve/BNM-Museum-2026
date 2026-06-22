@@ -347,12 +347,12 @@ button {
   position: relative;
   width: 100%;
   max-width: calc(760 * var(--u));
-  min-height: calc(190 * var(--u));
-  padding-left: calc(136 * var(--u));
+  min-height: calc(330 * var(--u));
+  padding-bottom: calc(278 * var(--u));
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  justify-content: flex-end;
+  align-items: center;
+  justify-content: flex-start;
   gap: calc(7 * var(--u));
   margin-bottom: calc(10 * var(--u));
 }
@@ -375,23 +375,25 @@ button {
   background: var(--panel);
   border: calc(3 * var(--u)) solid var(--wood);
   border-radius: var(--radius-lg);
-  border-bottom-left-radius: calc(6 * var(--u));
-  padding: calc(12 * var(--u)) calc(18 * var(--u));
+  padding: calc(12 * var(--u)) calc(20 * var(--u));
   box-shadow: 0 calc(4 * var(--u)) calc(16 * var(--u)) rgba(0,0,0,0.13);
+  max-width: 82%;
 }
 .bubble-main::before {
   content: '';
   position: absolute;
-  bottom: calc(14 * var(--u)); left: calc(-15 * var(--u));
+  bottom: calc(-16 * var(--u));
+  left: 50%; transform: translateX(-50%);
   border: calc(9 * var(--u)) solid transparent;
-  border-right-color: var(--wood);
+  border-top-color: var(--wood);
 }
 .bubble-main::after {
   content: '';
   position: absolute;
-  bottom: calc(15 * var(--u)); left: calc(-10 * var(--u));
+  bottom: calc(-11 * var(--u));
+  left: 50%; transform: translateX(-50%);
   border: calc(7 * var(--u)) solid transparent;
-  border-right-color: var(--panel);
+  border-top-color: var(--panel);
 }
 
 .bubble-user {
@@ -426,10 +428,11 @@ button {
 /* ─── CHARACTER + TAG ─── */
 .presenter-char {
   position: absolute;
-  left: calc(6 * var(--u));
-  bottom: 0;
-  width: calc(118 * var(--u));
-  height: calc(174 * var(--u));
+  bottom: calc(20 * var(--u));
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(177 * var(--u));
+  height: calc(261 * var(--u));
 }
 .aisyah-sp {
   position: absolute; inset: 0;
@@ -448,16 +451,18 @@ button {
 
 .presenter-tag {
   position: absolute;
-  bottom: calc(-2 * var(--u));
-  left: calc(4 * var(--u));
+  bottom: calc(2 * var(--u));
+  left: 50%;
+  transform: translateX(-50%);
   background: var(--ac-green);
   color: white;
   font-family: 'Fredoka One', cursive;
-  font-size: calc(11 * var(--u));
-  padding: calc(2 * var(--u)) calc(8 * var(--u));
-  border-radius: calc(12 * var(--u));
-  letter-spacing: calc(0.3 * var(--u));
+  font-size: calc(14 * var(--u));
+  padding: calc(3 * var(--u)) calc(14 * var(--u));
+  border-radius: calc(14 * var(--u));
+  letter-spacing: calc(0.5 * var(--u));
   white-space: nowrap;
+  box-shadow: 0 calc(3 * var(--u)) calc(8 * var(--u)) rgba(78,158,32,0.3);
 }
 
 /* ─── PLANNER ANSWERS CONTAINER ─── */
@@ -1230,7 +1235,7 @@ const STRINGS = {
     input_title_en: "Tell Us About You",
     input_title: "Beritahu Kami Tentang Anda",
     input_subtitle: "Perancang Bajet Penjagaan Kesihatan",
-    mascot_label: "Perancang Kesihatan Anda",
+    mascot_label: "Si Kijang",
     age_label: "Berapa umur anda?",
     age_unit: "tahun",
     age_confirm: "Sahkan →",
