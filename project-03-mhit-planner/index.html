@@ -1836,57 +1836,158 @@ function selectCoverage(type) {
 // ══════════════════════════════════════════════════════
 // CALCULATION
 // ══════════════════════════════════════════════════════
-function getBaseCost(age) {
-  if (age <= 25) return 3000;
-  if (age <= 35) return 5000;
-  if (age <= 45) return 8000;
-  if (age <= 55) return 15000;
-  return 25000;
+// ══════════════════════════════════════════════════════
+// ACTUARIAL DATA TABLES (source: calculator.fenetwork.my)
+// ══════════════════════════════════════════════════════
+const uninsuredMedianBillByAge = {
+  18:6333.03,19:6333.03,
+  20:6333.03,21:6384.70,22:6384.70,23:6384.70,24:6384.70,25:6384.70,
+  26:6604.20,27:6604.20,28:6604.20,29:6604.20,30:6604.20,
+  31:6997.21,32:6997.21,33:6997.21,34:6997.21,35:6997.21,
+  36:7392.00,37:7392.00,38:7392.00,39:7392.00,40:7392.00,
+  41:7611.53,42:7611.53,43:7611.53,44:7611.53,45:7611.53,
+  46:7647.47,47:7647.47,48:7647.47,49:7647.47,50:7647.47,
+  51:7590.45,52:7590.45,53:7590.45,54:7590.45,55:7590.45,
+  56:7638.50,57:7638.50,58:7638.50,59:7638.50,60:7638.50,
+  61:7683.75,62:7683.75,63:7683.75,64:7683.75,65:7683.75,
+  66:7653.00,67:7653.00,68:7653.00,69:7653.00,70:7653.00,
+  71:7648.30,72:7648.30,73:7648.30,74:7648.30,75:7648.30,
+  76:7648.30,77:7648.30,78:7648.30,79:7648.30,80:7648.30,
+  100:7648.30
+};
+const uninsuredAvgBillByAge = {
+  18:11234.12,19:11234.12,
+  20:11234.12,21:11353.20,22:11353.20,23:11353.20,24:11353.20,25:11353.20,
+  26:11536.73,27:11536.73,28:11536.73,29:11536.73,30:11536.73,
+  31:12144.69,32:12144.69,33:12144.69,34:12144.69,35:12144.69,
+  36:12790.33,37:12790.33,38:12790.33,39:12790.33,40:12790.33,
+  41:13411.97,42:13411.97,43:13411.97,44:13411.97,45:13411.97,
+  46:13647.18,47:13647.18,48:13647.18,49:13647.18,50:13647.18,
+  51:13789.08,52:13789.08,53:13789.08,54:13789.08,55:13789.08,
+  56:14037.46,57:14037.46,58:14037.46,59:14037.46,60:14037.46,
+  61:14453.64,62:14453.64,63:14453.64,64:14453.64,65:14453.64,
+  66:15330.21,67:15330.21,68:15330.21,69:15330.21,70:15330.21,
+  71:11764.03,72:11764.03,73:11764.03,74:11764.03,75:11764.03,
+  100:11764.03
+};
+const uninsuredFrequencyByAge = {
+  18:0.056788,19:0.056788,
+  20:0.056788,21:0.070067,22:0.070067,23:0.070067,24:0.070067,25:0.070067,
+  26:0.073779,27:0.073779,28:0.073779,29:0.073779,30:0.073779,
+  31:0.078509,32:0.078509,33:0.078509,34:0.078509,35:0.078509,
+  36:0.086289,37:0.086289,38:0.086289,39:0.086289,40:0.086289,
+  41:0.096474,42:0.096474,43:0.096474,44:0.096474,45:0.096474,
+  46:0.113769,47:0.113769,48:0.113769,49:0.113769,50:0.113769,
+  51:0.141446,52:0.141446,53:0.141446,54:0.141446,55:0.141446,
+  56:0.187275,57:0.187275,58:0.187275,59:0.187275,60:0.187275,
+  61:0.251453,62:0.251453,63:0.251453,64:0.251453,65:0.251453,
+  66:0.319141,67:0.319141,68:0.319141,69:0.319141,70:0.319141,
+  71:0.343862,72:0.343862,73:0.343862,74:0.343862,75:0.343862,
+  100:0.343862
+};
+const insuredAvgClaimByAge = {
+  18:14878.35,19:14878.35,
+  20:14878.35,21:15421.27,22:15421.27,23:15421.27,24:15421.27,25:15421.27,
+  26:16381.31,27:16381.31,28:16381.31,29:16381.31,30:16381.31,
+  31:18167.26,32:18167.26,33:18167.26,34:18167.26,35:18167.26,
+  36:20363.29,37:20363.29,38:20363.29,39:20363.29,40:20363.29,
+  41:22743.97,42:22743.97,43:22743.97,44:22743.97,45:22743.97,
+  46:24104.35,47:24104.35,48:24104.35,49:24104.35,50:24104.35,
+  51:24527.36,52:24527.36,53:24527.36,54:24527.36,55:24527.36,
+  56:25033.96,57:25033.96,58:25033.96,59:25033.96,60:25033.96,
+  61:25922.71,62:25922.71,63:25922.71,64:25922.71,65:25922.71,
+  66:25960.62,67:25960.62,68:25960.62,69:25960.62,70:25960.62,
+  71:27268.75,72:27268.75,73:27268.75,74:27268.75,75:27268.75,
+  100:27268.75
+};
+const insuredFrequencyByAge = {
+  18:0.040139,19:0.040139,
+  20:0.040139,21:0.048551,22:0.048551,23:0.048551,24:0.048551,25:0.048551,
+  26:0.049270,27:0.049270,28:0.049270,29:0.049270,30:0.049270,
+  31:0.049618,32:0.049618,33:0.049618,34:0.049618,35:0.049618,
+  36:0.050982,37:0.050982,38:0.050982,39:0.050982,40:0.050982,
+  41:0.052760,42:0.052760,43:0.052760,44:0.052760,45:0.052760,
+  46:0.058805,47:0.058805,48:0.058805,49:0.058805,50:0.058805,
+  51:0.071340,52:0.071340,53:0.071340,54:0.071340,55:0.071340,
+  56:0.092138,57:0.092138,58:0.092138,59:0.092138,60:0.092138,
+  61:0.119953,62:0.119953,63:0.119953,64:0.119953,65:0.119953,
+  66:0.148507,67:0.148507,68:0.148507,69:0.148507,70:0.148507,
+  71:0.158298,72:0.158298,73:0.158298,74:0.158298,75:0.158298,
+  100:0.158298
+};
+const medianPremiumByAge = {
+  18:69.11,19:69.11,
+  20:69.11,21:81.94,22:81.94,23:81.94,24:81.94,25:81.94,
+  26:91.31,27:91.31,28:91.31,29:91.31,30:91.31,
+  31:101.44,32:101.44,33:101.44,34:101.44,35:101.44,
+  36:117.10,37:117.10,38:117.10,39:117.10,40:117.10,
+  41:137.47,42:137.47,43:137.47,44:137.47,45:137.47,
+  46:163.69,47:163.69,48:163.69,49:163.69,50:163.69,
+  51:202.30,52:202.30,53:202.30,54:202.30,55:202.30,
+  56:249.56,57:249.56,58:249.56,59:249.56,60:249.56,
+  61:297.88,62:297.88,63:297.88,64:297.88,65:297.88,
+  66:357.41,67:357.41,68:357.41,69:357.41,70:357.41,
+  71:421.78,72:421.78,73:421.78,74:421.78,75:421.78,
+  76:522.34,77:522.34,78:522.34,79:522.34,80:522.34,
+  100:691.13
+};
+
+function lookupAge(table, age) {
+  const a = Math.max(18, Math.min(100, Math.round(age)));
+  if (table[a] !== undefined) return table[a];
+  for (let i = a - 1; i >= 18; i--) { if (table[i] !== undefined) return table[i]; }
+  const vals = Object.values(table);
+  return vals[vals.length - 1];
 }
 
-function getCoveragePct(coverage) {
-  if (coverage === 'none') return 0;
-  if (coverage === 'basic') return 0.6;
-  return 0.9;
+function pmtCalc(rate, nper, pv, fv) {
+  fv = fv || 0;
+  if (rate === 0) return -(pv + fv) / nper;
+  const pvif = Math.pow(1 + rate, nper);
+  return -(rate * (pv * pvif + fv) / (pvif - 1));
 }
 
-function getEffectiveCoveragePct() {
-  if (!state.hasMhit) return 0;
-  const p = state.premium;
-  let base = p < 100 ? 0.5 : p < 200 ? 0.7 : 0.9;
-  if (state.hasCoPayment) {
-    base *= (1 - state.coInsurance / 100);
-    base = Math.max(0, base - Math.min(0.15, state.deductible / 5000));
+function getHospitalizationCost(age) {
+  return Math.round(lookupAge(uninsuredMedianBillByAge, Math.max(20, Math.min(100, age))));
+}
+
+function calculateRequiredMonthlySaving(currentAge) {
+  const yearsToHorizon = state.targetAge - currentAge;
+  if (yearsToHorizon <= 0) return 0;
+  let totalCost = 0;
+  for (let t = 0; t <= yearsToHorizon; t++) {
+    const ageAtT = currentAge + t;
+    if (ageAtT > 100) break;
+    const utilAge = Math.min(20 + t, 75);
+    const baseClaim = lookupAge(uninsuredAvgBillByAge, utilAge);
+    const baseFreq  = lookupAge(uninsuredFrequencyByAge, ageAtT);
+    totalCost += baseClaim * Math.pow(1.06, t) * baseFreq;
   }
-  state.coverage = base === 0 ? 'none' : base < 0.65 ? 'basic' : 'comprehensive';
-  return base;
+  return Math.max(0, Math.round(pmtCalc(0.055, yearsToHorizon, 0, -totalCost) / 12));
 }
 
-function calcYear(baseCost, year, coveragePct) {
-  const yearCost = baseCost * Math.pow(1.10, year);
-  const covered = yearCost * coveragePct;
-  const gap = yearCost * (1 - coveragePct);
-  return { yearCost, covered, gap };
-}
-
-function calcProjections() {
-  const baseCost = getBaseCost(state.age);
-  const pct = state.hasMhit !== null ? getEffectiveCoveragePct() : getCoveragePct(state.coverage);
-  const maxY = Math.max(5, Math.min(10, state.targetAge - state.age));
-  const years = [1, 3, 5, maxY].filter((v, i, a) => a.indexOf(v) === i);
-  return years.map(y => ({ year: y, ...calcYear(baseCost, y, pct) }));
-}
-
-function calcTotal10yr() {
-  const baseCost = getBaseCost(state.age);
-  const pct = state.hasMhit !== null ? getEffectiveCoveragePct() : getCoveragePct(state.coverage);
-  const maxY = Math.max(5, Math.min(10, state.targetAge - state.age));
-  let total = 0;
-  for (let y = 1; y <= maxY; y++) {
-    total += baseCost * Math.pow(1.10, y) * (1 - pct);
-    if (state.hasMhit) total += state.premium * 12;
+function calculateInsuredMonthlySaving(currentAge, monthlyPremium, deductible, coinsurancePct, copaymentCap) {
+  const yearsToHorizon = state.targetAge - currentAge;
+  if (yearsToHorizon <= 0) return 0;
+  const deduc     = deductible    || 500;
+  const coinsRate = (coinsurancePct || 0) / 100;
+  const coinsCap  = copaymentCap  || 3000;
+  const baseMedPrem = lookupAge(medianPremiumByAge, currentAge) || 91;
+  let totalPremiums = 0, totalOOP = 0;
+  for (let t = 0; t <= yearsToHorizon; t++) {
+    const ageAtT = currentAge + t;
+    if (ageAtT > 100) break;
+    const ageFactor = lookupAge(medianPremiumByAge, Math.min(ageAtT, 100)) / baseMedPrem;
+    totalPremiums += 12 * monthlyPremium * ageFactor * Math.pow(1.05, t);
+    const utilAge   = Math.min(20 + t, 75);
+    const avgClaimAtT = lookupAge(insuredAvgClaimByAge, utilAge) * Math.pow(1.06, t);
+    const oopPerEp  = Math.min(
+      avgClaimAtT,
+      deduc + Math.min(coinsRate * Math.max(avgClaimAtT - deduc, 0), coinsCap)
+    );
+    totalOOP += lookupAge(insuredFrequencyByAge, utilAge) * oopPerEp;
   }
-  return Math.round(total);
+  return Math.max(0, Math.round(pmtCalc(0.055, yearsToHorizon, 0, -(totalPremiums + totalOOP)) / 12));
 }
 
 function fmtRM(val) {
@@ -1897,12 +1998,16 @@ function fmtRM(val) {
 // RESULTS RENDER
 // ══════════════════════════════════════════════════════
 function renderResults() {
-  const baseCost = getBaseCost(state.age);
-  const maxY = Math.max(5, Math.min(10, state.targetAge - state.age));
-  const total = calcTotal10yr();
-  const monthlyNeeded = Math.max(0, Math.round(total / (maxY * 12)));
-
-  if (state.hasMhit !== null) getEffectiveCoveragePct();
+  const billCost = getHospitalizationCost(state.age);
+  let monthlyNeeded;
+  if (state.hasMhit) {
+    monthlyNeeded = calculateInsuredMonthlySaving(
+      state.age, state.premium, state.deductible, state.coInsurance, state.coPayCap
+    );
+  } else {
+    monthlyNeeded = calculateRequiredMonthlySaving(state.age);
+  }
+  const yearsToHorizon = state.targetAge - state.age;
 
   document.getElementById('badge-age').textContent = '👤 ' + state.age + ' tahun';
   const planLabelMap = { none: '🚫 Tiada Perlindungan', basic: '🛡️ Perlindungan Asas', comprehensive: '⭐ Perlindungan Komprehensif' };
@@ -1912,10 +2017,10 @@ function renderResults() {
   document.getElementById('badge-plan-text').textContent = planLabelMap[state.coverage];
 
   document.getElementById('result-monthly-amt').textContent = fmtRM(monthlyNeeded);
-  document.getElementById('result-bill-amt').textContent = fmtRM(baseCost);
+  document.getElementById('result-bill-amt').textContent = fmtRM(billCost);
 
   document.getElementById('result-monthly-sub').textContent =
-    'Anggaran simpanan untuk menampung kos perubatan anda selama ' + maxY + ' tahun akan datang';
+    'Anggaran simpanan untuk menampung kos perubatan anda selama ' + yearsToHorizon + ' tahun akan datang';
   document.getElementById('result-bill-sub').textContent =
     'Kos hospitalisasi semasa bagi pesakit berumur ' + state.age + ' tahun di Malaysia';
 
