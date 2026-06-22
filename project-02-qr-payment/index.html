@@ -640,19 +640,17 @@ if(typeof gsap==='undefined'){
     animation: pulseCta 2s ease-in-out infinite;
   }
 
-  /* QR section + wallet picker — centered phone on dark stage */
+  /* QR section + wallet picker — full-screen phone */
   #section-2, #section-wallet {
     padding: 0;
     overflow: hidden;
-    align-items: center;
-    justify-content: center;
-    background: radial-gradient(ellipse 80% 70% at 50% 50%, #0d1a38, #060810 75%);
   }
 
-  /* Coaching overlay — floats above phone content */
+  /* Coaching overlay — floats at bottom of screen */
   .pay-coach {
     position: absolute;
-    top: 0.75rem;
+    bottom: 1.25rem;
+    top: auto;
     left: 50%;
     transform: translateX(-50%);
     z-index: 50;
@@ -687,68 +685,27 @@ if(typeof gsap==='undefined'){
   .pay-dot.active { background:var(--gold); transform:scale(1.35); box-shadow:0 0 6px rgba(245,166,35,0.75); }
   .pay-dot.done { background:var(--teal); }
 
-  /* Phone — iPhone-style frame */
+  /* Phone — full screen, no frame */
   .payphone {
-    width: 24rem;
-    height: 51rem;
-    background: linear-gradient(160deg, #2e2e30 0%, #1c1c1e 45%, #101012 100%);
-    border-radius: 3.375rem;
-    padding: 0.8125rem;
-    box-shadow:
-      0 0 0 1px rgba(255,255,255,0.18),
-      0 0 0 2.5px #0a0a0c,
-      0 0 0 3.5px rgba(255,255,255,0.07),
-      0 40px 100px rgba(0,0,0,0.7),
-      inset 0 1px 0 rgba(255,255,255,0.12);
-    position: relative;
-    flex-shrink: 0;
-    zoom: 1.42;
-  }
-  /* Volume buttons — left */
-  .payphone::before {
-    content: '';
     position: absolute;
-    left: -0.3125rem;
-    top: 8.75rem;
-    width: 0.25rem;
-    height: 2.75rem;
-    background: #2e2e30;
-    border-radius: 0.25rem 0 0 0.25rem;
-    box-shadow: 0 3.625rem 0 0 #2e2e30;
+    inset: 0;
+    background: transparent;
+    border-radius: 0;
+    padding: 0;
+    box-shadow: none;
+    zoom: unset;
   }
-  /* Power button — right */
-  .payphone::after {
-    content: '';
-    position: absolute;
-    right: -0.3125rem;
-    top: 11rem;
-    width: 0.25rem;
-    height: 4.5rem;
-    background: #2e2e30;
-    border-radius: 0 0.25rem 0.25rem 0;
-  }
+  .payphone::before, .payphone::after { display: none; }
   .payphone-screen {
+    position: absolute;
+    inset: 0;
     width: 100%;
     height: 100%;
-    border-radius: 2.625rem;
+    border-radius: 0;
     overflow: hidden;
-    position: relative;
     background: #F4F8FF;
   }
-  /* Dynamic Island */
-  .pp-punchhole {
-    display: block;
-    position: absolute;
-    top: 0.875rem;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 4rem;
-    height: 1.25rem;
-    background: #000;
-    border-radius: 0.625rem;
-    z-index: 30;
-    box-shadow: 0 0 0 2px rgba(0,0,0,0.6);
-  }
+  .pp-punchhole { display: none; }
   .pp-statusbar {
     position: absolute; top: 0; left: 0; right: 0;
     display: flex; justify-content: space-between; align-items: center;
