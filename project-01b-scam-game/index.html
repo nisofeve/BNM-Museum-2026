@@ -110,6 +110,28 @@ html, body {
 .attract-dash { width: 60px; height: 8px; background: var(--gold); border-radius: 0; opacity: 0.9; flex-shrink: 0; box-shadow: 0 0 12px var(--gold); }
 @keyframes road-scroll-attract { from { transform: translateX(0) translateY(-50%); } to { transform: translateX(-92px) translateY(-50%); } }
 
+
+/* â”€â”€ Parallax city & trees (attract screen) â”€â”€ */
+.attract-city-wrap, .attract-trees-wrap {
+  position: absolute; left: 0; width: 200%;
+  pointer-events: none; overflow: hidden;
+  display: flex; align-items: flex-end;
+}
+.attract-city-wrap {
+  bottom: clamp(68px, 11vh, 148px);
+  height: clamp(90px, 22vh, 260px);
+  z-index: 0;
+  animation: parallax-city 42s linear infinite;
+}
+.attract-trees-wrap {
+  bottom: clamp(68px, 11vh, 148px);
+  height: clamp(55px, 14vh, 165px);
+  z-index: 0;
+  animation: parallax-trees 20s linear infinite;
+}
+.attract-city-wrap > svg, .attract-trees-wrap > svg { flex: 0 0 50%; height: 100%; }
+@keyframes parallax-city  { to { transform: translateX(-50%); } }
+@keyframes parallax-trees { to { transform: translateX(-50%); } }
 .attract-car {
   position: relative; z-index: 2;
   font-size: clamp(56px, 9vmin, 110px);
@@ -644,6 +666,170 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
   <p class="attract-sub" data-i18n="attract_sub">Pandu Bijak, Elak Scam!</p>
   <p class="attract-cta" data-i18n="attract_cta">Tekan Pedal Minyak untuk Mula</p>
   <button class="btn-start" onclick="goHowTo()" data-i18n="btn_howto">MULA</button>
+  <div class="attract-city-wrap" aria-hidden="true">
+    <svg viewBox="0 0 1000 240" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" fill="#1a083a">
+  <polygon points="0,240 0,115 62,115 62,52 95,52 95,88 175,88 175,22 198,22 198,78 268,78 268,118 315,118 315,62 398,62 398,95 452,95 452,38 492,38 492,76 568,76 568,108 628,108 628,55 680,55 680,85 756,85 756,42 790,42 790,100 858,100 858,68 918,68 918,115 1000,115 1000,240"/>
+  <rect x="77" y="36" width="4" height="18"/>
+  <rect x="184" y="6" width="4" height="18"/>
+  <rect x="373" y="44" width="4" height="20"/>
+  <rect x="469" y="20" width="4" height="20"/>
+  <rect x="641" y="36" width="4" height="21"/>
+  <rect x="771" y="23" width="4" height="21"/>
+  <rect x="6" y="128" width="14" height="9" fill="rgba(0,240,255,0.22)"/>
+  <rect x="6" y="145" width="14" height="9" fill="rgba(0,240,255,0.14)"/>
+  <rect x="68" y="64" width="10" height="7" fill="rgba(0,240,255,0.20)"/>
+  <rect x="82" y="64" width="10" height="7" fill="rgba(255,211,25,0.18)"/>
+  <rect x="68" y="78" width="10" height="7" fill="rgba(0,240,255,0.12)"/>
+  <rect x="100" y="102" width="12" height="8" fill="rgba(0,240,255,0.18)"/>
+  <rect x="118" y="102" width="12" height="8" fill="rgba(0,240,255,0.15)"/>
+  <rect x="140" y="102" width="12" height="8" fill="rgba(255,211,25,0.18)"/>
+  <rect x="160" y="102" width="12" height="8" fill="rgba(0,240,255,0.12)"/>
+  <rect x="200" y="90" width="11" height="7" fill="rgba(255,46,151,0.22)"/>
+  <rect x="216" y="90" width="11" height="7" fill="rgba(255,46,151,0.18)"/>
+  <rect x="234" y="90" width="11" height="7" fill="rgba(255,46,151,0.12)"/>
+  <rect x="322" y="75" width="12" height="8" fill="rgba(0,240,255,0.20)"/>
+  <rect x="340" y="75" width="12" height="8" fill="rgba(0,240,255,0.18)"/>
+  <rect x="362" y="75" width="12" height="8" fill="rgba(255,211,25,0.22)"/>
+  <rect x="382" y="75" width="12" height="8" fill="rgba(0,240,255,0.15)"/>
+  <rect x="322" y="90" width="12" height="8" fill="rgba(0,240,255,0.12)"/>
+  <rect x="458" y="52" width="11" height="7" fill="rgba(0,240,255,0.22)"/>
+  <rect x="472" y="52" width="11" height="7" fill="rgba(0,240,255,0.18)"/>
+  <rect x="634" y="68" width="11" height="7" fill="rgba(255,211,25,0.22)"/>
+  <rect x="648" y="68" width="11" height="7" fill="rgba(255,211,25,0.18)"/>
+  <rect x="662" y="68" width="11" height="7" fill="rgba(0,240,255,0.15)"/>
+  <rect x="688" y="98" width="12" height="8" fill="rgba(0,240,255,0.18)"/>
+  <rect x="706" y="98" width="12" height="8" fill="rgba(0,240,255,0.15)"/>
+  <rect x="726" y="98" width="12" height="8" fill="rgba(255,211,25,0.18)"/>
+  <rect x="762" y="55" width="11" height="7" fill="rgba(0,240,255,0.22)"/>
+  <rect x="776" y="55" width="11" height="7" fill="rgba(0,240,255,0.18)"/>
+  <rect x="864" y="82" width="11" height="7" fill="rgba(255,46,151,0.18)"/>
+  <rect x="878" y="82" width="11" height="7" fill="rgba(255,46,151,0.14)"/>
+</svg>
+    <svg viewBox="0 0 1000 240" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" fill="#1a083a">
+  <polygon points="0,240 0,115 62,115 62,52 95,52 95,88 175,88 175,22 198,22 198,78 268,78 268,118 315,118 315,62 398,62 398,95 452,95 452,38 492,38 492,76 568,76 568,108 628,108 628,55 680,55 680,85 756,85 756,42 790,42 790,100 858,100 858,68 918,68 918,115 1000,115 1000,240"/>
+  <rect x="77" y="36" width="4" height="18"/>
+  <rect x="184" y="6" width="4" height="18"/>
+  <rect x="373" y="44" width="4" height="20"/>
+  <rect x="469" y="20" width="4" height="20"/>
+  <rect x="641" y="36" width="4" height="21"/>
+  <rect x="771" y="23" width="4" height="21"/>
+  <rect x="6" y="128" width="14" height="9" fill="rgba(0,240,255,0.22)"/>
+  <rect x="6" y="145" width="14" height="9" fill="rgba(0,240,255,0.14)"/>
+  <rect x="68" y="64" width="10" height="7" fill="rgba(0,240,255,0.20)"/>
+  <rect x="82" y="64" width="10" height="7" fill="rgba(255,211,25,0.18)"/>
+  <rect x="68" y="78" width="10" height="7" fill="rgba(0,240,255,0.12)"/>
+  <rect x="100" y="102" width="12" height="8" fill="rgba(0,240,255,0.18)"/>
+  <rect x="118" y="102" width="12" height="8" fill="rgba(0,240,255,0.15)"/>
+  <rect x="140" y="102" width="12" height="8" fill="rgba(255,211,25,0.18)"/>
+  <rect x="160" y="102" width="12" height="8" fill="rgba(0,240,255,0.12)"/>
+  <rect x="200" y="90" width="11" height="7" fill="rgba(255,46,151,0.22)"/>
+  <rect x="216" y="90" width="11" height="7" fill="rgba(255,46,151,0.18)"/>
+  <rect x="234" y="90" width="11" height="7" fill="rgba(255,46,151,0.12)"/>
+  <rect x="322" y="75" width="12" height="8" fill="rgba(0,240,255,0.20)"/>
+  <rect x="340" y="75" width="12" height="8" fill="rgba(0,240,255,0.18)"/>
+  <rect x="362" y="75" width="12" height="8" fill="rgba(255,211,25,0.22)"/>
+  <rect x="382" y="75" width="12" height="8" fill="rgba(0,240,255,0.15)"/>
+  <rect x="322" y="90" width="12" height="8" fill="rgba(0,240,255,0.12)"/>
+  <rect x="458" y="52" width="11" height="7" fill="rgba(0,240,255,0.22)"/>
+  <rect x="472" y="52" width="11" height="7" fill="rgba(0,240,255,0.18)"/>
+  <rect x="634" y="68" width="11" height="7" fill="rgba(255,211,25,0.22)"/>
+  <rect x="648" y="68" width="11" height="7" fill="rgba(255,211,25,0.18)"/>
+  <rect x="662" y="68" width="11" height="7" fill="rgba(0,240,255,0.15)"/>
+  <rect x="688" y="98" width="12" height="8" fill="rgba(0,240,255,0.18)"/>
+  <rect x="706" y="98" width="12" height="8" fill="rgba(0,240,255,0.15)"/>
+  <rect x="726" y="98" width="12" height="8" fill="rgba(255,211,25,0.18)"/>
+  <rect x="762" y="55" width="11" height="7" fill="rgba(0,240,255,0.22)"/>
+  <rect x="776" y="55" width="11" height="7" fill="rgba(0,240,255,0.18)"/>
+  <rect x="864" y="82" width="11" height="7" fill="rgba(255,46,151,0.18)"/>
+  <rect x="878" y="82" width="11" height="7" fill="rgba(255,46,151,0.14)"/>
+</svg>
+  </div>
+  <div class="attract-trees-wrap" aria-hidden="true">
+    <svg viewBox="0 0 600 150" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" fill="#0e041e">
+  <polygon points="65,150 77,150 74,18 68,18"/>
+  <ellipse cx="70" cy="14" rx="38" ry="9" transform="rotate(-70,70,14)"/>
+  <ellipse cx="70" cy="14" rx="40" ry="9" transform="rotate(-45,70,14)"/>
+  <ellipse cx="70" cy="14" rx="42" ry="9" transform="rotate(-20,70,14)"/>
+  <ellipse cx="70" cy="14" rx="42" ry="9" transform="rotate(5,70,14)"/>
+  <ellipse cx="70" cy="14" rx="40" ry="9" transform="rotate(30,70,14)"/>
+  <ellipse cx="70" cy="14" rx="36" ry="9" transform="rotate(55,70,14)"/>
+  <ellipse cx="70" cy="14" rx="32" ry="8" transform="rotate(80,70,14)"/>
+  <polygon points="173,150 185,150 183,38 175,38"/>
+  <ellipse cx="178" cy="34" rx="34" ry="8" transform="rotate(-70,178,34)"/>
+  <ellipse cx="178" cy="34" rx="36" ry="8" transform="rotate(-45,178,34)"/>
+  <ellipse cx="178" cy="34" rx="38" ry="8" transform="rotate(-20,178,34)"/>
+  <ellipse cx="178" cy="34" rx="38" ry="8" transform="rotate(5,178,34)"/>
+  <ellipse cx="178" cy="34" rx="36" ry="8" transform="rotate(30,178,34)"/>
+  <ellipse cx="178" cy="34" rx="32" ry="8" transform="rotate(55,178,34)"/>
+  <ellipse cx="178" cy="34" rx="28" ry="7" transform="rotate(80,178,34)"/>
+  <polygon points="290,150 302,150 299,10 292,10"/>
+  <ellipse cx="295" cy="6" rx="40" ry="9" transform="rotate(-70,295,6)"/>
+  <ellipse cx="295" cy="6" rx="42" ry="9" transform="rotate(-45,295,6)"/>
+  <ellipse cx="295" cy="6" rx="44" ry="9" transform="rotate(-20,295,6)"/>
+  <ellipse cx="295" cy="6" rx="44" ry="9" transform="rotate(5,295,6)"/>
+  <ellipse cx="295" cy="6" rx="42" ry="9" transform="rotate(30,295,6)"/>
+  <ellipse cx="295" cy="6" rx="38" ry="9" transform="rotate(55,295,6)"/>
+  <ellipse cx="295" cy="6" rx="34" ry="8" transform="rotate(80,295,6)"/>
+  <polygon points="403,150 415,150 413,30 405,30"/>
+  <ellipse cx="408" cy="26" rx="36" ry="8" transform="rotate(-70,408,26)"/>
+  <ellipse cx="408" cy="26" rx="38" ry="8" transform="rotate(-45,408,26)"/>
+  <ellipse cx="408" cy="26" rx="40" ry="8" transform="rotate(-20,408,26)"/>
+  <ellipse cx="408" cy="26" rx="40" ry="8" transform="rotate(5,408,26)"/>
+  <ellipse cx="408" cy="26" rx="38" ry="8" transform="rotate(30,408,26)"/>
+  <ellipse cx="408" cy="26" rx="34" ry="8" transform="rotate(55,408,26)"/>
+  <ellipse cx="408" cy="26" rx="30" ry="7" transform="rotate(80,408,26)"/>
+  <polygon points="503,150 515,150 513,20 505,20"/>
+  <ellipse cx="508" cy="16" rx="38" ry="9" transform="rotate(-70,508,16)"/>
+  <ellipse cx="508" cy="16" rx="40" ry="9" transform="rotate(-45,508,16)"/>
+  <ellipse cx="508" cy="16" rx="42" ry="9" transform="rotate(-20,508,16)"/>
+  <ellipse cx="508" cy="16" rx="42" ry="9" transform="rotate(5,508,16)"/>
+  <ellipse cx="508" cy="16" rx="40" ry="9" transform="rotate(30,508,16)"/>
+  <ellipse cx="508" cy="16" rx="36" ry="9" transform="rotate(55,508,16)"/>
+  <ellipse cx="508" cy="16" rx="32" ry="8" transform="rotate(80,508,16)"/>
+</svg>
+    <svg viewBox="0 0 600 150" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" fill="#0e041e">
+  <polygon points="65,150 77,150 74,18 68,18"/>
+  <ellipse cx="70" cy="14" rx="38" ry="9" transform="rotate(-70,70,14)"/>
+  <ellipse cx="70" cy="14" rx="40" ry="9" transform="rotate(-45,70,14)"/>
+  <ellipse cx="70" cy="14" rx="42" ry="9" transform="rotate(-20,70,14)"/>
+  <ellipse cx="70" cy="14" rx="42" ry="9" transform="rotate(5,70,14)"/>
+  <ellipse cx="70" cy="14" rx="40" ry="9" transform="rotate(30,70,14)"/>
+  <ellipse cx="70" cy="14" rx="36" ry="9" transform="rotate(55,70,14)"/>
+  <ellipse cx="70" cy="14" rx="32" ry="8" transform="rotate(80,70,14)"/>
+  <polygon points="173,150 185,150 183,38 175,38"/>
+  <ellipse cx="178" cy="34" rx="34" ry="8" transform="rotate(-70,178,34)"/>
+  <ellipse cx="178" cy="34" rx="36" ry="8" transform="rotate(-45,178,34)"/>
+  <ellipse cx="178" cy="34" rx="38" ry="8" transform="rotate(-20,178,34)"/>
+  <ellipse cx="178" cy="34" rx="38" ry="8" transform="rotate(5,178,34)"/>
+  <ellipse cx="178" cy="34" rx="36" ry="8" transform="rotate(30,178,34)"/>
+  <ellipse cx="178" cy="34" rx="32" ry="8" transform="rotate(55,178,34)"/>
+  <ellipse cx="178" cy="34" rx="28" ry="7" transform="rotate(80,178,34)"/>
+  <polygon points="290,150 302,150 299,10 292,10"/>
+  <ellipse cx="295" cy="6" rx="40" ry="9" transform="rotate(-70,295,6)"/>
+  <ellipse cx="295" cy="6" rx="42" ry="9" transform="rotate(-45,295,6)"/>
+  <ellipse cx="295" cy="6" rx="44" ry="9" transform="rotate(-20,295,6)"/>
+  <ellipse cx="295" cy="6" rx="44" ry="9" transform="rotate(5,295,6)"/>
+  <ellipse cx="295" cy="6" rx="42" ry="9" transform="rotate(30,295,6)"/>
+  <ellipse cx="295" cy="6" rx="38" ry="9" transform="rotate(55,295,6)"/>
+  <ellipse cx="295" cy="6" rx="34" ry="8" transform="rotate(80,295,6)"/>
+  <polygon points="403,150 415,150 413,30 405,30"/>
+  <ellipse cx="408" cy="26" rx="36" ry="8" transform="rotate(-70,408,26)"/>
+  <ellipse cx="408" cy="26" rx="38" ry="8" transform="rotate(-45,408,26)"/>
+  <ellipse cx="408" cy="26" rx="40" ry="8" transform="rotate(-20,408,26)"/>
+  <ellipse cx="408" cy="26" rx="40" ry="8" transform="rotate(5,408,26)"/>
+  <ellipse cx="408" cy="26" rx="38" ry="8" transform="rotate(30,408,26)"/>
+  <ellipse cx="408" cy="26" rx="34" ry="8" transform="rotate(55,408,26)"/>
+  <ellipse cx="408" cy="26" rx="30" ry="7" transform="rotate(80,408,26)"/>
+  <polygon points="503,150 515,150 513,20 505,20"/>
+  <ellipse cx="508" cy="16" rx="38" ry="9" transform="rotate(-70,508,16)"/>
+  <ellipse cx="508" cy="16" rx="40" ry="9" transform="rotate(-45,508,16)"/>
+  <ellipse cx="508" cy="16" rx="42" ry="9" transform="rotate(-20,508,16)"/>
+  <ellipse cx="508" cy="16" rx="42" ry="9" transform="rotate(5,508,16)"/>
+  <ellipse cx="508" cy="16" rx="40" ry="9" transform="rotate(30,508,16)"/>
+  <ellipse cx="508" cy="16" rx="36" ry="9" transform="rotate(55,508,16)"/>
+  <ellipse cx="508" cy="16" rx="32" ry="8" transform="rotate(80,508,16)"/>
+</svg>
+  </div>
   <div class="attract-road-strip">
     <div class="attract-dash-row">
       <div class="attract-dash"></div><div class="attract-dash"></div>
