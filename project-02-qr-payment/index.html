@@ -534,6 +534,54 @@ if(typeof gsap==='undefined'){
   .btn-dismiss-facts { padding:1.25rem 3.75rem; border:none; border-radius:3.125rem; background:linear-gradient(135deg,var(--teal),var(--blue)); color:white; font-family:'Poppins',sans-serif; font-weight:700; font-size:1.5rem; cursor:pointer; min-height:4.5rem; }
   .btn-dismiss-facts:hover { opacity:0.9; }
 
+  /* Explore icon buttons (section-5 landing) */
+  .explore-btns { display:flex; gap:1.5rem; justify-content:center; margin-bottom:2rem; }
+  .explore-btn {
+    background: white; border: 3px solid #e0e8f5; border-radius: 1.5rem;
+    padding: 1.75rem 2rem; cursor: pointer; text-align: center;
+    flex: 1; max-width: 22rem;
+    box-shadow: 0 4px 20px rgba(0,40,100,0.07);
+    transition: all 0.22s cubic-bezier(0.175,0.885,0.32,1.275);
+    display: flex; flex-direction: column; align-items: center; gap: 0.625rem;
+  }
+  .explore-btn:hover, .explore-btn:active { border-color: var(--teal); transform: translateY(-4px); box-shadow: 0 10px 36px rgba(0,71,171,0.14); }
+  .explore-btn-icon { font-size: 3.25rem; line-height: 1; }
+  .explore-btn-label { font-family:'Poppins',sans-serif; font-weight:800; font-size:1.5rem; color:var(--text-dark); }
+  .explore-btn-sub { font-size:1.0625rem; color:var(--text-light); }
+
+  /* Info modal overlay */
+  .info-modal {
+    position: fixed; inset: 0; z-index: 200;
+    display: flex; align-items: flex-end; justify-content: center;
+  }
+  .info-modal.hidden { display: none; }
+  .info-modal-backdrop { position: absolute; inset: 0; background: rgba(0,10,40,0.55); backdrop-filter: blur(4px); }
+  .info-modal-panel {
+    position: relative; z-index: 1;
+    background: #f6f9ff; border-radius: 2rem 2rem 0 0;
+    width: 100%; max-width: 80rem;
+    max-height: 80vh; display: flex; flex-direction: column;
+    box-shadow: 0 -8px 40px rgba(0,40,120,0.2);
+    animation: slideUpModal 0.32s cubic-bezier(0.175,0.885,0.32,1.275);
+  }
+  @keyframes slideUpModal { from { transform: translateY(100%); opacity:0; } to { transform: translateY(0); opacity:1; } }
+  .info-modal-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.75rem 2.5rem 1.25rem;
+    border-bottom: 2px solid #e0e8f5;
+    flex-shrink: 0;
+  }
+  .info-modal-header h3 { font-family:'Poppins',sans-serif; font-weight:800; font-size:1.875rem; color:var(--text-dark); }
+  .info-modal-close {
+    width: 3rem; height: 3rem; border-radius: 50%;
+    border: 2px solid #d0dcea; background: white;
+    font-size: 1.375rem; cursor: pointer; color: var(--text-mid);
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+  }
+  .info-modal-close:hover { background: var(--red); color: white; border-color: var(--red); }
+  .info-modal-body { flex: 1; overflow-y: auto; padding: 2rem 2.5rem 3rem; }
+
   /* Quiz */
   .quiz-progress-bar { display:flex; gap:0.875rem; margin-bottom:1.625rem; justify-content:center; }
   .qpb-dot { width:0.9375rem; height:0.9375rem; border-radius:50%; background:#d0dcea; transition:background 0.3s; }
@@ -1329,91 +1377,101 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;b
   </div>
 
   <!-- ========== SECTION 4: BEHIND SCENES ========== -->
-  <div class="section" id="section-3">
-    <h2 id="s3-title">Di Di Sebalik Tabir</h2>
-    <div class="info-grid">
+  <!-- ========== INFO MODALS (popup from section-5 icons) ========== -->
+  <div id="info-modal" class="info-modal hidden">
+    <div class="info-modal-backdrop" onclick="closeInfoModal()"></div>
+    <div class="info-modal-panel">
+      <div class="info-modal-header">
+        <h3 id="info-modal-title"></h3>
+        <button class="info-modal-close" onclick="closeInfoModal()">✕</button>
+      </div>
+      <div class="info-modal-body">
 
-      <div class="info-card" onclick="toggleInfoCard(0)">
-        <div class="info-card-header">
-          <span class="info-icon">🏦</span>
-          <span class="info-title" id="ic0-title">Sistem penyelesaian antara bank</span>
-          <span class="expand-arrow">▼</span>
-        </div>
-        <div class="info-card-body">
-          <div class="info-card-body-inner">
-            <p id="ic0-body"></p>
+        <div id="modal-tabir" class="hidden">
+          <div class="info-grid">
+            <div class="info-card" onclick="toggleInfoCard(0)">
+              <div class="info-card-header">
+                <span class="info-icon">🏦</span>
+                <span class="info-title" id="ic0-title">Sistem penyelesaian antara bank</span>
+                <span class="expand-arrow">▼</span>
+              </div>
+              <div class="info-card-body">
+                <div class="info-card-body-inner"><p id="ic0-body"></p></div>
+              </div>
+            </div>
+            <div class="info-card" onclick="toggleInfoCard(1)">
+              <div class="info-card-header">
+                <span class="info-icon">📱</span>
+                <span class="info-title" id="ic1-title">Kebolehgunaan QR rentas sempadan</span>
+                <span class="expand-arrow">▼</span>
+              </div>
+              <div class="info-card-body">
+                <div class="info-card-body-inner"><p id="ic1-body"></p></div>
+              </div>
+            </div>
+            <div class="info-card" onclick="toggleInfoCard(2)">
+              <div class="info-card-header">
+                <span class="info-icon">💱</span>
+                <span class="info-title" id="ic2-title">Enjin penukaran mata wang</span>
+                <span class="expand-arrow">▼</span>
+              </div>
+              <div class="info-card-body">
+                <div class="info-card-body-inner"><p id="ic2-body"></p></div>
+              </div>
+            </div>
+            <div class="info-card" onclick="toggleInfoCard(3)">
+              <div class="info-card-header">
+                <span class="info-icon">🤝</span>
+                <span class="info-title" id="ic3-title">Kerjasama pengawalseliaan</span>
+                <span class="expand-arrow">▼</span>
+              </div>
+              <div class="info-card-body">
+                <div class="info-card-body-inner"><p id="ic3-body"></p></div>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div class="info-card" onclick="toggleInfoCard(1)">
-        <div class="info-card-header">
-          <span class="info-icon">📱</span>
-          <span class="info-title" id="ic1-title">Kebolehgunaan QR rentas sempadan</span>
-          <span class="expand-arrow">▼</span>
-        </div>
-        <div class="info-card-body">
-          <div class="info-card-body-inner">
-            <p id="ic1-body"></p>
+        <div id="modal-selamat" class="hidden">
+          <div class="safety-list">
+            <div class="safety-item" id="si-0">
+              <div class="safety-num">1</div>
+              <div class="safety-text" id="si0-text">Imbas QR daripada peniaga yang betul sahaja</div>
+            </div>
+            <div class="safety-item" id="si-1">
+              <div class="safety-num">2</div>
+              <div class="safety-text" id="si1-text">Semak nama peniaga dan jumlah pembayaran sebelum mengesahkan</div>
+            </div>
+            <div class="safety-item" id="si-2">
+              <div class="safety-num">3</div>
+              <div class="safety-text" id="si2-text">Lindungi telefon dengan PIN atau biometrik</div>
+            </div>
+            <div class="safety-item" id="si-3">
+              <div class="safety-num">4</div>
+              <div class="safety-text" id="si3-text">Jangan sesekali kongsi OTP anda dengan sesiapa</div>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div class="info-card" onclick="toggleInfoCard(2)">
-        <div class="info-card-header">
-          <span class="info-icon">💱</span>
-          <span class="info-title" id="ic2-title">Enjin penukaran mata wang</span>
-          <span class="expand-arrow">▼</span>
-        </div>
-        <div class="info-card-body">
-          <div class="info-card-body-inner">
-            <p id="ic2-body"></p>
-          </div>
-        </div>
-      </div>
-
-      <div class="info-card" onclick="toggleInfoCard(3)">
-        <div class="info-card-header">
-          <span class="info-icon">🤝</span>
-          <span class="info-title" id="ic3-title">Kerjasama pengawalseliaan</span>
-          <span class="expand-arrow">▼</span>
-        </div>
-        <div class="info-card-body">
-          <div class="info-card-body-inner">
-            <p id="ic3-body"></p>
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- ========== SECTION 5: SAFETY ========== -->
-  <div class="section" id="section-4">
-    <h2 id="s4-title">🛡️ Selamat &amp; Mudah / Safe &amp; Easy</h2>
-    <div class="safety-list">
-      <div class="safety-item" id="si-0">
-        <div class="safety-num">1</div>
-        <div class="safety-text" id="si0-text">Imbas QR daripada peniaga yang betul sahaja / Scan QR from verified merchants only</div>
-      </div>
-      <div class="safety-item" id="si-1">
-        <div class="safety-num">2</div>
-        <div class="safety-text" id="si1-text">Semak nama peniaga dan jumlah pembayaran sebelum mengesahkan / Check merchant name and amount before confirming</div>
-      </div>
-      <div class="safety-item" id="si-2">
-        <div class="safety-num">3</div>
-        <div class="safety-text" id="si2-text">Lindungi telefon dengan PIN atau biometric / Protect your phone with PIN or biometrics</div>
-      </div>
-      <div class="safety-item" id="si-3">
-        <div class="safety-num">4</div>
-        <div class="safety-text" id="si3-text">Jangan sesekali kongsi OTP anda dengan sesiapa / Never share your OTP with anyone</div>
       </div>
     </div>
   </div>
 
   <!-- ========== SECTION 6: QUIZ ========== -->
   <div class="section" id="section-5">
-    <h2 id="s5-title">🌟 Fakta &amp; Kuiz / Facts &amp; Quiz</h2>
+    <h2 id="s5-title">🌟 Fakta &amp; Kuiz</h2>
+    <div class="explore-btns">
+      <button class="explore-btn" onclick="openInfoModal('tabir')">
+        <div class="explore-btn-icon">🔍</div>
+        <div class="explore-btn-label">Disebalik Tabir</div>
+        <div class="explore-btn-sub">Ketahui lebih lanjut</div>
+      </button>
+      <button class="explore-btn" onclick="openInfoModal('selamat')">
+        <div class="explore-btn-icon">🛡️</div>
+        <div class="explore-btn-label">Selamat &amp; Mudah</div>
+        <div class="explore-btn-sub">Tips keselamatan</div>
+      </button>
+    </div>
     <div id="quiz-content">
       <div id="facts-area">
         <div class="facts-container">
@@ -2033,6 +2091,43 @@ function animateSafetyItems() {
   });
 }
 
+function openInfoModal(type) {
+  resetIdleTimer();
+  SFX.tap();
+  var modal = document.getElementById('info-modal');
+  var tabir = document.getElementById('modal-tabir');
+  var selamat = document.getElementById('modal-selamat');
+  var titleEl = document.getElementById('info-modal-title');
+  tabir.classList.add('hidden');
+  selamat.classList.add('hidden');
+  if (type === 'tabir') {
+    titleEl.textContent = '🔍 Disebalik Tabir';
+    tabir.classList.remove('hidden');
+  } else {
+    titleEl.textContent = '🛡️ Selamat & Mudah';
+    selamat.classList.remove('hidden');
+    setTimeout(animateSafetyItems, 80);
+  }
+  modal.classList.remove('hidden');
+}
+
+function closeInfoModal() {
+  SFX.tap();
+  var modal = document.getElementById('info-modal');
+  var panel = modal.querySelector('.info-modal-panel');
+  panel.style.animation = 'none';
+  panel.style.transform = 'translateY(100%)';
+  panel.style.opacity = '0';
+  panel.style.transition = 'transform 0.25s ease-in, opacity 0.2s ease-in';
+  setTimeout(function() {
+    modal.classList.add('hidden');
+    panel.style.transform = '';
+    panel.style.opacity = '';
+    panel.style.transition = '';
+    panel.style.animation = '';
+  }, 260);
+}
+
 /* ============================================================
    QUIZ
    ============================================================ */
@@ -2603,6 +2698,8 @@ function goToStart() {
   _summaryCountdown = null;
   var popup = document.getElementById('summary-popup');
   if (popup) popup.classList.add('hidden');
+  var infoModal = document.getElementById('info-modal');
+  if (infoModal) infoModal.classList.add('hidden');
   if (payTimer) { clearTimeout(payTimer); payTimer = null; }
   if (payConvInterval) { clearInterval(payConvInterval); payConvInterval = null; }
   if (convInterval) { clearInterval(convInterval); convInterval = null; }
