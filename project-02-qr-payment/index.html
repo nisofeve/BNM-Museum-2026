@@ -721,7 +721,7 @@ if(typeof gsap==='undefined'){
   .pp-battery { width: 1.5rem; height: 0.75rem; border: 2px solid currentColor; border-radius: 0.25rem; position: relative; }
   .pp-battery::before { content:''; position:absolute; inset:2px; right:28%; background:currentColor; border-radius:1px; }
   .pp-battery::after { content:''; position:absolute; right:-0.3125rem; top:0.125rem; width:0.1875rem; height:0.375rem; background:currentColor; border-radius:0 2px 2px 0; }
-  #pay-screen { position: absolute; inset: 0; display: flex; flex-direction: column; }
+  #pay-screen { position: absolute; inset: 0; display: flex; flex-direction: column; background: #F8FAFF; overflow-y: auto; }
 
   /* ── Wallet Picker ── */
   .wp-screen { position:absolute; inset:0; display:flex; flex-direction:column; background:#F0F6FF; }
@@ -759,57 +759,64 @@ if(typeof gsap==='undefined'){
 
   /* -- App home screen -- */
   .pph-header {
-    background: linear-gradient(150deg, var(--blue) 0%, #0a5fc4 55%, var(--teal) 130%);
-    padding: 4rem 1.5rem 4.5rem;
-    border-radius: 0 0 2.25rem 2.25rem;
+    padding: 4.5rem 1.5rem 5rem;
+    border-radius: 0 0 2.75rem 2.75rem;
     color: white;
     position: relative;
-    box-shadow: 0 10px 30px rgba(0,71,171,0.25);
+    box-shadow: 0 16px 48px rgba(0,0,0,0.22);
   }
   .pph-wallet-badge {
-    position: absolute; top: 1.25rem; right: 1.375rem;
-    background: rgba(255,255,255,0.2); border: 2px solid rgba(255,255,255,0.4);
-    border-radius: 0.75rem; padding: 0.3rem 0.875rem;
-    font-family: 'Poppins', sans-serif; font-weight: 900; font-size: 0.9375rem;
-    color: white; letter-spacing: 0.5px; backdrop-filter: blur(6px);
+    position: absolute; top: 1.25rem; right: 1.5rem;
+    background: rgba(255,255,255,0.22); border: 1.5px solid rgba(255,255,255,0.45);
+    border-radius: 2rem; padding: 0.3rem 1rem;
+    font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 0.9375rem;
+    color: white; letter-spacing: 0.5px;
   }
-  .pph-greet { font-size: 1.0625rem; opacity: 0.85; }
-  .pph-name { font-family:'Poppins',sans-serif; font-weight:700; font-size:1.5rem; margin-bottom:1.25rem; }
+  .pph-greet { font-size: 1.0625rem; font-weight: 500; opacity: 0.92; margin-bottom: 0.25rem; }
+  .pph-name { font-family:'Poppins',sans-serif; font-weight:800; font-size:2rem; margin-bottom:1.5rem; line-height:1.15; }
   .pph-balance-card {
-    background: rgba(255,255,255,0.16);
-    border: 1px solid rgba(255,255,255,0.35);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    border-radius: 1.25rem;
-    padding: 1.125rem 1.5rem;
+    background: rgba(255,255,255,0.18);
+    border: 1.5px solid rgba(255,255,255,0.35);
+    border-radius: 1.375rem;
+    padding: 1.25rem 1.5rem 1.375rem;
   }
-  .pph-balance-label { font-size: 0.9375rem; opacity: 0.85; }
-  .pph-balance { font-family:'Poppins',sans-serif; font-weight:800; font-size:2.5rem; letter-spacing:0.5px; }
+  .pph-balance-label { display:block; font-size: 0.9375rem; opacity: 0.82; margin-bottom: 0.375rem; }
+  .pph-balance { font-family:'Poppins',sans-serif; font-weight:900; font-size:3rem; letter-spacing:-0.5px; line-height:1; }
   .pph-scan-btn {
-    position: absolute; left: 50%; bottom: -2.5rem; transform: translateX(-50%);
-    width: 18rem; min-height: 5rem;
-    border: none; border-radius: 3rem;
-    background: linear-gradient(135deg, var(--gold), var(--coral));
+    position: absolute; left: 1.5rem; right: 1.5rem; bottom: -2.75rem;
+    width: auto;
+    min-height: 5.25rem;
+    border: none; border-radius: 2.75rem;
+    background: linear-gradient(135deg, #FF9F0A 0%, #FF6B35 100%);
     color: white;
-    font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 1.375rem;
+    font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 1.5rem;
     cursor: pointer;
-    box-shadow: 0 12px 32px rgba(255,107,91,0.45);
+    box-shadow: 0 14px 40px rgba(255,107,53,0.5);
     animation: pulseScanBtn 1.8s ease-in-out infinite;
-    display: flex; align-items: center; justify-content: center; gap: 0.625rem;
+    display: flex; align-items: center; justify-content: center; gap: 0.75rem;
     z-index: 5;
+    letter-spacing: 0.25px;
   }
   @keyframes pulseScanBtn {
-    0%,100% { transform: translateX(-50%) scale(1); box-shadow: 0 12px 32px rgba(255,107,91,0.45); }
-    50% { transform: translateX(-50%) scale(1.05); box-shadow: 0 16px 44px rgba(255,107,91,0.6); }
+    0%,100% { box-shadow: 0 14px 40px rgba(255,107,53,0.5); }
+    50% { box-shadow: 0 20px 52px rgba(255,107,53,0.65); transform: translateY(-2px); }
   }
-  .pph-section-label { font-family:'Poppins',sans-serif; font-weight:700; font-size:1rem; color:var(--text-mid); margin:3.75rem 1.5rem 0.75rem; }
-  .pph-tx { display:flex; align-items:center; gap:1rem; background:white; border-radius:1.125rem; padding:1rem 1.25rem; margin:0 1.25rem 0.625rem; box-shadow:0 2px 10px rgba(0,40,100,0.07); }
-  .pph-tx-icon { width:2.875rem; height:2.875rem; border-radius:0.75rem; display:flex; align-items:center; justify-content:center; font-size:1.375rem; flex-shrink:0; }
+  .pph-section-label {
+    font-family:'Poppins',sans-serif; font-weight:800; font-size:1.0625rem;
+    color:var(--text-dark); margin:4.5rem 1.5rem 0.875rem;
+  }
+  .pph-tx {
+    display:flex; align-items:center; gap:1rem;
+    background:white; border-radius:1.25rem;
+    padding:1.0625rem 1.25rem; margin:0 1.25rem 0.75rem;
+    box-shadow:0 2px 12px rgba(0,40,100,0.06);
+  }
+  .pph-tx-icon { width:3rem; height:3rem; border-radius:0.875rem; display:flex; align-items:center; justify-content:center; font-size:1.5rem; flex-shrink:0; }
   .pph-tx-name { font-weight:700; font-size:1.0625rem; color:var(--text-dark); }
-  .pph-tx-date { font-size:0.875rem; color:var(--text-light); }
-  .pph-tx-amt { margin-left:auto; font-family:'Poppins',sans-serif; font-weight:700; font-size:1.125rem; white-space:nowrap; }
-  .pph-tx-amt.neg { color:var(--text-dark); }
-  .pph-tx-amt.pos { color:var(--green); }
+  .pph-tx-date { font-size:0.875rem; color:var(--text-light); margin-top:0.125rem; }
+  .pph-tx-amt { margin-left:auto; font-family:'Poppins',sans-serif; font-weight:700; font-size:1.0625rem; white-space:nowrap; }
+  .pph-tx-amt.neg { color:#1a1a2e; }
+  .pph-tx-amt.pos { color:#16a34a; }
 
   /* -- Camera viewfinder / scanner -- */
   .pps-scanner { flex:1; background:radial-gradient(circle at 50% 30%, #122036, #0A1020 70%); display:flex; flex-direction:column; align-items:center; padding-top:5.5rem; position:relative; }
@@ -1731,9 +1738,9 @@ var i18n = {
     pay_scan_btn: 'Imbas QR',
     pay_recent: 'Transaksi Terkini',
     pay_tx: [
-      { icon: '🍛', bg: '#FFF1DC', name: 'Nasi Lemak Cik Kiah', date: 'Hari ini, 8:15 pagi', amt: '- RM 8.50', cls: 'neg' },
-      { icon: '💳', bg: '#E2F7EE', name: 'Tambah Nilai', date: 'Semalam', amt: '+ RM 50.00', cls: 'pos' },
-      { icon: '🚆', bg: '#E4EEFF', name: 'Tiket MRT', date: 'Semalam', amt: '- RM 2.40', cls: 'neg' }
+      { icon: '🍛', bg: '#FFE8E4', name: 'Nasi Lemak Cik Kiah', date: 'Hari ini, 8:15 pagi', amt: '- RM 8.50', cls: 'neg' },
+      { icon: '💳', bg: '#DDF5EB', name: 'Tambah Nilai', date: 'Semalam', amt: '+ RM 50.00', cls: 'pos' },
+      { icon: '🚊', bg: '#E0EEFF', name: 'Tiket MRT', date: 'Semalam', amt: '- RM 2.40', cls: 'neg' }
     ],
     pay_scan_title: 'Imbas Kod QR',
     pay_scan_sub: '📍 Bangkok, Thailand 🇹🇭',
