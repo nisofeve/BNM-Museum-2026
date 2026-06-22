@@ -294,7 +294,7 @@ if(typeof gsap==='undefined'){
   #section-0 h1 {
     font-family: 'Poppins', sans-serif;
     font-weight: 800;
-    font-size: 2.875rem;
+    font-size: 4rem;
     text-align: center;
     background: linear-gradient(135deg, var(--blue), var(--teal));
     -webkit-background-clip: text;
@@ -1296,8 +1296,8 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;b
       <span class="label-city left">Kuala Lumpur 🇲🇾</span>
       <span class="label-city right">Singapore 🇸🇬</span>
     </div>
-    <h1 id="s0-title">Dunia yang semakin bersambung...<br>Kini, semuanya terasa lebih dekat...</h1>
-    <p id="s0-body">Dahulu, pembayaran rentas negara memerlukan wang tunai dan pertukaran mata wang. Hari ini, hanya perlu satu imbasan QR. Pembayaran digital rentas sempadan menunjukkan bagaimana Malaysia dan Singapura berbeza dari segi negara, tetapi bersatu sebagai satu ekosistem digital.</p>
+    <h1 id="s0-title">Kenali dan cuba bayaran QR</h1>
+    <p id="s0-body" style="display:none"></p>
     <div class="slide-unlock" id="slide-unlock">
       <div class="slide-track" id="slide-track">
         <div class="slide-fill" id="slide-fill"></div>
@@ -1736,8 +1736,8 @@ var scenarios = [
    ============================================================ */
 var i18n = {
   bm: {
-    s0_title: 'Dunia yang semakin bersambung...<br>Kini, semuanya terasa lebih dekat...',
-    s0_body: 'Dahulu, pembayaran rentas negara memerlukan wang tunai dan pertukaran mata wang. Hari ini, hanya perlu satu imbasan QR. Pembayaran digital rentas sempadan menunjukkan bagaimana Malaysia dan Singapura berbeza dari segi negara, tetapi bersatu sebagai satu ekosistem digital.',
+    s0_title: 'Kenali dan cuba bayaran QR',
+    s0_body: '',
     s0_cta: 'Leret untuk mula  ›  Slide to start',
     s1_title: 'Contoh Situasi',
     s1_c1_title: 'Rakan menghantar wang serta-merta',
@@ -1873,7 +1873,9 @@ function renderTexts() {
   var l = i18n[currentLang];
   // S0
   document.getElementById('s0-title').innerHTML = l.s0_title;
-  document.getElementById('s0-body').textContent = l.s0_body;
+  var s0b = document.getElementById('s0-body');
+  if (l.s0_body) { s0b.textContent = l.s0_body; s0b.style.display = ''; }
+  else { s0b.style.display = 'none'; }
   // s0-cta: BM only
   // S1
   document.getElementById('s1-title').textContent = l.s1_title;
