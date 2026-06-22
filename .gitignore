@@ -1,3 +1,4 @@
 node_modules/
 %ASKPASS_FILE%
 *.bat.tmp
+Backup/

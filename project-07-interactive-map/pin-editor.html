@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pin Position Editor — Malaysia Map</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{--cyan:#00e5ff;--gold:#ffd700;--navy:#04091e}
+  html,body{height:100%;font-family:'Segoe UI',system-ui,sans-serif;background:#04050a;color:#cfeffd;overflow:hidden}
+  body{display:flex;flex-direction:column}
+
+  /* toolbar */
+  #toolbar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+    padding:8px 14px;background:rgba(4,9,30,.95);border-bottom:1px solid rgba(0,229,255,.25);z-index:20}
+  #toolbar h1{font-size:14px;letter-spacing:.06em;color:#fff;text-transform:uppercase;margin-right:6px}
+  .tool{display:flex;align-items:center;gap:6px;font-size:12px;color:rgba(0,229,255,.8)}
+  select,button{font-family:inherit;font-size:12px;background:rgba(0,229,255,.08);color:var(--cyan);
+    border:1px solid rgba(0,229,255,.3);border-radius:5px;padding:5px 10px;cursor:pointer}
+  button:hover{background:rgba(0,229,255,.18)}
+  button.primary{background:var(--cyan);color:#021018;font-weight:700;border-color:var(--cyan)}
+  label.chk{display:flex;align-items:center;gap:5px;cursor:pointer}
+
+  /* main split */
+  #main{flex:1;display:flex;min-height:0}
+  #board{position:relative;flex:1;display:flex;align-items:center;justify-content:center;
+    background:#02030a;overflow:hidden}
+  #map{max-width:100%;max-height:100%;object-fit:contain;display:block;user-select:none;-webkit-user-drag:none}
+
+  /* safe-area overlay */
+  #safe{position:absolute;pointer-events:none;border:2px dashed rgba(255,215,0,.85);
+    box-shadow:0 0 0 9999px rgba(0,0,0,.45);display:none}
+  #safe.on{display:block}
+  #safe-tag{position:absolute;top:-22px;left:0;font-size:11px;color:var(--gold);
+    background:rgba(0,0,0,.6);padding:1px 6px;border-radius:3px;white-space:nowrap}
+
+  /* pin layer (exactly overlays the rendered image) */
+  #pins{position:absolute}
+  .pin{position:absolute;transform:translate(-50%,-50%);cursor:grab;
+    display:flex;flex-direction:column;align-items:center;touch-action:none;z-index:5}
+  .pin.sel{z-index:10}
+  .pin.dragging{cursor:grabbing}
+  .pin-icon{width:58px;height:58px;border-radius:50%;overflow:hidden;
+    background:rgba(4,9,30,.9);border:2px solid rgba(0,229,255,.6);
+    box-shadow:0 0 12px rgba(0,229,255,.4);display:flex;align-items:center;justify-content:center}
+  .pin.sel .pin-icon{border-color:var(--gold);box-shadow:0 0 16px rgba(255,215,0,.7)}
+  .pin-icon img{width:100%;height:100%;object-fit:cover;pointer-events:none}
+  .pin-label{margin-top:5px;background:rgba(4,9,30,.9);border:1px solid rgba(0,229,255,.3);
+    border-radius:4px;padding:2px 7px;text-align:center;max-width:150px;line-height:1.2}
+  .pl-state{display:block;font-size:11px;font-weight:700;color:var(--cyan);text-transform:uppercase;white-space:nowrap}
+  .pl-motif{display:block;font-size:8.5px;color:rgba(255,255,255,.7)}
+  .pl-xy{display:block;font-size:9px;color:var(--gold);margin-top:1px;letter-spacing:.04em}
+
+  /* panel */
+  #panel{width:300px;flex-shrink:0;background:rgba(4,9,30,.96);border-left:1px solid rgba(0,229,255,.25);
+    display:flex;flex-direction:column;min-height:0}
+  #panel h2{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:rgba(0,229,255,.7);
+    padding:10px 14px 6px}
+  #rows{overflow-y:auto;flex:1;padding:0 10px}
+  .row{display:flex;align-items:center;gap:8px;padding:7px 6px;border-bottom:1px solid rgba(0,229,255,.08);
+    font-size:12px;cursor:pointer;border-radius:5px}
+  .row:hover{background:rgba(0,229,255,.06)}
+  .row.sel{background:rgba(255,215,0,.1)}
+  .row .sw{width:22px;height:22px;border-radius:50%;overflow:hidden;flex-shrink:0;border:1px solid rgba(0,229,255,.4)}
+  .row .sw img{width:100%;height:100%;object-fit:cover}
+  .row .nm{flex:1}
+  .row .nm b{color:#fff}
+  .row .co{color:var(--gold);font-variant-numeric:tabular-nums}
+  #out{margin:8px 10px;height:150px;width:calc(100% - 20px);resize:none;font-family:ui-monospace,Menlo,Consolas,monospace;
+    font-size:11px;background:#020912;color:#9fe7ff;border:1px solid rgba(0,229,255,.25);border-radius:6px;padding:8px}
+  #panel .btns{display:flex;gap:8px;padding:0 10px 12px}
+  #panel .btns button{flex:1}
+  #hint{font-size:11px;color:rgba(0,229,255,.55);padding:0 14px 10px;line-height:1.5}
+  #toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:var(--cyan);color:#021018;
+    font-weight:700;font-size:12px;padding:8px 18px;border-radius:20px;opacity:0;transition:.25s;pointer-events:none;z-index:50}
+  #toast.show{opacity:1}
+</style>
+</head>
+<body>
+
+<div id="toolbar">
+  <h1>Pin Editor</h1>
+  <div class="tool">
+    <span>Safe area (cover crop):</span>
+    <select id="aspect">
+      <option value="0">Off</option>
+      <option value="1.7778">16:9 landscape TV</option>
+      <option value="1.3333">4:3</option>
+      <option value="1.5">3:2 (full map)</option>
+      <option value="0.5625">9:16 portrait kiosk</option>
+      <option value="0.75">3:4 portrait</option>
+      <option value="win">This window</option>
+    </select>
+  </div>
+  <label class="chk"><input type="checkbox" id="snap"> Snap to 0.5%</label>
+  <button id="reset">Reset to current</button>
+  <span style="font-size:11px;color:rgba(0,229,255,.5)">Drag pins · click to select · arrow keys nudge (Shift = ×4)</span>
+</div>
+
+<div id="main">
+  <div id="board">
+    <img id="map" src="Assets/Malaysia_mlbb_map.png" alt="map">
+    <div id="safe"><span id="safe-tag"></span></div>
+    <div id="pins"></div>
+  </div>
+  <div id="panel">
+    <h2>Coordinates</h2>
+    <div id="rows"></div>
+    <h2>Export (paste into index.html)</h2>
+    <textarea id="out" readonly></textarea>
+    <div class="btns">
+      <button class="primary" id="copy">Copy coordinates</button>
+      <button id="copyfacts">Copy x/y lines</button>
+    </div>
+    <div id="hint">The numbers are % of the map image, exactly matching the kiosk app's anchoring — drop them straight into the <b>FACTS</b> array. Pins outside the yellow safe area will be cropped off on that screen shape.</div>
+  </div>
+</div>
+
+<div id="toast">Copied!</div>
+
+<script>
+// ── current pin layout (matches index.html) ──
+const DEFAULTS = [
+  { denom:'RM1',   state:'Kelantan',   motif:'Wau Bulan',                     x:27, y:13, note:'Assets-malaysia/notes/RM1_kelantan_note.png',    iconPos:'50% 50%' },
+  { denom:'RM5',   state:'Sarawak',    motif:'Enggang Badak',                 x:57, y:49, note:'Assets-malaysia/notes/RM5_sarawak_note.png',     iconPos:'50% 50%' },
+  { denom:'RM10',  state:'Perak',      motif:'Rafflesia Azlanii',             x:12, y:31, note:'Assets-malaysia/notes/RM10_perak_note.png',      iconPos:'22% 50%' },
+  { denom:'RM20',  state:'Terengganu', motif:'Penyu Karah & Penyu Belimbing', x:29, y:22, note:'Assets-malaysia/notes/RM20_terengganu_note.png', iconPos:'50% 50%' },
+  { denom:'RM50',  state:'Selangor',   motif:'Kelapa Sawit',                  x:15, y:44, note:'Assets-malaysia/notes/RM50_selangor_note.png',   iconPos:'50% 50%' },
+  { denom:'RM100', state:'Sabah',      motif:'Gunung Kinabalu & Gunung Api',  x:82, y:15, note:'Assets-malaysia/notes/RM100_sabah_note.png',     iconPos:'50% 50%' },
+];
+let PINS = JSON.parse(JSON.stringify(DEFAULTS));
+let sel = 0, dragging = -1;
+
+const board = document.getElementById('board');
+const map   = document.getElementById('map');
+const layer = document.getElementById('pins');
+const rows  = document.getElementById('rows');
+const out   = document.getElementById('out');
+const safe  = document.getElementById('safe');
+const safeTag = document.getElementById('safe-tag');
+
+// ── build pins + rows ──
+function build(){
+  layer.innerHTML=''; rows.innerHTML='';
+  PINS.forEach((p,i)=>{
+    const pin=document.createElement('div');
+    pin.className='pin'+(i===sel?' sel':'');
+    pin.style.left=p.x+'%'; pin.style.top=p.y+'%';
+    pin.innerHTML=`
+      <div class="pin-icon"><img src="${p.note}" style="object-position:${p.iconPos}"></div>
+      <div class="pin-label">
+        <span class="pl-state">${p.state}</span>
+        <span class="pl-motif">${p.motif}</span>
+        <span class="pl-xy">${p.x.toFixed(1)}, ${p.y.toFixed(1)}</span>
+      </div>`;
+    pin.addEventListener('pointerdown',e=>startDrag(e,i));
+    layer.appendChild(pin);
+
+    const row=document.createElement('div');
+    row.className='row'+(i===sel?' sel':'');
+    row.innerHTML=`<div class="sw"><img src="${p.note}" style="object-position:${p.iconPos}"></div>
+      <div class="nm"><b>${p.state}</b> · ${p.denom}</div>
+      <div class="co">${p.x.toFixed(1)}, ${p.y.toFixed(1)}</div>`;
+    row.addEventListener('click',()=>{sel=i;build();updateOut();});
+    rows.appendChild(row);
+  });
+  layoutLayer();
+}
+
+// ── overlay pin layer exactly on the rendered image ──
+function layoutLayer(){
+  const r=map.getBoundingClientRect(), b=board.getBoundingClientRect();
+  layer.style.left=(r.left-b.left)+'px';
+  layer.style.top =(r.top -b.top )+'px';
+  layer.style.width =r.width+'px';
+  layer.style.height=r.height+'px';
+  drawSafe();
+}
+
+// ── drag ──
+function startDrag(e,i){
+  e.preventDefault();
+  dragging=i; sel=i;
+  document.querySelectorAll('.pin')[i].classList.add('dragging');
+  build();
+  window.addEventListener('pointermove',onMove);
+  window.addEventListener('pointerup',endDrag);
+}
+function onMove(e){
+  if(dragging<0) return;
+  const r=layer.getBoundingClientRect();
+  let x=(e.clientX-r.left)/r.width*100;
+  let y=(e.clientY-r.top )/r.height*100;
+  x=Math.max(0,Math.min(100,x)); y=Math.max(0,Math.min(100,y));
+  if(document.getElementById('snap').checked){x=Math.round(x*2)/2;y=Math.round(y*2)/2;}
+  PINS[dragging].x=Math.round(x*10)/10; PINS[dragging].y=Math.round(y*10)/10;
+  refreshPin(dragging); updateOut();
+}
+function endDrag(){
+  dragging=-1;
+  window.removeEventListener('pointermove',onMove);
+  window.removeEventListener('pointerup',endDrag);
+  build(); updateOut();
+}
+function refreshPin(i){
+  const p=PINS[i];
+  const pin=document.querySelectorAll('.pin')[i];
+  pin.style.left=p.x+'%'; pin.style.top=p.y+'%';
+  pin.querySelector('.pl-xy').textContent=`${p.x.toFixed(1)}, ${p.y.toFixed(1)}`;
+  rows.children[i].querySelector('.co').textContent=`${p.x.toFixed(1)}, ${p.y.toFixed(1)}`;
+}
+
+// ── keyboard nudge ──
+window.addEventListener('keydown',e=>{
+  if(sel<0) return;
+  const step=e.shiftKey?2:0.5; let used=true;
+  if(e.key==='ArrowLeft')  PINS[sel].x=Math.max(0,Math.round((PINS[sel].x-step)*10)/10);
+  else if(e.key==='ArrowRight') PINS[sel].x=Math.min(100,Math.round((PINS[sel].x+step)*10)/10);
+  else if(e.key==='ArrowUp')    PINS[sel].y=Math.max(0,Math.round((PINS[sel].y-step)*10)/10);
+  else if(e.key==='ArrowDown')  PINS[sel].y=Math.min(100,Math.round((PINS[sel].y+step)*10)/10);
+  else used=false;
+  if(used){e.preventDefault();refreshPin(sel);updateOut();}
+});
+
+// ── safe-area overlay ──
+function drawSafe(){
+  const selv=document.getElementById('aspect').value;
+  if(selv==='0'){safe.classList.remove('on');return;}
+  let A = selv==='win' ? (board.clientWidth/board.clientHeight) : parseFloat(selv);
+  const imgA=1.5; // 1536/1024
+  let wPct,hPct;
+  if(A>=imgA){wPct=100; hPct=imgA/A*100;} else {hPct=100; wPct=A/imgA*100;}
+  const r=map.getBoundingClientRect(), b=board.getBoundingClientRect();
+  const ox=r.left-b.left, oy=r.top-b.top;
+  const w=r.width*wPct/100, h=r.height*hPct/100;
+  safe.classList.add('on');
+  safe.style.left=(ox+(r.width-w)/2)+'px';
+  safe.style.top =(oy+(r.height-h)/2)+'px';
+  safe.style.width=w+'px'; safe.style.height=h+'px';
+  safeTag.textContent='Visible on '+(selv==='win'?'this window':document.getElementById('aspect').selectedOptions[0].text)+' (cover)';
+}
+
+// ── output ──
+function updateOut(){
+  const lines = PINS.map(p=>`${p.state.padEnd(11)} x: ${p.x.toFixed(1).padStart(5)}, y: ${p.y.toFixed(1).padStart(5)}`);
+  out.value = lines.join('\n');
+}
+function factsLines(){
+  return PINS.map(p=>`${p.denom}/${p.state}:  x: ${Math.round(p.x)}, y: ${Math.round(p.y)},`).join('\n');
+}
+function toast(){const t=document.getElementById('toast');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1200);}
+async function copy(text){
+  try{ await navigator.clipboard.writeText(text); }
+  catch(e){ out.value=text; out.select(); document.execCommand('copy'); }
+  toast();
+}
+document.getElementById('copy').onclick=()=>copy(out.value);
+document.getElementById('copyfacts').onclick=()=>copy(factsLines());
+document.getElementById('reset').onclick=()=>{PINS=JSON.parse(JSON.stringify(DEFAULTS));sel=0;build();updateOut();};
+document.getElementById('aspect').onchange=drawSafe;
+
+// ── init ──
+window.addEventListener('resize',layoutLayer);
+if(map.complete) build(); else map.onload=build;
+build(); updateOut();
+</script>
+</body>
+</html>

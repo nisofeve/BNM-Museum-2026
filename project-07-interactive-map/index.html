@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ms">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Johor — Currency &amp; Banking History</title>
+<title>Kenali Wang Anda — Wang Kertas Malaysia</title>
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
   html,body{width:100%;height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-serif;background:#04050a}
@@ -17,10 +17,10 @@
 
   /* ── map background ── */
   #map-bg{position:fixed;inset:0;
-    background:url('Assets/Johore map.png') center/cover no-repeat;
-    filter:brightness(.82) saturate(.85)}
+    background:url('Assets/Malaysia_mlbb_map.png') center/cover no-repeat;
+    filter:brightness(.9) saturate(.95)}
   #map-vignette{position:fixed;inset:0;
-    background:radial-gradient(ellipse at 50% 50%,rgba(4,9,30,.25) 0%,rgba(4,9,30,.72) 100%)}
+    background:radial-gradient(ellipse at 50% 50%,rgba(4,9,30,.12) 0%,rgba(4,9,30,.62) 100%)}
 
   /* ── header ── */
   #header{
@@ -38,17 +38,9 @@
     background:rgba(0,229,255,.07);border:1px solid rgba(0,229,255,.25);
     border-radius:calc(6*var(--u));padding:calc(7*var(--u)) calc(16*var(--u));
     font-size:calc(11*var(--u));color:rgba(0,229,255,.75);letter-spacing:.12em;text-transform:uppercase}
-  #lang-toggle{display:flex;gap:calc(5*var(--u))}
-  .lang-btn{
-    background:rgba(0,229,255,.05);border:1px solid rgba(0,229,255,.2);
-    border-radius:calc(4*var(--u));padding:calc(6*var(--u)) calc(14*var(--u));
-    font-size:calc(10*var(--u));color:rgba(0,229,255,.45);letter-spacing:.14em;
-    text-transform:uppercase;cursor:pointer;font-family:inherit;transition:.18s}
-  .lang-btn.active{
-    background:rgba(0,229,255,.15);border-color:var(--cyan);color:var(--cyan);font-weight:700}
 
-  /* ── map stage ── */
-  #map-stage{position:fixed;inset:0}
+  /* ── map stage (sized by JS to match the cover-scaled map image) ── */
+  #map-stage{position:fixed;left:0;top:0}
 
   /* ── connection lines svg ── */
   #svg-lines{position:fixed;inset:0;pointer-events:none;z-index:10}
@@ -77,20 +69,17 @@
     transform:scale(1.12);
     box-shadow:0 0 calc(22*var(--u)) rgba(0,229,255,.6),inset 0 0 calc(10*var(--u)) rgba(0,71,171,.3)}
   .map-pin:active .pin-icon{transform:scale(.94)}
-  .pin-icon img{width:65%;height:65%;object-fit:contain}
-  .pin-num{
-    position:absolute;bottom:-2px;right:-2px;
-    width:calc(20*var(--u));height:calc(20*var(--u));border-radius:50%;
-    background:var(--gold);color:#000;
-    font-size:calc(10*var(--u));font-weight:700;
-    display:flex;align-items:center;justify-content:center}
+  .pin-icon img{width:100%;height:100%;object-fit:cover}
   .pin-label{
     margin-top:calc(7*var(--u));
     background:rgba(4,9,30,.88);border:1px solid rgba(0,229,255,.28);
-    border-radius:calc(4*var(--u));padding:calc(3*var(--u)) calc(9*var(--u));
-    font-size:calc(9.5*var(--u));letter-spacing:.07em;
-    color:rgba(0,229,255,.85);text-align:center;white-space:nowrap;
-    max-width:calc(130*var(--u));overflow:hidden;text-overflow:ellipsis}
+    border-radius:calc(4*var(--u));padding:calc(4*var(--u)) calc(10*var(--u));
+    text-align:center;max-width:calc(160*var(--u));
+    display:flex;flex-direction:column;align-items:center;gap:calc(1*var(--u))}
+  .pl-state{font-size:calc(11*var(--u));font-weight:700;letter-spacing:.08em;
+    color:var(--cyan);text-transform:uppercase;white-space:nowrap}
+  .pl-motif{font-size:calc(9*var(--u));letter-spacing:.03em;
+    color:rgba(255,255,255,.72);line-height:1.25}
 
   @keyframes pinFloat{from{transform:translateY(0)}to{transform:translateY(calc(-7*var(--u)))}}
   @keyframes pinRipple{
@@ -130,13 +119,13 @@
   /* ── card header ── */
   .card-header{
     display:flex;align-items:flex-start;gap:calc(20*var(--u));
-    margin-bottom:calc(22*var(--u));padding-bottom:calc(18*var(--u));
+    margin-bottom:calc(18*var(--u));padding-bottom:calc(16*var(--u));
     border-bottom:1px solid rgba(0,229,255,.13)}
   .card-icon-wrap{
     flex-shrink:0;width:calc(76*var(--u));height:calc(76*var(--u));border-radius:50%;
     background:rgba(0,229,255,.07);border:2px solid rgba(0,229,255,.28);
     display:flex;align-items:center;justify-content:center;overflow:hidden}
-  .card-icon-wrap img{width:70%;height:70%;object-fit:contain}
+  .card-icon-wrap img{width:100%;height:100%;object-fit:cover}
   .card-meta{flex:1}
   .card-num{
     font-size:calc(10.5*var(--u));letter-spacing:.2em;text-transform:uppercase;
@@ -148,21 +137,33 @@
     font-size:calc(11*var(--u));color:rgba(255,215,0,.72);
     margin-top:calc(5*var(--u));letter-spacing:.08em}
 
+  /* ── card tabs ── */
+  .card-tabs{display:flex;gap:calc(8*var(--u));margin-bottom:calc(16*var(--u))}
+  .card-tab{
+    flex:1;background:rgba(0,229,255,.05);border:1px solid rgba(0,229,255,.2);
+    border-radius:calc(6*var(--u));padding:calc(9*var(--u)) calc(10*var(--u));
+    font-size:calc(11.5*var(--u));color:rgba(0,229,255,.5);letter-spacing:.07em;
+    text-transform:uppercase;cursor:pointer;font-family:inherit;transition:.18s;text-align:center}
+  .card-tab.active{background:rgba(0,229,255,.15);border-color:var(--cyan);color:var(--cyan);font-weight:700}
+
   /* ── card body ── */
   .card-body{font-size:calc(14.5*var(--u));color:rgba(255,255,255,.82);line-height:1.8}
-  .fact-img{width:100%;max-height:calc(210*var(--u));object-fit:contain;
+  .card-page{display:none}
+  .card-page.active{display:block}
+  .fact-img{width:100%;max-height:calc(230*var(--u));object-fit:contain;
     border-radius:calc(8*var(--u));margin-bottom:calc(14*var(--u));
     border:1px solid rgba(0,229,255,.15);background:rgba(0,0,0,.3)}
-  .fact-img.cover{object-fit:cover}
+  /* ── security features (Page 2) ── */
+  .sec-head{font-size:calc(12*var(--u));letter-spacing:.14em;text-transform:uppercase;
+    color:var(--cyan);font-weight:700;margin-bottom:calc(12*var(--u));
+    display:flex;align-items:center;gap:calc(9*var(--u))}
+  .sec-head::before{content:'';width:calc(20*var(--u));height:calc(2*var(--u));background:var(--cyan)}
+  .sec-sheet{width:100%;display:block;border-radius:calc(10*var(--u));
+    border:1px solid rgba(0,229,255,.3);
+    box-shadow:0 0 calc(26*var(--u)) rgba(0,229,255,.12)}
   .card-body p{margin-bottom:calc(12*var(--u))}
   .card-body strong{color:#fff;font-weight:600}
   .card-body em{color:rgba(0,229,255,.85);font-style:italic}
-  .card-body .highlight{
-    background:rgba(0,229,255,.05);
-    border-left:3px solid rgba(0,229,255,.4);
-    padding:calc(10*var(--u)) calc(16*var(--u));
-    border-radius:0 calc(6*var(--u)) calc(6*var(--u)) 0;
-    margin:calc(14*var(--u)) 0;color:rgba(0,229,255,.9)}
   .tag{
     display:inline-block;
     background:rgba(255,215,0,.1);border:1px solid rgba(255,215,0,.32);
@@ -178,8 +179,6 @@
     display:flex;align-items:center;justify-content:center;
     transition:background .2s,color .2s;z-index:10}
   #btn-close:hover{background:rgba(0,229,255,.18);color:#fff}
-
-  /* nav row removed — use pins to switch facts */
 
   /* ── hint bar ── */
   #hint{
@@ -209,15 +208,8 @@
 
 <div id="header">
   <div id="header-left">
-    <h1 id="header-h1">Sejarah Mata Wang &amp; Perbankan Johor</h1>
-    <p id="header-sub">5 Fakta Menarik — Sentuh ikon untuk menerokai</p>
-  </div>
-  <div style="display:flex;align-items:center;gap:calc(16*var(--u))">
-    <div id="lang-toggle">
-      <button class="lang-btn active" id="btn-bm" onclick="setLang('bm')">BM</button>
-      <button class="lang-btn" id="btn-en" onclick="setLang('en')">EN</button>
-    </div>
-    <div class="header-badge">BNM Museum · IMD 2026</div>
+    <h1 id="header-h1">Kenali Wang Anda</h1>
+    <p id="header-sub">Wang Kertas Malaysia</p>
   </div>
 </div>
 
@@ -237,182 +229,169 @@
         <div class="card-period" id="card-period"></div>
       </div>
     </div>
-    <div class="card-body" id="card-body"></div>
+    <div class="card-tabs">
+      <button class="card-tab active" id="tab-1" onclick="showCardPage(1)">Imej</button>
+      <button class="card-tab" id="tab-2" onclick="showCardPage(2)">Ciri Keselamatan</button>
+    </div>
+    <div class="card-body">
+      <div class="card-page active" id="page-1">
+        <img class="fact-img" id="page1-img" src="" alt="">
+        <div id="page1-text"></div>
+      </div>
+      <div class="card-page" id="page-2">
+        <div id="page2-body"></div>
+      </div>
+    </div>
   </div>
 </div>
 
-<div id="hint">Sentuh ikon untuk menerokai sejarah kewangan Johor</div>
+<div id="hint">Sentuh sebuah negeri untuk menerokai wang kertas Malaysia</div>
 <div class="p6-particles" id="p6-particles"></div>
 
 <script>
 // ══════════════════════════════════════════════════
-// DATA
+// DATA — 6 wang kertas BNM, dipetakan ke negeri
 // ══════════════════════════════════════════════════
 const FACTS = [
   {
-    id: 1,
-    icon: 'Assets/Map icon/Icon_01.png',
-    x: 52, y: 42,
-    en: {
-      label: 'Gold Coins',
-      period: '1564 – 1760',
-      title: 'Johor Minted Its Own Gold Coins — The Mas & Kupang',
-      body: `
-        <img class="fact-img" src="Assets/maskupang.png" alt="Mas & Kupang gold coins">
-        <p>After the fall of Malacca to the Portuguese in <strong>1511</strong>, the Johor Sultanate developed its own gold trade coinage — two denominations known as the <span class="tag">Mas</span> and the <span class="tag">Kupang</span>.</p>
-        <p>These <strong>octagonal gold coins</strong> were so widely accepted that they circulated as far north as <em>Patani and Kedah</em>, and even into parts of Sumatra.</p>
-        <p>Alongside these, tin coins called <span class="tag">Katun</span> were used locally — minted in round, hexagonal, and octagonal shapes.</p>
-        <div class="highlight">Gold coin production eventually ceased during the reign of Sultan Sulaiman Badrul Alam Shah <strong>(1722–1760)</strong>.</div>
-      `
-    },
-    bm: {
-      label: 'Syiling Emas',
-      period: '1564 – 1760',
-      title: 'Johor Mencetak Syiling Emas Tersendiri — Mas & Kupang',
-      body: `
-        <img class="fact-img" src="Assets/maskupang.png" alt="Syiling Mas & Kupang">
-        <p>Selepas kejatuhan Melaka kepada Portugis pada <strong>1511</strong>, Kesultanan Johor membangunkan syiling perdagangan emas tersendiri — dua denominasi yang dikenali sebagai <span class="tag">Mas</span> dan <span class="tag">Kupang</span>.</p>
-        <p>Syiling emas <strong>bersegi lapan</strong> ini diterima secara meluas sehingga beredar sejauh utara seperti <em>Patani dan Kedah</em>, malah ke bahagian Sumatera.</p>
-        <p>Selain itu, syiling timah yang dikenali sebagai <span class="tag">Katun</span> digunakan secara tempatan — dicetak dalam bentuk bulat, segi enam, dan segi lapan.</p>
-        <div class="highlight">Pengeluaran syiling emas akhirnya terhenti semasa pemerintahan Sultan Sulaiman Badrul Alam Shah <strong>(1722–1760)</strong>.</div>
-      `
-    }
+    id: 1, denom: 'RM1', state: 'Kelantan', x: 26.3, y: 32.1,
+    note:     'Assets-malaysia/notes/RM1_kelantan_note.png',
+    security: [
+      { method:'Sentuh', icon:'✋', items:[
+        {t:"Cetakan timbul", d:"Sentuh kesan cetakan timbul pada wang kertas."} ]},
+      { method:'Cahaya Putih', icon:'💡', items:[
+        {t:"Tingkap pandang telus", d:"Tingkap lutsinar dengan angka 1 dicetak timbul."},
+        {t:"Imej tanda bayang", d:"Imej lengkap bayangan motif songket."},
+        {t:"Tingkap tidak telus", d:"Bulan sabit dan bintang dicetak dalam warna putih pada bahagian belakang wang polimer."},
+        {t:"Tanda pandang telus", d:"Bentuk lengkap angka 1."} ]},
+      { method:'Cahaya Ultraungu', icon:'🔦', items:[
+        {t:"Huruf mikro", d:"Cetakan timbul tulisan huruf mikro."},
+        {t:"Unsur cahaya pendarfluor dua warna", d:"Imej Wau Bulan dan angka 1 dalam warna merah dan kuning."},
+        {t:"Teks dan logo", d:"Motif kijang dan kotak segi empat tepat dengan teks 'BNM 1'."} ]}
+    ],
+    subject: 'Wau Bulan',
+    caption: `<p>Wang kertas RM1 memaparkan imej Wau Bulan, iaitu sejenis permainan tradisional yang paling ikonik dan terkenal di Malaysia, terutamanya di Kelantan dan Terengganu.</p>
+      <p>Secara tradisinya, permainan wau juga menjadi satu acara untuk meraikan hasil tuaian yang baik, sekali gus merapatkan hubungan masyarakat setempat di negeri-negeri tersebut.</p>
+      <p>Wau Bulan buatan tangan yang diperbuat daripada buluh dan kertas turut menjadi hiasan popular di rumah-rumah di Malaysia.</p>`
   },
   {
-    id: 2,
-    icon: 'Assets/Map icon/Icon_02.png',
-    x: 20, y: 77,
-    en: {
-      label: 'Constantinople Estate',
-      period: '1 May 1878',
-      title: "The Constantinople Estate: Johor's Own Private Banknotes",
-      body: `
-        <img class="fact-img cover" src="Assets/kukup.png" alt="Constantinople Estate currency notes">
-        <p>On <strong>1 May 1878</strong>, a wealthy Arab-Peranakan merchant named <strong>Sayid Muhammad al-Sagoff</strong> issued a series of rare private currency notes for exclusive use within his <strong>60,000-acre</strong> agricultural concession at <em>Kukup</em>, southwestern Johor — authorised by Sultan Abu Bakar himself.</p>
-        <p>The notes came in four denominations: <span class="tag">25¢</span> <span class="tag">50¢</span> <span class="tag">$1</span> <span class="tag">$2</span> — primarily used to pay coolie labourers working on plantations of gambier, pepper, sago, rubber, and cocoa.</p>
-        <div class="highlight">The estate was named <strong>"Constantinople"</strong> in homage to the Ottoman capital, reflecting al-Sagoff's ties to the Ottoman Empire — including his appointment as Ottoman consular representative in Singapore.</div>
-        <p>These notes are today extraordinarily rare — surviving pieces fetch <strong>SGD $10,000–$20,000</strong> at auction.</p>
-      `
-    },
-    bm: {
-      label: 'Estet Constantinople',
-      period: '1 Mei 1878',
-      title: 'Estet Constantinople: Wang Kertas Persendirian Johor',
-      body: `
-        <img class="fact-img cover" src="Assets/kukup.png" alt="Wang kertas Estet Constantinople">
-        <p>Pada <strong>1 Mei 1878</strong>, seorang saudagar kaya Arab-Peranakan bernama <strong>Sayid Muhammad al-Sagoff</strong> mengeluarkan siri wang kertas persendirian yang jarang untuk digunakan secara eksklusif dalam konsesi pertaniannya seluas <strong>60,000 ekar</strong> di <em>Kukup</em>, barat daya Johor — dengan kebenaran Sultan Abu Bakar sendiri.</p>
-        <p>Wang kertas ini terdapat dalam empat denominasi: <span class="tag">25¢</span> <span class="tag">50¢</span> <span class="tag">$1</span> <span class="tag">$2</span> — terutamanya digunakan untuk membayar buruh kuli yang bekerja di ladang gambir, lada, sagu, getah, dan koko.</p>
-        <div class="highlight">Estet ini dinamakan <strong>"Constantinople"</strong> sebagai penghormatan kepada ibu kota Ottoman, mencerminkan hubungan al-Sagoff dengan Empayar Ottoman — termasuk pelantikannya sebagai wakil konsul Ottoman di Singapura.</div>
-        <p>Wang kertas ini kini amat langka — kepingan yang masih wujud mencapai harga <strong>SGD $10,000–$20,000</strong> dalam lelongan.</p>
-      `
-    }
+    id: 2, denom: 'RM5', state: 'Sarawak', x: 58.0, y: 48.5,
+    note:     'Assets-malaysia/notes/RM5_sarawak_note.png',
+    security: [
+      { method:'Sentuh', icon:'✋', items:[
+        {t:"Cetakan timbul", d:"Sentuh kesan cetakan timbul pada wang kertas."} ]},
+      { method:'Cahaya Putih', icon:'💡', items:[
+        {t:"Tingkap pandang telus", d:"Tingkap lutsinar dengan angka 5 dicetak timbul."},
+        {t:"Imej tanda bayang", d:"Bayangan lengkap motif burung enggang."},
+        {t:"Tingkap tidak telus", d:"Bulan sabit dan bintang dicetak dalam warna putih pada bahagian belakang wang polimer."},
+        {t:"Tanda pandang telus", d:"Bentuk lengkap angka 5."},
+        {t:"Petak berubah warna", d:"Motif berubah daripada hijau kepada ungu apabila disengetkan."} ]},
+      { method:'Cahaya Ultraungu', icon:'🔦', items:[
+        {t:"Huruf mikro", d:"Cetakan timbul tulisan huruf mikro."},
+        {t:"Unsur cahaya pendarfluor dua warna", d:"Imej burung enggang dan angka 5 dalam warna merah dan kuning."},
+        {t:"Teks dan logo", d:"Motif kijang dan kotak segi empat tepat dengan teks 'BNM 5'."} ]}
+    ],
+    subject: 'Enggang Badak',
+    caption: `<p>Wang kertas polimer RM5 memaparkan Burung Enggang Badak (Buceros rhinoceros), salah satu spesies enggang terbesar dan paling menonjol di dunia.</p>
+      <p>Burung hutan ini mempunyai sayap yang lebar dan ekor yang panjang serta biasanya ditemui dalam kumpulan kecil di hutan hujan di seluruh negara.</p>
+      <p>Ia turut memainkan peranan penting dalam budaya serta upacara tradisional di Sarawak, yang dikenali sebagai 'Bumi Kenyalang'. Selain itu, burung enggang merupakan simbol kekuatan dan keberanian bagi masyarakat asli Sarawak.</p>`
   },
   {
-    id: 3,
-    icon: 'Assets/Map icon/Icon_03.png',
-    x: 30, y: 40,
-    en: {
-      label: 'Doughnut Coin',
-      period: '1722 – 1760',
-      title: 'Johor Had a Unique "Doughnut Hole" Coin',
-      body: `
-        <img class="fact-img" src="Assets/pitis.jpg" alt="Johor pitis coin with hole">
-        <p>Among the currency designs on display at the BNM Museum, the Johor currency from <strong>Sultan Sulaiman Badrul Alam Shah's</strong> reign stands out — it featured a <strong>hole in the middle</strong>, reminiscent of modern Danish 1 krone coins.</p>
-        <div class="highlight">This distinctive circular-hole design was a <strong>unique feature</strong> of Johor's monetary identity — unlike any other Malay sultanate coinage of the era.</div>
-        <p>The design was eventually replaced as <em>British colonial standardisation</em> took over in the late 19th century, erasing the individuality of Johor's monetary tradition.</p>
-      `
-    },
-    bm: {
-      label: 'Syiling Berlubang',
-      period: '1722 – 1760',
-      title: 'Johor Mempunyai Syiling "Berlubang" Yang Unik',
-      body: `
-        <img class="fact-img" src="Assets/pitis.jpg" alt="Syiling pitis Johor berlubang">
-        <p>Antara reka bentuk mata wang yang dipamerkan di Museum BNM, mata wang Johor dari zaman pemerintahan <strong>Sultan Sulaiman Badrul Alam Shah</strong> amat menonjol — ia mempunyai <strong>lubang di tengah</strong>, mengingatkan kepada syiling 1 krone Denmark moden.</p>
-        <div class="highlight">Reka bentuk berlubang yang tersendiri ini merupakan <strong>ciri unik</strong> identiti kewangan Johor — tidak seperti mana-mana syiling kesultanan Melayu lain pada zaman tersebut.</div>
-        <p>Reka bentuk ini akhirnya digantikan apabila <em>penyeragaman kolonial British</em> mengambil alih pada akhir abad ke-19, menghapuskan keunikan tradisi kewangan Johor.</p>
-      `
-    }
+    id: 3, denom: 'RM10', state: 'Perak', x: 18.8, y: 43.6,
+    iconPos: '22% 50%',
+    note:     'Assets-malaysia/notes/RM10_perak_note.png',
+    security: [
+      { method:'Sentuh', icon:'✋', items:[
+        {t:"Cetakan timbul", d:"Sentuh kesan cetakan timbul pada wang kertas."} ]},
+      { method:'Cahaya Putih', icon:'💡', items:[
+        {t:"Tanda air", d:"Potret tera air dan angka 10."},
+        {t:"Tanda pandang telus", d:"Bentuk lengkap angka 10."},
+        {t:"Benang keselamatan berubah warna", d:"Benang keselamatan yang dijalin berubah warna daripada biru kepada merah, dengan garisan gelap dan huruf mikro 'BNM10'."},
+        {t:"Petak kilat berwarna", d:"Jalur berwarna emas dengan teks 'RM10'."} ]},
+      { method:'Cahaya Ultraungu', icon:'🔦', items:[
+        {t:"Huruf mikro", d:"Cetakan timbul tulisan huruf mikro."},
+        {t:"Unsur cahaya pendarfluor dua warna", d:"Imej bunga Rafflesia dan angka 10 dalam warna merah dan kuning."},
+        {t:"Teks dan logo", d:"Motif kijang dan kotak segi empat tepat dengan teks 'BNM 10'."},
+        {t:"Benang serat keselamatan", d:"Kelihatan bertaburan dalam warna merah, kuning dan biru."} ]}
+    ],
+    subject: 'Rafflesia Azlanii',
+    caption: `<p>Tahukah anda bunga Rafflesia yang dipaparkan pada wang kertas RM10 bukanlah spesies bunga yang terdapat di Borneo?</p>
+      <p>Hutan hujan tropika Malaysia yang tumbuh subur, iaitu antara hutan hujan tertua di dunia, mempunyai pelbagai jenis tumbuhan berbunga, dan salah satu yang paling ikonik ialah bunga terbesar di dunia, iaitu bunga Rafflesia.</p>
+      <p>Bunga Rafflesia Azlanii yang dipaparkan pada wang kertas RM10 ini merupakan spesies asli Semenanjung Malaysia dan pertama kali ditemui di Hutan Simpan Royal Belum di negeri Perak pada tahun 2003. Bagi memperingati penemuan ini, bunga yang mengagumkan ini dinamakan sempena Sultan Perak, Sultan Azlan Muhibbuddin Shah ibni Almarhum Sultan Yusuff Izzuddin Shah Ghafarullahu-Lah.</p>`
   },
   {
-    id: 4,
-    icon: 'Assets/Map icon/Icon_04.png',
-    x: 80, y: 82,
-    en: {
-      label: 'Anglo-Johor Treaty',
-      period: '1885',
-      title: "The Anglo-Johor Treaty Ended Johor's Own Currency",
-      body: `
-        <img class="fact-img cover" src="Assets/treaty.png" alt="Anglo-Johor Treaty 1885">
-        <p>Under the <strong>Anglo-Johor Treaty of 1885</strong>, all currency apart from the <strong>Straits Settlements coinage</strong> was officially withdrawn from circulation in Johor.</p>
-        <p>This marked the end of Johor's monetary independence — the Sultanate had been <em>one of the last Malay states</em> to resist British financial control.</p>
-        <div class="highlight">The 1885 treaty included a provision that Johor's government would be supplied coins from <strong>British mints</strong> on the same terms as other Malay states — effectively folding Johor into the British colonial monetary system.</div>
-      `
-    },
-    bm: {
-      label: 'Perjanjian Anglo-Johor',
-      period: '1885',
-      title: 'Perjanjian Anglo-Johor Menamatkan Mata Wang Johor',
-      body: `
-        <img class="fact-img cover" src="Assets/treaty.png" alt="Perjanjian Anglo-Johor 1885">
-        <p>Di bawah <strong>Perjanjian Anglo-Johor 1885</strong>, semua mata wang selain daripada <strong>syiling Negeri-Negeri Selat</strong> telah ditarik balik secara rasmi daripada peredaran di Johor.</p>
-        <p>Ini menandakan berakhirnya kemerdekaan kewangan Johor — Kesultanan ini merupakan antara <em>negeri Melayu terakhir</em> yang menentang kawalan kewangan British.</p>
-        <div class="highlight">Perjanjian 1885 turut mengandungi peruntukan bahawa kerajaan Johor akan dibekalkan syiling daripada <strong>kilang percetakan British</strong> dengan terma yang sama seperti negeri-negeri Melayu lain — dengan berkesan melipat Johor ke dalam sistem kewangan kolonial British.</div>
-      `
-    }
+    id: 4, denom: 'RM20', state: 'Terengganu', x: 40.4, y: 35.5,
+    note:     'Assets-malaysia/notes/RM20_terengganu_note.png',
+    security: [
+      { method:'Sentuh', icon:'✋', items:[
+        {t:"Cetakan timbul", d:"Sentuh kesan cetakan timbul pada wang kertas."} ]},
+      { method:'Cahaya Putih', icon:'💡', items:[
+        {t:"Tanda air", d:"Potret tera air dan angka 20."},
+        {t:"Tanda pandang telus", d:"Bentuk lengkap angka 20."},
+        {t:"Benang keselamatan berubah warna", d:"Benang keselamatan yang dijalin berubah warna daripada emas kepada hijau, dengan garisan gelap dan huruf mikro 'BNM20'."},
+        {t:"Petak kilat berwarna", d:"Jalur berwarna emas dengan teks 'RM20'."} ]},
+      { method:'Cahaya Ultraungu', icon:'🔦', items:[
+        {t:"Huruf mikro", d:"Cetakan timbul tulisan huruf mikro."},
+        {t:"Unsur cahaya pendarfluor dua warna", d:"Imej penyu dan angka 20 dalam warna merah dan kuning."},
+        {t:"Teks dan logo", d:"Motif kijang dan kotak segi empat tepat dengan teks 'BNM 20'."},
+        {t:"Benang serat keselamatan", d:"Kelihatan bertaburan dalam warna merah, kuning dan biru."} ]}
+    ],
+    subject: 'Penyu Karah & Penyu Belimbing',
+    caption: `<p>Wang kertas RM20 pula memaparkan dua spesies penyu terkenal dan hanya dijumpai di perairan Malaysia iaitu Penyu Karah (Eretmochelys imbricata) dan Penyu Belimbing (Dermochelys coriacea), yang juga merupakan lambang hidupan laut yang pelbagai dan berwarna-warni di perairan tropika Malaysia.</p>
+      <p>Penyu Karah mudah dikenali melalui muncungnya yang melengkung dan kulitnya yang bersisik manakala Penyu Belimbing pula mempunyai kulit yang keras dan tujuh jaluran pada cangkerangnya.</p>
+      <p>Kewujudan penyu-penyu ini memberi peringatan bahawa kehidupan mereka bergantung pada imbangan aktiviti manusia dan pemuliharaan hidupan laut yang perlu dikendalikan dengan bijaksana.</p>`
   },
   {
-    id: 5,
-    icon: 'Assets/Map icon/Icon_05.png',
-    x: 68, y: 62,
-    en: {
-      label: "Johor's Treasury",
-      period: 'Late 19th Century',
-      title: "Johor's Treasury: One of Malaya's First Modern State Financial Institutions",
-      body: `
-        <img class="fact-img cover" src="Assets/bankjohor.png" alt="Bank of Johor">
-        <p>Under the leadership of <strong>Sultan Abu Bakar</strong> — known as the <em>"Father of Modern Johor"</em> — various government departments were established in the late 19th century, among them a formal <strong>Treasury</strong>.</p>
-        <p>This made Johor one of the <strong>earliest Malay states</strong> to have a structured, government-run financial administration.</p>
-        <div class="highlight">More recently, Sultan Ibrahim Ismail has even floated the idea of a <strong>Bank of Johor</strong> — continuing the state's long tradition of financial ambition and independence.</div>
-      `
-    },
-    bm: {
-      label: 'Perbendaharaan Johor',
-      period: 'Akhir Abad ke-19',
-      title: 'Perbendaharaan Johor: Antara Institusi Kewangan Moden Terawal di Malaya',
-      body: `
-        <img class="fact-img cover" src="Assets/bankjohor.png" alt="Bank Johor">
-        <p>Di bawah pimpinan <strong>Sultan Abu Bakar</strong> — dikenali sebagai <em>"Bapa Johor Moden"</em> — pelbagai jabatan kerajaan ditubuhkan pada akhir abad ke-19, antaranya sebuah <strong>Perbendaharaan</strong> rasmi.</p>
-        <p>Ini menjadikan Johor antara <strong>negeri Melayu terawal</strong> yang mempunyai pentadbiran kewangan berstruktur yang dikendalikan kerajaan.</p>
-        <div class="highlight">Baru-baru ini, Sultan Ibrahim Ismail bahkan pernah mengutarakan idea mengenai sebuah <strong>Bank Johor</strong> — meneruskan tradisi panjang negeri ini dalam keazaman dan kemerdekaan kewangan.</div>
-      `
-    }
+    id: 5, denom: 'RM50', state: 'Selangor', x: 22.3, y: 60.1,
+    note:     'Assets-malaysia/notes/RM50_selangor_note.png',
+    security: [
+      { method:'Sentuh', icon:'✋', items:[
+        {t:"Cetakan timbul", d:"Sentuh kesan cetakan timbul pada wang kertas."} ]},
+      { method:'Cahaya Putih', icon:'💡', items:[
+        {t:"Tanda air", d:"Potret tera air dan angka 50."},
+        {t:"Tanda pandang telus", d:"Bentuk lengkap grafik songket."},
+        {t:"Benang keselamatan berubah warna", d:"Benang keselamatan yang dijalin berubah warna daripada merah kepada hijau."},
+        {t:"Jalur holografik", d:"Angka 50 dan bunga raya berwarna berbelau; imej pendam pelbagai warna apabila disengetkan."} ]},
+      { method:'Cahaya Ultraungu', icon:'🔦', items:[
+        {t:"Huruf mikro", d:"Cetakan timbul tulisan huruf mikro."},
+        {t:"Unsur cahaya pendarfluor dua warna", d:"Imej bunga raya dan angka 50 dalam warna merah dan kuning."},
+        {t:"Teks dan logo", d:"Motif kijang dan kotak segi empat tepat dengan teks 'BNM 50'."},
+        {t:"Benang serat keselamatan", d:"Kelihatan bertaburan dalam warna merah, kuning dan biru."} ]}
+    ],
+    subject: 'Kelapa Sawit · Tema "Misi Negara"',
+    caption: `<p>Reka bentuk wang kertas ini berteraskan tema “Misi Negara”, yang menekankan usaha berterusan untuk memacu ekonomi Malaysia ke arah rantaian nilai yang lebih tinggi. Aspirasi ini mencerminkan transformasi ekonomi negara kepada aktiviti bernilai tambah dalam sektor pertanian, pembuatan dan perkhidmatan, sejajar dengan perkembangan ekonomi moden.</p>
+      <p>Pada bahagian hadapan, potret Seri Paduka Baginda Yang di-Pertuan Agong pertama, Tuanku Abdul Rahman ibni Tuanku Muhammad, ditampilkan secara dominan melalui teknik cetakan intaglio, melambangkan kedaulatan dan warisan negara. Di bahagian tengah pula, bunga raya sebagai bunga kebangsaan diperagakan sebagai simbol identiti nasional. Keseluruhan komposisi diperkaya dengan motif tenunan songket yang menghiasi bahagian belakang dan sisi wang kertas, mencerminkan kehalusan kraftangan serta tradisi tekstil Malaysia.</p>
+      <p>Bahagian belakang wang kertas ini menampilkan detik bersejarah pengisytiharan kemerdekaan Tanah Melayu oleh Perdana Menteri pertama, Tunku Abdul Rahman Putra Al-Haj. Visual ini diperkukuhkan dengan kehadiran logo Ulang Tahun Kemerdekaan ke-50, sebagai penghormatan terhadap perjalanan negara dalam mencapai dan mengekalkan kemerdekaan.</p>`
+  },
+  {
+    id: 6, denom: 'RM100', state: 'Sabah', x: 74.3, y: 25.0,
+    note:     'Assets-malaysia/notes/RM100_sabah_note.png',
+    security: [
+      { method:'Sentuh', icon:'✋', items:[
+        {t:"Cetakan timbul", d:"Sentuh kesan cetakan timbul pada wang kertas."} ]},
+      { method:'Cahaya Putih', icon:'💡', items:[
+        {t:"Tanda air", d:"Potret tera air dan angka 100."},
+        {t:"Tanda pandang telus", d:"Bentuk lengkap angka 100."},
+        {t:"Benang keselamatan berubah warna", d:"Benang keselamatan yang dijalin berubah warna, dengan garisan gelap dan huruf mikro 'BNM100'."},
+        {t:"Petak kilat berwarna", d:"Jalur berwarna emas dengan teks 'RM100'."} ]},
+      { method:'Cahaya Ultraungu', icon:'🔦', items:[
+        {t:"Huruf mikro", d:"Cetakan timbul tulisan huruf mikro."},
+        {t:"Unsur cahaya pendarfluor dua warna", d:"Imej Gunung Kinabalu dan angka 100 dalam warna biru dan kuning."},
+        {t:"Teks dan logo", d:"Motif kijang dan kotak segi empat tepat dengan teks 'BNM 100'."},
+        {t:"Benang serat keselamatan", d:"Kelihatan bertaburan dalam warna merah, kuning dan biru."} ]}
+    ],
+    subject: 'Gunung Kinabalu & Lembah Gunung Api',
+    caption: `<p>Wang kertas RM100 menampilkan dua keajaiban alam semula jadi terulung di Malaysia yang telah diiktiraf sebagai Tapak Warisan Dunia oleh Pertubuhan Pendidikan, Sains dan Kebudayaan Bangsa-bangsa Bersatu (UNESCO). Pengiktirafan ini mencerminkan nilai sejagat yang luar biasa bagi warisan Malaysia.</p>
+      <p>Antara yang diketengahkan ialah Taman Kinabalu di Sabah, yang menempatkan Gunung Kinabalu, iaitu gunung tertinggi di Asia Tenggara, sebagai simbol keagungan landskap semula jadi negara. Turut dipaparkan ialah formasi batu kapur yang unik dan dramatik di lembah Gunung Api, yang terletak dalam kawasan Taman Negara Mulu di Sarawak, terkenal dengan keindahan geologi yang menakjubkan.</p>
+      <p>Kedua-dua tapak ini bukan sahaja memperlihat kekayaan biodiversiti dan keunikan geologi Malaysia, malah menawarkan pengalaman alam semula jadi yang istimewa dan tidak ternilai kepada para pengunjung.</p>`
   }
 ];
-
-// ══════════════════════════════════════════════════
-// I18N
-// ══════════════════════════════════════════════════
-const LANG = {
-  en: {
-    h1:    'Johor Currency &amp; Banking History',
-    sub:   '5 Interesting Facts — Tap any icon to explore',
-    hint:  "Tap an icon to discover Johor's monetary history",
-    factOf: (n, t) => `Fact ${n} of ${t}`,
-  },
-  bm: {
-    h1:    'Sejarah Mata Wang &amp; Perbankan Johor',
-    sub:   '5 Fakta Menarik — Sentuh ikon untuk menerokai',
-    hint:  'Sentuh ikon untuk menerokai sejarah kewangan Johor',
-    factOf: (n, t) => `Fakta ${n} daripada ${t}`,
-  }
-};
 
 // ══════════════════════════════════════════════════
 // STATE
 // ══════════════════════════════════════════════════
 let activeIdx = -1;
-let currentLang = 'bm';
+let currentPage = 1;
 
 // ══════════════════════════════════════════════════
 // BUILD PINS
@@ -430,11 +409,13 @@ FACTS.forEach((f, i) => {
       <div class="pin-ring"></div>
       <div class="pin-ring" style="animation-delay:.9s"></div>
       <div class="pin-icon" style="animation-delay:${(i * 0.55).toFixed(2)}s;animation-duration:${(3.0 + i * 0.3).toFixed(1)}s">
-        <img src="${f.icon}" alt="${f[currentLang].label}">
-        <div class="pin-num">${f.id}</div>
+        <img src="${f.note}" alt="${f.denom}" style="object-position:${f.iconPos || '50% 50%'}">
       </div>
     </div>
-    <div class="pin-label">${f[currentLang].label}</div>
+    <div class="pin-label">
+      <span class="pl-state">${f.state}</span>
+      <span class="pl-motif">${f.subject}</span>
+    </div>
   `;
   pin.addEventListener('click', () => openPanel(i));
   // touch support
@@ -442,20 +423,45 @@ FACTS.forEach((f, i) => {
   stage.appendChild(pin);
 });
 
+// ══════════════════════════════════════════════════
+// ANCHOR PINS TO THE MAP IMAGE
+// Size/position #map-stage to exactly match the cover-scaled
+// background image, so pins stay locked to their map location
+// regardless of screen size or aspect ratio.
+// ══════════════════════════════════════════════════
+const MAP_W = 1536, MAP_H = 1024;   // Malaysia_mlbb_map.png native size
+function layoutStage() {
+  const vw = window.innerWidth, vh = window.innerHeight;
+  const scale = Math.max(vw / MAP_W, vh / MAP_H);   // matches background-size:cover
+  const w = MAP_W * scale, h = MAP_H * scale;
+  stage.style.width  = w + 'px';
+  stage.style.height = h + 'px';
+  stage.style.left   = ((vw - w) / 2) + 'px';
+  stage.style.top    = ((vh - h) / 2) + 'px';
+}
+window.addEventListener('resize', layoutStage);
+window.addEventListener('orientationchange', layoutStage);
+layoutStage();
+
 
 // ══════════════════════════════════════════════════
 // PANEL OPEN / CLOSE
 // ══════════════════════════════════════════════════
 function openPanel(idx) {
   const f = FACTS[idx];
-  const d = f[currentLang];
   activeIdx = idx;
 
-  document.getElementById('card-icon').src = f.icon;
-  document.getElementById('card-num').textContent = LANG[currentLang].factOf(f.id, FACTS.length);
-  document.getElementById('card-title').textContent = d.title;
-  document.getElementById('card-period').textContent = '🗓  ' + d.period;
-  document.getElementById('card-body').innerHTML = d.body;
+  document.getElementById('card-icon').src = f.note;
+  document.getElementById('card-icon').style.objectPosition = f.iconPos || '50% 50%';
+  document.getElementById('card-num').textContent = 'Wang Kertas ' + f.id + ' daripada ' + FACTS.length;
+  document.getElementById('card-title').textContent = f.denom + ' · ' + f.state;
+  document.getElementById('card-period').textContent = '🖼  Imej: ' + f.subject;
+
+  document.getElementById('page1-img').src = f.note;
+  document.getElementById('page1-text').innerHTML = f.caption;
+  document.getElementById('page2-body').innerHTML = buildSecurity(f);
+
+  showCardPage(1);
 
   // highlight active pin
   document.querySelectorAll('.map-pin').forEach((p, i) => {
@@ -467,35 +473,29 @@ function openPanel(idx) {
   playSfx();
 }
 
+function showCardPage(n) {
+  currentPage = n;
+  document.getElementById('page-1').classList.toggle('active', n === 1);
+  document.getElementById('page-2').classList.toggle('active', n === 2);
+  document.getElementById('tab-1').classList.toggle('active', n === 1);
+  document.getElementById('tab-2').classList.toggle('active', n === 2);
+  const card = document.getElementById('info-card');
+  if (card) card.scrollTop = 0;
+}
+
+// build the themed security-features panel from a fact's `security` groups
+function buildSecurity(f) {
+  const sheet = f.note.replace('/notes/', '/security/').replace('_note.png', '_security.png');
+  return `<div class="sec-head">Ciri-ciri Keselamatan · ${f.denom}</div>` +
+         `<img class="sec-sheet" src="${sheet}" alt="Ciri keselamatan ${f.denom}">`;
+}
+
 function closePanel() {
   document.getElementById('info-overlay').classList.remove('open');
   document.querySelectorAll('.map-pin .pin-icon').forEach(p => {
     p.style.borderColor = 'rgba(0,229,255,.55)';
   });
   activeIdx = -1;
-}
-
-// ══════════════════════════════════════════════════
-// LANGUAGE TOGGLE
-// ══════════════════════════════════════════════════
-function setLang(l) {
-  currentLang = l;
-  document.getElementById('btn-bm').classList.toggle('active', l === 'bm');
-  document.getElementById('btn-en').classList.toggle('active', l === 'en');
-  const L = LANG[l];
-  document.getElementById('header-h1').innerHTML = L.h1;
-  document.getElementById('header-sub').textContent = L.sub;
-  document.getElementById('hint').textContent = L.hint;
-  // update pin labels
-  FACTS.forEach((f, i) => {
-    const pin = document.getElementById('pin-' + i);
-    if (pin) {
-      pin.querySelector('.pin-label').textContent = f[l].label;
-      pin.querySelector('img').alt = f[l].label;
-    }
-  });
-  // refresh panel if open
-  if (activeIdx >= 0) openPanel(activeIdx);
 }
 
 // close on overlay background click
@@ -531,7 +531,7 @@ document.addEventListener('touchstart', e => { if (e.touches.length > 1) e.preve
 document.querySelectorAll('img').forEach(img => img.addEventListener('dragstart', e => e.preventDefault()));
 
 // ══════════════════════════════════════════════════
-// IDLE TIMER — 60s inactivity → 7s countdown → return to map
+// IDLE TIMER — inactivity → 7s countdown → return to map
 // ══════════════════════════════════════════════════
 let idleTimer = null;
 let idleCountdown = null;
@@ -552,9 +552,8 @@ function showIdleWarning() {
   const mainEl = document.getElementById('idle-warn-main');
   const subEl = document.getElementById('idle-warn-sub');
   function updateText(n) {
-    const bm = (currentLang !== 'en');
-    if (mainEl) mainEl.textContent = bm ? 'Tiada aktiviti dikesan.' : 'No activity detected.';
-    if (subEl) subEl.textContent = bm ? 'Kembali ke skrin mula dalam ' + n + ' saat...' : 'Returning to start screen in ' + n + ' seconds...';
+    if (mainEl) mainEl.textContent = 'Tiada aktiviti dikesan.';
+    if (subEl) subEl.textContent = 'Kembali ke skrin mula dalam ' + n + ' saat...';
   }
   updateText(secs);
   if (ov) ov.classList.add('visible');
