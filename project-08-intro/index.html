@@ -501,9 +501,9 @@ void main(){
   ];
   const sleep=ms=>new Promise(r=>setTimeout(r,ms));
   function charDelay(ch){
-    if(ch==='.'||ch===',') return 300;
-    if(ch===' ') return 28;
-    return 40;
+    if(ch==='.'||ch===',') return 150;
+    if(ch===' ') return 14;
+    return 20;
   }
   let narrToken=0;
   async function startNarration(){
@@ -522,11 +522,11 @@ void main(){
         if(c%3===0) tick();
         await sleep(charDelay(txt[c]));
       }
-      await sleep(540);
+      await sleep(270);
     }
     if(mine!==narrToken) return;
     cursor.remove();
-    await sleep(700);
+    await sleep(350);
     if(mine!==narrToken) return;
     narrationDone();
   }
