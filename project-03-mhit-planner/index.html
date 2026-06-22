@@ -476,6 +476,7 @@ button {
   flex-direction: column;
   align-items: center;
   gap: calc(4 * var(--u));
+  transform: translateY(30px);
 }
 .presenter-char {
   position: relative;
@@ -680,30 +681,34 @@ button {
 .copay-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: calc(14 * var(--u));
+  gap: calc(10 * var(--u));
   width: 100%;
 }
 .copay-field {
   background: var(--cream);
   border: calc(2 * var(--u)) solid var(--wood);
   border-radius: var(--radius);
-  padding: calc(12 * var(--u)) calc(14 * var(--u));
+  padding: calc(10 * var(--u)) calc(10 * var(--u));
   display: flex; flex-direction: column;
   align-items: center;
-  gap: calc(7 * var(--u));
+  gap: calc(6 * var(--u));
 }
 .copay-label {
   font-family: 'Fredoka One', cursive;
-  font-size: calc(14 * var(--u));
+  font-size: calc(13 * var(--u));
   color: var(--text);
   text-align: center;
 }
 .copay-sublabel {
-  font-size: calc(11 * var(--u));
+  font-size: calc(10 * var(--u));
   color: var(--text-light);
   text-align: center;
-  line-height: 1.4;
+  line-height: 1.3;
 }
+/* compact controls inside copay columns */
+.copay-grid .age-control { gap: calc(8 * var(--u)); flex-wrap: wrap; justify-content: center; }
+.copay-grid .age-display  { font-size: calc(26 * var(--u)) !important; min-width: 0; }
+.copay-grid .age-btn      { width: calc(36 * var(--u)); height: calc(36 * var(--u)); font-size: calc(20 * var(--u)); }
 
 /* ─── CALCULATING SCREEN ─── */
 #screen-calculating { gap: calc(22 * var(--u)); }
@@ -1086,7 +1091,7 @@ button {
           <div class="copay-sublabel" data-i18n="copay_deductible_sub"></div>
           <div class="age-control">
             <button class="age-btn minus" onclick="changeDeductible(-100)">−</button>
-            <div class="age-display" id="deductible-display" style="font-size:calc(44*var(--u))">RM 0</div>
+            <div class="age-display" id="deductible-display">RM 0</div>
             <button class="age-btn plus" onclick="changeDeductible(100)">+</button>
           </div>
         </div>
@@ -1095,7 +1100,7 @@ button {
           <div class="copay-sublabel" data-i18n="copay_coins_sub"></div>
           <div class="age-control">
             <button class="age-btn minus" onclick="changeCoIns(-5)">−</button>
-            <div class="age-display" id="coins-display" style="font-size:calc(44*var(--u))">0%</div>
+            <div class="age-display" id="coins-display">0%</div>
             <button class="age-btn plus" onclick="changeCoIns(5)">+</button>
           </div>
         </div>
@@ -1104,7 +1109,7 @@ button {
           <div class="copay-sublabel" data-i18n="copay_cap_sub"></div>
           <div class="age-control">
             <button class="age-btn minus" onclick="changeCoPayCap(-500)">−</button>
-            <div class="age-display" id="copaycap-display" style="font-size:calc(44*var(--u))">RM 0</div>
+            <div class="age-display" id="copaycap-display">RM 0</div>
             <button class="age-btn plus" onclick="changeCoPayCap(500)">+</button>
           </div>
         </div>
