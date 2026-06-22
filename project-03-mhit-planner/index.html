@@ -6,7 +6,6 @@
 <title>Perancang Bajet Penjagaan Kesihatan | Health Budget Planner</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
   :root {
     --cream: #FFF8F0;
@@ -1009,6 +1008,7 @@
     padding: calc(32 * var(--u)) 4vw;
     gap: 0;
     flex-direction: column;
+    align-items: center;
     overflow: hidden;
   }
 
@@ -1017,8 +1017,8 @@
     align-items: center;
     justify-content: space-between;
     width: 100%;
-    max-width: calc(1600 * var(--u));
-    margin-bottom: calc(22 * var(--u));
+    max-width: calc(1200 * var(--u));
+    margin-bottom: calc(36 * var(--u));
   }
 
   .results-title {
@@ -1042,162 +1042,99 @@
   }
 
   .badge-age { background: var(--teal-light); border: 1px solid rgba(0,180,166,0.25); color: var(--teal-dark); }
-  .badge-plan-none { background: var(--teal-light); border: 1px solid rgba(0,180,166,0.25); color: var(--teal-dark); }
+  .badge-plan-none { background: var(--amber-light); border: 1px solid rgba(245,124,0,0.25); color: var(--amber); }
   .badge-plan-basic { background: var(--blue-light); border: 1px solid rgba(0,71,171,0.20); color: var(--blue); }
   .badge-plan-comprehensive { background: var(--green-light); border: 1px solid rgba(46,125,50,0.20); color: var(--green); }
 
-  .results-body {
+  .result-cards {
     display: flex;
-    gap: calc(32 * var(--u));
+    gap: calc(40 * var(--u));
     width: 100%;
-    max-width: calc(1600 * var(--u));
+    max-width: calc(1200 * var(--u));
+    justify-content: center;
     flex: 1;
-    min-height: 0;
+    align-items: center;
   }
 
-  .results-left {
-    flex: 1.2;
-    display: flex;
-    flex-direction: column;
-    gap: calc(20 * var(--u));
-    min-height: 0;
-  }
-
-  .results-right {
-    flex: 0.9;
-    display: grid;
-    grid-template-rows: auto 1fr;
-    gap: calc(14 * var(--u));
-    min-height: 0;
-  }
-
-  .advice-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: calc(14 * var(--u));
-    min-height: 0;
-  }
-
-  .chart-card {
+  .result-card {
+    flex: 1;
+    max-width: calc(520 * var(--u));
+    background: white;
     border-radius: var(--radius-lg);
-    padding: calc(26 * var(--u)) calc(30 * var(--u));
-    flex: 1;
-    min-height: 0;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .chart-card h3 {
-    font-family: 'Poppins', sans-serif;
-    font-size: calc(20 * var(--u));
-    font-weight: 700;
-    color: var(--text-dark);
-    margin-bottom: calc(14 * var(--u));
-    flex-shrink: 0;
-  }
-
-  .chart-wrap { flex: 1; min-height: 0; position: relative; }
-
-  .alert-card {
-    border-radius: var(--radius-md);
-    padding: calc(20 * var(--u)) calc(28 * var(--u));
-    display: flex;
-    align-items: flex-start;
-    gap: calc(16 * var(--u));
-    background: var(--white);
-    border: 1px solid rgba(0,180,166,0.20);
-    box-shadow: var(--shadow-sm);
-    flex-shrink: 0;
-  }
-
-  .alert-card.amber { border-left: calc(5 * var(--u)) solid var(--amber); }
-  .alert-card.blue { border-left: calc(5 * var(--u)) solid var(--blue); }
-  .alert-card.green { border-left: calc(5 * var(--u)) solid var(--green); }
-
-  .alert-icon { font-size: calc(32 * var(--u)); flex-shrink: 0; }
-
-  .alert-text h4 {
-    font-family: 'Poppins', sans-serif;
-    font-size: calc(17 * var(--u));
-    font-weight: 700;
-    color: var(--text-dark);
-    margin-bottom: calc(4 * var(--u));
-  }
-
-  .alert-text p {
-    font-size: calc(15 * var(--u));
-    color: var(--text-mid);
-    line-height: 1.6;
-  }
-
-  .advice-card {
-    position: relative;
-    background: linear-gradient(160deg, var(--teal-light) 0%, var(--blue-light) 100%);
-    border-radius: calc(14 * var(--u));
-    border: calc(2 * var(--u)) solid rgba(0,180,166,0.35);
-    box-shadow:
-      0 0 0 calc(1 * var(--u)) rgba(0,180,166,0.15) inset,
-      var(--shadow-sm);
+    box-shadow: var(--shadow-lg);
+    padding: calc(52 * var(--u)) calc(44 * var(--u)) calc(44 * var(--u));
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start;
-    padding: calc(22 * var(--u)) calc(12 * var(--u)) calc(16 * var(--u));
-    gap: calc(6 * var(--u));
+    text-align: center;
+    position: relative;
     overflow: hidden;
-    opacity: 0;
-    transform: translateY(calc(12 * var(--u)));
+    border: 2px solid rgba(0,180,166,0.10);
   }
 
-  .advice-card::before {
+  .result-card::before {
     content: '';
     position: absolute;
-    inset: calc(6 * var(--u));
-    border: calc(1 * var(--u)) solid rgba(0,180,166,0.22);
-    border-radius: calc(9 * var(--u));
-    pointer-events: none;
+    top: 0; left: 0; right: 0;
+    height: calc(7 * var(--u));
   }
 
-  .advice-card::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(120deg,
-      transparent 30%, rgba(255,255,255,0.07) 50%, transparent 70%);
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    border-radius: inherit;
-    pointer-events: none;
-  }
+  .result-monthly::before { background: linear-gradient(90deg, var(--teal), var(--blue)); }
+  .result-bill::before    { background: linear-gradient(90deg, var(--blue), var(--coral)); }
 
-  .advice-icon {
-    font-size: calc(36 * var(--u));
+  .result-card-icon {
+    font-size: calc(64 * var(--u));
     line-height: 1;
-    filter: drop-shadow(0 0 calc(8 * var(--u)) rgba(0,180,166,0.30));
+    margin-bottom: calc(20 * var(--u));
   }
 
-  .advice-divider {
-    width: 70%;
-    height: calc(1 * var(--u));
-    background: linear-gradient(90deg, transparent, rgba(0,180,166,0.4), transparent);
+  .result-card-label {
+    font-family: 'Poppins', sans-serif;
+    font-size: calc(15 * var(--u));
+    font-weight: 700;
+    color: var(--text-mid);
+    text-transform: uppercase;
+    letter-spacing: calc(2.5 * var(--u));
+    margin-bottom: calc(20 * var(--u));
+  }
+
+  .result-card-amount {
+    font-family: 'Poppins', sans-serif;
+    font-size: calc(56 * var(--u));
+    font-weight: 900;
+    line-height: 1;
+    margin-bottom: calc(20 * var(--u));
+  }
+
+  .result-monthly .result-card-amount { color: var(--teal-dark); }
+  .result-bill .result-card-amount    { color: var(--blue); }
+
+  .result-card-sub {
+    font-size: calc(15 * var(--u));
+    color: var(--text-light);
+    line-height: 1.65;
+  }
+
+  .result-note {
+    width: 100%;
+    max-width: calc(1200 * var(--u));
+    margin-top: calc(28 * var(--u));
+    margin-bottom: calc(20 * var(--u));
+    padding: calc(20 * var(--u)) calc(28 * var(--u));
+    background: rgba(0,180,166,0.07);
+    border: 1px solid rgba(0,180,166,0.22);
+    border-radius: var(--radius-md);
+    font-size: calc(16 * var(--u));
+    color: var(--text-mid);
+    text-align: center;
+    line-height: 1.7;
     flex-shrink: 0;
   }
-
-  .advice-text {
-    font-size: calc(13 * var(--u));
-    color: var(--text-dark);
-    line-height: 1.55;
-    text-align: center;
-    padding: 0 calc(4 * var(--u));
-  }
-
-  .advice-text strong { color: var(--teal-dark); font-weight: 700; display: block; margin-bottom: calc(3 * var(--u)); }
 
   .results-footer {
     display: flex;
     gap: calc(20 * var(--u));
     justify-content: center;
-    margin-top: calc(20 * var(--u));
     flex-shrink: 0;
   }
 
@@ -1523,68 +1460,29 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;b
 ══════════════════════════════════════════════════════ -->
 <div id="screen-results" class="screen">
   <div class="results-header">
-    <div class="results-title glitch" data-i18n="results_title"></div>
+    <div class="results-title glitch">Anggaran Kos Kesihatan Anda</div>
     <div class="profile-badges">
-      <div class="badge badge-age" id="badge-age">👤 30 <span data-i18n="results_years"></span></div>
-      <div class="badge badge-age" id="badge-gender" style="display:none"></div>
-      <div class="badge badge-age" id="badge-target-age" style="display:none"></div>
-      <div class="badge" id="badge-plan">🛡️ <span id="badge-plan-text"></span></div>
+      <div class="badge badge-age" id="badge-age">👤 –</div>
+      <div class="badge" id="badge-plan"><span id="badge-plan-text"></span></div>
     </div>
   </div>
 
-  <div class="results-body">
-    <!-- LEFT: Chart + Alert -->
-    <div class="results-left">
-      <div class="chart-card holo-panel">
-        <h3 data-i18n="chart_title"></h3>
-        <div class="chart-wrap">
-          <canvas id="results-chart"></canvas>
-        </div>
-      </div>
-      <div id="alert-card" class="alert-card amber">
-        <div class="alert-icon" id="alert-icon">🚨</div>
-        <div class="alert-text">
-          <h4 id="alert-heading"></h4>
-          <p id="alert-body"></p>
-        </div>
-      </div>
+  <div class="result-cards">
+    <div class="result-card result-monthly">
+      <div class="result-card-icon">💰</div>
+      <div class="result-card-label">Simpan Setiap Bulan</div>
+      <div class="result-card-amount" id="result-monthly-amt">RM –</div>
+      <div class="result-card-sub" id="result-monthly-sub">Anggaran simpanan bulanan yang diperlukan</div>
     </div>
-
-    <!-- RIGHT: Advice cards -->
-    <div class="results-right">
-      <div style="font-family:'Poppins',sans-serif;font-size:calc(18 * var(--u));font-weight:700;color:var(--teal-dark);" data-i18n="advice_heading"></div>
-      <div class="advice-grid">
-        <div class="advice-card" id="advice-1">
-          <span class="tarot-corner tl">✦</span><span class="tarot-corner tr">✦</span>
-          <span class="tarot-corner bl">✦</span><span class="tarot-corner br">✦</span>
-          <div class="advice-icon" id="advice-icon-1">💡</div>
-          <div class="advice-divider"></div>
-          <div class="advice-text" id="advice-text-1"></div>
-        </div>
-        <div class="advice-card" id="advice-2">
-          <span class="tarot-corner tl">✦</span><span class="tarot-corner tr">✦</span>
-          <span class="tarot-corner bl">✦</span><span class="tarot-corner br">✦</span>
-          <div class="advice-icon" id="advice-icon-2">📅</div>
-          <div class="advice-divider"></div>
-          <div class="advice-text" id="advice-text-2"></div>
-        </div>
-        <div class="advice-card" id="advice-3">
-          <span class="tarot-corner tl">✦</span><span class="tarot-corner tr">✦</span>
-          <span class="tarot-corner bl">✦</span><span class="tarot-corner br">✦</span>
-          <div class="advice-icon" id="advice-icon-3">🎯</div>
-          <div class="advice-divider"></div>
-          <div class="advice-text" id="advice-text-3"></div>
-        </div>
-        <div class="advice-card" id="advice-4">
-          <span class="tarot-corner tl">✦</span><span class="tarot-corner tr">✦</span>
-          <span class="tarot-corner bl">✦</span><span class="tarot-corner br">✦</span>
-          <div class="advice-icon">⭐</div>
-          <div class="advice-divider"></div>
-          <div class="advice-text" data-i18n="advice_abc"></div>
-        </div>
-      </div>
+    <div class="result-card result-bill">
+      <div class="result-card-icon">🏥</div>
+      <div class="result-card-label">Anggaran 1 Bil Hospital</div>
+      <div class="result-card-amount" id="result-bill-amt">RM –</div>
+      <div class="result-card-sub" id="result-bill-sub">Kos hospitalisasi semasa berdasarkan umur anda</div>
     </div>
   </div>
+
+  <div class="result-note" id="result-note"></div>
 
   <div class="results-footer">
     <button class="btn-secondary" onclick="goToScreen('input')" data-i18n="btn_recalculate"></button>
@@ -1771,7 +1669,6 @@ let state = {
   coInsurance: 0,      // %
   coPayCap: 0,         // RM
   coverage: 'basic',   // derived: 'none'|'basic'|'comprehensive'
-  chartInstance: null,
   idleTimer: null,
   idleCountdown: null,
   idleSeconds: 25,
@@ -2294,256 +2191,51 @@ function fmtRM(val) {
 // RESULTS RENDER
 // ══════════════════════════════════════════════════════
 function renderResults() {
-  const projs = calcProjections();
-  const total10 = calcTotal10yr();
+  const baseCost = getBaseCost(state.age);
+  const maxY = Math.max(5, Math.min(10, state.targetAge - state.age));
+  const total = calcTotal10yr();
+  const monthlyNeeded = Math.max(0, Math.round(total / (maxY * 12)));
+
+  // Sync coverage for badge
+  if (state.hasMhit !== null) getEffectiveCoveragePct();
 
   // Badges
-  document.getElementById('badge-age').innerHTML = '👤 ' + state.age + ' <span>' + t('results_years') + '</span>';
-  const genderBadge = document.getElementById('badge-gender');
-  if (state.gender) {
-    genderBadge.textContent = (state.gender === 'male' ? '👨 ' : '👩 ') + t('gender_' + state.gender);
-    genderBadge.style.display = '';
-  } else { genderBadge.style.display = 'none'; }
-  const targetBadge = document.getElementById('badge-target-age');
-  if (state.targetAge) {
-    targetBadge.textContent = '🗓️ ' + state.targetAge + ' ' + t('age_unit');
-    targetBadge.style.display = '';
-  } else { targetBadge.style.display = 'none'; }
-  const planMap = { none: 'plan_none', basic: 'plan_basic', comprehensive: 'plan_comp' };
-  const planClassMap = { none: 'badge-plan-none', basic: 'badge-plan-basic', comprehensive: 'badge-plan-comprehensive' };
+  document.getElementById('badge-age').textContent = '👤 ' + state.age + ' tahun';
+  const planLabelMap = { none: '🚫 Tiada Perlindungan', basic: '🛡️ Perlindungan Asas', comprehensive: '⭐ Perlindungan Komprehensif' };
+  const planClassMap = { none: 'badge badge-plan-none', basic: 'badge badge-plan-basic', comprehensive: 'badge badge-plan-comprehensive' };
   const badgePlan = document.getElementById('badge-plan');
-  badgePlan.className = 'badge ' + planClassMap[state.coverage];
-  const iconMap = { none: '🚫', basic: '🛡️', comprehensive: '⭐' };
-  const premiumNote = state.hasMhit ? ' (RM ' + state.premium + '/bulan)' : '';
-  document.getElementById('badge-plan-text').textContent = iconMap[state.coverage] + ' ' + t(planMap[state.coverage]) + premiumNote;
+  badgePlan.className = planClassMap[state.coverage];
+  document.getElementById('badge-plan-text').textContent = planLabelMap[state.coverage];
 
-  // Chart
-  if (state.chartInstance) {
-    state.chartInstance.destroy();
-    state.chartInstance = null;
-  }
+  // Result numbers
+  document.getElementById('result-monthly-amt').textContent = fmtRM(monthlyNeeded);
+  document.getElementById('result-bill-amt').textContent = fmtRM(baseCost);
 
-  const covData = projs.map(p => Math.round(p.covered));
-  const gapData = projs.map(p => Math.round(p.gap));
+  document.getElementById('result-monthly-sub').textContent =
+    'Anggaran simpanan untuk menampung kos perubatan anda selama ' + maxY + ' tahun akan datang';
+  document.getElementById('result-bill-sub').textContent =
+    'Kos hospitalisasi semasa bagi pesakit berumur ' + state.age + ' tahun di Malaysia';
 
-  const ctx = document.getElementById('results-chart').getContext('2d');
-  state.chartInstance = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: [t('chart_year_1'), t('chart_year_3'), t('chart_year_5'), t('chart_year_10')],
-      datasets: [
-        {
-          label: t('chart_covered'),
-          data: covData,
-          backgroundColor: 'rgba(0,180,166,0.8)',
-          borderColor: '#00B4A6',
-          borderWidth: 2,
-          borderRadius: 8,
-        },
-        {
-          label: t('chart_gap'),
-          data: gapData,
-          backgroundColor: 'rgba(255,107,91,0.8)',
-          borderColor: '#FF6B5B',
-          borderWidth: 2,
-          borderRadius: 8,
-        }
-      ]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          position: 'top',
-          labels: {
-            font: { family: 'Nunito', size: 14, weight: '700' },
-            padding: 16,
-          }
-        },
-        tooltip: {
-          callbacks: {
-            label: function(ctx) {
-              return ctx.dataset.label + ': ' + fmtRM(ctx.raw);
-            }
-          },
-          titleFont: { family: 'Poppins', size: 14, weight: '700' },
-          bodyFont: { family: 'Nunito', size: 13 },
-          padding: 12,
-        }
-      },
-      scales: {
-        x: {
-          stacked: true,
-          grid: { display: false },
-          ticks: { font: { family: 'Nunito', size: 13, weight: '600' } }
-        },
-        y: {
-          stacked: true,
-          grid: { color: 'rgba(0,0,0,0.05)' },
-          ticks: {
-            font: { family: 'Nunito', size: 12 },
-            callback: v => 'RM ' + v.toLocaleString('en-MY')
-          }
-        }
-      },
-      animation: {
-        duration: 1000,
-        easing: 'easeOutQuart',
-      }
-    }
-  });
-
-  // Alert card
-  const alertCard = document.getElementById('alert-card');
-  const alertIcon = document.getElementById('alert-icon');
-  const alertHeading = document.getElementById('alert-heading');
-  const alertBody = document.getElementById('alert-body');
-
+  // Contextual note
+  const noteEl = document.getElementById('result-note');
   if (state.coverage === 'none') {
-    alertCard.className = 'alert-card amber';
-    alertIcon.textContent = '🚨';
-    alertHeading.textContent = t('alert_none_heading');
-    const body = t('alert_none_body');
-    alertBody.textContent = body.replace('{total10yr}', fmtRM(total10));
-    // Insert actual value
-    alertBody.textContent = (state.lang === 'bm'
-      ? 'Anda menanggung ' + fmtRM(total10) + ' kos perubatan tanpa perlindungan dalam 10 tahun! Pertimbangkan untuk mendapatkan MHIT sekarang.'
-      : 'You face ' + fmtRM(total10) + ' in uncovered medical costs over 10 years! Consider getting MHIT coverage now.');
+    noteEl.textContent = '⚠️ Tanpa pelan MHIT, anda menanggung sepenuhnya kos perubatan. Pertimbangkan untuk mendapatkan perlindungan MHIT sekarang bagi mengurangkan beban kewangan anda.';
   } else if (state.coverage === 'basic') {
-    alertCard.className = 'alert-card blue';
-    alertIcon.textContent = '💡';
-    alertHeading.textContent = t('alert_basic_heading');
-    alertBody.textContent = t('alert_basic_body');
+    noteEl.textContent = '💡 Pelan asas anda menampung sebahagian kos. Semak had perlindungan tahunan dan pertimbangkan naik taraf ke pelan komprehensif apabila mampu.';
   } else {
-    alertCard.className = 'alert-card green';
-    alertIcon.textContent = '✅';
-    alertHeading.textContent = t('alert_comp_heading');
-    alertBody.textContent = t('alert_comp_body');
+    noteEl.textContent = '✅ Perlindungan komprehensif anda membantu mengurangkan kos poket dengan ketara. Teruskan mengekalkan pelan anda dan semak semula setiap tahun.';
   }
 
-  // Advice cards
-  renderAdvice();
-
-  // Animate advice cards
-  const adviceCards = document.querySelectorAll('.advice-card');
-  adviceCards.forEach((card, i) => {
+  // Animate cards in
+  document.querySelectorAll('.result-card').forEach((card, i) => {
     card.style.opacity = '0';
-    card.style.transform = 'translateY(12px)';
+    card.style.transform = 'translateY(calc(20 * var(--u)))';
     setTimeout(() => {
-      card.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+      card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
       card.style.opacity = '1';
-      card.style.transform = 'translateX(0)';
-    }, 300 + i * 150);
+      card.style.transform = 'none';
+    }, 200 + i * 220);
   });
-}
-
-function renderAdvice() {
-  const isYoung = state.age <= 35;
-  const isMid = state.age > 35 && state.age <= 55;
-  const isSenior = state.age > 55;
-  const cov = state.coverage;
-  const lang = state.lang;
-
-  const advice = getAdvice(isYoung, isMid, isSenior, cov, lang);
-
-  for (let i = 1; i <= 3; i++) {
-    const el = document.getElementById('advice-text-' + i);
-    const icon = document.getElementById('advice-icon-' + i);
-    if (el && advice[i-1]) {
-      el.innerHTML = advice[i-1].text;
-      icon.textContent = advice[i-1].icon;
-    }
-  }
-}
-
-function getAdvice(isYoung, isMid, isSenior, cov, lang) {
-  const bm = lang === 'bm';
-  const advices = [];
-
-  // Age + coverage specific
-  if (isYoung && cov === 'none') {
-    advices.push({
-      icon: '🌱',
-      text: bm
-        ? '<strong>Mulakan MHIT awal!</strong> Premium lebih rendah ketika muda. Semakin awal anda mula, semakin banyak anda jimat.'
-        : '<strong>Start MHIT early!</strong> Premiums are lower when you\'re young. The earlier you start, the more you save.'
-    });
-  } else if (isYoung && cov === 'basic') {
-    advices.push({
-      icon: '📈',
-      text: bm
-        ? '<strong>Semak had perlindungan anda.</strong> Pelan asas mungkin tidak mencukupi 5–10 tahun lagi apabila kos perubatan meningkat.'
-        : '<strong>Check your coverage limits.</strong> A basic plan may not be enough in 5–10 years as medical costs rise.'
-    });
-  } else if (isYoung && cov === 'comprehensive') {
-    advices.push({
-      icon: '🏆',
-      text: bm
-        ? '<strong>Pilihan bijak!</strong> Perlindungan komprehensif pada usia muda memastikan anda dilindungi jangka panjang dengan premium lebih berpatutan.'
-        : '<strong>Smart choice!</strong> Comprehensive coverage at a young age ensures long-term protection at more affordable premiums.'
-    });
-  } else if (isMid && cov === 'none') {
-    advices.push({
-      icon: '⚠️',
-      text: bm
-        ? '<strong>Risiko tinggi!</strong> Usia pertengahan adalah masa kritikal untuk mendapatkan MHIT. Kos perubatan meningkat dengan usia.'
-        : '<strong>High risk!</strong> Middle age is a critical time to get MHIT. Medical costs increase with age.'
-    });
-  } else if (isMid && cov === 'basic') {
-    advices.push({
-      icon: '🔄',
-      text: bm
-        ? '<strong>Pertimbangkan naik taraf.</strong> Pelan asas mungkin tidak mencukupi untuk keperluan perubatan usia pertengahan. Semak had tahunan anda.'
-        : '<strong>Consider upgrading.</strong> A basic plan may be insufficient for middle-age medical needs. Review your annual limits.'
-    });
-  } else if (isMid && cov === 'comprehensive') {
-    advices.push({
-      icon: '✅',
-      text: bm
-        ? '<strong>Perlindungan yang baik!</strong> Teruskan kekalkan pelan komprehensif anda dan semak had perlindungan setiap tahun.'
-        : '<strong>Well covered!</strong> Keep maintaining your comprehensive plan and review coverage limits annually.'
-    });
-  } else if (isSenior && cov === 'none') {
-    advices.push({
-      icon: '🚨',
-      text: bm
-        ? '<strong>Tindakan segera diperlukan!</strong> Tanpa perlindungan di usia ini, kos perubatan boleh menjadi sangat tinggi. Dapatkan MHIT sekarang.'
-        : '<strong>Urgent action needed!</strong> Without coverage at this age, medical costs can be very high. Get MHIT coverage now.'
-    });
-  } else if (isSenior && cov === 'basic') {
-    advices.push({
-      icon: '⬆️',
-      text: bm
-        ? '<strong>Tingkatkan perlindungan anda.</strong> Keperluan perubatan meningkat dengan usia. Pelan asas mungkin tidak mencukupi untuk keperluan anda.'
-        : '<strong>Upgrade your coverage.</strong> Medical needs increase with age. A basic plan may not be sufficient for your needs.'
-    });
-  } else if (isSenior && cov === 'comprehensive') {
-    advices.push({
-      icon: '🛡️',
-      text: bm
-        ? '<strong>Perlindungan terbaik!</strong> Anda membuat pilihan yang tepat. Pastikan pelan anda diperbaharui dan semak manfaat setiap tahun.'
-        : '<strong>Best protection!</strong> You\'ve made the right choice. Ensure your plan is renewed and review benefits annually.'
-    });
-  }
-
-  // General financial planning tip
-  advices.push({
-    icon: '💰',
-    text: bm
-      ? '<strong>Rancang kewangan anda.</strong> Peruntukkan 5–10% daripada pendapatan bulanan untuk premium MHIT bagi memastikan perlindungan berterusan.'
-      : '<strong>Plan your finances.</strong> Allocate 5–10% of monthly income for MHIT premiums to ensure continuous coverage.'
-  });
-
-  // Professional advice (always last)
-  advices.push({
-    icon: '🤝',
-    text: bm
-      ? '<strong>Dapatkan nasihat profesional.</strong> Hubungi ejen atau penasihat MHIT berlesen untuk pilihan pelan yang paling sesuai dengan keperluan anda.'
-      : '<strong>Get professional advice.</strong> Contact a licensed MHIT agent or advisor for the plan options best suited to your needs.'
-  });
-
-  return advices;
 }
 
 // ══════════════════════════════════════════════════════
