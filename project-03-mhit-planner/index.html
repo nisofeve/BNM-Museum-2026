@@ -167,10 +167,17 @@ html, body {
   align-items: center; justify-content: center;
   padding: calc(20 * var(--u)) calc(28 * var(--u));
   opacity: 0;
+  overflow: hidden;
   transform: translateY(calc(28 * var(--u))) scale(0.96);
   pointer-events: none;
   transition: opacity 0.4s var(--ease-bounce), transform 0.4s var(--ease-bounce);
   z-index: 10;
+}
+/* Input screen: hide verbose header; Si Kijang's bubble serves as intro */
+#screen-input .info-header { display: none; }
+#screen-input {
+  justify-content: center;
+  gap: calc(14 * var(--u));
 }
 .screen.active {
   opacity: 1;
@@ -342,22 +349,31 @@ button {
   margin-top: calc(4 * var(--u));
 }
 
-/* ─── PRESENTER STAGE ─── */
+/* ─── PRESENTER STAGE — landscape row layout ─── */
 .presenter-stage {
   position: relative;
   width: 100%;
-  max-width: calc(760 * var(--u));
+  max-width: min(calc(920 * var(--u)), 96vw);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: calc(22 * var(--u));
+  margin-bottom: 0;
+}
+
+/* bubble column: stacks bubbles vertically on the right of char */
+.bubble-col {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
   gap: calc(7 * var(--u));
-  margin-bottom: 0;
+  max-width: min(calc(500 * var(--u)), 58vw);
 }
 
 /* ─── SPEECH BUBBLES ─── */
 .bubble {
-  max-width: calc(490 * var(--u));
+  width: 100%;
   opacity: 0;
   transform: scale(0.84) translateY(calc(10 * var(--u)));
   transition: opacity 0.3s var(--ease-bounce), transform 0.3s var(--ease-bounce);
@@ -373,25 +389,30 @@ button {
   background: var(--panel);
   border: calc(3 * var(--u)) solid var(--wood);
   border-radius: var(--radius-lg);
+  border-bottom-left-radius: calc(6 * var(--u));
   padding: calc(12 * var(--u)) calc(20 * var(--u));
   box-shadow: 0 calc(4 * var(--u)) calc(16 * var(--u)) rgba(0,0,0,0.13);
-  max-width: 82%;
 }
+/* tail points LEFT toward character */
 .bubble-main::before {
   content: '';
   position: absolute;
-  bottom: calc(-16 * var(--u));
-  left: 50%; transform: translateX(-50%);
+  top: calc(18 * var(--u));
+  left: calc(-16 * var(--u));
+  bottom: auto;
+  transform: none;
   border: calc(9 * var(--u)) solid transparent;
-  border-top-color: var(--wood);
+  border-right-color: var(--wood);
 }
 .bubble-main::after {
   content: '';
   position: absolute;
-  bottom: calc(-11 * var(--u));
-  left: 50%; transform: translateX(-50%);
+  top: calc(19 * var(--u));
+  left: calc(-10 * var(--u));
+  bottom: auto;
+  transform: none;
   border: calc(7 * var(--u)) solid transparent;
-  border-top-color: var(--panel);
+  border-right-color: var(--panel);
 }
 
 .bubble-user {
@@ -425,6 +446,7 @@ button {
 
 /* ─── CHARACTER + TAG ─── */
 .char-wrap {
+  flex: 0 0 auto;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -465,6 +487,7 @@ button {
 /* ─── PLANNER ANSWERS CONTAINER ─── */
 #planner-answers {
   width: 100%;
+  max-width: min(calc(920 * var(--u)), 96vw);
   display: flex;
   justify-content: center;
   align-items: flex-start;
@@ -890,11 +913,13 @@ button {
 
   <!-- presenter stage: character asks the planner questions in sequence -->
   <div class="presenter-stage" id="stage-planner">
-    <div class="bubble bubble-main"><div class="bubble-content"></div></div>
-    <div class="bubble bubble-user"><div class="bubble-content"></div></div>
     <div class="char-wrap">
       <div class="presenter-char"></div>
       <div class="presenter-tag" data-i18n="mascot_label"></div>
+    </div>
+    <div class="bubble-col">
+      <div class="bubble bubble-main"><div class="bubble-content"></div></div>
+      <div class="bubble bubble-user"><div class="bubble-content"></div></div>
     </div>
   </div>
 
