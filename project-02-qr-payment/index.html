@@ -96,7 +96,6 @@ if(typeof gsap==='undefined'){
     width: 100%;
     height: 100%;
     overflow: hidden;
-    position: relative;
     font-family: 'Nunito', sans-serif;
     background:
       radial-gradient(120vw 80vh at 12% -10%, rgba(255,150,50,0.20), transparent 60%),
@@ -111,7 +110,7 @@ if(typeof gsap==='undefined'){
   /* Stage is authored at 1080×1440. JS scaler below transforms it to fit any viewport.
      CSS transform on #stage makes position:fixed children contained to the stage. */
   #stage {
-    position: absolute;
+    position: fixed;
     top: 0; left: 0;
     width: 1080px;
     height: 1440px;
@@ -218,7 +217,7 @@ if(typeof gsap==='undefined'){
     align-items: center;
     justify-content: center;
     /* top: clear fixed progress-dots bar (2.25rem top + ~1.75rem height = ~4rem) */
-    padding: 6rem 4.5rem 5rem;
+    padding: max(4.5rem, min(6rem, 8vh)) min(4.5rem, 5vw) max(3rem, min(5rem, 5vh));
     opacity: 0;
     pointer-events: none;
     overflow: hidden;
@@ -229,21 +228,21 @@ if(typeof gsap==='undefined'){
      SECTION 1 — OPENING
   ======================================================== */
   #section-0 {
-    gap: 2.25rem;
+    gap: min(2.25rem, 2.5vh);
     justify-content: space-evenly;
   }
 
   .skyline-container {
     width: 100%;
     max-width: 70rem;
-    max-height: 18rem;
+    max-height: min(18rem, 28vh);
     overflow: hidden;
     position: relative;
     display: flex;
     align-items: flex-end;
     justify-content: center;
     gap: 0;
-    padding-bottom: 2.75rem;
+    padding-bottom: min(2.75rem, 3vh);
     flex-shrink: 1;
     min-height: 0;
   }
@@ -253,7 +252,7 @@ if(typeof gsap==='undefined'){
     width: 38%;
     max-width: 26rem;
     height: auto;
-    max-height: 14rem;
+    max-height: min(14rem, 18vh);
     object-fit: contain;
     object-position: bottom center;
     mix-blend-mode: multiply;
@@ -284,9 +283,9 @@ if(typeof gsap==='undefined'){
     min-width: 18%;
     max-width: 22rem;
     position: relative;
-    height: 10rem;
+    height: min(10rem, 12vh);
     align-self: center;
-    margin-bottom: 1rem;
+    margin-bottom: min(1rem, 1.2vh);
     overflow: visible;
   }
   .flow-arc-svg { width: 100%; height: 100%; overflow: visible; display: block; }
@@ -305,7 +304,7 @@ if(typeof gsap==='undefined'){
   #section-0 h1 {
     font-family: 'Poppins', sans-serif;
     font-weight: 800;
-    font-size: 4rem;
+    font-size: min(4rem, 6vh);
     text-align: center;
     background: linear-gradient(135deg, var(--blue), var(--teal));
     -webkit-background-clip: text;
@@ -566,7 +565,7 @@ if(typeof gsap==='undefined'){
     position: relative; z-index: 1;
     background: #F6F0FF; border-radius: 2rem 2rem 0 0;
     width: 100%; max-width: 80rem;
-    max-height: 72rem; display: flex; flex-direction: column;
+    max-height: 80vh; display: flex; flex-direction: column;
     box-shadow: 0 -8px 40px rgba(80,0,160,0.20);
     animation: slideUpModal 0.32s cubic-bezier(0.175,0.885,0.32,1.275);
   }
@@ -970,14 +969,14 @@ if(typeof gsap==='undefined'){
 
 /* ========== SLIDE-TO-UNLOCK ========== */
 .slide-unlock {
-  width: 43.75rem;
-  max-width: 43.75rem;
+  width: min(43.75rem, 88vw);
+  max-width: 90vw;
   position: relative;
   flex-shrink: 0;
 }
 .slide-track {
   width: 100%;
-  height: 10.25rem;
+  height: min(10.25rem, 13vh);
   background: rgba(255,255,255,0.22);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
@@ -998,10 +997,10 @@ if(typeof gsap==='undefined'){
 }
 .slide-thumb {
   position: absolute;
-  left: 0.625rem;
-  top: 0.625rem;
-  width: 9rem;
-  height: 9rem;
+  left: min(0.625rem, 0.8vh);
+  top: min(0.625rem, 0.8vh);
+  width: min(9rem, 11.4vh);
+  height: min(9rem, 11.4vh);
   border-radius: 50%;
   background: linear-gradient(135deg, var(--blue), var(--teal));
   display: flex;
@@ -1980,10 +1979,10 @@ function goTo(next) {
 
   SFX.swap();
   gsap.to(prevEl, {
-    x: dir > 0 ? -140 : 140, opacity: 0, duration: 0.38, ease: 'power2.in',
+    x: dir > 0 ? -Math.round(window.innerWidth*0.13) : Math.round(window.innerWidth*0.13), opacity: 0, duration: 0.38, ease: 'power2.in',
     onComplete: function() { prevEl.classList.remove('active'); gsap.set(prevEl, { x: 0, opacity: 0 }); }
   });
-  gsap.set(nextEl, { x: dir > 0 ? 140 : -140, opacity: 0 });
+  gsap.set(nextEl, { x: dir > 0 ? Math.round(window.innerWidth*0.13) : -Math.round(window.innerWidth*0.13), opacity: 0 });
   nextEl.classList.add('active');
   gsap.to(nextEl, { x: 0, opacity: 1, duration: 0.38, ease: 'power2.out', delay: 0.1 });
 
@@ -2709,8 +2708,8 @@ function _menuDrawShape(ctx, shape, size) {
 function initMenuCanvas() {
   var canvas = document.getElementById('menu-canvas');
   if (!canvas) return;
-  canvas.width = canvas.offsetWidth || 1080;
-  canvas.height = canvas.offsetHeight || 1440;
+  canvas.width = canvas.offsetWidth || window.innerWidth;
+  canvas.height = canvas.offsetHeight || window.innerHeight;
   var shapes = ['circle','square','triangle','diamond','hexagon','ring'];
   var colors = [[0,71,171],[0,180,166],[245,166,35],[123,94,167],[255,107,91],[34,197,94],[237,46,103],[100,160,255],[255,220,80]];
   _menuStars = [];
@@ -2893,7 +2892,7 @@ gsap.from('#section-0',{opacity:0,y:36,duration:0.9,ease:'power2.out',delay:0.3}
   },{passive:false});
 })();
 initSlider();
-(function(){var cont=document.createElement('div');cont.className='p6-particles';(document.getElementById('stage')||document.body).appendChild(cont);for(var pi=0;pi<18;pi++){var pp=document.createElement('div');pp.className='p6-part';var sz=2+Math.random()*4;pp.style.cssText='width:'+sz+'px;height:'+sz+'px;left:'+Math.round(Math.random()*1080)+'px;top:'+Math.round(Math.random()*1440)+'px;opacity:'+(0.04+Math.random()*0.07)+';animation:p6a'+pi+' '+(9+Math.random()*11)+'s ease-in-out infinite alternate';var st=document.createElement('style');st.textContent='@keyframes p6a'+pi+'{from{transform:translate(0,0)}to{transform:translate('+((Math.random()-0.5)*130)+'px,'+((Math.random()-0.5)*90)+'px)}}';document.head.appendChild(st);cont.appendChild(pp);}})();
+(function(){var cont=document.createElement('div');cont.className='p6-particles';document.body.appendChild(cont);for(var pi=0;pi<18;pi++){var pp=document.createElement('div');pp.className='p6-part';var sz=2+Math.random()*4;pp.style.cssText='width:'+sz+'px;height:'+sz+'px;left:'+(Math.random()*100)+'vw;top:'+(Math.random()*100)+'vh;opacity:'+(0.04+Math.random()*0.07)+';animation:p6a'+pi+' '+(9+Math.random()*11)+'s ease-in-out infinite alternate';var st=document.createElement('style');st.textContent='@keyframes p6a'+pi+'{from{transform:translate(0,0)}to{transform:translate('+((Math.random()-0.5)*130)+'px,'+((Math.random()-0.5)*90)+'px)}}';document.head.appendChild(st);cont.appendChild(pp);}})();
 </script>
 </body>
 </html>
