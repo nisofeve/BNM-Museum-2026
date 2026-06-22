@@ -624,42 +624,50 @@ if(typeof gsap==='undefined'){
     animation: pulseCta 2s ease-in-out infinite;
   }
 
-  #section-2 { flex-direction: row; flex-wrap: wrap; gap: 2rem; padding: 4rem 3rem; align-items: center; justify-content: center; }
+  #section-2 {
+    flex-direction: column;
+    gap: 0.875rem;
+    padding: 1.25rem 2rem 1rem;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(ellipse at 50% 25%, #0d1a38, #060c1c 70%);
+  }
 
-  /* Coaching panel (outside the phone) */
+  /* Coaching panel — compact top bar */
   .pay-coach {
-    max-width: 58.5rem;
+    max-width: 34rem;
     width: 100%;
-    background: rgba(255,255,255,0.6);
+    background: rgba(255,255,255,0.07);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255,255,255,0.85);
-    border-radius: var(--radius);
-    box-shadow: 0 12px 44px rgba(0,40,100,0.12);
-    padding: 2.5rem 3rem;
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 1.25rem;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+    padding: 0.875rem 1.5rem 1rem;
+    text-align: center;
   }
   .pay-coach-badge {
     display: inline-block;
     font-family: 'Poppins', sans-serif;
     font-weight: 700;
-    font-size: 1.125rem;
+    font-size: 0.875rem;
     letter-spacing: 2px;
     text-transform: uppercase;
     color: white;
     background: linear-gradient(135deg, var(--purple), var(--blue));
-    padding: 0.625rem 1.75rem;
+    padding: 0.3125rem 1rem;
     border-radius: 2.5rem;
-    margin-bottom: 1.5rem;
-    box-shadow: 0 6px 20px rgba(123,94,167,0.35);
+    margin-bottom: 0.5rem;
+    box-shadow: 0 4px 12px rgba(123,94,167,0.35);
   }
-  .pay-coach h2 { font-family:'Poppins',sans-serif; font-weight:800; font-size:2.25rem; color:var(--blue); line-height:1.22; margin-bottom:0.875rem; }
-  .pay-coach p { font-size:1.312rem; color:var(--text-mid); line-height:1.65; }
-  .pay-coach-dots { display:flex; gap:0.75rem; margin-top:2.125rem; }
-  .pay-dot { width:0.9375rem; height:0.9375rem; border-radius:50%; background:rgba(0,71,171,0.18); transition:all 0.3s; }
-  .pay-dot.active { background:var(--gold); transform:scale(1.35); box-shadow:0 0 14px rgba(245,166,35,0.75); }
+  .pay-coach h2 { font-family:'Poppins',sans-serif; font-weight:800; font-size:1.25rem; color:white; line-height:1.25; margin-bottom:0.3rem; }
+  .pay-coach p { font-size:0.9375rem; color:rgba(255,255,255,0.7); line-height:1.5; }
+  .pay-coach-dots { display:flex; gap:0.625rem; margin-top:0.75rem; justify-content:center; }
+  .pay-dot { width:0.625rem; height:0.625rem; border-radius:50%; background:rgba(255,255,255,0.2); transition:all 0.3s; }
+  .pay-dot.active { background:var(--gold); transform:scale(1.35); box-shadow:0 0 10px rgba(245,166,35,0.75); }
   .pay-dot.done { background:var(--teal); }
 
-  /* Phone frame — scaled to 75% via zoom for iPad Pro portrait canvas */
+  /* Phone frame */
   .payphone {
     width: 26.5rem;
     height: 55.94rem;
@@ -669,7 +677,7 @@ if(typeof gsap==='undefined'){
     box-shadow: 0 36px 90px rgba(10,20,45,0.5), 0 0 60px rgba(0,180,166,0.18), inset 0 0 0 2px rgba(255,255,255,0.14);
     position: relative;
     flex-shrink: 0;
-    zoom: 0.72;
+    zoom: 0.86;
   }
   .payphone::before { content:''; position:absolute; right:-0.3125rem; top:12.5rem; width:0.3125rem; height:6rem; background:#3b4a6e; border-radius:0 0.3125rem 0.3125rem 0; }
   .payphone::after { content:''; position:absolute; right:-0.3125rem; top:20rem; width:0.3125rem; height:3.5rem; background:#3b4a6e; border-radius:0 0.3125rem 0.3125rem 0; }
@@ -944,6 +952,59 @@ if(typeof gsap==='undefined'){
 
   .hidden { display:none !important; }
 
+/* ── Summary Popup ── */
+#summary-popup {
+  position: fixed; inset: 0;
+  background: rgba(0,10,30,0.92);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  z-index: 600;
+  display: flex; align-items: center; justify-content: center;
+}
+#summary-popup.hidden { display: none !important; }
+.summary-inner {
+  background: white; border-radius: 2rem;
+  padding: 3rem 3.5rem; max-width: 44rem; width: 90%;
+  text-align: center;
+  box-shadow: 0 28px 80px rgba(0,0,0,0.45);
+  animation: popIn 0.4s cubic-bezier(0.175,0.885,0.32,1.275);
+}
+.summary-emoji { font-size: 5rem; display: block; margin-bottom: 0.75rem; }
+.summary-inner h2 { font-family:'Poppins',sans-serif; font-weight:800; font-size:2.5rem; color:var(--blue); margin-bottom:0.625rem; }
+.summary-inner p { font-size:1.375rem; color:var(--text-mid); line-height:1.5; margin-bottom:1.5rem; }
+.summary-score-box { background:linear-gradient(135deg,var(--blue),var(--teal)); border-radius:1.25rem; padding:1.5rem 3.5rem; display:inline-block; color:white; margin-bottom:2rem; }
+.summary-score-num { font-family:'Poppins',sans-serif; font-weight:900; font-size:3.5rem; line-height:1; }
+.summary-score-lbl { font-size:1.125rem; opacity:0.9; margin-top:0.25rem; }
+.summary-restart-btn {
+  display: flex; align-items: center; justify-content: center; gap: 1rem;
+  width: 100%; padding: 1.5rem 2rem; border: none; border-radius: 3rem;
+  background: linear-gradient(135deg, var(--blue), var(--teal));
+  color: white; font-family:'Poppins',sans-serif; font-weight:700; font-size:1.5rem;
+  cursor: pointer; box-shadow: 0 8px 28px rgba(0,71,171,0.35);
+  animation: pulseCta 2s ease-in-out infinite;
+}
+.summary-cd {
+  background: rgba(255,255,255,0.25); border-radius: 50%;
+  width: 2.5rem; height: 2.5rem; display: flex; align-items: center; justify-content: center;
+  font-size: 1.25rem; font-weight: 800; flex-shrink: 0;
+}
+
+/* ── Scenario card phone-app style ── */
+.scenario-cards { display: flex; flex-direction: column; gap: 2rem; justify-content: center; align-items: center; width: 100%; }
+.scenario-card { position: relative; }
+.scenario-card-cta {
+  display: block; margin-top: 1.25rem;
+  padding: 1rem 2.5rem; border: none; border-radius: 3rem;
+  background: linear-gradient(135deg, var(--blue), var(--teal));
+  color: white; font-family:'Poppins',sans-serif; font-weight:700; font-size:1.25rem;
+  cursor: pointer; pointer-events: none;
+  box-shadow: 0 6px 20px rgba(0,71,171,0.25);
+}
+
+/* ── Facts section phone-app feel ── */
+.fact-bubble { border-radius: 1.25rem; }
+.btn-dismiss-facts { width: 100%; max-width: 40rem; }
+
 /* ═══ P06-STYLE VFX ═══ */
 body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,71,171,.007) 3px,rgba(0,71,171,.007) 4px);}
 .p6-particles{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0;}
@@ -1089,7 +1150,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;b
 <div id="app">
 
   <!-- ========== SECTION 1: OPENING ========== -->
-  <div class="section active" id="section-0">
+  <div class="section" id="section-0">
     <div class="skyline-container">
       <div class="skyline skyline-jb">
         <div class="sky-building b1"></div>
@@ -1180,18 +1241,20 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;b
   </div>
 
   <!-- ========== SECTION 2: SCENARIOS ========== -->
-  <div class="section" id="section-1">
-    <h2 id="s1-title">Contoh Situasi</h2>
+  <div class="section active" id="section-1">
+    <h2 id="s1-title">Pilih Situasi Anda</h2>
     <div class="scenario-cards">
-      <div class="scenario-card">
+      <div class="scenario-card" onclick="chooseScenario(0)" style="cursor:pointer">
         <span class="scenario-emoji">👫</span>
         <h3 id="s1-c1-title">Rakan menghantar wang serta-merta</h3>
         <p id="s1-c1-body">Hantar wang kepada rakan di Singapura dalam masa beberapa saat — tanpa perlu ke bank atau tukar wang tunai. Mudah, cepat dan selamat.</p>
+        <button class="scenario-card-cta" tabindex="-1">Cuba Sekarang →</button>
       </div>
-      <div class="scenario-card">
+      <div class="scenario-card" onclick="chooseScenario(1)" style="cursor:pointer">
         <span class="scenario-emoji">🚌</span>
         <h3 id="s1-c2-title">Membayar pengangkutan di luar negara</h3>
         <p id="s1-c2-body">Gunakan e-dompet Malaysia untuk membayar tambang bas atau teksi di Singapura. Kadar pertukaran automatik — tiada bayaran tersembunyi.</p>
+        <button class="scenario-card-cta" tabindex="-1">Cuba Sekarang →</button>
       </div>
     </div>
   </div>
@@ -1345,18 +1408,34 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;b
   <div class="section" id="section-6">
     <span class="celebration-emoji">✨</span>
     <div class="closing-text">
-      <h2 id="s6-title">Tahniah! / Congratulations!</h2>
+      <h2 id="s6-title">Tahniah!</h2>
       <p id="s6-body1">Anda telah mengalami bagaimana kewangan digital menghubungkan manusia, perniagaan dan negara.</p>
       <p id="s6-body2">Kewangan bukan sekadar transaksi — ia menyatukan kita!</p>
     </div>
     <div class="score-display">
       <div class="score-num" id="final-score">0 / 4</div>
-      <div class="score-label" id="final-score-label">soalan betul / questions correct</div>
+      <div class="score-label" id="final-score-label">soalan betul</div>
     </div>
-    <button class="btn-restart" onclick="restart()" id="s6-restart">↺ Mulakan Semula / Restart</button>
+    <button class="btn-restart" onclick="closeSummaryAndRestart()" id="s6-restart">↺ Mulakan Semula</button>
   </div>
 
+</div>
 
+<!-- ========== SUMMARY POPUP ========== -->
+<div id="summary-popup" class="hidden">
+  <div class="summary-inner">
+    <span class="summary-emoji" id="summary-emoji">🎉</span>
+    <h2>Tahniah, Juara Kewangan!</h2>
+    <p id="summary-msg">Anda telah menyelesaikan simulasi pembayaran QR rentas sempadan.</p>
+    <div class="summary-score-box">
+      <div class="summary-score-num" id="summary-score">0 / 4</div>
+      <div class="summary-score-lbl">soalan betul</div>
+    </div>
+    <button class="summary-restart-btn" onclick="closeSummaryAndRestart()">
+      <span>↺ Kembali ke Mula</span>
+      <span class="summary-cd" id="summary-countdown">10</span>
+    </button>
+  </div>
 </div>
 
 <!-- Idle overlay -->
@@ -1382,7 +1461,7 @@ return{tap()  { tone({freq:2200,type:'square',dur:.04,vol:.07}); tone({freq:1400
 /* ============================================================
    STATE
    ============================================================ */
-var currentSection = 0;
+var currentSection = 1;
 var currentLang = 'bm';
 var quizScore = 0;
 var quizAnswered = [null, null, null, null];
@@ -1397,6 +1476,57 @@ var payTimer = null;
 var payConvInterval = null;
 var payRefNo = 'BNM-2026-000000';
 var quizJustCompleted = false;
+var selectedScenario = 0;
+var _summaryCountdown = null;
+
+var scenarios = [
+  {
+    pay_coach_titles: ['Buka E-Dompet Anda', 'Imbas QR PayNow Rakan', 'Semak & Sahkan', 'Sedang Diproses...', 'Wang Berjaya Dihantar! 🎉'],
+    pay_coach_bodies: [
+      'Ali mahu menghantar wang kepada rakannya Mei di Singapura. Tekan butang "Imbas QR" pada telefon untuk memulakan.',
+      'Mei kongsi kod QR PayNow beliau. Imbas kod tersebut — e-dompet Malaysia boleh hantar terus ke PayNow Singapura!',
+      'Semak nama penerima dan jumlah wang. RM ditukar kepada SGD secara automatik. Tekan "Sahkan".',
+      'Rangkaian DuitNow × PayNow sedang memproses kiriman wang anda dengan selamat. Tunggu sebentar...',
+      'Tahniah! Wang telah berjaya dihantar kepada Mei di Singapura. Tekan "Selesai" untuk teruskan.'
+    ],
+    pay_merchant: 'Amirah Hassan 🇸🇬',
+    pay_merchant_loc: 'Singapura • Singapore 🇸🇬',
+    pay_foreign_amount: 'SGD 20.00',
+    pay_myr_target: 63.49,
+    pay_myr_display: 'RM 63.49',
+    pay_rate: 'Kadar: 1 MYR = 0.315 SGD',
+    pay_xb_badge: 'DuitNow × PayNow • Rentas Sempadan',
+    pay_r_amount_label: 'Jumlah (SGD)',
+    pay_r_amount_val: 'SGD 20.00',
+    pay_r_rate_val: '1 MYR = 0.315 SGD',
+    merchant_emoji: '👤',
+    pay_scan_sub: '📍 Singapura, Singapore 🇸🇬',
+    pay_scan_hint: '👆 Sentuh QR PayNow untuk mengimbas'
+  },
+  {
+    pay_coach_titles: ['Buka E-Dompet Anda', 'Imbas QR Pengangkutan', 'Semak & Sahkan', 'Sedang Diproses...', 'Tambang Berjaya Dibayar! 🎉'],
+    pay_coach_bodies: [
+      'Siti berada di stesen bas di Singapura dan mahu membayar tambang menggunakan e-dompet Malaysia. Tekan "Imbas QR".',
+      'Halakan kamera ke kod QR DuitNow di mesin pembayaran bas. E-dompet Malaysia anda boleh membayar di Singapura!',
+      'Semak nama syarikat dan jumlah tambang. SGD ditukar kepada RM secara automatik. Tekan "Sahkan".',
+      'Sistem pembayaran rentas sempadan sedang mengesahkan transaksi anda dengan selamat...',
+      'Tambang berjaya dibayar! Anda boleh menaiki bas sekarang. Tekan "Selesai" untuk teruskan.'
+    ],
+    pay_merchant: 'SBS Transit 🚌',
+    pay_merchant_loc: 'Singapura • Singapore 🇸🇬',
+    pay_foreign_amount: 'SGD 1.80',
+    pay_myr_target: 5.71,
+    pay_myr_display: 'RM 5.71',
+    pay_rate: 'Kadar: 1 MYR = 0.315 SGD',
+    pay_xb_badge: 'DuitNow QR • Rentas Sempadan',
+    pay_r_amount_label: 'Jumlah (SGD)',
+    pay_r_amount_val: 'SGD 1.80',
+    pay_r_rate_val: '1 MYR = 0.315 SGD',
+    merchant_emoji: '🚌',
+    pay_scan_sub: '📍 Stesen Bas, Singapore 🇸🇬',
+    pay_scan_hint: '👆 Sentuh kod QR untuk mengimbas'
+  }
+];
 
 /* ============================================================
    i18n
@@ -1749,12 +1879,8 @@ function goTo(next) {
   var nextEl = document.getElementById(nextId);
   if (!prevEl || !nextEl) return;
 
-  // Direction: going TO menu = slide back (-1), going FROM menu/0 to content = slide forward (1)
   var dir = 1;
-  if (next === 'menu') dir = -1;
-  else if (next === 0) dir = -1;
-  else if (currentSection === 0 || currentSection === 'menu') dir = 1;
-  else if (typeof next === 'number' && typeof currentSection === 'number') dir = next > currentSection ? 1 : -1;
+  if (typeof next === 'number' && typeof currentSection === 'number') dir = next > currentSection ? 1 : -1;
 
   SFX.swap();
   gsap.to(prevEl, {
@@ -1769,35 +1895,32 @@ function goTo(next) {
   updateDots();
   updateNav();
   if (typeof next === 'number') onSectionEnter(next);
-  if (next === 'menu') { setTimeout(initMenuCanvas, 200); }
 }
 
 function goToMenu() {
   if (payTimer) { clearTimeout(payTimer); payTimer = null; }
   if (payConvInterval) { clearInterval(payConvInterval); payConvInterval = null; }
   if (convInterval) { clearInterval(convInterval); convInterval = null; }
-  goTo('menu');
+  goTo(1);
 }
 
 function updateDots() {
-  // In hub mode, hide progress dots on content sections; show only on start page
   var dotsEl = document.getElementById('progress-dots');
   if (!dotsEl) return;
-  dotsEl.style.display = (currentSection === 0) ? 'flex' : 'none';
+  dotsEl.style.display = 'none';
 }
 
 function updateNav() {
   var back = document.getElementById('nav-back');
   var home = document.getElementById('nav-home');
   var l = i18n[currentLang];
-  // Hide old nav-back and nav-next always (replaced by nav-home)
   if (back) back.style.display = 'none';
-  // Show nav-home (Back to Menu) on all content sections (1-7 and 'menu' hidden)
-  var isContent = currentSection !== 0 && currentSection !== 'menu';
+  // Show back-to-situasi on QR sim and facts/quiz sections, hide on situasi itself
+  var showHome = (currentSection !== 1 && currentSection !== 0 && currentSection !== 'menu');
   if (home) {
-    home.style.display = isContent ? 'flex' : 'none';
+    home.style.display = showHome ? 'flex' : 'none';
     var homeTxtEl = document.getElementById('nav-home-txt');
-    if (homeTxtEl) homeTxtEl.textContent = l ? l.nav_home : 'Menu Utama';
+    if (homeTxtEl) homeTxtEl.textContent = '← Situasi';
   }
 }
 
@@ -2094,8 +2217,52 @@ function nextQuestion() {
     renderQuestion();
   } else {
     quizJustCompleted = true;
-    goTo(6);
+    showSummaryPopup();
   }
+}
+
+/* ============================================================
+   SUMMARY POPUP
+   ============================================================ */
+function showSummaryPopup() {
+  var popup = document.getElementById('summary-popup');
+  if (!popup) return;
+  var scoreEl = document.getElementById('summary-score');
+  if (scoreEl) scoreEl.textContent = quizScore + ' / 4';
+  var msgs = ['Teruskan usaha! Cuba lagi ya.', 'Bagus! Hampir sempurna.', 'Hebat! Hampir semua betul!', 'Cemerlang! Hampir sempurna!', 'Sempurna! Anda pakar kewangan digital! 🌟'];
+  var msgEl = document.getElementById('summary-msg');
+  if (msgEl) msgEl.textContent = msgs[Math.min(quizScore, 4)];
+  var emEl = document.getElementById('summary-emoji');
+  if (emEl) emEl.textContent = quizScore >= 3 ? '🏆' : quizScore >= 2 ? '🎉' : '💪';
+  popup.classList.remove('hidden');
+  SFX.win();
+  var count = 10;
+  var cdEl = document.getElementById('summary-countdown');
+  if (cdEl) cdEl.textContent = count;
+  clearInterval(_summaryCountdown);
+  _summaryCountdown = setInterval(function() {
+    count--;
+    if (cdEl) cdEl.textContent = count;
+    if (count <= 0) {
+      clearInterval(_summaryCountdown);
+      _summaryCountdown = null;
+      closeSummaryAndRestart();
+    }
+  }, 1000);
+}
+
+function closeSummaryAndRestart() {
+  clearInterval(_summaryCountdown);
+  _summaryCountdown = null;
+  var popup = document.getElementById('summary-popup');
+  if (popup) popup.classList.add('hidden');
+  quizScore = 0;
+  quizAnswered = [null, null, null, null];
+  currentQuestion = 0;
+  factsShown = true;
+  quizJustCompleted = false;
+  SFX.swap();
+  goTo(1);
 }
 
 /* ============================================================
@@ -2105,13 +2272,26 @@ function startPayDemo() {
   goTo(2);
 }
 
+function chooseScenario(idx) {
+  resetIdleTimer();
+  SFX.tap();
+  selectedScenario = idx;
+  // Highlight selected card briefly
+  var cards = document.querySelectorAll('.scenario-card');
+  cards.forEach(function(c, i) {
+    c.style.border = i === idx ? '3px solid var(--teal)' : '';
+  });
+  setTimeout(function() { goTo(2); }, 180);
+}
+
 function renderPayStep() {
   var l = i18n[currentLang];
 
+  var sc = scenarios[selectedScenario];
   // Coaching panel (outside the phone)
   document.getElementById('pay-badge').textContent = l.pay_badges[payStep];
-  document.getElementById('pay-coach-title').textContent = l.pay_coach_titles[payStep];
-  document.getElementById('pay-coach-body').textContent = l.pay_coach_bodies[payStep];
+  document.getElementById('pay-coach-title').textContent = sc.pay_coach_titles[payStep];
+  document.getElementById('pay-coach-body').textContent = sc.pay_coach_bodies[payStep];
   for (var i = 0; i < 5; i++) {
     var d = document.getElementById('pd-' + i);
     d.classList.remove('active', 'done');
@@ -2149,28 +2329,28 @@ function renderPayStep() {
     case 1: // camera viewfinder + DuitNow QR
       html = '<div class="pps-scanner">'
            + '<div class="pps-title">' + l.pay_scan_title + '</div>'
-           + '<div class="pps-sub">' + l.pay_scan_sub + '</div>'
+           + '<div class="pps-sub">' + sc.pay_scan_sub + '</div>'
            + '<div class="pps-frame" onclick="payScanned()">'
            + '<div class="pps-corner tl"></div><div class="pps-corner tr"></div><div class="pps-corner bl"></div><div class="pps-corner br"></div>'
            + '<div class="duitnow-card"><div class="duitnow-head">DuitNow QR</div><div class="duitnow-qr" id="duitnow-qr"></div><div class="duitnow-foot">MALAYSIA ↔ ASEAN</div></div>'
            + '<div class="pps-scanline"></div>'
            + '</div>'
-           + '<div class="pps-hint">' + l.pay_scan_hint + '</div>'
+           + '<div class="pps-hint">' + sc.pay_scan_hint + '</div>'
            + '<div class="pps-flash" id="pps-flash"></div>'
            + '</div>';
       break;
     case 2: // confirmation with currency conversion
       html = '<div class="ppc-wrap">'
            + '<div class="ppc-title">' + l.pay_confirm_title + '</div>'
-           + '<div class="ppc-merchant"><div class="ppc-merchant-icon">🍜</div><div><div class="ppc-merchant-name">' + l.pay_merchant + '</div><div class="ppc-merchant-loc">' + l.pay_merchant_loc + '</div></div></div>'
+           + '<div class="ppc-merchant"><div class="ppc-merchant-icon">' + sc.merchant_emoji + '</div><div><div class="ppc-merchant-name">' + sc.pay_merchant + '</div><div class="ppc-merchant-loc">' + sc.pay_merchant_loc + '</div></div></div>'
            + '<div class="ppc-amount-card">'
-           + '<div class="ppc-foreign">THB 120.00</div>'
-           + '<div class="ppc-rate">💱 ' + l.pay_rate + '</div>'
+           + '<div class="ppc-foreign">' + sc.pay_foreign_amount + '</div>'
+           + '<div class="ppc-rate">💱 ' + sc.pay_rate + '</div>'
            + '<div class="ppc-arrow">⬇</div>'
            + '<div class="ppc-myr" id="ppc-myr">RM 0.00</div>'
            + '<div class="ppc-myr-label">' + l.pay_myr_label + '</div>'
            + '</div>'
-           + '<div class="duitnow-badge">' + l.pay_xb_badge + '</div>'
+           + '<div class="duitnow-badge">' + sc.pay_xb_badge + '</div>'
            + '<button class="ppc-confirm-btn" onclick="payConfirm()">' + l.pay_confirm_btn + '</button>'
            + '</div>';
       break;
@@ -2188,10 +2368,10 @@ function renderPayStep() {
            + '<div class="ppd-check"><svg width="54" height="54" viewBox="0 0 54 54"><path d="M12 28 L23 39 L43 16" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>'
            + '<div class="ppd-title">' + l.pay_success + '</div>'
            + '<div class="ppd-receipt">'
-           + '<div class="ppd-row"><span>' + l.pay_r_merchant + '</span><span>' + l.pay_merchant + '</span></div>'
-           + '<div class="ppd-row"><span>' + l.pay_r_amount + '</span><span>THB 120.00</span></div>'
-           + '<div class="ppd-row"><span>' + l.pay_r_rate + '</span><span>1 THB = RM 0.1320</span></div>'
-           + '<div class="ppd-row total"><span>' + l.pay_r_paid + '</span><span>RM 15.84</span></div>'
+           + '<div class="ppd-row"><span>' + l.pay_r_merchant + '</span><span>' + sc.pay_merchant + '</span></div>'
+           + '<div class="ppd-row"><span>' + sc.pay_r_amount_label + '</span><span>' + sc.pay_r_amount_val + '</span></div>'
+           + '<div class="ppd-row"><span>' + l.pay_r_rate + '</span><span>' + sc.pay_r_rate_val + '</span></div>'
+           + '<div class="ppd-row total"><span>' + l.pay_r_paid + '</span><span>' + sc.pay_myr_display + '</span></div>'
            + '<div class="ppd-row"><span>' + l.pay_r_ref + '</span><span>' + payRefNo + '</span></div>'
            + '<div class="ppd-row"><span>' + l.pay_r_date + '</span><span>' + dateStr + '</span></div>'
            + '</div>'
@@ -2265,9 +2445,10 @@ function payScanned() {
 function payConvAnim() {
   var el = document.getElementById('ppc-myr');
   if (!el) return;
-  var val = 0, target = 15.84;
+  var val = 0, target = scenarios[selectedScenario].pay_myr_target;
+  var step = target / 24;
   payConvInterval = setInterval(function() {
-    val += 0.66;
+    val += step;
     if (val >= target) {
       val = target;
       clearInterval(payConvInterval);
@@ -2305,54 +2486,21 @@ function launchPayConfetti() {
 function payDone() {
   resetIdleTimer();
   SFX.tap();
-  goToMenu();
+  // Proceed to Facts & Quiz
+  factsShown = true;
+  quizScore = 0;
+  quizAnswered = [null, null, null, null];
+  currentQuestion = 0;
+  document.getElementById('facts-area').classList.remove('hidden');
+  document.getElementById('quiz-area').classList.add('hidden');
+  goTo(5);
 }
 
 /* ============================================================
    RESTART
    ============================================================ */
 function restart() {
-  resetIdleTimer();
-  quizScore = 0;
-  quizAnswered = [null, null, null, null];
-  currentQuestion = 0;
-  factsShown = true;
-  simCurrentStep = 0;
-  payStep = 0;
-  quizJustCompleted = false;
-  if (payTimer) { clearTimeout(payTimer); payTimer = null; }
-  if (payConvInterval) { clearInterval(payConvInterval); payConvInterval = null; }
-  SFX.swap();
-
-  document.querySelectorAll('.info-card').forEach(function(c) { c.classList.remove('expanded'); });
-  // Reset quiz UI state
-  document.getElementById('quiz-area').classList.remove('hidden');
-  document.getElementById('facts-area').classList.add('hidden');
-  var fb = document.getElementById('quiz-feedback');
-  if (fb) { fb.className = 'quiz-feedback'; fb.textContent = ''; }
-  var bnq = document.getElementById('btn-next-q');
-  if (bnq) bnq.className = 'btn-next-q';
-
-  var oldEl = document.getElementById(currentSection === 'menu' ? 'section-menu' : 'section-' + currentSection);
-  gsap.to(oldEl, {
-    x: Math.round(window.innerWidth*0.13), opacity: 0, duration: 0.38, ease: 'power2.in',
-    onComplete: function() {
-      oldEl.classList.remove('active');
-      gsap.set(oldEl, { x: 0, opacity: 0 });
-    }
-  });
-
-  currentSection = 5;
-  var newEl = document.getElementById('section-5');
-  gsap.set(newEl, { x: -Math.round(window.innerWidth*0.13), opacity: 0 });
-  newEl.classList.add('active');
-  gsap.to(newEl, { x: 0, opacity: 1, duration: 0.38, ease: 'power2.out', delay: 0.15,
-    onComplete: function() { renderQuestion(); }
-  });
-  setTimeout(initSlider, 200);
-
-  updateDots();
-  updateNav();
+  goToStart();
 }
 
 /* ============================================================
@@ -2513,6 +2661,10 @@ window.addEventListener('pointercancel',function(){
 function goToStart() {
   clearTimeout(window._p02AutoNext);
   window._p02AutoNext = null;
+  clearInterval(_summaryCountdown);
+  _summaryCountdown = null;
+  var popup = document.getElementById('summary-popup');
+  if (popup) popup.classList.add('hidden');
   if (payTimer) { clearTimeout(payTimer); payTimer = null; }
   if (payConvInterval) { clearInterval(payConvInterval); payConvInterval = null; }
   if (convInterval) { clearInterval(convInterval); convInterval = null; }
@@ -2523,29 +2675,12 @@ function goToStart() {
   simCurrentStep = 0;
   payStep = 0;
   quizJustCompleted = false;
-
-  var oldId = currentSection === 'menu' ? 'section-menu' : 'section-' + currentSection;
-  var oldEl = document.getElementById(oldId);
-  if (oldEl) {
-    gsap.to(oldEl, {
-      x: Math.round(window.innerWidth * 0.13), opacity: 0, duration: 0.32, ease: 'power2.in',
-      onComplete: function() { oldEl.classList.remove('active'); gsap.set(oldEl, { x: 0, opacity: 0 }); }
-    });
-  }
-  currentSection = 0;
-  var newEl = document.getElementById('section-0');
-  if (newEl) {
-    gsap.set(newEl, { x: -Math.round(window.innerWidth * 0.13), opacity: 0 });
-    newEl.classList.add('active');
-    gsap.to(newEl, { x: 0, opacity: 1, duration: 0.38, ease: 'power2.out', delay: 0.12 });
-  }
-  updateDots(); updateNav();
-  setTimeout(initSlider, 600);
+  goTo(1);
 }
 
 /* idle */
-function resetIdleTimer(){if(idleTimer)clearTimeout(idleTimer);dismissIdle();if(currentSection===0)return;idleTimer=setTimeout(showIdle,25000);}
-function showIdle(){var secs=7,overlay=document.getElementById('idle-overlay'),mainEl=document.getElementById('idle-warn-main'),subEl=document.getElementById('idle-warn-sub'),activeLang=document.querySelector('#lang-toggle .lang-btn.active')?document.querySelector('#lang-toggle .lang-btn.active').dataset.lang:'bm';function updateText(n){var bm=(activeLang!=='en');if(mainEl)mainEl.textContent=bm?'Tiada aktiviti dikesan.':'No activity detected.';if(subEl)subEl.textContent=bm?'Kembali ke skrin mula dalam '+n+' saat...':'Returning to start screen in '+n+' seconds...';}updateText(secs);overlay.classList.add('show');clearInterval(idleCountdown);idleCountdown=setInterval(function(){secs--;updateText(secs);if(secs<=0){clearInterval(idleCountdown);idleCountdown=null;overlay.classList.remove('show');goToStart();}},1000);}
+function resetIdleTimer(){if(idleTimer)clearTimeout(idleTimer);dismissIdle();if(currentSection===1)return;idleTimer=setTimeout(showIdle,25000);}
+function showIdle(){var secs=7,overlay=document.getElementById('idle-overlay'),mainEl=document.getElementById('idle-warn-main'),subEl=document.getElementById('idle-warn-sub');function updateText(n){if(mainEl)mainEl.textContent='Tiada aktiviti dikesan.';if(subEl)subEl.textContent='Kembali ke skrin mula dalam '+n+' saat...';}updateText(secs);overlay.classList.add('show');clearInterval(idleCountdown);idleCountdown=setInterval(function(){secs--;updateText(secs);if(secs<=0){clearInterval(idleCountdown);idleCountdown=null;overlay.classList.remove('show');goToStart();}},1000);}
 function dismissIdle(){clearInterval(idleCountdown);idleCountdown=null;document.getElementById('idle-overlay').classList.remove('show');}
 
 /* kiosk scaler */
@@ -2558,7 +2693,7 @@ document.addEventListener('touchstart',resetIdleTimer,{passive:true});
 document.addEventListener('click',resetIdleTimer);
 document.addEventListener('pointerdown',function(e){if(!document.fullscreenElement&&document.documentElement.requestFullscreen){document.documentElement.requestFullscreen().catch(function(){});}if(e.target.closest('button,.wallet-opt,.info-card,.scenario-card,.quiz-opt,.pps-frame,.fact-bubble,.lang-btn,.app-icon,.slide-thumb')){SFX.tap();}},true);
 renderTexts();updateDots();updateNav();resetIdleTimer();
-gsap.from('#section-0',{opacity:0,y:36,duration:0.9,ease:'power2.out',delay:0.3});
+gsap.from('#section-1',{opacity:0,y:36,duration:0.9,ease:'power2.out',delay:0.3});
 (function(){
   var thumb=document.getElementById('slide-thumb');
   if(!thumb)return;
