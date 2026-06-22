@@ -1373,20 +1373,34 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;b
     </div><!-- /.wp-screen -->
       </div><!-- /.payphone-screen -->
     </div><!-- /.payphone -->
+    <div class="pay-coach">
+      <div class="pay-coach-badge">Langkah 1 / 6</div>
+      <h2>Pilih E-Dompet Anda</h2>
+      <p>Pilih dompet digital yang ingin anda gunakan untuk membuat pembayaran rentas sempadan.</p>
+      <div class="pay-coach-dots">
+        <div class="pay-dot active"></div>
+        <div class="pay-dot"></div>
+        <div class="pay-dot"></div>
+        <div class="pay-dot"></div>
+        <div class="pay-dot"></div>
+        <div class="pay-dot"></div>
+      </div>
+    </div>
   </div><!-- /#section-wallet -->
 
   <!-- ========== SECTION 3: QR SIMULATION ========== -->
   <div class="section" id="section-2">
     <div class="pay-coach">
-      <div class="pay-coach-badge" id="pay-badge">Langkah 1 / 5</div>
+      <div class="pay-coach-badge" id="pay-badge">Langkah 2 / 6</div>
       <h2 id="pay-coach-title"></h2>
       <p id="pay-coach-body"></p>
       <div class="pay-coach-dots">
-        <div class="pay-dot active" id="pd-0"></div>
-        <div class="pay-dot" id="pd-1"></div>
+        <div class="pay-dot done" id="pd-0"></div>
+        <div class="pay-dot active" id="pd-1"></div>
         <div class="pay-dot" id="pd-2"></div>
         <div class="pay-dot" id="pd-3"></div>
         <div class="pay-dot" id="pd-4"></div>
+        <div class="pay-dot" id="pd-5"></div>
       </div>
     </div>
     <div class="payphone">
@@ -1614,7 +1628,7 @@ var _summaryCountdown = null;
 
 var scenarios = [
   {
-    pay_coach_titles: ['Buka E-Dompet Anda', 'Imbas QR PayNow Rakan', 'Semak & Sahkan', 'Sedang Diproses...', 'Wang Berjaya Dihantar! 🎉'],
+    pay_coach_titles: ['Tekan Imbas QR', 'Imbas QR PayNow Rakan', 'Semak & Sahkan', 'Sedang Diproses...', 'Wang Berjaya Dihantar! 🎉'],
     pay_coach_bodies: [
       'Ali mahu menghantar wang kepada rakannya Mei di Singapura. Tekan butang "Imbas QR" pada telefon untuk memulakan.',
       'Mei kongsi kod QR PayNow beliau. Imbas kod tersebut — e-dompet Malaysia boleh hantar terus ke PayNow Singapura!',
@@ -1637,7 +1651,7 @@ var scenarios = [
     pay_scan_hint: '👆 Sentuh QR PayNow untuk mengimbas'
   },
   {
-    pay_coach_titles: ['Buka E-Dompet Anda', 'Imbas QR Pengangkutan', 'Semak & Sahkan', 'Sedang Diproses...', 'Tambang Berjaya Dibayar! 🎉'],
+    pay_coach_titles: ['Tekan Imbas QR', 'Imbas QR Pengangkutan', 'Semak & Sahkan', 'Sedang Diproses...', 'Tambang Berjaya Dibayar! 🎉'],
     pay_coach_bodies: [
       'Siti berada di stesen bas di Singapura dan mahu membayar tambang menggunakan e-dompet Malaysia. Tekan "Imbas QR".',
       'Halakan kamera ke kod QR DuitNow di mesin pembayaran bas. E-dompet Malaysia anda boleh membayar di Singapura!',
@@ -1735,8 +1749,8 @@ var i18n = {
     final_score_label: 'soalan betul',
     s6_restart: '↺ Mulakan Semula',
     s6_paycta: '📲 Cuba Bayar Dengan QR!',
-    pay_badges: ['Langkah 1 / 5', 'Langkah 2 / 5', 'Langkah 3 / 5', 'Langkah 4 / 5', 'Langkah 5 / 5'],
-    pay_coach_titles: ['Buka E-Dompet Anda', 'Imbas Kod QR DuitNow', 'Semak & Sahkan', 'Sedang Diproses...', 'Pembayaran Berjaya! 🎉'],
+    pay_badges: ['Langkah 2 / 6', 'Langkah 3 / 6', 'Langkah 4 / 6', 'Langkah 5 / 6', 'Langkah 6 / 6'],
+    pay_coach_titles: ['Tekan Imbas QR', 'Imbas Kod QR DuitNow', 'Semak & Sahkan', 'Sedang Diproses...', 'Pembayaran Berjaya! 🎉'],
     pay_coach_bodies: [
       'Bayangkan anda sedang melancong di Bangkok, Thailand 🇹🇭 dan mahu membeli som tam yang sedap. Tekan butang "Imbas QR" pada telefon untuk mula.',
       'Halakan kamera dan sentuh kod QR DuitNow peniaga. E-dompet Malaysia anda boleh membaca kod QR di luar negara!',
@@ -2348,11 +2362,11 @@ function renderPayStep() {
   document.getElementById('pay-badge').textContent = l.pay_badges[payStep];
   document.getElementById('pay-coach-title').textContent = sc.pay_coach_titles[payStep];
   document.getElementById('pay-coach-body').textContent = sc.pay_coach_bodies[payStep];
-  for (var i = 0; i < 5; i++) {
+  for (var i = 0; i < 6; i++) {
     var d = document.getElementById('pd-' + i);
     d.classList.remove('active', 'done');
-    if (i < payStep) d.classList.add('done');
-    if (i === payStep) d.classList.add('active');
+    if (i === 0 || i < payStep + 1) d.classList.add('done');
+    if (i === payStep + 1) d.classList.add('active');
   }
 
   // Status bar: live time + light/dark per screen background
