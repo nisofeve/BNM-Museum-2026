@@ -165,20 +165,12 @@ html, body {
   position: absolute; inset: 0;
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
-  padding: clamp(10px, calc(20 * var(--u)), 4vh) clamp(10px, calc(28 * var(--u)), 3vw);
+  padding: calc(20 * var(--u)) calc(28 * var(--u));
   opacity: 0;
-  overflow-y: auto;
-  overflow-x: hidden;
   transform: translateY(calc(28 * var(--u))) scale(0.96);
   pointer-events: none;
   transition: opacity 0.4s var(--ease-bounce), transform 0.4s var(--ease-bounce);
   z-index: 10;
-}
-/* Input screen: top-aligned so scroll starts from top, not clipped center */
-#screen-input {
-  justify-content: flex-start;
-  padding-top: clamp(8px, calc(16 * var(--u)), 3vh);
-  gap: clamp(6px, calc(10 * var(--u)), 2vh);
 }
 .screen.active {
   opacity: 1;
@@ -298,7 +290,7 @@ button {
   box-shadow:
     0 calc(14 * var(--u)) calc(44 * var(--u)) rgba(0,0,0,0.2),
     inset 0 1px 0 rgba(255,255,255,0.85);
-  max-width: min(calc(650 * var(--u)), 90vw);
+  max-width: calc(650 * var(--u));
   position: relative;
 }
 .welcome-content::before {
@@ -354,19 +346,20 @@ button {
 .presenter-stage {
   position: relative;
   width: 100%;
-  max-width: min(calc(760 * var(--u)), 96vw);
+  max-width: calc(760 * var(--u));
+  min-height: calc(330 * var(--u));
+  padding-bottom: calc(278 * var(--u));
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
   gap: calc(7 * var(--u));
-  margin-bottom: calc(6 * var(--u));
+  margin-bottom: calc(10 * var(--u));
 }
 
 /* ─── SPEECH BUBBLES ─── */
 .bubble {
-  max-width: min(calc(490 * var(--u)), 88vw);
-  width: 100%;
+  max-width: calc(490 * var(--u));
   opacity: 0;
   transform: scale(0.84) translateY(calc(10 * var(--u)));
   transition: opacity 0.3s var(--ease-bounce), transform 0.3s var(--ease-bounce);
@@ -384,7 +377,7 @@ button {
   border-radius: var(--radius-lg);
   padding: calc(12 * var(--u)) calc(20 * var(--u));
   box-shadow: 0 calc(4 * var(--u)) calc(16 * var(--u)) rgba(0,0,0,0.13);
-  width: 100%;
+  max-width: 82%;
 }
 .bubble-main::before {
   content: '';
@@ -433,18 +426,13 @@ button {
 .bubble-line { margin-bottom: calc(3 * var(--u)); }
 
 /* ─── CHARACTER + TAG ─── */
-.char-wrap {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: calc(4 * var(--u));
-  flex-shrink: 0;
-}
 .presenter-char {
-  position: relative;
-  width: min(calc(177 * var(--u)), 22vw);
-  height: min(calc(261 * var(--u)), 32vh);
-  flex-shrink: 0;
+  position: absolute;
+  bottom: calc(20 * var(--u));
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(177 * var(--u));
+  height: calc(261 * var(--u));
 }
 .aisyah-sp {
   position: absolute; inset: 0;
@@ -462,10 +450,14 @@ button {
 .presenter-char.is-happy   .sp-happy { opacity: 1; }
 
 .presenter-tag {
+  position: absolute;
+  bottom: calc(2 * var(--u));
+  left: 50%;
+  transform: translateX(-50%);
   background: var(--ac-green);
   color: white;
   font-family: 'Fredoka One', cursive;
-  font-size: clamp(10px, calc(14 * var(--u)), 22px);
+  font-size: calc(14 * var(--u));
   padding: calc(3 * var(--u)) calc(14 * var(--u));
   border-radius: calc(14 * var(--u));
   letter-spacing: calc(0.5 * var(--u));
@@ -485,7 +477,7 @@ button {
 /* ─── ANSWER PANELS ─── */
 .answer-panel {
   width: 100%;
-  max-width: min(calc(740 * var(--u)), 96vw);
+  max-width: calc(740 * var(--u));
   background: var(--panel);
   border: calc(4 * var(--u)) solid var(--wood);
   border-bottom: calc(8 * var(--u)) solid var(--wood-dark);
@@ -704,7 +696,7 @@ button {
   opacity: 0.75;
 }
 .progress-bar-wrap {
-  width: min(calc(430 * var(--u)), 80vw);
+  width: calc(430 * var(--u));
   height: calc(18 * var(--u));
   background: var(--cream);
   border-radius: calc(12 * var(--u));
@@ -806,7 +798,7 @@ button {
   font-size: calc(14 * var(--u));
   color: var(--text);
   text-align: center;
-  max-width: min(calc(600 * var(--u)), 90vw);
+  max-width: calc(600 * var(--u));
   line-height: 1.5;
 }
 .results-footer {
@@ -904,10 +896,8 @@ button {
   <div class="presenter-stage" id="stage-planner">
     <div class="bubble bubble-main"><div class="bubble-content"></div></div>
     <div class="bubble bubble-user"><div class="bubble-content"></div></div>
-    <div class="char-wrap">
-      <div class="presenter-char"></div>
-      <div class="presenter-tag" data-i18n="mascot_label"></div>
-    </div>
+    <div class="presenter-char"></div>
+    <div class="presenter-tag" data-i18n="mascot_label"></div>
   </div>
 
   <!-- answer area: touch buttons for the current question -->
