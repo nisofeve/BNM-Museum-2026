@@ -288,8 +288,8 @@ if(typeof gsap==='undefined'){
     font-size: 1.062rem;
     color: var(--text-mid);
   }
-  .label-city.left { left: 0; }
-  .label-city.right { right: 0; }
+  .label-city.left { left: 0; width: 38%; text-align: center; }
+  .label-city.right { right: 0; width: 38%; text-align: center; }
 
   #section-0 h1 {
     font-family: 'Poppins', sans-serif;
@@ -1331,7 +1331,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;b
           <div class="wp-logo" style="background:linear-gradient(135deg,#00c853,#009624)">TnG</div>
           <div class="wp-info">
             <div class="wp-name">Touch 'n Go</div>
-            <div class="wp-bal">Baki: RM 125.50</div>
+            <div class="wp-bal">Baki: RM 376.50</div>
           </div>
           <div class="wp-arrow">›</div>
         </div>
@@ -1339,7 +1339,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;b
           <div class="wp-logo" style="background:linear-gradient(135deg,#7b2ff7,#4a00c9)">MAE</div>
           <div class="wp-info">
             <div class="wp-name">MAE by Maybank</div>
-            <div class="wp-bal">Baki: RM 340.00</div>
+            <div class="wp-bal">Baki: RM 1,020.00</div>
           </div>
           <div class="wp-arrow">›</div>
         </div>
@@ -1347,7 +1347,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;b
           <div class="wp-logo" style="background:linear-gradient(135deg,#ff6d00,#e65100)">BST</div>
           <div class="wp-info">
             <div class="wp-name">Boost</div>
-            <div class="wp-bal">Baki: RM 88.20</div>
+            <div class="wp-bal">Baki: RM 264.60</div>
           </div>
           <div class="wp-arrow">›</div>
         </div>
@@ -1355,7 +1355,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;b
           <div class="wp-logo" style="background:linear-gradient(135deg,#00b14f,#007a38)">Grab</div>
           <div class="wp-info">
             <div class="wp-name">GrabPay</div>
-            <div class="wp-bal">Baki: RM 56.80</div>
+            <div class="wp-bal">Baki: RM 170.40</div>
           </div>
           <div class="wp-arrow">›</div>
         </div>
@@ -1609,10 +1609,10 @@ var quizJustCompleted = false;
 var selectedScenario = 0;
 var selectedWallet = 'tng';
 var wallets = {
-  tng:     { name: 'Touch \'n Go', balance: 'RM 125.50', color: '#00c853', logo: 'TnG' },
-  mae:     { name: 'MAE Maybank',  balance: 'RM 340.00', color: '#7b2ff7', logo: 'MAE' },
-  boost:   { name: 'Boost',        balance: 'RM 88.20',  color: '#ff6d00', logo: 'BST' },
-  grabpay: { name: 'GrabPay',      balance: 'RM 56.80',  color: '#00b14f', logo: 'Grab' }
+  tng:     { name: 'Touch \'n Go', balance: 'RM 376.50',   color: '#00c853', logo: 'TnG' },
+  mae:     { name: 'MAE Maybank',  balance: 'RM 1,020.00', color: '#7b2ff7', logo: 'MAE' },
+  boost:   { name: 'Boost',        balance: 'RM 264.60',   color: '#ff6d00', logo: 'BST' },
+  grabpay: { name: 'GrabPay',      balance: 'RM 170.40',   color: '#00b14f', logo: 'Grab' }
 };
 var _summaryCountdown = null;
 
