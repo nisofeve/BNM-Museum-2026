@@ -67,6 +67,36 @@
   #fallback{position:fixed;inset:0;z-index:20;display:none;
     align-items:center;justify-content:center;text-align:center;
     background:#02030a;color:#9fc7ff;font-size:3vmin;padding:8vmin;line-height:1.6}
+
+  /* ── steampunk gear overlay ── */
+  #gearSvg{position:fixed;inset:0;width:100%;height:100%;z-index:2;
+    pointer-events:none;overflow:visible;
+    animation:stIn 3s ease forwards;opacity:0;}
+  .gg{transform-box:fill-box;transform-origin:center;}
+  @keyframes stIn{0%{opacity:0}100%{opacity:1}}
+  @keyframes gcw {from{transform:rotate(  0deg)}to{transform:rotate( 360deg)}}
+  @keyframes gccw{from{transform:rotate(  0deg)}to{transform:rotate(-360deg)}}
+  .mstrip{position:fixed;left:0;right:0;z-index:5;pointer-events:none;overflow:hidden;
+    animation:stIn 2s ease forwards .7s;opacity:0;}
+  #mstrip-t{top:0;height:5vh;min-height:38px;}
+  #mstrip-b{bottom:0;height:5vh;min-height:38px;}
+  .mskin{width:100%;height:100%;display:flex;flex-direction:column;
+    justify-content:space-evenly;padding:0 1vmin;position:relative;overflow:hidden;}
+  #mstrip-t .mskin{
+    background:linear-gradient(180deg,#a0c6d8 0%,#7ba6bc 55%,#628caa 100%);
+    box-shadow:0 5px 20px rgba(0,0,0,.45);}
+  #mstrip-b .mskin{
+    background:linear-gradient(180deg,#628caa 0%,#7ba6bc 45%,#a0c6d8 100%);
+    box-shadow:0 -5px 20px rgba(0,0,0,.45);}
+  .mskin::before{content:'';position:absolute;inset:0;
+    background:repeating-linear-gradient(90deg,
+      transparent 0,rgba(255,255,255,.055) 1px,transparent 2px,transparent 6px);}
+  .mskin::after{content:'';position:absolute;inset:0;
+    background:linear-gradient(180deg,rgba(255,255,255,.26) 0%,rgba(255,255,255,.05) 65%,transparent 100%);}
+  .rvrow{display:flex;justify-content:space-around;width:100%;position:relative;z-index:1;}
+  .rv{width:1.5vmin;height:1.5vmin;min-width:8px;min-height:8px;border-radius:50%;flex-shrink:0;
+    background:radial-gradient(circle at 32% 28%,#dcf0fa 0%,#86a8c2 50%,#4e6880 100%);
+    box-shadow:0 .5px 2.5px rgba(0,0,0,.6),inset 0 .4px 0 rgba(255,255,255,.5);}
 </style>
 </head>
 <body>
@@ -81,6 +111,10 @@
 
   <div id="white"></div>
   <div id="fallback">Peranti ini tidak menyokong WebGL.<br>This device does not support WebGL.</div>
+
+  <svg id="gearSvg" aria-hidden="true"></svg>
+  <div class="mstrip" id="mstrip-t"><div class="mskin" id="rvt"></div></div>
+  <div class="mstrip" id="mstrip-b"><div class="mskin" id="rvb"></div></div>
 
 <script id="vert" type="x-shader/x-vertex">
 attribute vec2 aPos;
@@ -578,6 +612,77 @@ void main(){
 })();
 </script>
 
+<script>
+(function(){
+  var S=document.getElementById('gearSvg');
+  var RT=document.getElementById('rvt'), RB=document.getElementById('rvb');
+  function gp(cx,cy,ro,ri,rh,n){
+    var step=Math.PI*2/n,tw=step*.46,bv=step*.09,d='';
+    for(var i=0;i<n;i++){
+      var a=i*step;
+      var P=function(r,ang){return (cx+Math.cos(ang)*r).toFixed(1)+' '+(cy+Math.sin(ang)*r).toFixed(1);};
+      if(i===0) d+='M '+P(ri,a-tw-bv)+' ';
+      d+='L '+P(ro,a-tw)+' L '+P(ro,a+tw)+' L '+P(ri,a+tw+bv)+' ';
+    }
+    d+='Z M '+(cx+rh).toFixed(1)+' '+cy+' A '+rh+' '+rh+' 0 1 0 '+(cx-rh).toFixed(1)+' '+cy+' A '+rh+' '+rh+' 0 1 0 '+(cx+rh).toFixed(1)+' '+cy+' Z';
+    return d;
+  }
+  function spokes(cx,cy,ri,rhub,n){
+    var s='';
+    for(var i=0;i<n;i++){
+      var a=i*Math.PI*2/n,sw=(ri*.085).toFixed(1);
+      s+='<line x1="'+(cx+Math.cos(a)*rhub*1.4).toFixed(1)+'" y1="'+(cy+Math.sin(a)*rhub*1.4).toFixed(1)+'" x2="'+(cx+Math.cos(a)*ri*.77).toFixed(1)+'" y2="'+(cy+Math.sin(a)*ri*.77).toFixed(1)+'" stroke="rgba(0,0,0,.28)" stroke-width="'+sw+'" stroke-linecap="round"/>';
+    }
+    return s;
+  }
+  function gear(cx,cy,ro,ri,rhub,rhole,n,gr,anim,dur,op){
+    op=op===undefined?.88:op;
+    var d=gp(cx,cy,ro,ri,rhole,n),ns=Math.max(3,Math.min(6,Math.round(n/5)));
+    return '<g class="gg" style="animation:'+anim+' '+dur+'s linear infinite" opacity="'+op+'">'
+      +'<path d="'+d+'" fill="url(#'+gr+')" fill-rule="evenodd" stroke="rgba(0,0,0,.12)" stroke-width=".5"/>'
+      +'<circle cx="'+cx.toFixed(1)+'" cy="'+cy.toFixed(1)+'" r="'+rhub.toFixed(1)+'" fill="url(#'+gr+')" />'
+      +spokes(cx,cy,ri,rhub,ns)
+      +'<circle cx="'+cx.toFixed(1)+'" cy="'+cy.toFixed(1)+'" r="'+rhole.toFixed(1)+'" fill="#0c0c18"/>'
+      +'<path d="'+d+'" fill="url(#gSheen)" fill-rule="evenodd" opacity=".4"/>'
+      +'<circle cx="'+cx.toFixed(1)+'" cy="'+cy.toFixed(1)+'" r="'+rhub.toFixed(1)+'" fill="url(#gSheen)" opacity=".22"/>'
+      +'</g>';
+  }
+  function build(){
+    var W=innerWidth,H=innerHeight,vm=Math.min(W,H);
+    var defs='<defs>'
+      +'<radialGradient id="gGold" cx="38%" cy="32%" r="68%">'
+      +'<stop offset="0%" stop-color="#FFF6B0"/><stop offset="18%" stop-color="#F0D040"/>'
+      +'<stop offset="55%" stop-color="#C89A10"/><stop offset="100%" stop-color="#7C5C08"/>'
+      +'</radialGradient>'
+      +'<radialGradient id="gSilv" cx="38%" cy="32%" r="68%">'
+      +'<stop offset="0%" stop-color="#EEF8FF"/><stop offset="22%" stop-color="#C6DAEC"/>'
+      +'<stop offset="60%" stop-color="#8AAEC2"/><stop offset="100%" stop-color="#4A6878"/>'
+      +'</radialGradient>'
+      +'<linearGradient id="gSheen" x1="0" y1="0" x2="1" y2="1">'
+      +'<stop offset="0%" stop-color="rgba(255,255,255,.55)"/>'
+      +'<stop offset="45%" stop-color="rgba(255,255,255,.05)"/>'
+      +'<stop offset="100%" stop-color="rgba(0,0,0,.08)"/>'
+      +'</linearGradient></defs>';
+    var BLX=-vm*.04,BLY=H+vm*.06,ro1=vm*.30,ri1=vm*.25,ro2=vm*.18,ri2=vm*.15;
+    var ang12=.26*Math.PI,cx2=BLX+(ro1+ro2-.01*vm)*Math.cos(ang12),cy2=BLY-(ro1+ro2-.01*vm)*Math.sin(ang12);
+    var BRX=W+vm*.07,BRY=H+vm*.07,ro3=vm*.23,ri3=vm*.19,ro4=vm*.12,ri4=vm*.10;
+    var ang34=.74*Math.PI,cx4=BRX+(ro3+ro4-.01*vm)*Math.cos(ang34),cy4=BRY-(ro3+ro4-.01*vm)*Math.sin(ang34);
+    var h=defs;
+    h+=gear(BLX,BLY,ro1,ri1,ri1*.30,ri1*.11,24,'gGold','gcw', 50,.88);
+    h+=gear(cx2,cy2,ro2,ri2,ri2*.30,ri2*.11,16,'gSilv','gccw',34,.82);
+    h+=gear(BRX,BRY,ro3,ri3,ri3*.30,ri3*.11,20,'gGold','gccw',44,.86);
+    h+=gear(cx4,cy4,ro4,ri4,ri4*.30,ri4*.11,12,'gSilv','gcw', 27,.78);
+    h+=gear(W+vm*.04,-vm*.03,vm*.14,vm*.12,vm*.04,vm*.015,14,'gSilv','gcw', 40,.70);
+    h+=gear(-vm*.05,-vm*.02,vm*.09,vm*.07,vm*.028,vm*.011,10,'gGold','gccw',29,.65);
+    S.innerHTML=h;
+    var nc=Math.round(W/17),row='<div class="rvrow">';
+    for(var i=0;i<nc;i++) row+='<span class="rv"></span>';
+    row+='</div>';
+    RT.innerHTML=row+row; RB.innerHTML=row+row;
+  }
+  build(); window.addEventListener('resize',build);
+})();
+</script>
 <style id="kiosk-hardening">html,body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;}a{pointer-events:none;}</style><script id="kiosk-block">document.addEventListener("contextmenu",function(e){e.preventDefault();},true);document.addEventListener("dragstart",function(e){e.preventDefault();},true);</script>
 </body>
 </html>
