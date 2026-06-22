@@ -235,6 +235,7 @@ if(typeof gsap==='undefined'){
   }
   .skyline { display: flex; align-items: flex-end; gap: 0.3125rem; }
   .sky-building { border-radius: 0.25rem 0.25rem 0 0; }
+  .skyline-svg { display: block; height: 10.5rem; width: auto; }
 
   .skyline-jb .b1 { width:1.875rem; height:3.875rem; background:var(--blue); }
   .skyline-jb .b2 { width:1.5rem; height:5.75rem; background:#1a5fb4; }
@@ -939,12 +940,12 @@ if(typeof gsap==='undefined'){
 }
 .slide-track {
   width: 100%;
-  height: 6.75rem;
+  height: 10.25rem;
   background: rgba(255,255,255,0.22);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 2.5px solid rgba(255,255,255,0.55);
-  border-radius: 3.375rem;
+  border-radius: 5.125rem;
   position: relative;
   overflow: hidden;
   touch-action: none;
@@ -955,15 +956,15 @@ if(typeof gsap==='undefined'){
   left: 0; top: 0; bottom: 0;
   width: 0;
   background: linear-gradient(90deg, rgba(0,71,171,0.35), rgba(0,180,166,0.35));
-  border-radius: 3.375rem;
+  border-radius: 5.125rem;
   pointer-events: none;
 }
 .slide-thumb {
   position: absolute;
-  left: 0.5625rem;
-  top: 0.5625rem;
-  width: 5.625rem;
-  height: 5.625rem;
+  left: 0.625rem;
+  top: 0.625rem;
+  width: 9rem;
+  height: 9rem;
   border-radius: 50%;
   background: linear-gradient(135deg, var(--blue), var(--teal));
   display: flex;
@@ -981,8 +982,10 @@ if(typeof gsap==='undefined'){
 .slide-thumb:active { cursor: grabbing; }
 .slide-thumb-arrows {
   display: flex;
-  gap: 2px;
+  gap: 0;
   align-items: center;
+  font-size: 6.375rem;
+  letter-spacing: -0.5rem;
   animation: arrowPulse 1.4s ease-in-out infinite;
 }
 @keyframes arrowPulse {
@@ -1212,15 +1215,34 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;b
   <!-- ========== SECTION 1: OPENING ========== -->
   <div class="section active" id="section-0">
     <div class="skyline-container">
-      <div class="skyline skyline-jb">
-        <div class="sky-building b1"></div>
-        <div class="sky-building b2"></div>
-        <div class="sky-building b3"></div>
-        <div class="sky-building b4"></div>
-        <div class="sky-building b5"></div>
-        <div class="sky-building b6"></div>
-        <div class="sky-building b7"></div>
-      </div>
+      <!-- Malaysia skyline: KL Tower + Petronas Twin Towers -->
+      <svg class="skyline-svg" viewBox="0 0 220 100" xmlns="http://www.w3.org/2000/svg" fill="#0047AB">
+        <!-- Background generic buildings (far left) -->
+        <rect x="0" y="72" width="15" height="28"/>
+        <rect x="17" y="62" width="12" height="38"/>
+        <rect x="31" y="68" width="10" height="32"/>
+        <!-- KL Tower — thin shaft, oval pod, spire -->
+        <rect x="51" y="74" width="20" height="26" rx="1"/>
+        <rect x="58" y="33" width="5" height="45"/>
+        <ellipse cx="60.5" cy="35" rx="16" ry="20"/>
+        <rect x="59.5" y="8" width="2.5" height="28"/>
+        <!-- Petronas Twin Towers — twin stepped towers, sky bridge, spires -->
+        <rect x="85" y="16" width="28" height="84"/>
+        <rect x="89" y="12" width="20" height="7"/>
+        <rect x="93" y="8" width="12" height="6"/>
+        <rect x="98" y="0" width="3" height="10"/>
+        <rect x="119" y="16" width="28" height="84"/>
+        <rect x="123" y="12" width="20" height="7"/>
+        <rect x="127" y="8" width="12" height="6"/>
+        <rect x="132" y="0" width="3" height="10"/>
+        <!-- Sky bridge -->
+        <rect x="101" y="54" width="30" height="6" rx="3"/>
+        <!-- Right buildings -->
+        <rect x="152" y="44" width="20" height="56"/>
+        <rect x="174" y="54" width="15" height="46"/>
+        <rect x="191" y="48" width="14" height="52"/>
+        <rect x="207" y="64" width="13" height="36"/>
+      </svg>
       <div class="skyline-bridge">
         <div class="flow-line"></div>
         <div class="flow-line"></div>
@@ -1229,16 +1251,26 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;b
         <div class="flow-dot"></div>
         <div class="flow-dot"></div>
       </div>
-      <div class="skyline skyline-sg">
-        <div class="sky-building b1"></div>
-        <div class="sky-building b2"></div>
-        <div class="sky-building b3"></div>
-        <div class="sky-building b4"></div>
-        <div class="sky-building b5"></div>
-        <div class="sky-building b6"></div>
-        <div class="sky-building b7"></div>
-      </div>
-      <span class="label-city left">Johor Bahru 🇲🇾</span>
+      <!-- Singapore skyline: Marina Bay Sands + Supertrees -->
+      <svg class="skyline-svg" viewBox="0 0 220 100" xmlns="http://www.w3.org/2000/svg" fill="#00B4A6">
+        <!-- Marina Bay Sands — 3 towers + curved roof deck -->
+        <rect x="2" y="24" width="23" height="76"/>
+        <rect x="31" y="18" width="23" height="82"/>
+        <rect x="60" y="24" width="23" height="76"/>
+        <path d="M0 22 Q43 4 87 22 L87 14 Q43 -4 0 14 Z"/>
+        <!-- Gardens by the Bay Supertrees -->
+        <rect x="100" y="46" width="7" height="54"/>
+        <ellipse cx="103.5" cy="38" rx="21" ry="14"/>
+        <rect x="128" y="54" width="6" height="46"/>
+        <ellipse cx="131" cy="47" rx="17" ry="12"/>
+        <rect x="152" y="62" width="5" height="38"/>
+        <ellipse cx="154.5" cy="56" rx="14" ry="10"/>
+        <!-- Right background buildings -->
+        <rect x="172" y="44" width="20" height="56"/>
+        <rect x="194" y="38" width="14" height="62"/>
+        <rect x="210" y="56" width="10" height="44"/>
+      </svg>
+      <span class="label-city left">Kuala Lumpur 🇲🇾</span>
       <span class="label-city right">Singapore 🇸🇬</span>
     </div>
     <h1 id="s0-title">Dunia yang semakin bersambung...<br>Kini, semuanya terasa lebih dekat...</h1>
