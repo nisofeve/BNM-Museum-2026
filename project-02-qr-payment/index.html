@@ -1599,6 +1599,7 @@ var currentQuestion = 0;
 var factsShown = true;
 var simCurrentStep = 0;
 var idleTimer = null;
+var quizAutoTimer = null;
 var idleCountdown = null;
 var convInterval = null;
 var payStep = 0;
@@ -2237,6 +2238,24 @@ function answerQuiz(choice) {
   }
 
   document.getElementById('btn-next-q').classList.add('show');
+  startQuizCountdown();
+}
+
+function startQuizCountdown() {
+  clearInterval(quizAutoTimer);
+  var secs = 4;
+  var btn = document.getElementById('btn-next-q');
+  function updateBtn() { if (btn) btn.textContent = 'Soalan Seterusnya → (' + secs + ')'; }
+  updateBtn();
+  quizAutoTimer = setInterval(function() {
+    secs--;
+    if (secs <= 0) {
+      clearInterval(quizAutoTimer); quizAutoTimer = null;
+      nextQuestion();
+    } else {
+      updateBtn();
+    }
+  }, 1000);
 }
 
 function restoreAnswerState() {
@@ -2262,6 +2281,7 @@ function restoreAnswerState() {
 }
 
 function nextQuestion() {
+  clearInterval(quizAutoTimer); quizAutoTimer = null;
   resetIdleTimer();
   SFX.tap();
   if (currentQuestion < 3) {
@@ -2745,7 +2765,7 @@ function goToStart() {
 
 /* idle */
 function resetIdleTimer(){if(idleTimer)clearTimeout(idleTimer);dismissIdle();if(currentSection===0)return;idleTimer=setTimeout(showIdle,25000);}
-function showIdle(){var secs=7,overlay=document.getElementById('idle-overlay'),mainEl=document.getElementById('idle-warn-main'),subEl=document.getElementById('idle-warn-sub');function updateText(n){if(mainEl)mainEl.textContent='Tiada aktiviti dikesan.';if(subEl)subEl.textContent='Kembali ke skrin mula dalam '+n+' saat...';}updateText(secs);overlay.classList.add('show');clearInterval(idleCountdown);idleCountdown=setInterval(function(){secs--;updateText(secs);if(secs<=0){clearInterval(idleCountdown);idleCountdown=null;overlay.classList.remove('show');goToStart();}},1000);}
+function showIdle(){if(currentSection===0||currentSection==='menu')return;var secs=7,overlay=document.getElementById('idle-overlay'),mainEl=document.getElementById('idle-warn-main'),subEl=document.getElementById('idle-warn-sub');function updateText(n){if(mainEl)mainEl.textContent='Tiada aktiviti dikesan.';if(subEl)subEl.textContent='Kembali ke skrin mula dalam '+n+' saat...';}updateText(secs);overlay.classList.add('show');clearInterval(idleCountdown);idleCountdown=setInterval(function(){secs--;updateText(secs);if(secs<=0){clearInterval(idleCountdown);idleCountdown=null;overlay.classList.remove('show');goToStart();}},1000);}
 function dismissIdle(){clearInterval(idleCountdown);idleCountdown=null;document.getElementById('idle-overlay').classList.remove('show');}
 
 /* kiosk scaler */
