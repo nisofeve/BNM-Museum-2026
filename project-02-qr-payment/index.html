@@ -59,8 +59,8 @@ if(typeof gsap==='undefined'){
   })();
 }
 </script>
-<style>  /* ── Fluid scale: 1rem = 16px at 1080 px viewport width ── */
-  html { font-size: clamp(8px, calc(100vw / 67.5), 36px); }
+<style>  /* ── JS transform scaler handles all sizing — 1rem = 16px fixed ── */
+  html { font-size: 16px; }
 
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -107,15 +107,15 @@ if(typeof gsap==='undefined'){
     cursor: default;
   }
 
-  /* Proportional kiosk scaler: #stage is authored at 1080x1440 design units (iPad Pro 3:4 portrait)
-     and scaled by JS to fit any viewport with no overflow.
-     The transform also makes position:fixed children contain to the stage. */
+  /* Stage is authored at 1080×1440. JS scaler below transforms it to fit any viewport.
+     CSS transform on #stage makes position:fixed children contained to the stage. */
   #stage {
     position: fixed;
-    inset: 0;
-    width: 100%;
-    height: 100%;
+    top: 0; left: 0;
+    width: 1080px;
+    height: 1440px;
     overflow: hidden;
+    transform-origin: 0 0;
   }
 
   body::before {
@@ -339,17 +339,7 @@ if(typeof gsap==='undefined'){
     50% { transform:scale(1.04); box-shadow:0 12px 48px rgba(107,47,255,0.52); }
   }
 
-  /* ── Small screen overrides (iPhone SE range) ── */
-  @media (max-width: 420px), (max-height: 700px) {
-    #section-0 { gap: min(1.2rem, 1.5vh); }
-    .skyline-container { max-height: min(12rem, 22vh); padding-bottom: min(1rem, 1.5vh); }
-    .skyline-bridge { height: min(6rem, 9vh); }
-    .skyline-img { max-height: min(8rem, 14vh); }
-    #section-0 h1 { font-size: min(2.5rem, 4.5vh); }
-    .slide-track { height: min(7rem, 11vh); }
-    .slide-thumb { width: min(5.75rem, 9.5vh); height: min(5.75rem, 9.5vh); }
-    .section { padding: max(3.5rem, 8vh) min(3rem, 4vw) max(2rem, 4vh); }
-  }
+  /* Small-screen overrides removed — JS transform scaler handles all viewport sizes */
 
   /* ========================================================
      SECTION 2 — SCENARIOS
@@ -2801,11 +2791,11 @@ window.addEventListener('pointermove',function(e){
   e.preventDefault();
   var thumb=document.getElementById('slide-thumb'),track=document.getElementById('slide-track'),fill=document.getElementById('slide-fill'),label=document.getElementById('s0-cta');
   if(!track||!thumb)return;
-  var tr=track.getBoundingClientRect(), tw=thumb.offsetWidth;
-  var inset=Math.round(tr.height*0.083);
-  var maxX=tr.width-tw-inset*2;
+  var tr=track.getBoundingClientRect(), tw=thumb.offsetWidth, sc=_stageScale||1;
+  var inset=Math.round(tr.height/sc*0.083);
+  var maxX=tr.width/sc-tw-inset*2;
   if(maxX<=0)return;
-  var newLeft=Math.max(inset,Math.min(_sliderStartLeft+(e.clientX-_sliderStartX),inset+maxX));
+  var newLeft=Math.max(inset,Math.min(_sliderStartLeft+(e.clientX-_sliderStartX)/sc,inset+maxX));
   var progress=(newLeft-inset)/maxX;
   thumb.style.left=newLeft+'px';
   if(fill)fill.style.width=(newLeft+tw/2)+'px';
@@ -2859,7 +2849,21 @@ function resetIdleTimer(){if(idleTimer)clearTimeout(idleTimer);dismissIdle();if(
 function showIdle(){if(currentSection===0||currentSection==='menu')return;var secs=7,overlay=document.getElementById('idle-overlay'),mainEl=document.getElementById('idle-warn-main'),subEl=document.getElementById('idle-warn-sub');function updateText(n){if(mainEl)mainEl.textContent='Tiada aktiviti dikesan.';if(subEl)subEl.textContent='Kembali ke skrin mula dalam '+n+' saat...';}updateText(secs);overlay.classList.add('show');clearInterval(idleCountdown);idleCountdown=setInterval(function(){secs--;updateText(secs);if(secs<=0){clearInterval(idleCountdown);idleCountdown=null;overlay.classList.remove('show');goToStart();}},1000);}
 function dismissIdle(){clearInterval(idleCountdown);idleCountdown=null;document.getElementById('idle-overlay').classList.remove('show');}
 
-/* kiosk scaler */
+/* kiosk scaler — fits 1080×1440 design canvas to any viewport with letterboxing */
+var _stageScale = 1;
+(function(){
+  var W = 1080, H = 1440;
+  function fit(){
+    var vw = window.innerWidth, vh = window.innerHeight;
+    _stageScale = Math.min(vw / W, vh / H);
+    var el = document.getElementById('stage');
+    el.style.transform = 'scale(' + _stageScale + ')';
+    el.style.left = Math.round((vw - W * _stageScale) / 2) + 'px';
+    el.style.top  = Math.round((vh - H * _stageScale) / 2) + 'px';
+  }
+  window.addEventListener('resize', fit);
+  fit();
+})();
 
 
 /* init */
@@ -2880,8 +2884,8 @@ gsap.from('#section-0',{opacity:0,y:36,duration:0.9,ease:'power2.out',delay:0.3}
     var track=document.getElementById('slide-track');
     _sliderStartX=e.clientX;
     if(track){
-      var tr=track.getBoundingClientRect(), th=thumb.getBoundingClientRect();
-      _sliderStartLeft=th.left-tr.left;
+      var tr=track.getBoundingClientRect(), th=thumb.getBoundingClientRect(), sc=_stageScale||1;
+      _sliderStartLeft=(th.left-tr.left)/sc;
     } else {
       _sliderStartLeft=9;
     }
