@@ -214,7 +214,8 @@ if(typeof gsap==='undefined'){
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: min(5rem, 5vh) min(4.5rem, 5vw);
+    /* top: clear fixed progress-dots bar (2.25rem top + ~1.75rem height = ~4rem) */
+    padding: max(4.5rem, min(6rem, 8vh)) min(4.5rem, 5vw) max(3rem, min(5rem, 5vh));
     opacity: 0;
     pointer-events: none;
     overflow: hidden;
@@ -224,12 +225,16 @@ if(typeof gsap==='undefined'){
   /* ========================================================
      SECTION 1 — OPENING
   ======================================================== */
-  #section-0 { gap: min(2.25rem, 2.5vh); }
+  #section-0 {
+    gap: min(2.25rem, 2.5vh);
+    justify-content: space-evenly;
+  }
 
   .skyline-container {
     width: 100%;
     max-width: 70rem;
-    height: auto;
+    max-height: min(18rem, 28vh);
+    overflow: hidden;
     position: relative;
     display: flex;
     align-items: flex-end;
@@ -330,6 +335,18 @@ if(typeof gsap==='undefined'){
   @keyframes pulseCta {
     0%,100% { transform:scale(1); box-shadow:0 8px 32px rgba(0,71,171,0.35); }
     50% { transform:scale(1.04); box-shadow:0 12px 48px rgba(0,71,171,0.5); }
+  }
+
+  /* ── Small screen overrides (iPhone SE range) ── */
+  @media (max-width: 420px), (max-height: 700px) {
+    #section-0 { gap: min(1.2rem, 1.5vh); }
+    .skyline-container { max-height: min(12rem, 22vh); padding-bottom: min(1rem, 1.5vh); }
+    .skyline-bridge { height: min(6rem, 9vh); }
+    .skyline-img { max-height: min(8rem, 14vh); }
+    #section-0 h1 { font-size: min(2.5rem, 4.5vh); }
+    .slide-track { height: min(7rem, 11vh); }
+    .slide-thumb { width: min(5.75rem, 9.5vh); height: min(5.75rem, 9.5vh); }
+    .section { padding: max(3.5rem, 8vh) min(3rem, 4vw) max(2rem, 4vh); }
   }
 
   /* ========================================================
