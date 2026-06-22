@@ -499,24 +499,22 @@ void main(){
   async function startNarration(){
     const mine=++narrToken;
     narr.innerHTML=''; narr.classList.add('show');
-    const cursor=document.createElement('span'); cursor.id='cursor'; cursor.textContent='▍';
-    for(let i=0;i<LINES.length;i++){
+    const gap=Math.floor(3000/LINES.length);
+    const els=LINES.map(l=>{
+      const d=document.createElement('div');
+      d.className='nline'+(l.c?' '+l.c:'');
+      d.textContent=l[lang];
+      d.style.cssText='opacity:0;transform:translateY(8px);transition:opacity .28s ease,transform .28s ease';
+      narr.appendChild(d); return d;
+    });
+    for(let i=0;i<els.length;i++){
       if(mine!==narrToken) return;
-      const line=document.createElement('div');
-      line.className='nline'+(LINES[i].c?(' '+LINES[i].c):'');
-      narr.appendChild(line); line.appendChild(cursor);
-      const txt=LINES[i][lang];
-      for(let c=0;c<txt.length;c++){
-        if(mine!==narrToken) return;
-        line.insertBefore(document.createTextNode(txt[c]), cursor);
-        if(c%3===0) tick();
-        await sleep(charDelay(txt[c]));
-      }
-      await sleep(270);
+      tick();
+      els[i].style.opacity='1'; els[i].style.transform='translateY(0)';
+      await sleep(gap);
     }
     if(mine!==narrToken) return;
-    cursor.remove();
-    await sleep(350);
+    await sleep(200);
     if(mine!==narrToken) return;
     narrationDone();
   }
