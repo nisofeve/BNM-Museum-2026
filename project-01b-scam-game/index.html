@@ -1569,8 +1569,8 @@ const G29 = (() => {
     // D-pad left (14) / right (15) → move cursor
     if (i === 14) { moveCursor(-1); return; }
     if (i === 15) { moveCursor(1);  return; }
-    // X (0), Share (8), Options (9) → confirm selection or proceed
-    if (i === 0 || i === 8 || i === 9) { onConfirm(); return; }
+    // All other buttons (face, bumpers, triggers, paddles, share, options, home) → confirm
+    onConfirm();
   }
 
   return { poll, moveCursor, onConfirm };
