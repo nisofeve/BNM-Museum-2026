@@ -1229,13 +1229,15 @@ const IDLE_TIMEOUT = 25000;
 /* ==============================================================
    LANGUAGE
    ============================================================== */
-function setLang(lang) {
+function hl(t) {
+  return String(t).replace(/\n/g,'<br>').replace(/\b(scam-proof|scam|link|call|scan|verify)\b/gi,"<em>'$1'</em>");
+}function setLang(lang) {
   currentLang = lang;
   document.querySelectorAll('[data-i18n]').forEach(el => {
     const key = el.getAttribute('data-i18n');
     if (i18n[lang][key]) {
       if (el.tagName === 'INPUT') el.value = i18n[lang][key];
-      else el.textContent = i18n[lang][key];
+      else el.innerHTML = hl(i18n[lang][key]);
     }
   });
   // Refresh dynamic content if modal open
@@ -2474,7 +2476,7 @@ function renderModal(idx) {
   document.getElementById('modal-icon').textContent     = cp.icon;
   document.getElementById('modal-cp-label').textContent =
     `${i18n[lang].cp_label} ${idx + 1} ${i18n[lang].of} ${TOTAL_CP}`;
-  document.getElementById('modal-scenario').textContent  = cp.scenario[lang];
+  document.getElementById('modal-scenario').innerHTML  = hl(cp.scenario[lang]);
 
   // Choices
   const choicesEl = document.getElementById('modal-choices');
@@ -2501,10 +2503,9 @@ function renderModal(idx) {
   setContinueLabel();
   if (answered) {
     const wasCorrect = lastChoiceIdx === cp.correct;
-    fb.textContent = wasCorrect
+    showFeedback(wasCorrect
       ? cp.feedback[lang]
-      : wrongFeedback[lang] + ' ' + cp.feedback[lang].replace('✅ Betul! ', '').replace('✅ Correct! ', '');
-    fb.className = 'feedback-box show ' + (wasCorrect ? 'correct' : 'wrong');
+      : wrongFeedback[lang] + ' ' + cp.feedback[lang].replace('✅ Betul! ', '').replace('✅ Correct! ', ''), wasCorrect);
     cont.className = 'btn-continue show';
   } else {
     fb.className = 'feedback-box';
@@ -2569,7 +2570,7 @@ function handleChoice(choiceIdx, btn) {
 
 function showFeedback(msg, isCorrect) {
   const fb = document.getElementById('feedback-box');
-  fb.textContent = msg;
+  fb.innerHTML = hl(msg);
   fb.className = 'feedback-box show ' + (isCorrect ? 'correct' : 'wrong');
 }
 
@@ -2625,8 +2626,8 @@ function renderResult(finalScore, instant) {
 
   card.className  = `result-card ${tier.tierClass}`;
   ring.className  = `result-score-ring ${tier.tierClass}`;
-  document.getElementById('result-title').textContent = tier.title[lang];
-  document.getElementById('result-msg').textContent   = tier.msg[lang];
+  document.getElementById('result-title').innerHTML = hl(tier.title[lang]);
+  document.getElementById('result-msg').innerHTML   = hl(tier.msg[lang]);
   document.getElementById('result-pts').textContent   = i18n[lang].result_pts;
 
   const numEl = document.getElementById('result-score-num');
