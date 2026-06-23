@@ -1292,6 +1292,7 @@ function startGame() {
     W3.sparkParticles.length = 0;
   }
   gameState = 'GAME';
+  if (document.activeElement) document.activeElement.blur();
   showScreen('screen-game');
   updateHUD();
   initThree();
@@ -1538,11 +1539,13 @@ const G29 = (() => {
 })();
 
 // Keyboard: A/ArrowLeft=left, D/ArrowRight=right, Y=confirm — all others ignored
+// Block all input (incl. native space/enter button activation) while car is moving
 document.addEventListener('keydown', e => {
+  if (gameState === 'GAME') { e.preventDefault(); return; }
   const k = e.key.toLowerCase();
   if (k === 'a' || e.key === 'ArrowLeft') G29.moveCursor(-1);
   else if (k === 'd' || e.key === 'ArrowRight') G29.moveCursor(1);
-  else if (k === 'y' && !e.repeat) G29.onConfirm();
+  else if ((k === 'y' || k === 'u') && !e.repeat) G29.onConfirm();
 });
 
 let rafId = null, lastT = 0;
@@ -2591,6 +2594,7 @@ function continueGame() {
   currentCP++;
   answered = false;
   gameState = 'GAME';
+  if (document.activeElement) document.activeElement.blur();
   updateHUD();
   drive.hitTriggered = false;
   drive.evadeStarted = false;
