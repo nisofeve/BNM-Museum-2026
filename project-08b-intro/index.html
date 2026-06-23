@@ -159,9 +159,9 @@
     text-shadow:0 0 30px rgba(212,168,50,.35),0 2px 4px rgba(0,0,0,.7);}
   /* Front page pulsing hint */
   #pp-hint{
-    position:absolute;bottom:8vh;left:50%;transform:translateX(-50%);
+    position:absolute;bottom:33vh;left:50%;transform:translateX(-50%);
     z-index:2;font-size:clamp(13px,2.4vmin,26px);letter-spacing:.38em;
-    text-transform:uppercase;font-weight:700;
+    text-transform:uppercase;font-weight:400;
     color:#e8dfc0;white-space:nowrap;
     text-shadow:0 0 18px rgba(232,223,192,.7),0 2px 4px rgba(0,0,0,.8);
     animation:ppHintPulse 2.2s ease-in-out infinite;}
@@ -724,25 +724,27 @@
   function narrToP3() {
     hideHint();
     state = 'NARR_TRANS'; locked = true;
-    narrToken++; narr.classList.remove('show');
-    playBgm();
-    ramp(droneGain && droneGain.gain, 0.0, 0.5);
-    whoosh(true);
-    tween('spin', 1, 2200, easeInQuart);
     later(() => {
-      fadeBgmOut(1800);
-      shutClose(() => {
-        stopBgm();
-        U.spin = 0;
-        narrToken++;
-        narr.innerHTML = '<div class="nline first">Tekan butang merah di pintu masuk dan mulakan pengembaraan anda!</div><div class="nline accent" id="p3-cd" style="font-size:12vmin;font-weight:900;letter-spacing:0;margin-top:2vmin;color:#d4a832;text-shadow:0 0 30px rgba(212,168,50,.6)"></div>';
-        narr.classList.add('show');
-        shutOpen(() => {
-          state = 'P3'; locked = false;
-          startCountdown(10);
+      narrToken++; narr.classList.remove('show');
+      playBgm();
+      ramp(droneGain && droneGain.gain, 0.0, 0.5);
+      whoosh(true);
+      tween('spin', 1, 2200, easeInQuart);
+      later(() => {
+        fadeBgmOut(1800);
+        shutClose(() => {
+          stopBgm();
+          U.spin = 0;
+          narrToken++;
+          narr.innerHTML = '<div class="nline first">Tekan butang merah di pintu masuk dan mulakan pengembaraan anda!</div><div class="nline accent" id="p3-cd" style="font-size:12vmin;font-weight:900;letter-spacing:0;margin-top:2vmin;color:#d4a832;text-shadow:0 0 30px rgba(212,168,50,.6)"></div>';
+          narr.classList.add('show');
+          shutOpen(() => {
+            state = 'P3'; locked = false;
+            startCountdown(10);
+          });
         });
-      });
-    }, 2200);
+      }, 2200);
+    }, 3000);
   }
 
   function startCountdown(n) {
