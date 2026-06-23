@@ -227,14 +227,15 @@
     text-shadow:0 0 30px rgba(212,168,50,.35),0 2px 4px rgba(0,0,0,.7);}
   /* Front page pulsing hint */
   #pp-hint{
-    position:absolute;bottom:3.5vh;left:50%;transform:translateX(-50%);
-    z-index:2;font-size:clamp(8px,1.7vmin,16px);letter-spacing:.38em;
+    position:absolute;bottom:8vh;left:50%;transform:translateX(-50%);
+    z-index:2;font-size:clamp(13px,2.4vmin,26px);letter-spacing:.38em;
     text-transform:uppercase;font-weight:700;
-    color:rgba(255,255,255,.65);white-space:nowrap;
+    color:#e8dfc0;white-space:nowrap;
+    text-shadow:0 0 18px rgba(232,223,192,.7),0 2px 4px rgba(0,0,0,.8);
     animation:ppHintPulse 2.2s ease-in-out infinite;}
   @keyframes ppHintPulse{
-    0%,100%{opacity:.3;transform:translateX(-50%) translateY(0)}
-    50%{opacity:1;transform:translateX(-50%) translateY(-2px)}}
+    0%,100%{opacity:.55;transform:translateX(-50%) translateY(0)}
+    50%{opacity:1;transform:translateX(-50%) translateY(-3px)}}
   /* P3 countdown */
   #pp-countdown{
     position:absolute;bottom:11vh;left:50%;transform:translateX(-50%);
@@ -803,12 +804,14 @@ void main(){
   }
 
   function narrationDone(){
-    state='NARR_DONE';
+    state='NARR_WAIT';
     tween('blob',1,1000,easeOutCubic);
-    later(narrToP3,2000);
+    ppHintEl.style.display='block';
+    locked=false;
   }
 
   function narrToP3(){
+    ppHintEl.style.display='none';
     state='NARR_TRANS'; locked=true;
     narrToken++; narr.classList.remove('show');
     playBgm();
@@ -852,6 +855,7 @@ void main(){
     ensureAudio();
     if(locked) return;
     if(state==='FRONT'){ frontToNarr(); }
+    else if(state==='NARR_WAIT'){ narrToP3(); }
   }
   addEventListener('pointerdown', onTap);
 
