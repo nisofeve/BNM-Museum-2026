@@ -620,12 +620,6 @@ html, body {
 #idle-overlay.show { display: flex; }
 .idle-title { font-family: var(--font-display); font-weight: 400; font-size: clamp(14px, 2.4vmin, 30px); line-height: 1.5; color: var(--blue); text-shadow: 0 0 12px var(--blue); }
 .idle-sub { font-family: var(--font-body); font-size: clamp(13px, 1.7vmin, 21px); color: var(--muted); }
-/* ═══ CRT SCANLINES + VIGNETTE ═══ */
-body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
-  background:
-    repeating-linear-gradient(0deg, rgba(0,0,0,0.16) 0px, rgba(0,0,0,0.16) 1px, transparent 1px, transparent 3px),
-    radial-gradient(ellipse at center, transparent 58%, rgba(0,0,0,0.5) 100%);
-}
 .p6-particles{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0;}
 .p6-part{position:absolute;border-radius:50%;background:radial-gradient(circle,rgba(0,240,255,.8),rgba(181,55,242,.3));opacity:.1;}
 @keyframes p6TitleShimmer{0%{background-position:0%}100%{background-position:300%}}
