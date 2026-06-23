@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en" translate="no">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Virtual G29 Controller</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #0b0b14;
+      color: #e0e0f0;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      user-select: none;
+    }
+
+    /* ── Header ── */
+    header {
+      width: 100%;
+      background: #13131f;
+      border-bottom: 1px solid #2a2a40;
+      padding: 0.75rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .brand { font-size: 1rem; font-weight: 700; letter-spacing: 2px; color: #a0a0c0; text-transform: uppercase; }
+    .brand span { color: #e8b84b; }
+    .status-pill {
+      display: flex; align-items: center; gap: 0.5rem;
+      background: #1e1e30; border: 1px solid #3a3a55;
+      border-radius: 2rem; padding: 0.35rem 1rem;
+      font-size: 0.8rem; font-weight: 600; letter-spacing: 1px;
+    }
+    .status-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: #444; transition: background 0.3s;
+    }
+    .status-dot.live { background: #22c55e; box-shadow: 0 0 6px #22c55e; }
+    .status-text { color: #888; transition: color 0.3s; }
+    .status-text.live { color: #22c55e; }
+
+    /* ── Main layout ── */
+    main {
+      flex: 1;
+      width: 100%;
+      max-width: 900px;
+      padding: 2rem 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2rem;
+    }
+
+    /* ── Axis monitor ── */
+    .axis-monitor {
+      width: 100%;
+      background: #13131f;
+      border: 1px solid #2a2a40;
+      border-radius: 0.75rem;
+      padding: 0.75rem 1.5rem;
+      display: flex;
+      gap: 2rem;
+      font-size: 0.75rem;
+      font-family: monospace;
+      color: #666;
+    }
+    .axis-item { display: flex; flex-direction: column; gap: 0.2rem; }
+    .axis-label { color: #555; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1px; }
+    .axis-val { color: #e8b84b; font-size: 0.85rem; font-weight: 700; }
+    .axis-bar-wrap { width: 80px; height: 4px; background: #2a2a40; border-radius: 2px; }
+    .axis-bar { height: 100%; border-radius: 2px; background: #e8b84b; transition: width 0.05s; }
+
+    /* ── Controller body ── */
+    .controller {
+      display: grid;
+      grid-template-columns: 120px 1fr 120px;
+      grid-template-rows: auto auto;
+      gap: 1.5rem;
+      align-items: center;
+      justify-items: center;
+      width: 100%;
+    }
+
+    /* ── Steering wheel ── */
+    .wheel-wrap {
+      grid-column: 2;
+      grid-row: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .wheel-container {
+      position: relative;
+      width: 280px;
+      height: 280px;
+      cursor: grab;
+    }
+    .wheel-container:active { cursor: grabbing; }
+    #wheel-svg {
+      width: 100%;
+      height: 100%;
+      transition: transform 0.05s;
+      filter: drop-shadow(0 0 20px rgba(232,184,75,0.15));
+    }
+    .wheel-label {
+      font-size: 0.75rem;
+      color: #555;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    .wheel-value {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #e8b84b;
+      font-family: monospace;
+      min-width: 60px;
+      text-align: center;
+    }
+
+    /* ── D-pad ── */
+    .dpad {
+      grid-column: 1;
+      grid-row: 1;
+      display: grid;
+      grid-template-columns: 44px 44px 44px;
+      grid-template-rows: 44px 44px 44px;
+      gap: 4px;
+    }
+    .dpad-btn {
+      background: #1e1e30;
+      border: 2px solid #3a3a55;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      color: #888;
+      transition: all 0.1s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .dpad-btn:active, .dpad-btn.pressed {
+      background: #e8b84b;
+      border-color: #e8b84b;
+      color: #0b0b14;
+      transform: scale(0.93);
+    }
+    .dpad-center {
+      background: #1a1a28;
+      border: 2px solid #2a2a40;
+      border-radius: 6px;
+      pointer-events: none;
+    }
+    .dpad-empty { visibility: hidden; }
+
+    /* ── Face buttons ── */
+    .face-buttons {
+      grid-column: 3;
+      grid-row: 1;
+      display: grid;
+      grid-template-columns: 44px 44px 44px;
+      grid-template-rows: 44px 44px 44px;
+      gap: 4px;
+    }
+    .face-btn {
+      border-radius: 50%;
+      border: 2px solid #3a3a55;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-weight: 700;
+      transition: all 0.1s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .face-btn:active, .face-btn.pressed {
+      transform: scale(0.9);
+      filter: brightness(1.4);
+    }
+    .btn-x    { background: #1e1e30; border-color: #5b9bd5; color: #5b9bd5; }
+    .btn-sq   { background: #1e1e30; border-color: #c47fc0; color: #c47fc0; }
+    .btn-tri  { background: #1e1e30; border-color: #4caf82; color: #4caf82; }
+    .btn-ci   { background: #1e1e30; border-color: #d44f4f; color: #d44f4f; }
+    .btn-x:active, .btn-x.pressed   { background: #5b9bd5; color: #fff; border-color: #5b9bd5; }
+    .btn-sq:active, .btn-sq.pressed  { background: #c47fc0; color: #fff; }
+    .btn-tri:active, .btn-tri.pressed { background: #4caf82; color: #fff; }
+    .btn-ci:active, .btn-ci.pressed  { background: #d44f4f; color: #fff; }
+    .face-empty { visibility: hidden; }
+
+    /* ── Center buttons (Share / Options) ── */
+    .center-buttons {
+      grid-column: 2;
+      grid-row: 1;
+      position: absolute;
+      bottom: 20px;
+      display: flex;
+      gap: 1rem;
+    }
+    .wheel-wrap { position: relative; }
+    .hub-buttons {
+      display: flex;
+      gap: 1rem;
+      margin-top: -0.25rem;
+    }
+    .hub-btn {
+      background: #1e1e30;
+      border: 1px solid #3a3a55;
+      border-radius: 0.4rem;
+      color: #888;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      padding: 0.35rem 0.75rem;
+      cursor: pointer;
+      text-transform: uppercase;
+      transition: all 0.1s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .hub-btn:active, .hub-btn.pressed {
+      background: #e8b84b;
+      border-color: #e8b84b;
+      color: #0b0b14;
+    }
+
+    /* ── Pedals ── */
+    .pedals {
+      grid-column: 1 / -1;
+      grid-row: 2;
+      display: flex;
+      gap: 1.5rem;
+      justify-content: center;
+    }
+    .pedal-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .pedal-btn {
+      width: 110px;
+      height: 70px;
+      border-radius: 0.75rem 0.75rem 0.4rem 0.4rem;
+      border: 2px solid #3a3a55;
+      background: linear-gradient(180deg, #1e1e30 0%, #16162a 100%);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.25rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: #666;
+      transition: all 0.08s;
+      position: relative;
+      overflow: hidden;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .pedal-btn::before {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 4px;
+      border-radius: 0 0 0.3rem 0.3rem;
+    }
+    .pedal-clutch::before  { background: #8b8b8b; }
+    .pedal-brake::before   { background: #d44f4f; }
+    .pedal-gas::before     { background: #22c55e; }
+    .pedal-btn .pedal-icon { font-size: 1.3rem; }
+    .pedal-btn:active, .pedal-btn.pressed {
+      transform: translateY(4px) scale(0.97);
+      border-color: currentColor;
+    }
+    .pedal-clutch:active, .pedal-clutch.pressed { background: #3a3a3a; color: #ccc; border-color: #aaa; }
+    .pedal-brake:active, .pedal-brake.pressed   { background: #3d1a1a; color: #f87171; border-color: #d44f4f; }
+    .pedal-gas:active, .pedal-gas.pressed       { background: #0f2d1a; color: #4ade80; border-color: #22c55e; }
+    .pedal-label { font-size: 0.7rem; color: #555; letter-spacing: 1px; text-transform: uppercase; }
+
+    /* ── Instructions ── */
+    .instructions {
+      width: 100%;
+      background: #13131f;
+      border: 1px solid #2a2a40;
+      border-radius: 0.75rem;
+      padding: 1rem 1.5rem;
+      font-size: 0.78rem;
+      color: #555;
+      line-height: 1.6;
+    }
+    .instructions strong { color: #e8b84b; }
+    .instructions p { margin-bottom: 0.25rem; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="brand">Virtual <span>G29</span> Controller</div>
+  <div class="status-pill">
+    <div class="status-dot" id="status-dot"></div>
+    <span class="status-text" id="status-text">NOT CONNECTED</span>
+  </div>
+</header>
+
+<main>
+
+  <!-- Axis monitor -->
+  <div class="axis-monitor">
+    <div class="axis-item">
+      <div class="axis-label">Steering</div>
+      <div class="axis-val" id="mon-steer">0.00</div>
+      <div class="axis-bar-wrap"><div class="axis-bar" id="bar-steer" style="width:50%"></div></div>
+    </div>
+    <div class="axis-item">
+      <div class="axis-label">Clutch</div>
+      <div class="axis-val" id="mon-clutch">1.00</div>
+      <div class="axis-bar-wrap"><div class="axis-bar" id="bar-clutch" style="width:0%"></div></div>
+    </div>
+    <div class="axis-item">
+      <div class="axis-label">Brake</div>
+      <div class="axis-val" id="mon-brake">1.00</div>
+      <div class="axis-bar-wrap"><div class="axis-bar" id="bar-brake" style="width:0%"></div></div>
+    </div>
+    <div class="axis-item">
+      <div class="axis-label">Gas</div>
+      <div class="axis-val" id="mon-gas">1.00</div>
+      <div class="axis-bar-wrap"><div class="axis-bar" id="bar-gas" style="width:0%"></div></div>
+    </div>
+    <div class="axis-item">
+      <div class="axis-label">Active Buttons</div>
+      <div class="axis-val" id="mon-btns">—</div>
+    </div>
+  </div>
+
+  <!-- Controller layout -->
+  <div class="controller">
+
+    <!-- D-pad (left) -->
+    <div class="dpad">
+      <div class="dpad-empty"></div>
+      <div class="dpad-btn" id="dpad-up"   data-btn="12">▲</div>
+      <div class="dpad-empty"></div>
+      <div class="dpad-btn" id="dpad-left" data-btn="14">◀</div>
+      <div class="dpad-center"></div>
+      <div class="dpad-btn" id="dpad-right" data-btn="15">▶</div>
+      <div class="dpad-empty"></div>
+      <div class="dpad-btn" id="dpad-down"  data-btn="13">▼</div>
+      <div class="dpad-empty"></div>
+    </div>
+
+    <!-- Steering wheel (center) -->
+    <div class="wheel-wrap">
+      <div class="wheel-container" id="wheel-container">
+        <svg id="wheel-svg" viewBox="0 0 280 280" xmlns="http://www.w3.org/2000/svg">
+          <!-- Outer grip ring -->
+          <circle cx="140" cy="140" r="128" fill="none" stroke="#2a2a40" stroke-width="2"/>
+          <circle cx="140" cy="140" r="130" fill="#1a1a28" stroke="#3a3a55" stroke-width="2"/>
+          <!-- Grip texture segments -->
+          <circle cx="140" cy="140" r="128" fill="none" stroke="#e8b84b" stroke-width="18"
+            stroke-dasharray="60 20 60 20 60 20" stroke-dashoffset="10" opacity="0.15"/>
+          <circle cx="140" cy="140" r="128" fill="none" stroke="#e8b84b" stroke-width="14"
+            stroke-dasharray="55 25 55 25 55 25" stroke-dashoffset="10" opacity="0.08"/>
+          <!-- Rim highlight -->
+          <circle cx="140" cy="140" r="128" fill="none" stroke="#ffffff" stroke-width="1" opacity="0.05"/>
+          <!-- Spokes -->
+          <line x1="140" y1="12" x2="140" y2="95"  stroke="#3a3a55" stroke-width="12" stroke-linecap="round"/>
+          <line x1="140" y1="12" x2="140" y2="95"  stroke="#e8b84b" stroke-width="3"  stroke-linecap="round" opacity="0.4"/>
+          <line x1="26"  y1="201" x2="92" y2="166" stroke="#3a3a55" stroke-width="12" stroke-linecap="round"/>
+          <line x1="26"  y1="201" x2="92" y2="166" stroke="#e8b84b" stroke-width="3"  stroke-linecap="round" opacity="0.4"/>
+          <line x1="254" y1="201" x2="188" y2="166" stroke="#3a3a55" stroke-width="12" stroke-linecap="round"/>
+          <line x1="254" y1="201" x2="188" y2="166" stroke="#e8b84b" stroke-width="3"  stroke-linecap="round" opacity="0.4"/>
+          <!-- Center hub -->
+          <circle cx="140" cy="140" r="52" fill="#13131f" stroke="#3a3a55" stroke-width="2"/>
+          <circle cx="140" cy="140" r="46" fill="#1a1a28" stroke="#2a2a40" stroke-width="1"/>
+          <!-- G29 label -->
+          <text x="140" y="135" text-anchor="middle" font-family="Segoe UI, sans-serif"
+            font-size="11" font-weight="700" letter-spacing="3" fill="#e8b84b" opacity="0.9">G29</text>
+          <text x="140" y="152" text-anchor="middle" font-family="Segoe UI, sans-serif"
+            font-size="8" letter-spacing="2" fill="#555">LOGITECH</text>
+          <!-- Top indicator dot -->
+          <circle cx="140" cy="22" r="5" fill="#e8b84b" opacity="0.8"/>
+        </svg>
+      </div>
+      <div style="display:flex;align-items:center;gap:0.75rem">
+        <div class="wheel-label">STEERING</div>
+        <div class="wheel-value" id="wheel-val">0.00</div>
+      </div>
+      <!-- Share / Options buttons below wheel -->
+      <div class="hub-buttons">
+        <button class="hub-btn" id="btn-share"   data-btn="8">SHARE</button>
+        <button class="hub-btn" id="btn-options" data-btn="9">OPTIONS</button>
+      </div>
+    </div>
+
+    <!-- Face buttons (right) -->
+    <div class="face-buttons">
+      <div class="face-empty"></div>
+      <div class="face-btn btn-tri" data-btn="3">△</div>
+      <div class="face-empty"></div>
+      <div class="face-btn btn-sq"  data-btn="2">□</div>
+      <div class="face-empty"></div>
+      <div class="face-btn btn-ci"  data-btn="1">○</div>
+      <div class="face-empty"></div>
+      <div class="face-btn btn-x"   data-btn="0">✕</div>
+      <div class="face-empty"></div>
+    </div>
+
+    <!-- Pedals (full width, row 2) -->
+    <div class="pedals">
+      <div class="pedal-wrap">
+        <div class="pedal-btn pedal-clutch" data-axis="1">
+          <span class="pedal-icon">⬛</span>
+          <span>CLUTCH</span>
+        </div>
+        <div class="pedal-label">Axis 1</div>
+      </div>
+      <div class="pedal-wrap">
+        <div class="pedal-btn pedal-brake" data-axis="2">
+          <span class="pedal-icon">🟥</span>
+          <span>BRAKE</span>
+        </div>
+        <div class="pedal-label">Axis 2</div>
+      </div>
+      <div class="pedal-wrap">
+        <div class="pedal-btn pedal-gas" data-axis="3">
+          <span class="pedal-icon">🟩</span>
+          <span>GAS</span>
+        </div>
+        <div class="pedal-label">Axis 3</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Instructions -->
+  <div class="instructions">
+    <p><strong>How to use:</strong> Open this page alongside the game in separate browser tabs. The controller connects automatically via BroadcastChannel.</p>
+    <p><strong>Steering:</strong> Click and drag the wheel left/right. Releases and auto-centres when you let go.</p>
+    <p><strong>Pedals:</strong> Hold down to press. Any pedal triggers <em>Confirm</em> in the quiz.</p>
+    <p><strong>D-pad ◀▶:</strong> Moves quiz selection left/right (same as A/D keys).</p>
+    <p><strong>✕ / SHARE / OPTIONS:</strong> Confirms the current quiz selection.</p>
+  </div>
+
+</main>
+
+<script>
+  // ── Transport layer — BroadcastChannel + WebSocket ───────────────────────
+  // BroadcastChannel: same browser, no server needed
+  // WebSocket:        cross-browser, requires node server.js to be running
+
+  const BC = new BroadcastChannel('virtual_g29');
+  let   ws = null;
+  let   wsReady = false;
+
+  const WS_URL = 'ws://localhost:8765';
+
+  function connectWS() {
+    try {
+      ws = new WebSocket(WS_URL);
+      ws.onopen    = () => { wsReady = true;  console.log('[WS] Connected to relay server'); };
+      ws.onclose   = () => { wsReady = false; ws = null; setTimeout(connectWS, 3000); };
+      ws.onerror   = () => { wsReady = false; };
+      ws.onmessage = e => {
+        try { handleIncoming(JSON.parse(e.data)); } catch {}
+      };
+    } catch {}
+  }
+  connectWS();
+
+  function send(msg) {
+    BC.postMessage(msg);                          // same-browser tabs
+    if (wsReady) ws.send(JSON.stringify(msg));    // cross-browser via server
+  }
+
+  function handleIncoming(data) {
+    if (data.type === 'g29_ack') setLive(true);
+  }
+
+  // Announce connect on load and periodically
+  function announceConnect() { send({ type: 'g29_connect' }); }
+  announceConnect();
+  setInterval(announceConnect, 3000);
+
+  // Status indicator — lights up when game acknowledges
+  BC.onmessage = e => { try { handleIncoming(e.data); } catch {} };
+
+  let liveTimeout;
+  function setLive(on) {
+    const dot  = document.getElementById('status-dot');
+    const text = document.getElementById('status-text');
+    dot.classList.toggle('live', on);
+    text.classList.toggle('live', on);
+    text.textContent = on ? 'CONNECTED' : 'NOT CONNECTED';
+    clearTimeout(liveTimeout);
+    if (on) liveTimeout = setTimeout(() => setLive(false), 5000);
+  }
+
+  // ── Axis state ────────────────────────────────────────────────────────────
+  const axes = [0, 1, 1, 1];   // [steering, clutch, brake, gas]
+
+  function setAxis(index, value) {
+    axes[index] = value;
+    send({ type: 'g29_axis', index, value });
+    updateMonitor();
+  }
+
+  // ── Button state ──────────────────────────────────────────────────────────
+  const btns = {};
+
+  function setButton(index, pressed) {
+    btns[index] = pressed;
+    send({ type: 'g29_button', index, pressed });
+    updateMonitor();
+  }
+
+  // ── Monitor display ───────────────────────────────────────────────────────
+  function updateMonitor() {
+    const steer = axes[0];
+    document.getElementById('mon-steer').textContent  = steer.toFixed(2);
+    document.getElementById('mon-clutch').textContent = axes[1].toFixed(2);
+    document.getElementById('mon-brake').textContent  = axes[2].toFixed(2);
+    document.getElementById('mon-gas').textContent    = axes[3].toFixed(2);
+
+    // Steer bar: center = 50%, range 0–100
+    document.getElementById('bar-steer').style.width  = ((steer + 1) / 2 * 100) + '%';
+    // Pedal bars: 1 = released (0%), -1 = full press (100%)
+    document.getElementById('bar-clutch').style.width = ((1 - axes[1]) / 2 * 100) + '%';
+    document.getElementById('bar-brake').style.width  = ((1 - axes[2]) / 2 * 100) + '%';
+    document.getElementById('bar-gas').style.width    = ((1 - axes[3]) / 2 * 100) + '%';
+
+    const activeBtns = Object.entries(btns).filter(([,v]) => v).map(([k]) => k);
+    document.getElementById('mon-btns').textContent = activeBtns.length ? activeBtns.join(', ') : '—';
+  }
+
+  // ── Steering wheel drag ───────────────────────────────────────────────────
+  const wheelContainer = document.getElementById('wheel-container');
+  const wheelSvg       = document.getElementById('wheel-svg');
+  const wheelVal       = document.getElementById('wheel-val');
+
+  let isDragging   = false;
+  let startAngle   = 0;
+  let currentAngle = 0;   // degrees, clamped ±180
+
+  const MAX_ANGLE = 180;  // ±180° maps to ±1.0
+
+  function getAngleFromCenter(clientX, clientY) {
+    const rect = wheelContainer.getBoundingClientRect();
+    const cx = rect.left + rect.width  / 2;
+    const cy = rect.top  + rect.height / 2;
+    return Math.atan2(clientY - cy, clientX - cx) * (180 / Math.PI);
+  }
+
+  function applyWheelAngle(deg) {
+    currentAngle = Math.max(-MAX_ANGLE, Math.min(MAX_ANGLE, deg));
+    wheelSvg.style.transform = `rotate(${currentAngle}deg)`;
+    const axisVal = currentAngle / MAX_ANGLE;
+    wheelVal.textContent = axisVal.toFixed(2);
+    setAxis(0, parseFloat(axisVal.toFixed(3)));
+  }
+
+  // Auto-centre spring
+  let springRaf;
+  function startSpring() {
+    cancelAnimationFrame(springRaf);
+    function step() {
+      if (Math.abs(currentAngle) < 0.5) {
+        currentAngle = 0;
+        applyWheelAngle(0);
+        return;
+      }
+      currentAngle *= 0.82;
+      applyWheelAngle(currentAngle);
+      springRaf = requestAnimationFrame(step);
+    }
+    springRaf = requestAnimationFrame(step);
+  }
+
+  // Mouse
+  wheelContainer.addEventListener('mousedown', e => {
+    isDragging = true;
+    cancelAnimationFrame(springRaf);
+    startAngle = getAngleFromCenter(e.clientX, e.clientY) - currentAngle;
+    e.preventDefault();
+  });
+  document.addEventListener('mousemove', e => {
+    if (!isDragging) return;
+    const angle = getAngleFromCenter(e.clientX, e.clientY) - startAngle;
+    applyWheelAngle(angle);
+  });
+  document.addEventListener('mouseup', () => {
+    if (!isDragging) return;
+    isDragging = false;
+    startSpring();
+  });
+
+  // Touch
+  wheelContainer.addEventListener('touchstart', e => {
+    isDragging = true;
+    cancelAnimationFrame(springRaf);
+    const t = e.touches[0];
+    startAngle = getAngleFromCenter(t.clientX, t.clientY) - currentAngle;
+    e.preventDefault();
+  }, { passive: false });
+  document.addEventListener('touchmove', e => {
+    if (!isDragging) return;
+    const t = e.touches[0];
+    applyWheelAngle(getAngleFromCenter(t.clientX, t.clientY) - startAngle);
+  });
+  document.addEventListener('touchend', () => {
+    if (!isDragging) return;
+    isDragging = false;
+    startSpring();
+  });
+
+  // ── Pedals ────────────────────────────────────────────────────────────────
+  document.querySelectorAll('.pedal-btn').forEach(el => {
+    const axisIndex = parseInt(el.dataset.axis);
+
+    function press() {
+      el.classList.add('pressed');
+      setAxis(axisIndex, -1);
+    }
+    function release() {
+      el.classList.remove('pressed');
+      setAxis(axisIndex, 1);
+    }
+
+    el.addEventListener('mousedown',  press);
+    el.addEventListener('touchstart', press,   { passive: true });
+    el.addEventListener('mouseup',    release);
+    el.addEventListener('mouseleave', release);
+    el.addEventListener('touchend',   release);
+    el.addEventListener('touchcancel',release);
+  });
+
+  // ── Buttons (D-pad, face, hub) ────────────────────────────────────────────
+  document.querySelectorAll('[data-btn]').forEach(el => {
+    const btnIndex = parseInt(el.dataset.btn);
+
+    function press() {
+      el.classList.add('pressed');
+      setButton(btnIndex, true);
+    }
+    function release() {
+      el.classList.remove('pressed');
+      setButton(btnIndex, false);
+    }
+
+    el.addEventListener('mousedown',  press);
+    el.addEventListener('touchstart', press,   { passive: true });
+    el.addEventListener('mouseup',    release);
+    el.addEventListener('mouseleave', release);
+    el.addEventListener('touchend',   release);
+    el.addEventListener('touchcancel',release);
+  });
+
+  // ── Keyboard shortcuts ────────────────────────────────────────────────────
+  // Arrow keys = D-pad, Space = X button, Enter = Options
+  const keyMap = {
+    'ArrowLeft':  { el: 'dpad-left',   btn: 14 },
+    'ArrowRight': { el: 'dpad-right',  btn: 15 },
+    'ArrowUp':    { el: 'dpad-up',     btn: 12 },
+    'ArrowDown':  { el: 'dpad-down',   btn: 13 },
+    ' ':          { el: null,          btn: 0  },  // X button
+    'Enter':      { el: 'btn-options', btn: 9  },
+  };
+  document.addEventListener('keydown', e => {
+    const m = keyMap[e.key];
+    if (!m || e.repeat) return;
+    if (m.el) document.getElementById(m.el)?.classList.add('pressed');
+    setButton(m.btn, true);
+    e.preventDefault();
+  });
+  document.addEventListener('keyup', e => {
+    const m = keyMap[e.key];
+    if (!m) return;
+    if (m.el) document.getElementById(m.el)?.classList.remove('pressed');
+    setButton(m.btn, false);
+  });
+
+  // Keyboard steering with A/D
+  const heldKeys = {};
+  let steerRaf;
+  function steerLoop() {
+    if (!heldKeys['a'] && !heldKeys['d']) { steerRaf = null; return; }
+    let delta = heldKeys['d'] ? 8 : -8;
+    applyWheelAngle(currentAngle + delta);
+    steerRaf = requestAnimationFrame(steerLoop);
+  }
+  document.addEventListener('keydown', e => {
+    const k = e.key.toLowerCase();
+    if ((k === 'a' || k === 'd') && !heldKeys[k]) {
+      heldKeys[k] = true;
+      cancelAnimationFrame(springRaf);
+      if (!steerRaf) steerRaf = requestAnimationFrame(steerLoop);
+    }
+  });
+  document.addEventListener('keyup', e => {
+    const k = e.key.toLowerCase();
+    if (k === 'a' || k === 'd') {
+      heldKeys[k] = false;
+      if (!heldKeys['a'] && !heldKeys['d']) startSpring();
+    }
+  });
+
+  // Initial monitor render
+  updateMonitor();
+</script>
+</body>
+</html>
