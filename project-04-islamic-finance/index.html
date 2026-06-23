@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ms">
+<html lang="ms" translate="no">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -182,67 +182,6 @@
   @keyframes neon-pulse {
     0%, 100% { box-shadow: 0 0 calc(12 * var(--u)) rgba(212,175,55,0.18), 0 calc(8 * var(--u)) calc(32 * var(--u)) rgba(0,71,171,0.10); }
     50%      { box-shadow: 0 0 calc(28 * var(--u)) rgba(212,175,55,0.36), 0 calc(8 * var(--u)) calc(32 * var(--u)) rgba(0,71,171,0.12); }
-  }
-
-  /* ── LANG TOGGLE ── */
-  #lang-toggle {
-    display: flex;
-    align-self: flex-start;
-    flex-shrink: 0;
-    background: rgba(255,255,255,0.9);
-    border: 2px solid var(--gold);
-    border-radius: calc(50 * var(--u));
-    overflow: hidden;
-    box-shadow: 0 0 calc(16 * var(--u)) rgba(212,175,55,0.25);
-  }
-
-  #lang-toggle button {
-    padding: calc(10 * var(--u)) calc(24 * var(--u));
-    border: none;
-    background: transparent;
-    cursor: pointer;
-    font-family: 'Poppins', sans-serif;
-    font-weight: 700;
-    font-size: calc(16 * var(--u));
-    color: var(--text-mid);
-    transition: all 0.2s;
-    min-width: calc(70 * var(--u));
-  }
-
-  #lang-toggle button.active {
-    background: var(--gold);
-    color: var(--white);
-    border-radius: calc(50 * var(--u));
-  }
-
-  /* intro lang toggle (same visual, left-aligned in intro-bottom) */
-  .intro-lang-toggle {
-    display: flex;
-    flex-shrink: 0;
-    background: rgba(255,255,255,0.9);
-    border: 2px solid var(--gold);
-    border-radius: calc(50 * var(--u));
-    overflow: hidden;
-    box-shadow: 0 0 calc(16 * var(--u)) rgba(212,175,55,0.25);
-  }
-
-  .intro-lang-toggle button {
-    padding: calc(10 * var(--u)) calc(24 * var(--u));
-    border: none;
-    background: transparent;
-    cursor: pointer;
-    font-family: 'Poppins', sans-serif;
-    font-weight: 700;
-    font-size: calc(16 * var(--u));
-    color: var(--text-mid);
-    transition: all 0.2s;
-    min-width: calc(70 * var(--u));
-  }
-
-  .intro-lang-toggle button.active {
-    background: var(--gold);
-    color: var(--white);
-    border-radius: calc(50 * var(--u));
   }
 
   /* ── SCREEN BASE (holographic transition) ── */
@@ -567,22 +506,6 @@
     text-align: center;
   }
 
-  .intro-subtitle-en {
-    font-family: 'Poppins', sans-serif;
-    font-size: calc(20 * var(--u));
-    font-weight: 400;
-    color: var(--teal);
-    text-align: center;
-    margin-top: calc(-12 * var(--u));
-    display: none; /* hidden until EN is selected */
-  }
-
-  /* Language visibility — BM default, EN switches via body.lang-en */
-  body.lang-en .intro-subtitle-bm { display: none; }
-  body.lang-en .intro-subtitle-en { display: block; }
-  body.lang-en .lang-bm { display: none !important; }
-  body.lang-en .lang-en { display: inline !important; }
-
   .intro-divider {
     width: calc(80 * var(--u));
     height: calc(4 * var(--u));
@@ -675,7 +598,7 @@
     text-shadow: calc(2 * var(--u)) calc(2 * var(--u)) 0 var(--ink);
   }
   .hud-coin-icon {
-    width: calc(28 * var(--u)); height: calc(28 * var(--u));
+    width: calc(39 * var(--u)); height: calc(39 * var(--u));
     image-rendering: pixelated; display: block;
     animation: coinSpin 0.9s linear infinite;
   }
@@ -1143,7 +1066,7 @@
   /* pixel headings */
   .intro-title, .intro-eyebrow, .result-title, .result-title-en,
   .result-score, .score-label, .answer-letter, .bubble-line, #gb-brand,
-  .start-btn, .retry-btn, .finish-btn, .idle-touch-btn, .idle-text, #lang-toggle button, .intro-lang-toggle button {
+  .start-btn, .retry-btn, .finish-btn, .idle-touch-btn, .idle-text {
     font-family: var(--px-font) !important;
     letter-spacing: 0 !important;
   }
@@ -1151,10 +1074,10 @@
   /* INTRO */
   #intro-screen { padding: calc(40 * var(--u)); }
   .intro-content { gap: calc(34 * var(--u)); }
-  .intro-eyebrow { font-size: calc(11 * var(--u)); color: var(--ink); line-height: 1.6; opacity: .8; }
+  .intro-eyebrow { font-size: calc(15 * var(--u)); color: var(--ink); line-height: 1.6; opacity: .8; }
   /* Bold block pixel game title — NES/Gameboy style thick outline + hard drop */
   .intro-title {
-    font-size: calc(52 * var(--u));
+    font-size: calc(73 * var(--u));
     color: var(--coin);
     line-height: 1.25;
     letter-spacing: calc(1 * var(--u));
@@ -1174,7 +1097,7 @@
     box-shadow: calc(6 * var(--u)) calc(6 * var(--u)) 0 rgba(0,0,0,0.4);
   }
   .intro-subtitle-bm, .intro-subtitle-en {
-    font-family: var(--px-font) !important; font-size: calc(13 * var(--u));
+    font-family: var(--px-font) !important; font-size: calc(18 * var(--u));
     color: #fff;
     text-shadow:
       calc(-2 * var(--u)) calc(-2 * var(--u)) 0 var(--ink),
@@ -1191,7 +1114,7 @@
     box-shadow: calc(7 * var(--u)) calc(7 * var(--u)) 0 rgba(0,0,0,.3); animation: none;
     width: calc(120 * var(--u)); height: calc(120 * var(--u)); font-size: calc(56 * var(--u));
   }
-  .bnm-badge { font-family: var(--px-font); font-size: calc(9 * var(--u)); border-radius: 0; border: calc(3 * var(--u)) solid var(--ink); box-shadow: none; line-height: 1.5; }
+  .bnm-badge { font-family: var(--px-font); font-size: calc(13 * var(--u)); border-radius: 0; border: calc(3 * var(--u)) solid var(--ink); box-shadow: none; line-height: 1.5; }
   .bnm-dot { border-radius: 0; background: var(--hud-red); box-shadow: none; }
 
   /* PIXEL BUTTONS (shared) */
@@ -1202,9 +1125,20 @@
     background: var(--coin) !important;
     color: var(--ink) !important;
     text-transform: uppercase;
-    font-size: calc(16 * var(--u)) !important;
+    font-size: calc(22 * var(--u)) !important;
     transition: transform .08s steps(2), box-shadow .08s steps(2) !important;
     animation: none !important;
+  }
+  /* MULA button */
+  .intro-bottom .start-btn {
+    font-size: calc(24 * var(--u)) !important;
+    padding: calc(33 * var(--u)) calc(108 * var(--u)) !important;
+    border: calc(6 * var(--u)) solid var(--ink) !important;
+    box-shadow: calc(9 * var(--u)) calc(9 * var(--u)) 0 rgba(0,0,0,.35) !important;
+  }
+  .intro-bottom .start-btn:hover {
+    transform: translate(calc(5 * var(--u)), calc(5 * var(--u))) !important;
+    box-shadow: calc(4 * var(--u)) calc(4 * var(--u)) 0 rgba(0,0,0,.35) !important;
   }
   .start-btn:hover, .retry-btn:hover, .finish-btn:hover, .idle-touch-btn:hover {
     transform: translate(calc(3 * var(--u)), calc(3 * var(--u))) !important;
@@ -1216,14 +1150,9 @@
   }
   .retry-btn { background: var(--panel) !important; }
 
-  /* LANG TOGGLE — pixel style applies to both quiz-panel and intro instances */
-  #lang-toggle, .intro-lang-toggle { border-radius: 0; border: calc(3 * var(--u)) solid var(--ink); background: var(--panel); box-shadow: calc(4 * var(--u)) calc(4 * var(--u)) 0 rgba(0,0,0,.3); overflow: hidden; }
-  #lang-toggle button, .intro-lang-toggle button { font-family: var(--px-font) !important; font-size: calc(11 * var(--u)); border-radius: 0 !important; color: var(--ink); padding: calc(8 * var(--u)) calc(18 * var(--u)); min-width: 0; }
-  #lang-toggle button.active, .intro-lang-toggle button.active { background: var(--coin); color: var(--ink); border-radius: 0; }
-
   /* QUIZ topbar / progress */
-  .coin-hud { font-size: calc(15 * var(--u)); }
-  .quiz-bnm-badge { font-family: var(--px-font); font-size: calc(8 * var(--u)); color: #fff; text-shadow: calc(1 * var(--u)) calc(1 * var(--u)) 0 var(--ink); }
+  .coin-hud { font-size: calc(21 * var(--u)); }
+  .quiz-bnm-badge { font-family: var(--px-font); font-size: calc(11 * var(--u)); color: #fff; text-shadow: calc(1 * var(--u)) calc(1 * var(--u)) 0 var(--ink); }
   .quiz-bnm-badge .dot { border-radius: 0; background: var(--hud-red); }
   .progress-wrap { background: rgba(0,0,0,.25); height: calc(14 * var(--u)); border: calc(3 * var(--u)) solid var(--ink); }
   .progress-bar { background: var(--coin); border-radius: 0; box-shadow: none; }
@@ -1245,7 +1174,7 @@
   .answer-btn.reveal-correct { border-color: var(--ink); background: #ffe46b; box-shadow: calc(5 * var(--u)) calc(5 * var(--u)) 0 rgba(0,0,0,.28); }
   .answer-letter {
     border-radius: 0; background: var(--ink); color: var(--coin);
-    font-size: calc(14 * var(--u)); width: calc(50 * var(--u)); height: calc(50 * var(--u));
+    font-size: calc(20 * var(--u)); width: calc(70 * var(--u)); height: calc(70 * var(--u));
   }
   .answer-btn.selected .answer-letter { background: var(--ink); color: #fff0b8; }
   .answer-btn.correct .answer-letter { background: var(--hill-dark); color: #fff; }
@@ -1264,7 +1193,7 @@
   .bubble-main::before { display: none !important; }
   .bubble-main::after { background: var(--panel) !important; filter: none !important; }
   .bubble-main.visible { animation: bubble-pop .3s steps(4) both !important; }
-  .bubble-line { font-size: calc(15 * var(--u)) !important; color: var(--ink); line-height: 1.6; }
+  .bubble-line { font-size: calc(21 * var(--u)) !important; color: var(--ink); line-height: 1.6; }
   .bubble-line-en { font-family: 'Nunito', sans-serif !important; color: var(--ink-soft); font-weight: 700; }
   .bubble-main .bubble-content::-webkit-scrollbar-thumb { background: var(--ink); border-radius: 0; }
 
@@ -1299,7 +1228,7 @@
   #result-dialog.visible { opacity: 1; transform: translateY(0); }
   #result-dialog-text {
     flex: 1; font-family: 'Nunito', sans-serif; font-weight: 700;
-    font-size: calc(17 * var(--u)); color: var(--panel); line-height: 1.45;
+    font-size: calc(24 * var(--u)); color: var(--panel); line-height: 1.45;
   }
   #result-dialog-cursor {
     font-family: var(--px-font); font-size: calc(12 * var(--u)); color: var(--coin-edge);
@@ -1325,38 +1254,32 @@
   /* score row */
   .result-score-row { display: flex; align-items: center; gap: calc(12 * var(--u)); }
   .result-score {
-    font-family: var(--px-font); font-size: calc(48 * var(--u));
+    font-family: var(--px-font); font-size: calc(67 * var(--u));
     color: var(--ink); line-height: 1;
   }
   #result-panel.tier-high .result-score { color: var(--coin-edge); }
   #result-panel.tier-low  .result-score { color: var(--ground-dark); }
-  .score-label { font-family: var(--px-font); font-size: calc(10 * var(--u)); color: var(--ink); }
+  .score-label { font-family: var(--px-font); font-size: calc(14 * var(--u)); color: var(--ink); }
 
   /* title / msg */
-  .result-title    { font-family: var(--px-font); font-size: calc(11 * var(--u)); color: var(--ink); line-height: 1.65; text-align: center; }
-  .result-title-en { font-family: var(--px-font); font-size: calc(9 * var(--u)); color: var(--ink); opacity: .65; line-height: 1.65; text-align: center; }
-  .result-msg    { font-family: 'Nunito', sans-serif; font-weight: 700; font-size: calc(15 * var(--u)); color: var(--ink); text-align: center; line-height: 1.4; }
-  .result-msg-en { font-family: 'Nunito', sans-serif; font-size: calc(13 * var(--u)); color: var(--ink); opacity: .65; text-align: center; line-height: 1.35; }
+  .result-title    { font-family: var(--px-font); font-size: calc(15 * var(--u)); color: var(--ink); line-height: 1.65; text-align: center; }
+  .result-title-en { font-family: var(--px-font); font-size: calc(13 * var(--u)); color: var(--ink); opacity: .65; line-height: 1.65; text-align: center; }
+  .result-msg    { font-family: 'Nunito', sans-serif; font-weight: 700; font-size: calc(21 * var(--u)); color: var(--ink); text-align: center; line-height: 1.4; }
+  .result-msg-en { font-family: 'Nunito', sans-serif; font-size: calc(18 * var(--u)); color: var(--ink); opacity: .65; text-align: center; line-height: 1.35; }
 
   /* buttons row */
   .result-btns { display: flex; gap: calc(18 * var(--u)); margin-top: calc(4 * var(--u)); }
   #result-retry-btn { background: var(--panel) !important; }
   #result-countdown {
-    font-family: var(--px-font); font-size: calc(10 * var(--u));
+    font-family: var(--px-font); font-size: calc(14 * var(--u));
     color: var(--ink); opacity: 0.55; margin-top: calc(10 * var(--u));
     text-align: center; letter-spacing: calc(1 * var(--u));
   }
 
-  /* hide BM/EN based on lang */
-  body:not(.lang-en) .result-title-en,
-  body:not(.lang-en) .result-msg-en { display: none; }
-  body.lang-en .result-title,
-  body.lang-en .result-msg { display: none; }
-
   /* IDLE overlay pixel look */
   #idle-overlay { background: rgba(15,56,15,0.92); }
-  .idle-text { font-size: calc(22 * var(--u)); color: var(--coin); line-height: 1.6; text-shadow: calc(3 * var(--u)) calc(3 * var(--u)) 0 var(--ink); }
-  .idle-sub { font-family: var(--px-font); font-size: calc(10 * var(--u)); color: #fff; }
+  .idle-text { font-size: calc(31 * var(--u)); color: var(--coin); line-height: 1.6; text-shadow: calc(3 * var(--u)) calc(3 * var(--u)) 0 var(--ink); }
+  .idle-sub { font-family: var(--px-font); font-size: calc(14 * var(--u)); color: #fff; }
 
   /* scanline sweep recolor (transition flash) */
   #scan-sweep { background: linear-gradient(180deg, transparent, rgba(255,255,255,0.35) 50%, transparent); }
@@ -1525,16 +1448,16 @@
     padding: 0 calc(100 * var(--u)); z-index: 4; pointer-events: none;
   }
   .bot-arrow {
-    font-family: var(--px-font); font-size: calc(16 * var(--u));
-    background: var(--panel); border: calc(3 * var(--u)) solid var(--ink);
-    box-shadow: calc(3 * var(--u)) calc(3 * var(--u)) 0 rgba(0,0,0,.35);
-    color: var(--ink); width: calc(54 * var(--u)); height: calc(54 * var(--u));
+    font-family: var(--px-font); font-size: calc(32 * var(--u));
+    background: var(--panel); border: calc(6 * var(--u)) solid var(--ink);
+    box-shadow: calc(6 * var(--u)) calc(6 * var(--u)) 0 rgba(0,0,0,.35);
+    color: var(--ink); width: calc(108 * var(--u)); height: calc(108 * var(--u));
     display: flex; align-items: center; justify-content: center; cursor: pointer;
     pointer-events: all;
     transition: transform .06s steps(2), box-shadow .06s steps(2);
   }
   .bot-arrow:active {
-    transform: translate(calc(3 * var(--u)), calc(3 * var(--u)));
+    transform: translate(calc(6 * var(--u)), calc(6 * var(--u)));
     box-shadow: 0 0 0 rgba(0,0,0,.35);
   }
   /* label + dots: below the ground strip */
@@ -1551,7 +1474,7 @@
   }
   .bot-dot.active { background: var(--coin); }
   .bot-name {
-    font-family: var(--px-font); font-size: calc(10 * var(--u));
+    font-family: var(--px-font); font-size: calc(14 * var(--u));
     color: var(--ink); background: var(--panel);
     border: calc(2 * var(--u)) solid var(--ink);
     padding: calc(5 * var(--u)) calc(12 * var(--u));
@@ -1587,13 +1510,13 @@
   }
   #quiz-question {
     font-family: 'Nunito', sans-serif; font-weight: 800; color: var(--ink);
-    font-size: calc(22 * var(--u)); line-height: 1.3; text-align: center;
+    font-size: calc(31 * var(--u)); line-height: 1.3; text-align: center;
     display: flex; align-items: center; justify-content: center; gap: calc(10 * var(--u));
     flex-shrink: 0; overflow: hidden;
     container-type: inline-size;
   }
-  #quiz-question .qicon { font-size: calc(34 * var(--u)); flex-shrink: 0; }
-  #quiz-question .feedback-next { display: block; margin-top: calc(8 * var(--u)); font-family: var(--px-font); font-size: calc(10 * var(--u)); color: var(--hill-dark); }
+  #quiz-question .qicon { font-size: calc(48 * var(--u)); flex-shrink: 0; }
+  #quiz-question .feedback-next { display: block; margin-top: calc(8 * var(--u)); font-family: var(--px-font); font-size: calc(14 * var(--u)); color: var(--hill-dark); }
 
   #quiz-panel .answers-wrap {
     flex: 1; min-height: 0; max-width: none; margin: 0;
@@ -1608,13 +1531,13 @@
     padding: calc(6 * var(--u)) calc(12 * var(--u));
     container-type: inline-size;
   }
-  #quiz-panel .answer-btn .answer-text     { font-size: 4.8cqi; line-height: 1.2; }
-  #quiz-panel .answer-btn .answer-text-en  { font-size: 3.6cqi; }
+  #quiz-panel .answer-btn .answer-text     { font-size: 6.7cqi; line-height: 1.2; }
+  #quiz-panel .answer-btn .answer-text-en  { font-size: 5cqi; }
   #quiz-panel .answer-btn .answer-letter   {
-    width: 11cqi; height: 11cqi; min-width: 0; min-height: 0;
-    font-size: 4.2cqi; flex-shrink: 0;
+    width: 15.4cqi; height: 15.4cqi; min-width: 0; min-height: 0;
+    font-size: 5.9cqi; flex-shrink: 0;
   }
-  #quiz-panel .answer-btn .answer-check    { font-size: 6cqi; }
+  #quiz-panel .answer-btn .answer-check    { font-size: 8.4cqi; }
 
   /* ═══════════════════════════════════════════════════════════
      M5 — COINS · OBSTACLES · HEARTS
@@ -1861,22 +1784,12 @@
   </div>
   <!-- title -->
   <div class="intro-top">
-    <div class="intro-eyebrow">Bank Negara Malaysia Museum • IMD 2026</div>
-    <div class="intro-title glitch"><span class="lang-bm">Kewangan Islam</span><span class="lang-en" style="display:none">Islamic Finance</span></div>
+    <div class="intro-title glitch">Kewangan Islam</div>
     <div class="intro-subtitle-bm">Pilihan Bijak, Masa Depan Beretika</div>
-    <div class="intro-subtitle-en">Smart Choices, Ethical Future</div>
   </div>
   <!-- start CTA -->
   <div class="intro-bottom">
-    <div class="intro-lang-toggle">
-      <button class="lang-btn active" data-lang="bm" onclick="setLang('bm')">BM</button>
-      <button class="lang-btn" data-lang="en" onclick="setLang('en')">EN</button>
-    </div>
     <button class="start-btn" onclick="startQuiz()" id="intro-start-btn">MULA ▶</button>
-    <div class="bnm-badge">
-      <div class="bnm-dot"></div>
-      <span>Festival Hari Museum Antarabangsa 2026</span>
-    </div>
   </div>
 </div>
 
@@ -1913,10 +1826,6 @@
 
   <!-- BOTTOM 1/3: themed question + answer console -->
   <div id="quiz-panel">
-    <div id="lang-toggle">
-      <button class="lang-btn active" data-lang="bm" onclick="setLang('bm')">BM</button>
-      <button class="lang-btn" data-lang="en" onclick="setLang('en')">EN</button>
-    </div>
     <div id="quiz-question"></div>
     <div class="answers-wrap" id="answers-wrap"></div>
   </div>
@@ -1948,19 +1857,13 @@
       <div id="result-dialog-text"></div>
       <div id="result-dialog-cursor">▌</div>
     </div>
-    <div class="intro-lang-toggle" style="align-self:flex-start;margin-bottom:calc(4 * var(--u))">
-      <button class="lang-btn active" data-lang="bm" onclick="setLang('bm')">BM</button>
-      <button class="lang-btn" data-lang="en" onclick="setLang('en')">EN</button>
-    </div>
     <div class="result-score-row">
       <svg class="result-coin-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges"><rect x="7" y="1" width="10" height="2" fill="#080f1a"/><rect x="5" y="2" width="2" height="2" fill="#080f1a"/><rect x="17" y="2" width="2" height="2" fill="#080f1a"/><rect x="3" y="4" width="2" height="2" fill="#080f1a"/><rect x="19" y="4" width="2" height="2" fill="#080f1a"/><rect x="2" y="6" width="2" height="12" fill="#080f1a"/><rect x="20" y="6" width="2" height="12" fill="#080f1a"/><rect x="3" y="18" width="2" height="2" fill="#080f1a"/><rect x="19" y="18" width="2" height="2" fill="#080f1a"/><rect x="5" y="20" width="2" height="2" fill="#080f1a"/><rect x="17" y="20" width="2" height="2" fill="#080f1a"/><rect x="7" y="21" width="10" height="2" fill="#080f1a"/><rect x="7" y="3" width="10" height="18" fill="#ffd93b"/><rect x="5" y="4" width="2" height="16" fill="#ffd93b"/><rect x="17" y="4" width="2" height="16" fill="#ffd93b"/><rect x="7" y="3" width="6" height="3" fill="#fff8a0"/><rect x="5" y="4" width="2" height="6" fill="#fff8a0"/><rect x="7" y="6" width="3" height="3" fill="#fff8a0"/><rect x="14" y="18" width="3" height="3" fill="#c07800"/><rect x="17" y="14" width="2" height="5" fill="#c07800"/><rect x="11" y="7" width="2" height="10" fill="#b07000"/><rect x="8" y="9" width="8" height="2" fill="#b07000"/><rect x="8" y="12" width="8" height="2" fill="#b07000"/></svg>
       <span class="result-score" id="result-score">0</span>
       <span class="score-label" id="result-score-label">syiling</span>
     </div>
     <div class="result-title" id="result-title-bm"></div>
-    <div class="result-title-en" id="result-title-en"></div>
     <div class="result-msg" id="result-msg-bm"></div>
-    <div class="result-msg-en" id="result-msg-en"></div>
     <div class="result-btns">
       <button class="retry-btn" onclick="restartQuiz()" id="result-retry-btn">Cuba Lagi</button>
       <button class="finish-btn" onclick="finishQuiz()" id="result-finish-btn">Tamat ▶</button>
@@ -2493,41 +2396,6 @@ function showScreen(id) {
 }
 
 // ══════════════════════════════════════════════════════
-// LANGUAGE
-// ══════════════════════════════════════════════════════
-function setLang(lang, silent) {
-  state.lang = lang;
-  document.querySelectorAll('.lang-btn[data-lang="bm"]').forEach(b => b.classList.toggle('active', lang === 'bm'));
-  document.querySelectorAll('.lang-btn[data-lang="en"]').forEach(b => b.classList.toggle('active', lang === 'en'));
-  document.body.classList.toggle('lang-en', lang === 'en');
-  // Update intro screen static text
-  const introBody = document.getElementById('intro-body');
-  if (introBody) introBody.textContent = lang === 'bm'
-    ? 'Satu penerokaan interaktif prinsip kewangan Islam melalui pilihan nilai.'
-    : 'An interactive exploration of Islamic finance principles through value-based choices.';
-  const startBtn = document.getElementById('intro-start-btn');
-  if (startBtn) startBtn.textContent = lang === 'bm' ? 'MULA ▶' : 'START ▶';
-  const botLbl = document.getElementById('bot-name-label');
-  if (botLbl) botLbl.textContent = lang === 'bm' ? BOT_NAMES_BM[state.selectedBot] : BOT_NAMES_EN[state.selectedBot];
-  if (!silent) SFX.tap();
-  if (state.screen === 'quiz') {
-    renderCurrentQuestion(false);
-  }
-  if (state.screen === 'result' && state.resultTier) {
-    const tier = state.resultTier;
-    const lbl = document.getElementById('result-score-label');
-    if (lbl) lbl.textContent = lang === 'bm' ? 'syiling' : 'coins';
-    const retryBtn = document.getElementById('result-retry-btn');
-    const finishBtn = document.getElementById('result-finish-btn');
-    if (retryBtn) retryBtn.textContent = lang === 'bm' ? '◀ Cuba Lagi' : '◀ Try Again';
-    if (finishBtn) finishBtn.textContent = lang === 'bm' ? 'Tamat ▶' : 'Finish ▶';
-    const dialogText = document.getElementById('result-dialog-text');
-    if (dialogText) dialogText.textContent = lang === 'bm' ? tier.bubbleBm : tier.bubbleEn;
-  }
-  if (!silent) resetIdle();
-}
-
-// ══════════════════════════════════════════════════════
 // IDLE TIMER
 // ══════════════════════════════════════════════════════
 function resetIdle() {
@@ -2765,9 +2633,7 @@ function showResults() {
 
   // Populate text
   document.getElementById('result-title-bm').textContent = tier.titleBm;
-  document.getElementById('result-title-en').textContent = tier.titleEn;
   document.getElementById('result-msg-bm').textContent = tier.msgBm;
-  document.getElementById('result-msg-en').textContent = tier.msgEn;
 
   // Result buttons lang
   const retryBtn = document.getElementById('result-retry-btn');
@@ -2922,12 +2788,13 @@ function finishQuiz() {
 document.addEventListener('contextmenu', e => e.preventDefault());
 document.addEventListener('selectstart', e => e.preventDefault());
 
-// Fullscreen on first touch/click
-const goFullscreen = () => {
+// Fullscreen — try immediately (works in --kiosk) then retry on every tap until active
+function tryFullscreen() {
+  if (document.fullscreenElement) return;
   document.documentElement.requestFullscreen().catch(() => {});
-  document.removeEventListener('pointerdown', goFullscreen);
-};
-document.addEventListener('pointerdown', goFullscreen);
+}
+tryFullscreen();
+document.addEventListener('pointerdown', tryFullscreen, { passive: true });
 
 // SFX.tap() on every button press (delegated)
 document.addEventListener('pointerdown', e => {
@@ -2964,8 +2831,6 @@ document.addEventListener('DOMContentLoaded', () => {
   Mascot.mount('stage-quiz');
   Mascot.mount('stage-result');
   Mascot.mount('stage-intro');
-  // Initialize language (BM default, silent = no SFX)
-  setLang('bm', true);
   // Glitch the intro title once on load
   setTimeout(() => runGlitchEl(document.querySelector('.intro-title')), 300);
   resetIdle();
