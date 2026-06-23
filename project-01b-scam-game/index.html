@@ -1433,13 +1433,22 @@ const G29 = (() => {
     console.log('[G29] Registered:', gp.id);
   }
 
+  function isWheel(gp) { return /wheel|driving|g29|racing/i.test(gp.id); }
+
   window.addEventListener('gamepadconnected', e => {
-    initFromGamepad(e.gamepad);
+    const gp = e.gamepad;
+    // Always prefer wheel/driving controller; only fall back to other pads when nothing registered
+    if (isWheel(gp) || idx === null) initFromGamepad(gp);
   });
   window.addEventListener('gamepaddisconnected', e => {
     if (e.gamepad.index === idx) {
       idx = null; _gpSteer = 0;
       _keys['a'] = false; _keys['d'] = false;
+      // Fall back to any remaining gamepad
+      const pads = navigator.getGamepads ? navigator.getGamepads() : [];
+      let fallback = null;
+      for (const p of pads) { if (p && p.index !== e.gamepad.index) { if (isWheel(p)) { initFromGamepad(p); return; } if (!fallback) fallback = p; } }
+      if (fallback) initFromGamepad(fallback);
     }
   });
 
@@ -1447,9 +1456,13 @@ const G29 = (() => {
   setTimeout(() => {
     if (idx !== null) return;
     const pads = navigator.getGamepads ? navigator.getGamepads() : [];
+    let fallback = null;
     for (let i = 0; i < pads.length; i++) {
-      if (pads[i]) { initFromGamepad(pads[i]); break; }
+      if (!pads[i]) continue;
+      if (isWheel(pads[i])) { initFromGamepad(pads[i]); return; }
+      if (!fallback) fallback = pads[i];
     }
+    if (fallback) initFromGamepad(fallback);
   }, 500);
 
   // Returns currently interactive choice buttons (quiz) or result buttons.
