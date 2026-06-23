@@ -151,6 +151,28 @@
     font-size:1.6vmin;letter-spacing:.35em;color:#c9a227;text-transform:uppercase;
     background:rgba(201,162,39,.08);
     box-shadow:0 0 12px rgba(201,162,39,.2),inset 0 0 8px rgba(201,162,39,.05);}
+  /* Dynamic poster title */
+  .pp-dynamic-title{
+    font-size:clamp(14px,3.2vmin,36px);font-weight:800;
+    letter-spacing:.07em;text-align:center;line-height:1.45;
+    color:#d4a832;padding:0 3vmin;
+    text-shadow:0 0 30px rgba(212,168,50,.35),0 2px 4px rgba(0,0,0,.7);}
+  /* Front page pulsing hint */
+  #pp-hint{
+    position:absolute;bottom:3.5vh;left:50%;transform:translateX(-50%);
+    z-index:2;font-size:clamp(8px,1.7vmin,16px);letter-spacing:.38em;
+    text-transform:uppercase;font-weight:700;
+    color:rgba(255,255,255,.65);white-space:nowrap;
+    animation:ppHintPulse 2.2s ease-in-out infinite;}
+  @keyframes ppHintPulse{
+    0%,100%{opacity:.3;transform:translateX(-50%) translateY(0)}
+    50%{opacity:1;transform:translateX(-50%) translateY(-2px)}}
+  /* P3 countdown */
+  #pp-countdown{
+    position:absolute;bottom:11vh;left:50%;transform:translateX(-50%);
+    z-index:2;font-size:clamp(48px,9vmin,110px);font-weight:900;
+    color:rgba(212,168,50,.9);text-shadow:0 0 40px rgba(212,168,50,.5);
+    display:none;}
   .pp-mascot{height:42vh;max-height:380px;min-height:120px;
     object-fit:contain;flex-shrink:0;
     filter:drop-shadow(0 4px 16px rgba(0,0,0,.8)) drop-shadow(0 0 30px rgba(201,162,39,.15));}
@@ -198,9 +220,7 @@
       <div class="pp-rivet" id="pp-rv1"></div>
       <div class="pp-main">
         <div class="pp-titl">
-          <div class="pp-fest-sm">FESTIVAL</div>
-          <div class="pp-main-title">HARI<br>MUZIUM<br>ANTARABANGSA</div>
-          <div class="pp-sub-box">PERINGKAT KEBANGSAAN 2026</div>
+          <div class="pp-dynamic-title" id="pp-dtitle">Kapsul Masa: Kisah, Refleksi &amp; Kewangan dibuka.</div>
         </div>
         <img class="pp-mascot" src="Assets/mascot.png" alt="">
       </div>
@@ -223,6 +243,8 @@
       </div>
       <div class="pp-foot">MuseumBNM &nbsp;·&nbsp; GaleriSeniBNM &nbsp;·&nbsp; #HariMuziumAntarabangsa</div>
     </div>
+    <div id="pp-hint">Tekan Skrin Untuk Maju</div>
+    <div id="pp-countdown"></div>
   </div>
 
   <!-- Metal shutter strips (z-index 60) -->
@@ -645,69 +667,102 @@
   function hideHint() { hint.classList.remove('show'); }
 
   // ══════════════════════════════════════════════
-  //  STATE MACHINE (identical to original)
+  //  POSTER CONTENT HELPERS
   // ══════════════════════════════════════════════
-  let state = 'START', locked = false;
-  const timers = [];
-  function later(fn, ms) { timers.push(setTimeout(fn, ms)); }
-  function clearTimers() { timers.forEach(clearTimeout); timers.length = 0; }
+  const ppDtitle  = document.getElementById('pp-dtitle');
+  const ppHintEl  = document.getElementById('pp-hint');
+  const ppCountEl = document.getElementById('pp-countdown');
+  let cdTimer = null;
 
-  function toStart() {
-    state = 'START'; locked = false;
-    narrToken++; narr.classList.remove('show'); narr.innerHTML = '';
-    U.haloOn = 0; U.blob = 1; U.spin = 0; U.halo = 1;
-    showHint();
+  function setPosterFront() {
+    ppDtitle.textContent = 'Kapsul Masa: Kisah, Refleksi & Kewangan dibuka.';
+    ppHintEl.style.display = 'block';
+    ppCountEl.style.display = 'none'; ppCountEl.textContent = '';
+  }
+  function setPosterP3() {
+    ppDtitle.textContent = 'Tekan butang merah di pintu masuk dan mulakan pengembaraan anda!';
+    ppHintEl.style.display = 'none';
+    ppCountEl.style.display = 'block';
   }
 
-  function transitionIn() {
-    state = 'TRANS_IN'; locked = true; hideHint(); whoosh(true);
-    tween('spin', 1, 2800, easeInQuart);
-    later(() => fadeWhite(1, 700), 2150);
-    later(() => {
+  // ══════════════════════════════════════════════
+  //  STATE MACHINE
+  // ══════════════════════════════════════════════
+  let state = 'FRONT', locked = false;
+  const timers = [];
+  function later(fn, ms) { timers.push(setTimeout(fn, ms)); }
+  function clearTimers() { timers.forEach(clearTimeout); timers.length = 0; if (cdTimer) { clearTimeout(cdTimer); cdTimer = null; } }
+
+  function toFront() {
+    state = 'FRONT'; locked = false;
+    narrToken++; narr.classList.remove('show'); narr.innerHTML = '';
+    U.haloOn = 0; U.blob = 1; U.spin = 0; U.halo = 1;
+    setPosterFront(); showPoster();
+  }
+
+  function frontToNarr() {
+    state = 'FRONT_TRANS'; locked = true;
+    ppHintEl.style.display = 'none';
+    shutClose(() => {
+      hidePoster();
+      narrToken++; narr.innerHTML = ''; narr.classList.remove('show');
       U.haloOn = 1; U.blob = 0; U.spin = 0; U.halo = 1;
-      state = 'MIDDLE';
-      fadeWhite(0, 850);
-      ramp(droneGain && droneGain.gain, 0.12, 2.0);
-      startNarration();
-    }, 2850);
+      ramp(droneGain && droneGain.gain, 0.12, 1.5);
+      state = 'NARR';
+      shutOpen(() => { startNarration(); });
+    });
   }
 
   function narrationDone() {
-    state = 'MIDDLE_WAIT';
-    tween('blob', 1, 1300, easeOutCubic);
-    later(() => { showHint(); locked = false; }, 700);
+    state = 'NARR_DONE';
+    tween('blob', 1, 1000, easeOutCubic);
+    later(narrToP3, 2000);
   }
 
-  function transitionOut() {
-    state = 'TRANS_OUT'; locked = true; hideHint(); whoosh(true);
+  function narrToP3() {
+    state = 'NARR_TRANS'; locked = true;
     narrToken++; narr.classList.remove('show');
     playBgm();
     ramp(droneGain && droneGain.gain, 0.0, 0.5);
-    tween('spin', 1, 2600, easeInQuart);
-    tween('halo', 7, 5000, easeInQuad);
+    whoosh(true);
+    tween('spin', 1, 2200, easeInQuart);
     later(() => {
-      fadeBgmOut(2400);
+      fadeBgmOut(1800);
       shutClose(() => {
-        showPoster();
+        stopBgm();
+        setPosterP3(); showPoster();
         shutOpen(() => {
-          later(() => {
-            shutClose(() => {
-              stopBgm(); hidePoster(); toStart();
-              ramp(droneGain && droneGain.gain, 0.18, 2.0);
-              shutOpen();
-            });
-          }, 3000);
+          state = 'P3'; locked = false;
+          startCountdown(10);
         });
       });
-    }, 5000);
+    }, 2200);
+  }
+
+  function startCountdown(n) {
+    ppCountEl.textContent = n;
+    if (n <= 0) { p3ToFront(); return; }
+    cdTimer = setTimeout(() => startCountdown(n - 1), 1000);
+  }
+
+  function p3ToFront() {
+    if (cdTimer) { clearTimeout(cdTimer); cdTimer = null; }
+    state = 'P3_TRANS'; locked = true;
+    shutClose(() => {
+      hidePoster();
+      narrToken++; narr.innerHTML = ''; narr.classList.remove('show');
+      U.haloOn = 0; U.blob = 1; U.spin = 0; U.halo = 1;
+      setPosterFront(); showPoster();
+      ramp(droneGain && droneGain.gain, 0.18, 2.0);
+      shutOpen(() => { state = 'FRONT'; locked = false; });
+    });
   }
 
   // ── input ──
   function onTap() {
     ensureAudio();
     if (locked) return;
-    if (state === 'START')       { transitionIn(); }
-    else if (state === 'MIDDLE_WAIT') { transitionOut(); }
+    if (state === 'FRONT') { frontToNarr(); }
   }
   window.addEventListener('pointerdown', onTap);
 
@@ -727,7 +782,7 @@
   window.addEventListener('gesturestart', e => e.preventDefault());
 
   // boot
-  toStart();
+  toFront();
 })();
 </script>
 
