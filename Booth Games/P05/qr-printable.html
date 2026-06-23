@@ -20,24 +20,34 @@
 
   @page { size: 3in 3in; margin: 0; }
 
-  /* Screen: scale 3in (288px) up 3.5× for comfortable preview */
+  /* ── SHARED PAGE SHELL ── */
+  /* Screen: allocate 1008×1008px space per page (288px × 3.5 scale) */
   @media screen {
     body {
       background: #CACAC5;
       display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 0;
+      gap: 40px;
+      min-height: 100vh;
+    }
+    .page-shell {
+      width: 1008px;
+      height: 1008px;
+      display: flex;
       align-items: center;
       justify-content: center;
-      min-height: 100vh;
-      padding: 540px 0;
     }
     .page {
       transform: scale(3.5);
-      transform-origin: center center;
       box-shadow: 0 4px 40px rgba(0,0,0,.35);
     }
   }
   @media print {
     body { background: none; margin: 0; padding: 0; }
+    .page-shell { width: 3in; height: 3in; }
+    .page-shell + .page-shell { page-break-before: always; break-before: page; }
     .page { box-shadow: none; }
   }
 
@@ -91,15 +101,15 @@
     white-space: nowrap;
   }
 
-  /* ── QR SECTION ── */
+  /* ── PAGE 1 QR — maximised, no steps ── */
   .qr-section {
     flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 5pt;
-    padding: 6pt 0 4pt;
+    gap: 7pt;
+    padding: 8pt 0 6pt;
   }
 
   /* Viewfinder */
@@ -123,8 +133,9 @@
     display: block;
   }
   /* Let library manage display (canvas→img flip) — do NOT set display here */
-  #qr canvas { width: 72pt; height: 72pt; }
-  #qr img    { width: 72pt; height: 72pt; }
+  /* Page 1: large QR (130pt ≈ 1.8in) */
+  #qr canvas { width: 130pt; height: 130pt; }
+  #qr img    { width: 130pt; height: 130pt; }
 
   /* Scan label */
   .scan-label { text-align: center; }
@@ -204,12 +215,57 @@
     color: rgba(255,255,255,0.38);
     white-space: nowrap;
   }
+
+  /* ── PAGE 2 TARGET IMAGES ── */
+  .img-prompt {
+    font-size: 5pt;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--mid);
+    padding: 5pt 8pt 3pt;
+    flex-shrink: 0;
+  }
+  .img-row {
+    flex: 1;
+    display: flex;
+    gap: 5pt;
+    padding: 0 8pt 6pt;
+    min-height: 0;
+  }
+  .img-card {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2pt;
+    min-width: 0;
+  }
+  .img-card img {
+    flex: 1;
+    width: 100%;
+    min-height: 0;
+    object-fit: contain;
+    background: var(--rule);
+    border: 0.5pt solid var(--rule);
+    display: block;
+  }
+  .img-id {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 4pt;
+    color: var(--mid);
+    text-align: center;
+    letter-spacing: 0.06em;
+  }
 </style>
 </head>
 <body>
+
+<!-- ══════════════════════════════════════════════
+     PAGE 1 — QR code only
+     ══════════════════════════════════════════════ -->
+<div class="page-shell">
 <div class="page">
 
-  <!-- Header -->
   <div class="hd">
     <div class="hd-left">
       <span class="hd-org">Festival Hari Museum Antarabangsa</span>
@@ -218,7 +274,6 @@
     <span class="hd-badge">Imbas &amp; Tunjuk</span>
   </div>
 
-  <!-- QR -->
   <div class="qr-section">
     <div class="viewfinder">
       <span class="corner c-tl"></span>
@@ -229,17 +284,38 @@
     </div>
     <div class="scan-label">
       <div class="scan-ms">Imbas Kod QR Ini</div>
-      <div class="scan-en">Scan this QR code with your phone</div>
+      <div class="scan-en">Scan this QR code with your phone camera</div>
     </div>
   </div>
 
-  <!-- Steps -->
+  <div class="ft">
+    <span class="ft-url">nisofeve.github.io/BNM-Museum-2026/project-05-ar-puzzle/ar.html</span>
+    <span class="ft-ids">A01-1399 &amp; A01-1883</span>
+  </div>
+
+</div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     PAGE 2 — Instructions + target images
+     ══════════════════════════════════════════════ -->
+<div class="page-shell">
+<div class="page">
+
+  <div class="hd">
+    <div class="hd-left">
+      <span class="hd-org">Festival Hari Museum Antarabangsa</span>
+      <span class="hd-title">Cara Penggunaan &nbsp;·&nbsp; How to Use</span>
+    </div>
+    <span class="hd-badge">AR Experience</span>
+  </div>
+
   <div class="steps">
     <div class="step-row">
       <span class="step-n">1</span>
       <div class="step-text">
-        <div class="step-ms">Buka kamera telefon anda</div>
-        <div class="step-en">Open your phone camera to scan the QR code above</div>
+        <div class="step-ms">Imbas kod QR di muka depan</div>
+        <div class="step-en">Scan the QR code on the front page with your phone</div>
       </div>
     </div>
     <div class="step-row">
@@ -252,31 +328,45 @@
     <div class="step-row">
       <span class="step-n">3</span>
       <div class="step-text">
-        <div class="step-ms">Arahkan ke karya seni</div>
-        <div class="step-en">Point your camera at the artwork on display</div>
+        <div class="step-ms">Arahkan kamera ke karya seni</div>
+        <div class="step-en">Point your camera at one of the artworks shown below</div>
       </div>
     </div>
     <div class="step-row">
       <span class="step-n">4</span>
       <div class="step-text">
         <div class="step-ms">Saksikan animasi AR!</div>
-        <div class="step-en">Watch the artwork come alive with AR animation</div>
+        <div class="step-en">Watch the artwork come alive — hold steady to enjoy</div>
       </div>
     </div>
   </div>
 
-  <!-- Footer -->
+  <div class="img-prompt">Tunjukkan kamera ke karya seni ini &nbsp;·&nbsp; Point at these artworks</div>
+
+  <div class="img-row">
+    <div class="img-card">
+      <img src="Assets/A01-1399.jpg" alt="Karya A01-1399">
+      <div class="img-id">A01-1399</div>
+    </div>
+    <div class="img-card">
+      <img src="Assets/A01-1883.jpg" alt="Karya A01-1883">
+      <div class="img-id">A01-1883</div>
+    </div>
+  </div>
+
   <div class="ft">
     <span class="ft-url">nisofeve.github.io/BNM-Museum-2026/project-05-ar-puzzle/ar.html</span>
-    <span class="ft-ids">A01-1399 &amp; A01-1883</span>
+    <span class="ft-ids">Karya · A01-1399 &amp; A01-1883</span>
   </div>
 
 </div>
+</div>
+
 <script>
   new QRCode(document.getElementById('qr'), {
     text: 'https://nisofeve.github.io/BNM-Museum-2026/project-05-ar-puzzle/ar.html',
-    width: 300,
-    height: 300,
+    width: 500,
+    height: 500,
     colorDark: '#0D1320',
     colorLight: '#FFFFFF',
     correctLevel: QRCode.CorrectLevel.M
