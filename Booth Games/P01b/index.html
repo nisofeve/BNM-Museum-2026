@@ -1421,12 +1421,20 @@ const G29 = (() => {
   const CURSOR_AXIS_DZ = 0.5;
   const _cursorAxisPrev = {};   // "padIndex:axisIndex" -> -1|0|1 edge state
 
-  window.addEventListener('gamepadconnected', e => {
-    idx = e.gamepad.index;
+  function initFromGamepad(gp) {
+    idx = gp.index;
     prev.length = 0;
-    for (let i = 0; i < e.gamepad.buttons.length; i++) prev.push(false);
-    prevPedal.fill(false);
-    console.log('[G29] Connected:', e.gamepad.id);
+    for (let i = 0; i < gp.buttons.length; i++) prev.push(gp.buttons[i].pressed);
+    // Init prevPedal from ACTUAL axis state so joystick Y at centre (0.0) doesn't false-trigger
+    for (let p = 0; p < 3; p++) {
+      const v = gp.axes[p + 1] !== undefined ? gp.axes[p + 1] : 1;
+      prevPedal[p] = v < PEDAL_T;
+    }
+    console.log('[G29] Registered:', gp.id);
+  }
+
+  window.addEventListener('gamepadconnected', e => {
+    initFromGamepad(e.gamepad);
   });
   window.addEventListener('gamepaddisconnected', e => {
     if (e.gamepad.index === idx) {
@@ -1440,14 +1448,7 @@ const G29 = (() => {
     if (idx !== null) return;
     const pads = navigator.getGamepads ? navigator.getGamepads() : [];
     for (let i = 0; i < pads.length; i++) {
-      const gp = pads[i];
-      if (!gp) continue;
-      idx = gp.index;
-      prev.length = 0;
-      for (let j = 0; j < gp.buttons.length; j++) prev.push(false);
-      prevPedal.fill(false);
-      console.log('[G29] Pre-connected:', gp.id);
-      break;
+      if (pads[i]) { initFromGamepad(pads[i]); break; }
     }
   }, 500);
 
