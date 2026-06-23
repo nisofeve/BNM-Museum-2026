@@ -816,6 +816,7 @@ void main(){
     narrToken++;
     ramp(droneGain&&droneGain.gain,0.0,1.5);
     whoosh(true);
+    playBgm();
     narr.classList.remove('show');
     later(()=>{
       narrToken++;
@@ -837,6 +838,7 @@ void main(){
   function p3ToFront(){
     if(cdTimer){ clearTimeout(cdTimer); cdTimer=null; }
     state='P3_TRANS'; locked=true;
+    fadeBgmOut(2000);
     fadeWhite(1,800);
     later(()=>{
       narrToken++; narr.innerHTML=''; narr.classList.remove('show');

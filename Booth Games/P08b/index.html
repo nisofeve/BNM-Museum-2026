@@ -533,7 +533,7 @@
   }
 
   // BGM
-  const bgm = new Audio('../project-08-intro/Assets/enter_bgm.mp3');
+  const bgm = new Audio('Assets/enter_bgm.mp3');
   bgm.preload = 'auto';
   let bgmFade = null;
   function playBgm() {
@@ -727,6 +727,7 @@
     narrToken++;
     ramp(droneGain && droneGain.gain, 0.0, 1.5);
     whoosh(true);
+    playBgm();
     narr.classList.remove('show');
     later(() => {
       narrToken++;
@@ -748,6 +749,7 @@
   function p3ToFront() {
     if (cdTimer) { clearTimeout(cdTimer); cdTimer = null; }
     state = 'P3_TRANS'; locked = true;
+    fadeBgmOut(2000);
     fadeWhite(1, 800);
     later(() => {
       narrToken++; narr.innerHTML = ''; narr.classList.remove('show');
