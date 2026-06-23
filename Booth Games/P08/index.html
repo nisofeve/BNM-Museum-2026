@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="ms" translate="no">
 <head>
-<link rel="stylesheet" href="../_fonts/fonts.css">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <meta name="mobile-web-app-capable" content="yes">
@@ -22,7 +21,7 @@
   #narr{
     position:fixed;inset:0;z-index:3;
     display:flex;flex-direction:column;align-items:center;justify-content:center;
-    gap:1.3vmin;padding:6vmin;text-align:center;
+    gap:1.3vmin;padding:6vmin 6vmin calc(6vmin + 140px);text-align:center;
     pointer-events:none;opacity:0;transition:opacity .9s ease}
   #narr.show{opacity:1}
   .nline{
@@ -41,7 +40,7 @@
 
   /* ── touch hint ── */
   #hint{
-    position:fixed;left:50%;bottom:9vmin;transform:translateX(-50%);
+    position:fixed;left:50%;bottom:calc(9vmin + 70px);transform:translateX(-50%);
     z-index:4;pointer-events:none;text-align:center;opacity:0;
     transition:opacity .8s ease}
   #hint.show{opacity:1;animation:hintPulse 2.4s ease-in-out infinite}
@@ -53,11 +52,12 @@
   #hint .ico::after{content:"";width:1.5vmin;height:1.5vmin;border-radius:50%;
     background:radial-gradient(circle,#333,#000);
     box-shadow:0 0 10px rgba(0,0,0,.35)}
-  #hint .txt{font-size:2.1vmin;letter-spacing:.42em;text-transform:uppercase;
+  #hint .txt{font-size:2.1vmin;letter-spacing:.42em;text-transform:uppercase;font-weight:700;
     color:#0a0e16;text-shadow:0 0 12px rgba(255,255,255,.6);
     padding-left:.42em}
   @keyframes hintPulse{0%,100%{opacity:.45;transform:translateX(-50%) translateY(0)}
     50%{opacity:1;transform:translateX(-50%) translateY(-1vmin)}}
+
 
   /* ── white flash / fade ── */
   #white{position:fixed;inset:0;z-index:9;background:#ffffff;opacity:0;
@@ -76,63 +76,58 @@
   @keyframes stIn{0%{opacity:0}100%{opacity:1}}
   @keyframes gcw {from{transform:rotate(  0deg)}to{transform:rotate( 360deg)}}
   @keyframes gccw{from{transform:rotate(  0deg)}to{transform:rotate(-360deg)}}
-  .mstrip{position:fixed;left:0;right:0;z-index:5;pointer-events:none;overflow:hidden;
-    animation:stIn 2s ease forwards .7s;opacity:0;}
-  #mstrip-t{top:0;height:5vh;min-height:38px;}
-  #mstrip-b{bottom:0;height:5vh;min-height:38px;}
+
+  /* ── metal plating strips (double as top/bottom shutters) ── */
+  .mstrip{position:fixed;left:0;right:0;z-index:60;pointer-events:none;overflow:hidden;
+    will-change:transform;animation:stIn 2s ease forwards .7s;opacity:0;}
+  #mstrip-t{top:0;height:50vh;transform:translateY(-45vh);}
+  #mstrip-b{bottom:0;height:50vh;transform:translateY(45vh);}
   .mskin{width:100%;height:100%;display:flex;flex-direction:column;
-    justify-content:space-evenly;padding:0 1vmin;position:relative;overflow:hidden;}
+    justify-content:space-evenly;padding:0 1vmin;
+    position:relative;overflow:hidden;}
   #mstrip-t .mskin{
     background:linear-gradient(180deg,#a0c6d8 0%,#7ba6bc 55%,#628caa 100%);
-    box-shadow:0 5px 20px rgba(0,0,0,.45);}
+    box-shadow:0 12px 50px rgba(0,0,0,.7);}
   #mstrip-b .mskin{
     background:linear-gradient(180deg,#628caa 0%,#7ba6bc 45%,#a0c6d8 100%);
-    box-shadow:0 -5px 20px rgba(0,0,0,.45);}
+    box-shadow:0 -12px 50px rgba(0,0,0,.7);}
+  /* inner-edge rivet border */
+  #mstrip-t::after{content:'';position:absolute;left:0;right:0;bottom:0;height:22px;z-index:2;
+    background:
+      radial-gradient(circle at center,#d4e8f2 0,#7aaac0 5px,#4a7a98 6.5px,transparent 7.5px) 0 0/34px 22px,
+      linear-gradient(180deg,transparent 40%,rgba(0,0,0,.35));}
+  #mstrip-b::before{content:'';position:absolute;left:0;right:0;top:0;height:22px;z-index:2;
+    background:
+      radial-gradient(circle at center,#d4e8f2 0,#7aaac0 5px,#4a7a98 6.5px,transparent 7.5px) 0 0/34px 22px,
+      linear-gradient(180deg,rgba(0,0,0,.35),transparent 60%);}
+  /* slam closed → meet at centre */
+  #mstrip-t.smclose{transform:translateY(0);transition:transform 530ms cubic-bezier(.88,0,.96,1.12);}
+  #mstrip-b.smclose{transform:translateY(0);transition:transform 530ms cubic-bezier(.88,0,.96,1.12);}
+  /* retract open */
+  #mstrip-t.smopen{transform:translateY(-45vh);transition:transform 720ms cubic-bezier(.18,.85,.32,1);}
+  #mstrip-b.smopen{transform:translateY(45vh);transition:transform 720ms cubic-bezier(.18,.85,.32,1);}
+  /* brushed-metal lines */
   .mskin::before{content:'';position:absolute;inset:0;
     background:repeating-linear-gradient(90deg,
       transparent 0,rgba(255,255,255,.055) 1px,transparent 2px,transparent 6px);}
+  /* highlight sheen */
   .mskin::after{content:'';position:absolute;inset:0;
     background:linear-gradient(180deg,rgba(255,255,255,.26) 0%,rgba(255,255,255,.05) 65%,transparent 100%);}
-  .rvrow{display:flex;justify-content:space-around;width:100%;position:relative;z-index:1;}
-  .rv{width:1.5vmin;height:1.5vmin;min-width:8px;min-height:8px;border-radius:50%;flex-shrink:0;
+  .rvrow{display:flex;justify-content:space-around;width:100%;
+    position:relative;z-index:1;}
+  .rv{width:1.5vmin;height:1.5vmin;min-width:8px;min-height:8px;
+    border-radius:50%;flex-shrink:0;
     background:radial-gradient(circle at 32% 28%,#dcf0fa 0%,#86a8c2 50%,#4e6880 100%);
     box-shadow:0 .5px 2.5px rgba(0,0,0,.6),inset 0 .4px 0 rgba(255,255,255,.5);}
 
-  /* ── Metal shutters ───────────────────────────────────────────────────── */
-  #shutL,#shutR{
-    position:fixed;top:0;bottom:0;z-index:60;width:52%;
-    pointer-events:none;will-change:transform;
-    background:
-      repeating-linear-gradient(90deg,transparent 0,transparent 39px,rgba(0,0,0,.06) 40px),
-      repeating-linear-gradient(0deg,transparent 0,transparent 11px,rgba(255,255,255,.055) 12px),
-      linear-gradient(180deg,#8aa4b4 0%,#c5d5df 18%,#9eb8c8 45%,#72909e 78%,#8aaab8 100%);
-    box-shadow:inset 0 0 40px rgba(0,0,0,.28);}
-  #shutL{left:0;transform:translateX(-102%);}
-  #shutR{right:0;transform:translateX(102%);}
-  #shutL.sclose,#shutR.sclose{
-    transform:translateX(0);
-    transition:transform 530ms cubic-bezier(.88,0,.96,1.12);}
-  #shutL.sopen{
-    transform:translateX(-102%);
-    transition:transform 720ms cubic-bezier(.18,.85,.32,1);}
-  #shutR.sopen{
-    transform:translateX(102%);
-    transition:transform 720ms cubic-bezier(.18,.85,.32,1);}
-  /* Inner-edge rivet border */
-  #shutL::after{content:'';position:absolute;right:0;top:0;bottom:0;width:20px;
-    background:
-      repeating-radial-gradient(circle at 10px 0,#b0c4d2 0,#6a8898 7px,transparent 8px) 0 10px / 20px 32px,
-      linear-gradient(90deg,transparent,rgba(0,0,0,.18));}
-  #shutR::before{content:'';position:absolute;left:0;top:0;bottom:0;width:20px;
-    background:
-      repeating-radial-gradient(circle at 10px 0,#b0c4d2 0,#6a8898 7px,transparent 8px) 0 10px / 20px 32px,
-      linear-gradient(90deg,rgba(0,0,0,.18),transparent);}
+  /* ── Old left/right shutters — replaced by top/bottom mstrip shutters ── */
+  #shutL,#shutR{display:none;}
 
   /* ── Metallic poster panel (replaces old .pp-* rules) ─────────────────── */
   #posterPanel{
     position:fixed;inset:0;z-index:55;display:none;
     font-family:"Century Gothic","Trebuchet MS","Segoe UI",sans-serif;
-    overflow:hidden;flex-direction:column;
+    overflow:hidden;flex-direction:column;padding:5.5vh 0;
     /* Brushed dark-steel background */
     background:
       repeating-linear-gradient(87deg,transparent 0,transparent 3px,rgba(255,255,255,.018) 3px,rgba(255,255,255,.018) 4px),
@@ -207,7 +202,7 @@
   .pp-titl{text-align:center;flex:1;min-width:0;}
   .pp-fest-sm{
     font-size:2vmin;letter-spacing:.6em;color:#8a7840;
-    font-weight:300;text-transform:uppercase;margin-bottom:.6vh;}
+    font-weight:300;text-transform:uppercase;margin-bottom:.2vh;}
   .pp-main-title{
     font-size:8vmin;font-weight:900;line-height:1.0;
     color:#e8e0c0;letter-spacing:.04em;
@@ -218,7 +213,7 @@
       2px 2px 0 rgba(0,0,0,.5);
     -webkit-text-stroke:.5px #c9a22740;}
   .pp-sub-box{
-    display:inline-block;margin-top:1.2vh;
+    display:inline-block;margin-top:.4vh;
     border:2px solid #c9a227;padding:.5vh 2vw;
     font-size:1.6vmin;letter-spacing:.35em;color:#c9a227;
     text-transform:uppercase;
@@ -255,6 +250,7 @@
 </head>
 <body>
   <canvas id="gl"></canvas>
+
 
   <div id="narr"></div>
 
@@ -317,7 +313,9 @@
   </div>
 <div id="fallback">Peranti ini tidak menyokong WebGL.<br>This device does not support WebGL.</div>
 
+  <!-- Steampunk gear overlay (z-index 2, behind narration text) -->
   <svg id="gearSvg" aria-hidden="true"></svg>
+  <!-- Metal plating strips (z-index 5) -->
   <div class="mstrip" id="mstrip-t"><div class="mskin" id="rvt"></div></div>
   <div class="mstrip" id="mstrip-b"><div class="mskin" id="rvb"></div></div>
 
@@ -705,7 +703,7 @@ void main(){
   async function startNarration(){
     const mine=++narrToken;
     narr.innerHTML=''; narr.classList.add('show');
-    const gap=Math.floor(3000/LINES.length);
+    const gap=Math.floor(3000/LINES.length);   // all lines within 3 s
     const els=LINES.map(l=>{
       const d=document.createElement('div');
       d.className='nline'+(l.c?' '+l.c:'');
@@ -733,6 +731,7 @@ void main(){
   function updateHint(){ hintTxt.textContent=HINTS[lang]; }
   function showHint(){ updateHint(); hint.classList.add('show'); }
   function hideHint(){ hint.classList.remove('show'); }
+
 
   // ══════════════════════════════════════════════
   //  STATE MACHINE
@@ -826,18 +825,20 @@ void main(){
   addEventListener('gesturestart', e=>e.preventDefault());
 
 
-  // ── Metal shutter controls ──
-  var shutL=document.getElementById('shutL');
-  var shutR=document.getElementById('shutR');
+  // ── Metal shutter controls (top/bottom plates) ──
+  var mstripT=document.getElementById('mstrip-t');
+  var mstripB=document.getElementById('mstrip-b');
   var posterPanel=document.getElementById('posterPanel');
 
   function shutClose(cb){
-    shutL.className='sclose'; shutR.className='sclose';
+    mstripT.classList.remove('smopen'); mstripT.classList.add('smclose');
+    mstripB.classList.remove('smopen'); mstripB.classList.add('smclose');
     playClang();
     setTimeout(cb||function(){},580);
   }
   function shutOpen(cb){
-    shutL.className='sopen'; shutR.className='sopen';
+    mstripT.classList.remove('smclose'); mstripT.classList.add('smopen');
+    mstripB.classList.remove('smclose'); mstripB.classList.add('smopen');
     if(cb) setTimeout(cb,780);
   }
 
@@ -1092,12 +1093,11 @@ void main(){
     var nc=Math.round(W/17), row='<div class="rvrow">';
     for(var i=0;i<nc;i++) row+='<span class="rv"></span>';
     row+='</div>';
-    RT.innerHTML=row+row; RB.innerHTML=row+row;
+    RT.innerHTML=row+row+row+row+row; RB.innerHTML=row+row+row+row+row;
   }
   build();
   window.addEventListener('resize',build);
 })();
 </script>
-<style id="kiosk-hardening">html,body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;}a{pointer-events:none;}</style><script id="kiosk-block">document.addEventListener("contextmenu",function(e){e.preventDefault();},true);document.addEventListener("dragstart",function(e){e.preventDefault();},true);</script>
 </body>
 </html>

@@ -1,11 +1,12 @@
 ﻿<!DOCTYPE html>
 <html lang="ms" translate="no">
 <head>
-<link rel="stylesheet" href="../_fonts/fonts.css">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Perangkap Scam Di Hadapan! — IMD 2026 BNM</title>
-
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Orbitron:wght@500;700;900&family=Poppins:wght@700;800&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 /* ============================================================
    RESET & BASE  (kiosk hardened)
@@ -109,6 +110,7 @@ html, body {
 .attract-dash { width: 60px; height: 8px; background: var(--gold); border-radius: 0; opacity: 0.9; flex-shrink: 0; box-shadow: 0 0 12px var(--gold); }
 @keyframes road-scroll-attract { from { transform: translateX(0) translateY(-50%); } to { transform: translateX(-92px) translateY(-50%); } }
 
+
 /* â”€â”€ Parallax city & trees (attract screen) â”€â”€ */
 .attract-city-wrap, .attract-trees-wrap {
   position: absolute; left: 0; width: 200%;
@@ -182,6 +184,7 @@ html, body {
 .btn-start:hover { transform: translateY(-2px); background: var(--gold); color: var(--bg); box-shadow: 0 0 30px var(--gold); }
 .btn-start:active { transform: translateY(0) scale(0.96); }
 @keyframes pulse-btn { 0%,100%{ box-shadow:0 0 0 2px rgba(255,211,25,0.25), 0 0 18px rgba(255,211,25,0.45), inset 0 0 14px rgba(255,211,25,0.18); } 50%{ box-shadow:0 0 0 2px rgba(255,211,25,0.45), 0 0 34px rgba(255,211,25,0.85), inset 0 0 18px rgba(255,211,25,0.3); } }
+
 
 /* ============================================================
    HOW TO PLAY SCREEN
@@ -281,6 +284,7 @@ html, body {
   text-shadow: 0 0 6px var(--gold);
 }
 .ctrl-label span { font-family: var(--font-body); font-size: clamp(10px,1.1vmin,14px); color: var(--muted); }
+
 
 /* ============================================================
    GAME SCREEN — 3D
@@ -628,12 +632,14 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
 </head>
 <body>
 
+<!-- Idle Overlay -->
 <div id="idle-overlay">
   <div style="font-size:clamp(48px,7vmin,90px)">⏳</div>
   <div class="idle-title" id="idle-warn-main">Tiada aktiviti dikesan.</div>
   <div class="idle-sub" id="idle-warn-sub">Kembali ke skrin mula dalam 7 saat...</div>
 </div>
 
+<!-- ===================== ATTRACT SCREEN ===================== -->
 <div class="screen active" id="screen-attract">
   <div class="attract-car">🚗</div>
   <h1 class="attract-title" data-i18n="attract_title">Perangkap Scam<br>Di Hadapan!</h1>
@@ -825,6 +831,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
   </div>
 </div>
 
+<!-- ===================== HOW TO PLAY SCREEN ===================== -->
 <div class="screen" id="screen-howto">
   <div class="howto-card">
     <div class="howto-icon">🗺️</div>
@@ -836,7 +843,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
       <div class="score-pill correct" data-i18n="scoring_correct">✓ Betul = +20 mata</div>
       <div class="score-pill wrong"   data-i18n="scoring_wrong">✗ Salah = −10 mata</div>
     </div>
-
+    <!-- G29 proceed hint -->
     <div class="g29-proceed-hint">
       <svg viewBox="0 0 62 50" fill="currentColor"><rect x="3" y="13" width="13" height="23" rx="3"/><rect x="1" y="34" width="17" height="12" rx="3"/><rect x="25" y="6" width="13" height="30" rx="3"/><rect x="23" y="34" width="17" height="12" rx="3"/><rect x="47" y="13" width="13" height="23" rx="3"/><rect x="45" y="34" width="17" height="12" rx="3"/></svg>
       <span data-i18n="g29_proceed">Tekan mana-mana pedal untuk mula permainan</span>
@@ -845,6 +852,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
   </div>
 </div>
 
+<!-- ===================== GAME SCREEN (3D) ===================== -->
 <div class="screen" id="screen-game">
   <canvas id="game-canvas"></canvas>
   <div class="game-hud">
@@ -865,6 +873,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
   </div>
 </div>
 
+<!-- ===================== CHECKPOINT MODAL ===================== -->
 <div id="modal-overlay">
   <div class="modal-card">
     <div class="modal-progress" id="modal-progress"></div>
@@ -890,6 +899,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
   </div>
 </div>
 
+<!-- ===================== RESULT SCREEN ===================== -->
 <div class="screen" id="screen-result">
   <div class="result-card" id="result-card">
     <div class="confetti-container" id="confetti-container"></div>
@@ -906,9 +916,10 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
   </div>
 </div>
 
-<script src="../_vendor/three.min.js"></script>
-<script src="../_vendor/GLTFLoader.js"></script>
-<script src="../_vendor/gsap.min.js"></script>
+<!-- Three.js r128 + GSAP + GLTFLoader -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 
 <script>
 /* ==============================================================
@@ -1281,6 +1292,7 @@ function startGame() {
     W3.sparkParticles.length = 0;
   }
   gameState = 'GAME';
+  if (document.activeElement) document.activeElement.blur();
   showScreen('screen-game');
   updateHUD();
   initThree();
@@ -1290,6 +1302,7 @@ function startGame() {
   BGM.start();
   SFXCAR.startDrive();
 }
+
 
 function resetGame() {
   // Tamat — go back to attract screen
@@ -1365,7 +1378,7 @@ const drive = {
 
 /* ---- Keyboard steering (A / D only) ---- */
 const _keys = {};
-document.addEventListener('keydown', e => { const k = e.key.toLowerCase(); if ((k === 'a' || k === 'd') && gameState === 'CHECKPOINT') _keys[k] = true;  }, { passive: true });
+document.addEventListener('keydown', e => { const k = e.key.toLowerCase(); if (k === 'a' || k === 'd') _keys[k] = true;  }, { passive: true });
 document.addEventListener('keyup',   e => { const k = e.key.toLowerCase(); if (k === 'a' || k === 'd') _keys[k] = false; }, { passive: true });
 
 /* ---- Logitech G29 Racing Wheel (Gamepad API) ---- */
@@ -1482,19 +1495,14 @@ const G29 = (() => {
     if (!gp) return;
 
     // Steering wheel — axis 0 (-1 = full left, +1 = full right)
-    // Steering only active during quiz (CHECKPOINT), disabled during auto-drive (GAME)
     const steer = gp.axes[0] || 0;
-    if (gameState === 'CHECKPOINT') {
-      _gpSteer   = Math.abs(steer) > DZ ? steer : 0;
-      _keys['a'] = steer < -DZ;
-      _keys['d'] = steer >  DZ;
-      if (!_keys['a'] && gp.buttons[14]?.pressed) _keys['a'] = true;
-      if (!_keys['d'] && gp.buttons[15]?.pressed) _keys['d'] = true;
-    } else {
-      _gpSteer = 0;
-      _keys['a'] = false;
-      _keys['d'] = false;
-    }
+    _gpSteer   = Math.abs(steer) > DZ ? steer : 0;
+    _keys['a'] = steer < -DZ;
+    _keys['d'] = steer >  DZ;
+
+    // D-pad left/right (buttons 14/15) as digital steering backup
+    if (!_keys['a'] && gp.buttons[14]?.pressed) _keys['a'] = true;
+    if (!_keys['d'] && gp.buttons[15]?.pressed) _keys['d'] = true;
 
     // Pedal edge detection (axes 1=clutch, 2=brake, 3=gas)
     for (let p = 0; p < 3; p++) {
@@ -1530,13 +1538,14 @@ const G29 = (() => {
   return { poll, moveCursor, onConfirm };
 })();
 
-// Keyboard: A=left, D=right, Y=confirm — quiz only; spacebar blocked
+// Keyboard: A/ArrowLeft=left, D/ArrowRight=right, Y=confirm — all others ignored
+// Block all input (incl. native space/enter button activation) while car is moving
 document.addEventListener('keydown', e => {
-  if (e.code === 'Space') { e.preventDefault(); return; }  // block spacebar restart
+  if (gameState === 'GAME') { e.preventDefault(); return; }
   const k = e.key.toLowerCase();
-  if (k === 'a') G29.moveCursor(-1);
-  else if (k === 'd') G29.moveCursor(1);
-  else if (k === 'y' && !e.repeat) G29.onConfirm();
+  if (k === 'a' || e.key === 'ArrowLeft') G29.moveCursor(-1);
+  else if (k === 'd' || e.key === 'ArrowRight') G29.moveCursor(1);
+  else if ((k === 'y' || k === 'u') && !e.repeat) G29.onConfirm();
 });
 
 let rafId = null, lastT = 0;
@@ -1846,6 +1855,7 @@ function preloadTreeGLBs() {
 }
 preloadTreeGLBs();
 
+
 function buildCar() {
   const g = new THREE.Group();
 
@@ -2080,6 +2090,7 @@ function resetWorld() {
   W3.camera.lookAt(0, 1.5, -10);
   scheduleObstacle(drive.z - OBSTACLE_DIST - 40);
 }
+
 
 /* ---------- main loop ---------- */
 function startLoop() {
@@ -2583,6 +2594,7 @@ function continueGame() {
   currentCP++;
   answered = false;
   gameState = 'GAME';
+  if (document.activeElement) document.activeElement.blur();
   updateHUD();
   drive.hitTriggered = false;
   drive.evadeStarted = false;
@@ -2744,7 +2756,5 @@ document.getElementById('screen-attract').addEventListener('click', function(e) 
   }
 })();
 </script>
-
-<style id="kiosk-hardening">html,body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;}a{pointer-events:none;}</style><script id="kiosk-block">document.addEventListener("contextmenu",function(e){e.preventDefault();},true);document.addEventListener("dragstart",function(e){e.preventDefault();},true);</script>
 </body>
 </html>
