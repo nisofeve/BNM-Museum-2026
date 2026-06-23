@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="ms" translate="no">
 <head>
-<link rel="stylesheet" href="../_fonts/fonts.css">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=1080">
 <title>Bina Semula Simpanan Bersama — IMD 2026</title>
@@ -593,6 +592,9 @@ html,body{width:100vw;height:100vh;overflow:hidden;font-family:'Poppins',sans-se
 </head>
 <body>
 
+<!-- Fixed overlays -->
+
+
 <div id="idle-bar"></div>
 <div id="idle-overlay">
   <div id="idle-warn-icon">⏳</div>
@@ -601,6 +603,7 @@ html,body{width:100vw;height:100vh;overflow:hidden;font-family:'Poppins',sans-se
 </div>
 <div id="scan-sweep"></div>
 
+<!-- TOP: Wall display -->
 <div id="top-section">
   <div id="wall-particles"></div>
   <div id="wall-header">
@@ -620,8 +623,10 @@ html,body{width:100vw;height:100vh;overflow:hidden;font-family:'Poppins',sans-se
     <div class="orb-particle" style="background:rgba(39,174,96,.75);box-shadow:0 0 7px #27AE60;--pd:36s;--pdelay:-24s;"></div>
   </div>
 
+  <!-- Tabung toggle (always on top) -->
   <button id="tabung-toggle-btn" onclick="toggleTabung()">🪙 Tabung</button>
 
+  <!-- Tabung view overlay -->
   <div id="tabung-view">
     <div class="tv-title">🏦 Tabung Digital</div>
     <div class="tv-sub lang-bm">SYILING TERKUMPUL</div>
@@ -641,18 +646,21 @@ html,body{width:100vw;height:100vh;overflow:hidden;font-family:'Poppins',sans-se
   </div>
 </div>
 
+<!-- Divider -->
 <div id="section-divider"></div>
 
+<!-- BOTTOM: Quiz -->
 <div id="bottom-section">
   <div id="holo-grid"></div>
 
+
   <div id="quiz-inner">
 
+  <!-- Screen: Welcome -->
   <div id="screen-welcome" class="screen active">
     <div class="welcome-logo">🏦</div>
     <div class="wc-title-bm">Bina Semula Simpanan Bersama</div>
     <div class="wc-divider"></div>
-    <div class="wc-title-en">Building Savings Together</div>
     <div class="wc-tagline lang-bm">Jawab 10 soalan dan bantu nyalakan rangkaian simpanan komuniti!</div>
     <div class="wc-tagline lang-en">Answer 10 questions and help light up our community savings network!</div>
     <div class="stats-card">
@@ -663,9 +671,9 @@ html,body{width:100vw;height:100vh;overflow:hidden;font-family:'Poppins',sans-se
     <button class="btn-start" id="btn-start">
       <span class="lang-bm">Mula</span><span class="lang-en">Start</span>
     </button>
-    <div class="bnm-badge"><div class="bnm-dot"></div><span>Bank Negara Malaysia — Festival Hari Museum Antarabangsa 2026</span></div>
   </div>
 
+  <!-- Screen: Question -->
   <div id="screen-question" class="screen">
     <div class="q-header">
       <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progress-fill" style="width:0%"></div></div>
@@ -691,11 +699,11 @@ html,body{width:100vw;height:100vh;overflow:hidden;font-family:'Poppins',sans-se
     </div>
   </div>
 
+  <!-- Screen: Thank You -->
   <div id="screen-thankyou" class="screen">
     <div class="ty-content">
       <div class="sparkle-wrap">✨</div>
       <h2 class="ty-title">Terima kasih atas penyertaan anda!</h2>
-      <p class="ty-title-en">Thank you for participating!</p>
       <div class="ty-divider"></div>
       <div class="score-badge">
         <span id="ty-score">0</span><span class="lang-bm">/10 kapsul diaktifkan</span><span class="lang-en">/10 capsules activated</span>
@@ -708,9 +716,10 @@ html,body{width:100vw;height:100vh;overflow:hidden;font-family:'Poppins',sans-se
       <div class="countdown-label" id="countdown-label"></div>
     </div>
   </div>
-  </div>
-</div>
+  </div><!-- /quiz-inner -->
+</div><!-- /bottom-section -->
 
+<!-- Presenter PNG sprite template -->
 <template id="presenter-img-template">
   <img class="aisyah-sp sp-idle"  src="../Assets/kijang_idle.png"       alt="" aria-hidden="true">
   <img class="aisyah-sp sp-blink" src="../Assets/kijang_close_eyes.png" alt="" aria-hidden="true">
@@ -1130,6 +1139,7 @@ const Presenter = (()=>{
   return {mount,use,say,userSay,hide,happy};
 })();
 
+
 // ═══ SCREEN NAV ═══
 function runScanSweep(){ const s=document.getElementById('scan-sweep'); s.classList.remove('run'); void s.offsetWidth; s.classList.add('run'); }
 
@@ -1319,7 +1329,5 @@ document.addEventListener('DOMContentLoaded',()=>{
 });
 window.addEventListener('resize',computeNodePixelPositions);
 </script>
-
-<style id="kiosk-hardening">html,body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;}a{pointer-events:none;}</style><script id="kiosk-block">document.addEventListener("contextmenu",function(e){e.preventDefault();},true);document.addEventListener("dragstart",function(e){e.preventDefault();},true);</script>
 </body>
 </html>

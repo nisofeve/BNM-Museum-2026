@@ -1366,6 +1366,46 @@ const drive = {
   playerX: 0,   // lateral offset from A/D steering
 };
 
+/* ---- Virtual G29 bridge (BroadcastChannel + WebSocket) ---- */
+(function() {
+  const _mock = {
+    index: 0, id: 'Virtual G29 (Test)', connected: true,
+    axes: [0, 1, 1, 1],
+    buttons: Array.from({length: 20}, () => ({ pressed: false, value: 0 })),
+    timestamp: performance.now(), mapping: ''
+  };
+
+  function handleMsg(d) {
+    _mock.timestamp = performance.now();
+    if (d.type === 'g29_connect') {
+      navigator.getGamepads = () => [_mock];
+      window.dispatchEvent(new GamepadEvent('gamepadconnected', { gamepad: _mock }));
+      _bc.postMessage({ type: 'g29_ack' });
+      if (_ws && _ws.readyState === 1) _ws.send(JSON.stringify({ type: 'g29_ack' }));
+    } else if (d.type === 'g29_axis') {
+      _mock.axes[d.index] = d.value;
+    } else if (d.type === 'g29_button') {
+      _mock.buttons[d.index] = { pressed: d.pressed, value: d.pressed ? 1 : 0 };
+    }
+  }
+
+  // BroadcastChannel (same browser)
+  const _bc = new BroadcastChannel('virtual_g29');
+  _bc.onmessage = e => { try { handleMsg(e.data); } catch {} };
+
+  // WebSocket (cross-browser)
+  let _ws = null;
+  function _connectWS() {
+    try {
+      _ws = new WebSocket('ws://localhost:8765');
+      _ws.onmessage = e => { try { handleMsg(JSON.parse(e.data)); } catch {} };
+      _ws.onclose   = () => { _ws = null; setTimeout(_connectWS, 3000); };
+      _ws.onerror   = () => {};
+    } catch {}
+  }
+  _connectWS();
+})();
+
 /* ---- Keyboard steering (A / D only) ---- */
 const _keys = {};
 document.addEventListener('keydown', e => { const k = e.key.toLowerCase(); if (k === 'a' || k === 'd') _keys[k] = true;  }, { passive: true });
