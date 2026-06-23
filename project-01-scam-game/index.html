@@ -1543,8 +1543,8 @@ const G29 = (() => {
   }
 
   function onBtn(i) {
-    // D-pad directional (12=up, 13=down, 14=left, 15=right) — not confirm
-    if (i === 12 || i === 13) return;
+    // Joystick clicks (10=L3, 11=R3) and D-pad (12=up, 13=down, 14=left, 15=right) — not confirm
+    if (i === 10 || i === 11 || i === 12 || i === 13) return;
     if (i === 14) { moveCursor(-1); return; }
     if (i === 15) { moveCursor(1);  return; }
     // All other buttons (face, bumpers, triggers, paddles, share, options, home) → confirm
