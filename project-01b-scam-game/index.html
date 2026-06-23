@@ -2130,8 +2130,10 @@ function tick(ts) {
   const dt = Math.min((ts - lastT) / 1000, 0.05);
   lastT = ts;
   G29.poll();
-  step(dt);
-  W3.renderer.render(W3.scene, W3.camera);
+  if (gameState === 'GAME' || gameState === 'CHECKPOINT') {
+    step(dt);
+    if (W3.renderer) W3.renderer.render(W3.scene, W3.camera);
+  }
 }
 
 const smooth = t => t * t * (3 - 2 * t);
@@ -2758,6 +2760,9 @@ document.addEventListener('pointerdown', function startMenuBGM() {
   MENUBGM.start();
   document.removeEventListener('pointerdown', startMenuBGM);
 }, { once: true });
+
+// Start polling loop immediately so G29 inputs work on attract/howto screens
+startLoop();
 
 // Attract screen click-to-start (tap anywhere except buttons)
 document.getElementById('screen-attract').addEventListener('click', function(e) {
