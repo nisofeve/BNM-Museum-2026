@@ -806,12 +806,12 @@ void main(){
   function narrationDone(){
     state='NARR_WAIT';
     tween('blob',1,1000,easeOutCubic);
-    ppHintEl.style.display='block';
+    showHint();
     locked=false;
   }
 
   function narrToP3(){
-    ppHintEl.style.display='none';
+    hideHint();
     state='NARR_TRANS'; locked=true;
     narrToken++; narr.classList.remove('show');
     playBgm();
@@ -822,7 +822,10 @@ void main(){
       fadeBgmOut(1800);
       shutClose(()=>{
         stopBgm();
-        setPosterP3(); showPoster();
+        U.spin=0;
+        narrToken++;
+        narr.innerHTML='<div class="nline first">Tekan butang merah di pintu masuk dan mulakan pengembaraan anda!</div><div class="nline accent" id="p3-cd" style="font-size:12vmin;font-weight:900;letter-spacing:0;margin-top:2vmin;color:#d4a832;text-shadow:0 0 30px rgba(212,168,50,.6)"></div>';
+        narr.classList.add('show');
         shutOpen(()=>{
           state='P3'; locked=false;
           startCountdown(10);
@@ -832,7 +835,8 @@ void main(){
   }
 
   function startCountdown(n){
-    ppCountEl.textContent=n;
+    var cdEl=document.getElementById('p3-cd');
+    if(cdEl) cdEl.textContent=n>0?n:'';
     if(n<=0){ p3ToFront(); return; }
     cdTimer=setTimeout(()=>startCountdown(n-1),1000);
   }
@@ -841,7 +845,6 @@ void main(){
     if(cdTimer){ clearTimeout(cdTimer); cdTimer=null; }
     state='P3_TRANS'; locked=true;
     shutClose(()=>{
-      hidePoster();
       narrToken++; narr.innerHTML=''; narr.classList.remove('show');
       U.haloOn=0; U.blob=1; U.spin=0; U.halo=1;
       setPosterFront(); showPoster();
