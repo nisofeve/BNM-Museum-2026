@@ -383,8 +383,8 @@
     if (blobAlpha < 0.01) return;
     const floatOff = Math.sin(t * 0.68) * h * 0.048 + Math.sin(t * 1.27) * h * 0.019;
     const cx = w / 2, cy = h / 2;
-    const capsR   = Math.min(w, h) * 0.085;
-    const halfLen = Math.min(w, h) * 0.215;
+    const capsR   = Math.min(w, h) * 0.060;
+    const halfLen = Math.min(w, h) * 0.150;
     const tilt    = 0.22;
     const spinAng = t * (0.50 + spin * 8.0);
     const spinPh  = (Math.cos(spinAng) + 1) * 0.5; // 0..1 top/bottom light phase
