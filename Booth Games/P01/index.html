@@ -1311,7 +1311,6 @@ function resetGame() {
   gameState = 'ATTRACT';
   document.getElementById('modal-overlay').classList.remove('open');
   showScreen('screen-attract');
-  stopLoop();
   MENUBGM.start();
 }
 
@@ -1328,7 +1327,6 @@ function replayGame() {
   lastChoiceIdx = null;
   gameState = 'ATTRACT';
   document.getElementById('modal-overlay').classList.remove('open');
-  stopLoop();
   goHowTo();
 }
 
@@ -1389,7 +1387,7 @@ const G29 = (() => {
   const prev = [];
   const prevPedal = [false, false, false]; // axes 1,2,3 = clutch, brake, gas
   const DZ = 0.08;    // wheel deadzone — G29 has slight centre drift
-  const PEDAL_T = 0.5; // G29 pedals: rest≈1.0, fully pressed≈-1.0; < 0.5 = pressed
+  const PEDAL_T = -0.5; // G29 pedals: rest≈1.0 (or 0.0 uncalibrated), pressed≈-1.0; < -0.5 = pressed
 
   // Quiz answer selection: ANY connected gamepad's horizontal axis (joystick left stick,
   // wheel, or right stick) — a left/right edge moves the cursor. Even axis indices are
@@ -2310,7 +2308,6 @@ function finishObstaclePass() {
 }
 
 function endJourney() {
-  stopLoop();
   BGM.stop();
   SFXCAR.stop();
   MENUBGM.start();
