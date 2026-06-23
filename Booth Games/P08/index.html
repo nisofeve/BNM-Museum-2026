@@ -425,27 +425,45 @@ mat3 rotX(float a){float c=cos(a),s=sin(a);return mat3(1.,0.,0., 0.,c,-s, 0.,s,c
 vec3 pal(float t){ return 0.5+0.5*cos(6.28318*(t+vec3(0.0,0.33,0.67))); }
 
 // globals set per-pixel in main()
-float gTime; float gDisp; float gRot;
+float gTime; float gSpin; float gFloat;
+mat3  gTilt;
 
-float mapBlob(vec3 p){
-  p = rotY(gRot)*rotX(gRot*0.6)*p;
-  float base = length(p) - 0.46;                       // half radius (50% smaller)
-  float n = fbm3(p*2.9 + vec3(0.0,0.0,gTime*0.30));     // doubled freq, slower evolution
-  return base - n*gDisp;
+// Capsule SDF — axis along local X, half-length hl, radius r
+float sdCapsuleX(vec3 p, float hl, float r){
+  float px=clamp(p.x,-hl,hl);
+  return length(vec3(p.x-px,p.y,p.z))-r;
+}
+// Metallic capsule with 3 circumferential groove rings
+float mapCapsule(vec3 p){
+  p.y -= gFloat;
+  p    = gTilt * p;
+  float HL=1.08, R=0.36;
+  float d = sdCapsuleX(p, HL, R);
+  // grooves only in cylindrical zone, fade toward caps
+  float gmask=1.0-smoothstep(HL-R*0.70, HL-R*0.18, abs(p.x));
+  float GW=0.044, GD=0.013;
+  d += GD*gmask*(
+    max(0.0, 1.0-abs(p.x-0.50)/GW)+
+    max(0.0, 1.0-abs(p.x     )/GW)+
+    max(0.0, 1.0-abs(p.x+0.50)/GW)
+  );
+  return d;
 }
 vec3 calcNormal(vec3 p){
-  vec2 e=vec2(0.0015,0.0);
+  vec2 e=vec2(0.0012,0.0);
   return normalize(vec3(
-    mapBlob(p+e.xyy)-mapBlob(p-e.xyy),
-    mapBlob(p+e.yxy)-mapBlob(p-e.yxy),
-    mapBlob(p+e.yyx)-mapBlob(p-e.yyx)));
+    mapCapsule(p+e.xyy)-mapCapsule(p-e.xyy),
+    mapCapsule(p+e.yxy)-mapCapsule(p-e.yxy),
+    mapCapsule(p+e.yyx)-mapCapsule(p-e.yyx)));
 }
 
 void main(){
   vec2 uv=(gl_FragCoord.xy - 0.5*uRes)/uRes.y;
   gTime=uTime;
-  gDisp=0.15 + 0.055*sin(uTime*0.4) + uSpin*0.20;   // half amplitude (smaller blob)
-  gRot =uTime*(0.10 + uSpin*9.0);                    // slower idle spin, same fast peak
+  gSpin=uTime*(0.50+uSpin*8.0);                      // slow idle → fast on transition
+  gFloat=0.048*sin(uTime*0.68)+0.019*sin(uTime*1.27); // gentle float
+  float ta=0.22; // ~12.5° tilt
+  gTilt=mat3(cos(ta),sin(ta),0.0, -sin(ta),cos(ta),0.0, 0.0,0.0,1.0);
 
   // ── mystic background (white with drifting pastel hue) ──
   vec2 q=uv*1.15;
@@ -469,37 +487,63 @@ void main(){
 
   vec3 bg=mix(mystic, halo, uHaloOn);
 
-  // ── raymarch the blob ──
+  // ── raymarch the metallic capsule ──
   vec3 ro=vec3(0.0,0.0,3.0);
   vec3 rd=normalize(vec3(uv,-1.7));
-  float t=0.0; float hit=0.0; float glow=0.0; vec3 pos=ro;
+  float t=0.3; float hit=0.0; float glow=0.0; vec3 pos=ro;
   for(int i=0;i<STEPS;i++){
     pos=ro+rd*t;
-    float d=mapBlob(pos);
-    glow += 0.018/(0.02+d*d);          // soft volumetric bloom
-    if(d<0.0015){ hit=1.0; break; }
-    t+=d*0.85;
+    float d=mapCapsule(pos);
+    glow+=0.005/(0.012+d*d);
+    if(d<0.001){ hit=1.0; break; }
+    t+=d*0.92;
     if(t>6.0) break;
   }
 
   vec3 col=bg;
-  float hue=uHue + uSpin*0.7 + uTime*0.04;
-  vec3 glowCol=pal(hue+0.35);
-
   if(hit>0.5){
     vec3 nor=calcNormal(pos);
-    vec3 ld=normalize(vec3(0.55,0.8,0.5));
-    float dif=clamp(dot(nor,ld),0.0,1.0);
-    float fres=pow(1.0-clamp(dot(nor,-rd),0.0,1.0),2.3);
-    float h=hue + dot(nor,vec3(0.33))*0.4 + length(pos)*0.32;
-    vec3 base=pal(h);
-    vec3 blobCol=base*(0.32+0.68*dif) + fres*pal(h+0.3)*1.5;
-    blobCol += pal(h+0.5)*0.45*pow(fres,0.6);          // inner sheen
-    blobCol = mix(blobCol, vec3(1.7), uSpin*uSpin*0.75); // explode → white
-    col = mix(bg, blobCol, uBlob);
+    // local capsule space for azimuthal (spin) shading
+    vec3 lp=pos; lp.y-=gFloat; lp=gTilt*lp;
+    float az=atan(lp.z,lp.y)+gSpin;  // sweeps as capsule rotates
+    // groove darkening
+    float GW=0.044;
+    float gmask=1.0-smoothstep(1.08-0.36*0.70,1.08-0.36*0.18,abs(lp.x));
+    float gc=gmask*(
+      max(0.0,1.0-abs(lp.x-0.50)/GW)+
+      max(0.0,1.0-abs(lp.x     )/GW)+
+      max(0.0,1.0-abs(lp.x+0.50)/GW));
+    // metallic silver with azimuthal sweep band
+    float azBand=0.5+0.5*sin(az*2.0);
+    vec3 silverBase=mix(vec3(0.46,0.48,0.52),vec3(0.86,0.88,0.93),azBand*0.35+0.22);
+    silverBase*=(1.0-0.52*clamp(gc,0.0,1.0));   // darken grooves
+    // lighting
+    vec3 ld1=normalize(vec3(0.5,1.2,1.0));
+    vec3 ld2=normalize(vec3(-0.7,0.5,0.4));
+    float dif1=max(0.0,dot(nor,ld1));
+    float dif2=max(0.0,dot(nor,ld2))*0.32;
+    // Blinn-Phong specular (high shininess = polished metal)
+    vec3 hv1=normalize(ld1-rd);
+    float spec1=pow(max(0.0,dot(nor,hv1)),96.0)*2.4;
+    vec3 hv2=normalize(ld2-rd);
+    float spec2=pow(max(0.0,dot(nor,hv2)),32.0)*0.7;
+    // narrow spinning highlight band sweeping around the axis
+    float spinBand=pow(max(0.0,sin(az+1.57)),22.0)*1.4;
+    // fresnel rim
+    float fres=pow(1.0-max(0.0,dot(nor,-rd)),3.5);
+    // assemble metallic shading
+    vec3 capsCol=silverBase*(0.10+0.90*(dif1+dif2));
+    capsCol+=vec3(0.93,0.95,1.00)*spec1;
+    capsCol+=vec3(0.72,0.78,0.90)*spec2;
+    capsCol+=vec3(0.85,0.88,0.96)*spinBand;
+    capsCol+=vec3(0.60,0.65,0.82)*fres*0.55;
+    // transition: gold-white flash as spin accelerates
+    capsCol=mix(capsCol,vec3(1.5,1.2,0.6),uSpin*uSpin*0.50);
+    col=mix(bg,capsCol,uBlob);
   }
-  // additive outer glow (also when ray misses surface)
-  col += glowCol * glow * 0.5 * uBlob * (0.6+0.4*uSpin);
+  // metallic bloom (silver-blue → gold on transition)
+  vec3 glowCol=mix(vec3(0.65,0.72,0.90),vec3(1.2,1.0,0.4),uSpin*0.7);
+  col+=glowCol*glow*0.30*uBlob*(0.5+0.5*uSpin);
 
   // gentle film grain
   col += (hash21(uv*uRes.xy + uTime)-0.5)*0.025;
