@@ -1435,6 +1435,22 @@ const G29 = (() => {
     }
   });
 
+  // Pick up gamepads already connected before page loaded (gamepadconnected won't fire for them)
+  setTimeout(() => {
+    if (idx !== null) return;
+    const pads = navigator.getGamepads ? navigator.getGamepads() : [];
+    for (let i = 0; i < pads.length; i++) {
+      const gp = pads[i];
+      if (!gp) continue;
+      idx = gp.index;
+      prev.length = 0;
+      for (let j = 0; j < gp.buttons.length; j++) prev.push(false);
+      prevPedal.fill(false);
+      console.log('[G29] Pre-connected:', gp.id);
+      break;
+    }
+  }, 500);
+
   // Returns currently interactive choice buttons (quiz) or result buttons.
   // #modal-overlay is position:fixed so offsetParent is always null for children —
   // use the .open class to detect visibility instead.
@@ -2009,7 +2025,13 @@ function initThree() {
   initShared();
 
   const canvas = document.getElementById('game-canvas');
-  W3.renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+  try {
+    W3.renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
+  } catch(e) {
+    try { W3.renderer = new THREE.WebGLRenderer({ canvas, antialias: false }); } catch(e2) {
+      console.error('WebGL init failed:', e2); return;
+    }
+  }
   W3.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   W3.renderer.setSize(window.innerWidth, window.innerHeight);
 
