@@ -1517,12 +1517,15 @@ const G29 = (() => {
     if (!_keys['a'] && gp.buttons[14]?.pressed) _keys['a'] = true;
     if (!_keys['d'] && gp.buttons[15]?.pressed) _keys['d'] = true;
 
-    // Pedal edge detection (axes 1=clutch, 2=brake, 3=gas)
-    for (let p = 0; p < 3; p++) {
-      const axisVal = gp.axes[p + 1] ?? 1;
-      const pressed = axisVal < PEDAL_T;
-      if (pressed && !prevPedal[p]) onConfirm();
-      prevPedal[p] = pressed;
+    // Pedal edge detection (axes 1=clutch, 2=brake, 3=gas) — G29/wheel only
+    // Skip for joysticks: their Y/Z axes share the same indices and would false-trigger
+    if (/wheel|driving|g29|racing/i.test(gp.id)) {
+      for (let p = 0; p < 3; p++) {
+        const axisVal = gp.axes[p + 1] ?? 1;
+        const pressed = axisVal < PEDAL_T;
+        if (pressed && !prevPedal[p]) onConfirm();
+        prevPedal[p] = pressed;
+      }
     }
 
     // Auto-reset cursor when question changes (choice count changes)
