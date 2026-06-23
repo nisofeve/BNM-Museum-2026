@@ -813,25 +813,19 @@ void main(){
   function narrToP3(){
     hideHint();
     state='NARR_TRANS'; locked=true;
-    narrToken++; narr.classList.remove('show');
-    playBgm();
-    ramp(droneGain&&droneGain.gain,0.0,0.5);
+    narrToken++;
+    ramp(droneGain&&droneGain.gain,0.0,1.5);
     whoosh(true);
-    tween('spin',1,2200,easeInQuart);
+    tween('spin',0.15,1500,easeOutCubic);
+    narr.classList.remove('show');
     later(()=>{
-      fadeBgmOut(1800);
-      shutClose(()=>{
-        stopBgm();
-        U.spin=0;
-        narrToken++;
-        narr.innerHTML='<div class="nline first">Tekan butang merah di pintu masuk dan mulakan pengembaraan anda!</div><div class="nline accent" id="p3-cd" style="font-size:12vmin;font-weight:900;letter-spacing:0;margin-top:2vmin;color:#d4a832;text-shadow:0 0 30px rgba(212,168,50,.6)"></div>';
-        narr.classList.add('show');
-        shutOpen(()=>{
-          state='P3'; locked=false;
-          later(()=>startCountdown(10),3000);
-        });
-      });
-    },2200);
+      narrToken++;
+      narr.innerHTML='<div class="nline first">Tekan butang merah di pintu masuk dan mulakan pengembaraan anda!</div><div class="nline accent" id="p3-cd" style="font-size:12vmin;font-weight:900;letter-spacing:0;margin-top:2vmin;color:#d4a832;text-shadow:0 0 30px rgba(212,168,50,.6)"></div>';
+      narr.classList.add('show');
+      state='P3'; locked=false;
+      tween('spin',1.0,13000,easeInCubic);
+      later(()=>startCountdown(10),3000);
+    },700);
   }
 
   function startCountdown(n){
