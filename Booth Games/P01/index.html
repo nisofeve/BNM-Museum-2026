@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Perangkap Scam Di Hadapan! — IMD 2026 BNM</title>
+<link rel="icon" href="data:,">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Orbitron:wght@500;700;900&family=Poppins:wght@700;800&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
@@ -932,7 +933,8 @@ const SFX=(()=>{let ctx;const ac=()=>ctx||(ctx=new(window.AudioContext||window.w
     win()  { [440,660,880,1100,1320,1760].forEach((f,i)=>tone({freq:f,type:'triangle',dur:.22,vol:.16,delay:i*.06})); [880,1320,1760].forEach((f,i)=>tone({freq:f,type:'sine',dur:.45,vol:.11,delay:.38+i*.06})); },
     lose() { tone({freq:280,type:'sawtooth',dur:.32,vol:.14,slide:-160}); tone({freq:140,type:'square',dur:.38,vol:.09,delay:.06}); },
     crash(){ tone({freq:75,type:'sawtooth',dur:.45,vol:.35,slide:-55}); tone({freq:55,type:'triangle',dur:.5,vol:.3,slide:-40,delay:.01}); tone({freq:900,type:'square',dur:.18,vol:.28,slide:-700,delay:.02}); tone({freq:1600,type:'sawtooth',dur:.14,vol:.18,slide:-1200,delay:.03}); tone({freq:320,type:'sawtooth',dur:.22,vol:.22,slide:-280,delay:.05}); },
-    carStop(){ tone({freq:1600,type:'sawtooth',dur:.6,vol:.25,slide:-300}); tone({freq:2100,type:'square',dur:.5,vol:.14,slide:-500,delay:.03}); tone({freq:2600,type:'sawtooth',dur:.38,vol:.1,slide:-800,delay:.06}); tone({freq:190,type:'sawtooth',dur:.55,vol:.18,slide:-160,delay:.08}); tone({freq:85,type:'triangle',dur:.28,vol:.14,slide:-65,delay:.5}); }
+    carStop(){ tone({freq:1600,type:'sawtooth',dur:.6,vol:.25,slide:-300}); tone({freq:2100,type:'square',dur:.5,vol:.14,slide:-500,delay:.03}); tone({freq:2600,type:'sawtooth',dur:.38,vol:.1,slide:-800,delay:.06}); tone({freq:190,type:'sawtooth',dur:.55,vol:.18,slide:-160,delay:.08}); tone({freq:85,type:'triangle',dur:.28,vol:.14,slide:-65,delay:.5}); },
+    screech(){ tone({freq:1800,type:'sawtooth',dur:.55,vol:.22,slide:-900}); tone({freq:2500,type:'square',dur:.42,vol:.14,slide:-1400,delay:.02}); tone({freq:900,type:'sawtooth',dur:.38,vol:.18,slide:-600,delay:.05}); }
   };
 })();
 
