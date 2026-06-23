@@ -748,13 +748,16 @@
   function p3ToFront() {
     if (cdTimer) { clearTimeout(cdTimer); cdTimer = null; }
     state = 'P3_TRANS'; locked = true;
-    shutClose(() => {
+    fadeWhite(1, 800);
+    later(() => {
       narrToken++; narr.innerHTML = ''; narr.classList.remove('show');
-      U.haloOn = 0; U.blob = 1; U.spin = 0; U.halo = 1;
+      tween('spin', 0, 1, t => t);
+      U.haloOn = 0; U.blob = 1; U.halo = 1;
       setPosterFront(); showPoster();
       ramp(droneGain && droneGain.gain, 0.18, 2.0);
-      shutOpen(() => { state = 'FRONT'; locked = false; });
-    });
+      fadeWhite(0, 1500);
+      later(() => { state = 'FRONT'; locked = false; }, 1600);
+    }, 3000);
   }
 
   // ── input ──
