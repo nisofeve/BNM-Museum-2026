@@ -797,7 +797,7 @@ void main(){
     ppCountEl.style.display='none'; ppCountEl.textContent='';
   }
   function setPosterP3(){
-    ppDtitle.textContent='Tekan butang merah di pintu masuk dan mulakan pengembaraan anda!';
+    ppDtitle.textContent='Tekan butang merah di pintu masuk';
     ppHintEl.style.display='none';
     ppCountEl.style.display='block';
   }
@@ -847,7 +847,7 @@ void main(){
     narr.classList.remove('show');
     later(()=>{
       narrToken++;
-      narr.innerHTML='<div class="nline first">Tekan butang merah di pintu masuk dan mulakan pengembaraan anda!</div><div class="nline accent" id="p3-cd" style="font-size:12vmin;font-weight:900;letter-spacing:0;margin-top:2vmin;color:#d4a832;text-shadow:0 0 30px rgba(212,168,50,.6)"></div>';
+      narr.innerHTML='<div class="nline first">Pengembaraan anda bermula sekarang!</div><div class="nline accent" id="p3-cd" style="font-size:12vmin;font-weight:900;letter-spacing:0;margin-top:2vmin;margin-bottom:2vmin;color:#d4a832;text-shadow:0 0 30px rgba(212,168,50,.6)"></div><div class="nline first">Tekan butang merah di pintu masuk</div>';
       narr.classList.add('show');
       state='P3'; locked=false;
       tween('spin',1.0,13000,easeInCubic);
