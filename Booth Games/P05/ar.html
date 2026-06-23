@@ -126,6 +126,7 @@
 </head>
 <body>
 
+  <!-- debug HUD: open ar.html?debug to verify autoplay -->
   <pre id="vid-debug" style="position:fixed;top:8px;left:8px;z-index:1000;margin:0;
        padding:8px 10px;background:rgba(0,0,0,.65);color:#0f0;font:12px/1.4 monospace;
        border-radius:6px;display:none;pointer-events:none;white-space:pre"></pre>
@@ -168,8 +169,9 @@
 
     <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
+    <!-- targets.mind index 0 = A01-1399 (verified: 2102x2560) → plays Animated-1399 -->
     <a-entity mindar-image-target="targetIndex: 0" id="marker-0">
-
+      <!-- Plane matches A01-1399.jpg aspect: 2102×2560 → width:height = 1:1.2179 -->
       <a-plane
         src="#ar-video"
         width="1"
@@ -180,8 +182,9 @@
       ></a-plane>
     </a-entity>
 
+    <!-- targets.mind index 1 = A01-1883 (verified: 2560x1788) → plays Animated-1883 -->
     <a-entity mindar-image-target="targetIndex: 1" id="marker-1">
-
+      <!-- Plane matches A01-1883.jpg aspect: 2560×1788 → width:height = 1:0.6984 -->
       <a-plane
         src="#ar-video-2"
         width="1"
