@@ -710,7 +710,7 @@
       U.haloOn = 1; U.blob = 0; U.spin = 0; U.halo = 1;
       ramp(droneGain && droneGain.gain, 0.12, 1.5);
       state = 'NARR';
-      shutOpen(() => { startNarration(); });
+      shutOpen(() => { tween('spin', 0.15, 2000, easeOutCubic); startNarration(); });
     });
   }
 
@@ -727,7 +727,6 @@
     narrToken++;
     ramp(droneGain && droneGain.gain, 0.0, 1.5);
     whoosh(true);
-    tween('spin', 0.15, 1500, easeOutCubic);
     narr.classList.remove('show');
     later(() => {
       narrToken++;
