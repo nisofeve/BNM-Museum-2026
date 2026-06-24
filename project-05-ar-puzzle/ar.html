@@ -232,7 +232,7 @@
     id="arscene"
   >
 
-    <a-assets>
+    <a-assets timeout="30000">
       <video id="ar-video"
         src="Assets/Animated-1399.mp4"
         loop playsinline webkit-playsinline
@@ -394,8 +394,12 @@
         btn.disabled = false;
         btn.textContent = 'Tap to Start';
         let msg = 'Camera access denied. Please allow camera permission and try again.';
-        if (err.name === 'NotFoundError')    msg = 'No camera found on this device.';
-        if (err.name === 'NotReadableError') msg = 'Camera is in use by another app. Close it and try again.';
+        if (err.name === 'NotFoundError')        msg = 'No camera found on this device.';
+        if (err.name === 'NotReadableError')     msg = 'Camera is in use by another app. Close it and try again.';
+        if (err.name === 'OverconstrainedError') {
+          showRetry('Camera could not be started. Tap to try again.');
+          return;
+        }
         errEl.textContent = msg;
         errEl.style.display = 'block';
         return;
