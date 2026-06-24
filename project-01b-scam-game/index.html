@@ -1552,8 +1552,8 @@ const G29 = (() => {
     const pads = navigator.getGamepads ? navigator.getGamepads() : [];
     for (const gp of pads) {
       if (!gp) continue;
-      for (const a of CURSOR_AXES) {
-        if (a >= gp.axes.length) continue;
+      const maxAxis = (gp.index === idx && isWheel(gp)) ? 1 : gp.axes.length;
+      for (let a = 0; a < maxAxis; a++) {
         const v = gp.axes[a] || 0;
         const dir = v < -CURSOR_AXIS_DZ ? -1 : v > CURSOR_AXIS_DZ ? 1 : 0;
         const key = gp.index + ':' + a;
@@ -2188,11 +2188,13 @@ function tick(ts) {
   rafId = requestAnimationFrame(tick);
   const dt = Math.min((ts - lastT) / 1000, 0.05);
   lastT = ts;
-  G29.poll();
+  try {
+      G29.poll();
   if (gameState === 'GAME' || gameState === 'CHECKPOINT') {
     step(dt);
     if (W3.renderer) W3.renderer.render(W3.scene, W3.camera);
   }
+  } catch(e) { console.error('[tick]', e); }
 }
 
 const smooth = t => t * t * (3 - 2 * t);

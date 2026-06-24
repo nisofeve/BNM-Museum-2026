@@ -1421,7 +1421,7 @@ const G29 = (() => {
   // Quiz answer selection: ANY connected gamepad's horizontal axis (joystick left stick,
   // wheel, or right stick) — a left/right edge moves the cursor. Even axis indices are
   // horizontal in the standard mapping (0=LX, 2=RX); odd are vertical and ignored.
-  const CURSOR_AXES = [0, 1, 2, 3];
+  // CURSOR_AXES removed — axis range determined per-pad in scanCursorAxes
   const CURSOR_AXIS_DZ = 0.5;
   const _cursorAxisPrev = {};   // "padIndex:axisIndex" -> -1|0|1 edge state
   const _altBtnPrev    = {};   // "padIndex:btnIndex" -> pressed state for non-idx pads
@@ -1529,8 +1529,8 @@ const G29 = (() => {
     const pads = navigator.getGamepads ? navigator.getGamepads() : [];
     for (const gp of pads) {
       if (!gp) continue;
-      for (const a of CURSOR_AXES) {
-        if (a >= gp.axes.length) continue;
+      const maxAxis = (gp.index === idx && isWheel(gp)) ? 1 : gp.axes.length;
+      for (let a = 0; a < maxAxis; a++) {
         const v = gp.axes[a] || 0;
         const dir = v < -CURSOR_AXIS_DZ ? -1 : v > CURSOR_AXIS_DZ ? 1 : 0;
         const key = gp.index + ':' + a;
@@ -2165,11 +2165,13 @@ function tick(ts) {
   rafId = requestAnimationFrame(tick);
   const dt = Math.min((ts - lastT) / 1000, 0.05);
   lastT = ts;
-  G29.poll();
+  try {
+      G29.poll();
   if (gameState === 'GAME' || gameState === 'CHECKPOINT') {
     step(dt);
     if (W3.renderer) W3.renderer.render(W3.scene, W3.camera);
   }
+  } catch(e) { console.error('[tick]', e); }
 }
 
 const smooth = t => t * t * (3 - 2 * t);
