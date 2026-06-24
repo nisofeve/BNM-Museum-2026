@@ -197,8 +197,6 @@ html, body {
 .howto-card {
   position: relative; z-index: 1;
   background: var(--glass-bg);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
   border: 2.5px solid var(--blue);
   border-radius: var(--radius-card);
   box-shadow: 0 0 30px rgba(0,240,255,0.4), inset 0 0 30px rgba(0,240,255,0.06);
@@ -310,8 +308,6 @@ html, body {
   color: var(--white); border-radius: 6px;
   padding: clamp(6px, 0.9vmin, 12px) clamp(16px, 2.2vmin, 30px);
   font-family: var(--font-display); font-weight: 400; font-size: clamp(10px, 1.3vmin, 15px);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
   border: 1.5px solid var(--blue);
   box-shadow: 0 0 18px rgba(0,240,255,0.45), inset 0 0 12px rgba(0,240,255,0.08);
   display: flex; align-items: center; gap: clamp(6px, 0.9vmin, 12px);
@@ -333,7 +329,7 @@ html, body {
    ============================================================ */
 #modal-overlay {
   position: fixed; inset: 0;
-  background: radial-gradient(ellipse at 50% 100%, rgba(255,46,151,0.25) 0%, rgba(4,1,18,0.78) 70%);
+  background: radial-gradient(ellipse at 50% 100%, rgba(255,46,151,0.25) 0%, rgba(4,1,18,0.97) 70%);
   display: flex; align-items: flex-end; justify-content: center;
   z-index: 500; opacity: 0; pointer-events: none;
   transition: opacity 0.35s ease;
@@ -512,8 +508,6 @@ html, body {
 }
 .result-card {
   background: var(--glass-bg);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
   border: 2.5px solid var(--blue);
   border-radius: var(--radius-card);
   box-shadow: 0 0 40px rgba(0,240,255,0.4), 0 0 80px rgba(181,55,242,0.3);
@@ -609,9 +603,7 @@ html, body {
    ============================================================ */
 #idle-overlay {
   position: fixed; inset: 0;
-  background: rgba(4,1,18,0.85);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+  background: rgba(4,1,18,0.97);
   z-index: 2000;
   display: none; align-items: center; justify-content: center;
   flex-direction: column; gap: 16px; text-align: center;
@@ -2159,7 +2151,7 @@ function tick(ts) {
   G29.poll();
   if (gameState === 'GAME' || gameState === 'CHECKPOINT') {
     step(dt);
-    if (W3.renderer) W3.renderer.render(W3.scene, W3.camera);
+    if (W3.renderer && gameState === 'GAME') W3.renderer.render(W3.scene, W3.camera);
   }
 }
 
