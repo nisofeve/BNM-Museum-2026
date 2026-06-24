@@ -355,6 +355,26 @@ html, body {
 }
 #modal-overlay.open .modal-card { transform: translateY(0); }
 
+#g29-guide {
+  position: absolute;
+  left: 2.5vw; top: 50%;
+  transform: translateY(-50%) translateX(-24px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease 0.25s, transform 0.4s ease 0.25s;
+}
+#modal-overlay.open #g29-guide {
+  opacity: 1;
+  transform: translateY(-50%) translateX(0);
+}
+#g29-guide img {
+  max-height: 64vh;
+  width: auto;
+  max-width: 26vw;
+  border-radius: 12px;
+  filter: drop-shadow(0 0 22px rgba(0,240,255,0.40));
+}
+
 .modal-progress {
   display: flex; gap: 6px; margin-bottom: clamp(12px, 1.6vmin, 22px); justify-content: center;
 }
@@ -629,7 +649,7 @@ html, body {
   <div class="attract-car">🚗</div>
   <h1 class="attract-title" data-i18n="attract_title">Perangkap Scam<br>Di Hadapan!</h1>
   <p class="attract-sub" data-i18n="attract_sub">Pandu Bijak, Elak Scam!</p>
-  <p class="attract-cta" data-i18n="attract_cta">Tekan Butang untuk Mula</p>
+  <p class="attract-cta" data-i18n="attract_cta">Tekan Pedal Minyak untuk Mula</p>
   <button class="btn-start" onclick="goHowTo()" data-i18n="btn_howto">MULA</button>
   <div class="attract-city-wrap" aria-hidden="true">
     <svg viewBox="0 0 1000 240" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" fill="#1a083a">
@@ -828,6 +848,11 @@ html, body {
       <div class="score-pill correct" data-i18n="scoring_correct">✓ Betul = +20 mata</div>
       <div class="score-pill wrong"   data-i18n="scoring_wrong">✗ Salah = −10 mata</div>
     </div>
+    <!-- G29 proceed hint -->
+    <div class="g29-proceed-hint">
+      <svg viewBox="0 0 62 50" fill="currentColor"><rect x="3" y="13" width="13" height="23" rx="3"/><rect x="1" y="34" width="17" height="12" rx="3"/><rect x="25" y="6" width="13" height="30" rx="3"/><rect x="23" y="34" width="17" height="12" rx="3"/><rect x="47" y="13" width="13" height="23" rx="3"/><rect x="45" y="34" width="17" height="12" rx="3"/></svg>
+      <span data-i18n="g29_proceed">Tekan mana-mana pedal untuk mula permainan</span>
+    </div>
     <button class="btn-start" style="width:100%;animation:none;" onclick="startGame()" data-i18n="btn_start">Mula Bermain!</button>
   </div>
 </div>
@@ -855,6 +880,9 @@ html, body {
 
 <!-- ===================== CHECKPOINT MODAL ===================== -->
 <div id="modal-overlay">
+  <div id="g29-guide">
+    <img src="Assets/G29_instruction.png" alt="Kawalan G29">
+  </div>
   <div class="modal-card">
     <div class="modal-progress" id="modal-progress"></div>
     <div class="modal-icon" id="modal-icon">📱</div>
@@ -1019,7 +1047,7 @@ const i18n = {
   bm: {
     attract_title:    'Perangkap Scam\nDi Hadapan!',
     attract_sub:      'Pandu Bijak, Elak Scam!',
-    attract_cta:      'Tekan Butang untuk Mula',
+    attract_cta:      'Tekan Pedal Minyak untuk Mula',
     btn_howto:        'MULA',
     howto_title:      'Cara Bermain',
     howto_desc:       'Pandu kereta anda dan harungi 5 perangkap scam di hadapan. Pilih jawapan yang betul untuk kumpul mata dan lihat tahap ‘Scam Awareness’ anda!',
@@ -1045,11 +1073,14 @@ const i18n = {
     sign_ahead:       'PERANGKAP SCAM DI HADAPAN',
     ctrl_steer_label: 'Roda Stereng',
     ctrl_steer_desc:  'Pusing kiri/kanan → Pandu kereta',
+    ctrl_pedal_label: 'Pedal (Mana-mana)',
+    ctrl_pedal_desc:  'Tekan → Pilih / Sahkan jawapan',
     ctrl_dpad_label:  'D-pad ◀ ▶',
     ctrl_dpad_desc:   'Navigasi pilihan jawapan',
     ctrl_close_hint:  'Ketuk untuk tutup',
     ctrl_nav:         'Navigasi',
     ctrl_select:      'Pilih',
+    g29_proceed:      'Tekan mana-mana pedal untuk mula permainan',
   }
 };
 
@@ -1349,20 +1380,63 @@ const drive = {
   playerX: 0,   // lateral offset from A/D steering
 };
 
+/* ---- Virtual G29 bridge (BroadcastChannel + WebSocket) ---- */
+(function() {
+  const _mock = {
+    index: 0, id: 'Virtual G29 (Test)', connected: true,
+    axes: [0, 1, 1, 1],
+    buttons: Array.from({length: 20}, () => ({ pressed: false, value: 0 })),
+    timestamp: performance.now(), mapping: ''
+  };
+
+  function handleMsg(d) {
+    _mock.timestamp = performance.now();
+    if (d.type === 'g29_connect') {
+      navigator.getGamepads = () => [_mock];
+      window.dispatchEvent(new GamepadEvent('gamepadconnected', { gamepad: _mock }));
+      _bc.postMessage({ type: 'g29_ack' });
+      if (_ws && _ws.readyState === 1) _ws.send(JSON.stringify({ type: 'g29_ack' }));
+    } else if (d.type === 'g29_axis') {
+      _mock.axes[d.index] = d.value;
+    } else if (d.type === 'g29_button') {
+      _mock.buttons[d.index] = { pressed: d.pressed, value: d.pressed ? 1 : 0 };
+    }
+  }
+
+  // BroadcastChannel (same browser)
+  const _bc = new BroadcastChannel('virtual_g29');
+  _bc.onmessage = e => { try { handleMsg(e.data); } catch {} };
+
+  // WebSocket (cross-browser)
+  let _ws = null, _wsRetries = 0;
+  function _connectWS() {
+    if (_wsRetries >= 3) return;
+    try {
+      _ws = new WebSocket('ws://localhost:8765');
+      _ws.onmessage = e => { try { handleMsg(JSON.parse(e.data)); } catch {} };
+      _ws.onclose   = () => { _ws = null; if (_wsRetries < 3) setTimeout(_connectWS, 3000); };
+      _ws.onerror   = () => { _wsRetries++; };
+    } catch {}
+  }
+  if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') _connectWS();
+})();
+
 /* ---- Keyboard steering (A / D only) ---- */
 const _keys = {};
 document.addEventListener('keydown', e => { const k = e.key.toLowerCase(); if (k === 'a' || k === 'd') _keys[k] = true;  }, { passive: true });
 document.addEventListener('keyup',   e => { const k = e.key.toLowerCase(); if (k === 'a' || k === 'd') _keys[k] = false; }, { passive: true });
 
-/* ---- Gamepad controller ---- */
-let _gpSteer = 0;          // axis 0 — proportional steering in step()
+/* ---- Logitech G29 Racing Wheel (Gamepad API) ---- */
+let _gpSteer = 0;          // raw wheel axis — proportional steering in step()
 let _gpCursor = -1;        // current UI selection index (-1 = uninitialised)
 let _gpPrevChoiceCnt = 0;  // detect new question load → auto-reset cursor
 
 const G29 = (() => {
   let idx = null;
-  const prev = []; // axes 1,2,3 = clutch, brake, gas
-  const DZ = 0.08;     // G29 pedals: rest≈1.0 (or 0.0 uncalibrated), pressed≈-1.0; < -0.5 = pressed
+  const prev = [];
+  const prevPedal = [false, false, false]; // axes 1,2,3 = clutch, brake, gas
+  const DZ = 0.08;    // wheel deadzone — G29 has slight centre drift
+  const PEDAL_T = -0.5; // G29 pedals: rest≈1.0 (or 0.0 uncalibrated), pressed≈-1.0; < -0.5 = pressed
 
   // Quiz answer selection: ANY connected gamepad's horizontal axis (joystick left stick,
   // wheel, or right stick) — a left/right edge moves the cursor. Even axis indices are
@@ -1376,17 +1450,30 @@ const G29 = (() => {
     idx = gp.index;
     prev.length = 0;
     for (let i = 0; i < gp.buttons.length; i++) prev.push(gp.buttons[i].pressed);
+    // Init prevPedal from ACTUAL axis state so joystick Y at centre (0.0) doesn't false-trigger
+    for (let p = 0; p < 3; p++) {
+      const v = gp.axes[p + 1] !== undefined ? gp.axes[p + 1] : 1;
+      prevPedal[p] = v < PEDAL_T;
+    }
+    console.log('[G29] Registered:', gp.id);
   }
 
+  function isWheel(gp) { return /wheel|driving|g29|racing/i.test(gp.id); }
+
   window.addEventListener('gamepadconnected', e => {
-    if (idx === null) initFromGamepad(e.gamepad);
+    const gp = e.gamepad;
+    // Always prefer wheel/driving controller; only fall back to other pads when nothing registered
+    if (isWheel(gp) || idx === null) initFromGamepad(gp);
   });
   window.addEventListener('gamepaddisconnected', e => {
     if (e.gamepad.index === idx) {
       idx = null; _gpSteer = 0;
       _keys['a'] = false; _keys['d'] = false;
+      // Fall back to any remaining gamepad
       const pads = navigator.getGamepads ? navigator.getGamepads() : [];
-      for (const p of pads) { if (p && p.index !== e.gamepad.index) { initFromGamepad(p); return; } }
+      let fallback = null;
+      for (const p of pads) { if (p && p.index !== e.gamepad.index) { if (isWheel(p)) { initFromGamepad(p); return; } if (!fallback) fallback = p; } }
+      if (fallback) initFromGamepad(fallback);
     }
   });
 
@@ -1397,6 +1484,7 @@ const G29 = (() => {
     let fallback = null;
     for (let i = 0; i < pads.length; i++) {
       if (!pads[i]) continue;
+      if (isWheel(pads[i])) { initFromGamepad(pads[i]); return; }
       if (!fallback) fallback = pads[i];
     }
     if (fallback) initFromGamepad(fallback);
@@ -1461,7 +1549,8 @@ const G29 = (() => {
     const pads = navigator.getGamepads ? navigator.getGamepads() : [];
     for (const gp of pads) {
       if (!gp) continue;
-      for (let a = 0; a < gp.axes.length; a++) {
+      const maxAxis = (gp.index === idx && isWheel(gp)) ? 1 : gp.axes.length;
+      for (let a = 0; a < maxAxis; a++) {
         const v = gp.axes[a] || 0;
         const dir = v < -CURSOR_AXIS_DZ ? -1 : v > CURSOR_AXIS_DZ ? 1 : 0;
         const key = gp.index + ':' + a;
@@ -1491,6 +1580,17 @@ const G29 = (() => {
     // D-pad left/right (buttons 14/15) as digital steering backup
     if (!_keys['a'] && gp.buttons[14]?.pressed) _keys['a'] = true;
     if (!_keys['d'] && gp.buttons[15]?.pressed) _keys['d'] = true;
+
+    // Pedal edge detection (axes 1=clutch, 2=brake, 3=gas) — G29/wheel only
+    // Skip for joysticks: their Y/Z axes share the same indices and would false-trigger
+    if (/wheel|driving|g29|racing/i.test(gp.id)) {
+      for (let p = 0; p < 3; p++) {
+        const axisVal = gp.axes[p + 1] ?? 1;
+        const pressed = axisVal < PEDAL_T;
+        if (pressed && !prevPedal[p]) onConfirm();
+        prevPedal[p] = pressed;
+      }
+    }
 
     // Auto-reset cursor when question changes (choice count changes)
     const cnt = getActiveChoices().length;
