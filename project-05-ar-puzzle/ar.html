@@ -132,17 +132,18 @@
     /* ── Start screen ── */
     #start-screen {
       position: fixed;
-      inset: 0;
+      top: 0; left: 0; right: 0; bottom: 0;
       background: #080c14;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       z-index: 2000;
-      gap: 20px;
       padding: 32px;
       text-align: center;
     }
+    #start-screen > * { margin-bottom: 20px; }
+    #start-screen > *:last-child { margin-bottom: 0; }
     #start-screen.hidden { display: none; }
 
     #start-icon {
@@ -290,10 +291,19 @@
       const btn   = document.getElementById('start-btn');
       btn.disabled = true;
       btn.textContent = 'Loading…';
+      const started = Date.now();
       function checkReady() {
         if (scene.hasLoaded && scene.systems['mindar-image-system']) {
           btn.disabled = false;
           btn.textContent = 'Tap to Start';
+        } else if (Date.now() - started > 20000) {
+          // Scripts failed to load (CDN down / no network) — tell the user
+          btn.disabled = false;
+          btn.textContent = 'Tap to Retry';
+          btn.onclick = () => location.reload();
+          document.getElementById('start-error').textContent =
+            'Failed to load AR engine. Check your connection and try again.';
+          document.getElementById('start-error').style.display = 'block';
         } else {
           setTimeout(checkReady, 100);
         }
@@ -315,26 +325,14 @@
       errEl.style.display = msg ? 'block' : 'none';
     }
 
-    // ── Returns true only when we can CONFIRM the canvas centre is black.
-    // Returns false (assume ok) whenever readPixels is unreliable (e.g. iOS).
+    // ── Returns true only when we can CONFIRM the camera feed is not rendering.
+    // Uses video element state instead of gl.readPixels — readPixels always
+    // returns zeros when A-Frame's preserveDrawingBuffer is false (the default),
+    // which made the pixel approach fire false positives on every Android device.
     function confirmBlack() {
-      try {
-        const canvas = document.querySelector('#arscene canvas');
-        if (!canvas || canvas.width === 0) return false;
-        const gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
-        if (!gl) return false;
-        const corner = new Uint8Array(4);
-        // iOS Safari returns all-zero including alpha when readPixels is blocked.
-        // A valid WebGL context always writes alpha ≥ 1 for opaque pixels.
-        // If alpha is 0 at a corner that should have rendered something, readPixels
-        // is unreliable — bail out and assume camera is fine.
-        gl.readPixels(2, 2, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, corner);
-        if (corner[3] === 0) return false; // readPixels not trustworthy on this device
-        const mid = new Uint8Array(4);
-        gl.readPixels(canvas.width >> 1, canvas.height >> 1, 1, 1,
-                      gl.RGBA, gl.UNSIGNED_BYTE, mid);
-        return mid[0] < 8 && mid[1] < 8 && mid[2] < 8;
-      } catch (e) { return false; }
+      const camVids = [...document.querySelectorAll('video:not([id])')];
+      if (camVids.length === 0) return false; // MindAR renders in WebGL directly — can't confirm
+      return camVids.every(v => v.videoWidth === 0 || v.readyState < 2);
     }
 
     // ── Main start — async so we can await arSystem.start(), but contains
@@ -355,14 +353,22 @@
       const scene    = document.getElementById('arscene');
       const arSystem = scene.systems['mindar-image-system'];
 
-      // Watch for any id-less video MindAR injects and force-play it (needed on some Android)
-      const camObserver = new MutationObserver(() => {
-        document.querySelectorAll('video:not([id])').forEach(v => {
-          v.muted = true;
-          v.setAttribute('playsinline', '');
-          v.setAttribute('webkit-playsinline', '');
-          v.play().catch(() => {});
-        });
+      // Watch specifically for new <video> nodes MindAR injects (not all DOM mutations).
+      // Only reacts to addedNodes that are or contain a video, avoiding unnecessary
+      // play() calls from A-Frame's own internal DOM churn during startup.
+      const camObserver = new MutationObserver((mutations) => {
+        for (const mut of mutations) {
+          mut.addedNodes.forEach(node => {
+            const vids = node.tagName === 'VIDEO' ? [node]
+              : node.querySelectorAll ? [...node.querySelectorAll('video')] : [];
+            vids.filter(v => !v.id).forEach(v => {
+              v.muted = true;
+              v.playsInline = true;              // DOM property — correct for iOS 10+
+              v.setAttribute('playsinline', ''); // attribute — belt-and-suspenders
+              v.play().catch(() => {});
+            });
+          });
+        }
       });
       camObserver.observe(document.body, { childList: true, subtree: true });
 
@@ -386,16 +392,15 @@
       screen.classList.add('hidden');
       camObserver.disconnect();
 
+      // Re-kick asset videos now that start() resolved — ensures they're playing
+      // on iOS where the gesture context may have expired before this point.
+      document.querySelectorAll('video[id]').forEach(v => { v.muted = true; v.play().catch(() => {}); });
+
       // Secondary watchdog: on some Android phones the stream opens but the
-      // canvas stays black. Poll for 6s; skip if readPixels is unreliable (iOS).
-      let checks = 0;
-      const pollId = setInterval(() => {
-        checks++;
-        if (checks >= 12) {                  // 12 × 500ms = 6s
-          clearInterval(pollId);
-          if (confirmBlack()) showRetry('Camera feed not showing. Tap to try again.');
-        }
-      }, 500);
+      // camera video never gets valid dimensions. Check once after 6s.
+      setTimeout(() => {
+        if (confirmBlack()) showRetry('Camera feed not showing. Tap to try again.');
+      }, 6000);
     }
 
     // map each target to its video
