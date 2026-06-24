@@ -281,45 +281,79 @@
     const flash = document.getElementById('found-flash');
     const badge = document.getElementById('status-badge');
 
-    // ── Start AR: called on button tap (user gesture required for camera on all phones) ──
-    async function startAR() {
+    // ── Disable the start button until A-Frame + MindAR system is ready.
+    // This ensures startAR() is never called before scene.systems is populated,
+    // so we never need an async scene-load wait inside startAR() that would
+    // break the browser's user-gesture context chain.
+    (function () {
+      const scene = document.getElementById('arscene');
+      const btn   = document.getElementById('start-btn');
+      if (!scene.hasLoaded) {
+        btn.disabled = true;
+        btn.textContent = 'Loading…';
+        scene.addEventListener('loaded', () => {
+          btn.disabled = false;
+          btn.textContent = 'Tap to Start';
+        }, { once: true });
+      }
+    })();
+
+    // ── Returns true when the centre of the WebGL canvas is still solid black.
+    // Used to detect that MindAR's camera feed has not yet rendered a frame.
+    function isCameraBlack() {
+      try {
+        const canvas = document.querySelector('#arscene canvas');
+        if (!canvas) return true;
+        const gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
+        if (!gl) return false;          // can't read pixels — assume ok
+        const px = new Uint8Array(4);
+        gl.readPixels(canvas.width >> 1, canvas.height >> 1, 1, 1,
+                      gl.RGBA, gl.UNSIGNED_BYTE, px);
+        return px[0] < 8 && px[1] < 8 && px[2] < 8;
+      } catch (e) { return false; }
+    }
+
+    // ── Show a retry prompt. Reloading is the most reliable recovery because the
+    // browser already has camera permission, so the second load always gets it
+    // without a race condition.
+    function showRetry(msg) {
+      const screen = document.getElementById('start-screen');
+      screen.classList.remove('hidden');
       const btn = document.getElementById('start-btn');
+      btn.disabled = false;
+      btn.textContent = 'Tap to Retry';
+      btn.onclick = () => location.reload();
       const errEl = document.getElementById('start-error');
+      errEl.textContent = msg || '';
+      errEl.style.display = msg ? 'block' : 'none';
+    }
+
+    // ── Main start function — called directly from button onclick.
+    // No awaited delays inside so the browser's user-gesture context is never broken.
+    function startAR() {
+      const btn    = document.getElementById('start-btn');
+      const errEl  = document.getElementById('start-error');
+      const screen = document.getElementById('start-screen');
+
       btn.disabled = true;
-      btn.textContent = 'Starting…';
+      btn.textContent = 'Opening camera…';
       errEl.style.display = 'none';
 
-      try {
-        // Explicitly request camera permission via user gesture.
-        // This is what fixes the stuck-camera bug on Samsung Internet / some Android Chrome.
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: 'environment' },
-          audio: false
-        });
-        // Stop the test stream — MindAR will open its own
-        stream.getTracks().forEach(t => t.stop());
-      } catch (err) {
+      // Kick asset video autoplay while the gesture is still hot
+      document.querySelectorAll('video').forEach(v => { v.muted = true; v.play().catch(() => {}); });
+
+      const scene    = document.getElementById('arscene');
+      const arSystem = scene.systems['mindar-image-system'];
+
+      if (!arSystem) {
+        errEl.textContent = 'AR engine not ready. Please refresh the page.';
+        errEl.style.display = 'block';
         btn.disabled = false;
         btn.textContent = 'Tap to Start';
-        let msg = 'Camera access denied. Please allow camera permission and try again.';
-        if (err.name === 'NotFoundError') msg = 'No camera found on this device.';
-        if (err.name === 'NotReadableError') msg = 'Camera is in use by another app. Close it and try again.';
-        errEl.textContent = msg;
-        errEl.style.display = 'block';
         return;
       }
 
-      // Hide start screen
-      document.getElementById('start-screen').classList.add('hidden');
-
-      // Kick asset videos (muted autoplay)
-      document.querySelectorAll('video').forEach(v => { v.muted = true; v.play().catch(() => {}); });
-
-      // Some phones need longer to release camera hardware before MindAR can reopen it
-      await new Promise(r => setTimeout(r, 800));
-
-      // Watch for MindAR's camera video being injected anywhere in the DOM and force-play it.
-      // MutationObserver fires exactly when the element appears — more reliable than polling.
+      // ── Watch for any no-id video MindAR injects and force-play it
       const camObserver = new MutationObserver(() => {
         document.querySelectorAll('video:not([id])').forEach(v => {
           v.muted = true;
@@ -329,21 +363,44 @@
         });
       });
       camObserver.observe(document.body, { childList: true, subtree: true });
-      setTimeout(() => camObserver.disconnect(), 8000);
 
-      const scene = document.getElementById('arscene');
+      // ── Pixel watchdog: poll the canvas every 500ms.
+      // As soon as a non-black frame appears, hide the start screen.
+      // If still black after 8s, show the retry prompt.
+      let cameraOk = false;
+      const pollId = setInterval(() => {
+        if (!isCameraBlack()) {
+          cameraOk = true;
+          clearInterval(pollId);
+          clearTimeout(giveUpId);
+          camObserver.disconnect();
+          screen.classList.add('hidden');
+        }
+      }, 500);
 
-      function launchMindAR() {
-        const arSystem = scene.systems['mindar-image-system'];
-        if (!arSystem) return;
-        arSystem.start();
-      }
+      const giveUpId = setTimeout(() => {
+        if (!cameraOk) {
+          clearInterval(pollId);
+          camObserver.disconnect();
+          showRetry('Camera not responding. Tap to try again.');
+        }
+      }, 8000);
 
-      if (scene.hasLoaded) {
-        launchMindAR();
-      } else {
-        scene.addEventListener('loaded', launchMindAR, { once: true });
-      }
+      // ── Fire MindAR. No pre-test stream, no delay — single camera open,
+      // called within the user-gesture context. Async errors are caught below.
+      Promise.resolve(arSystem.start()).catch(err => {
+        clearInterval(pollId);
+        clearTimeout(giveUpId);
+        camObserver.disconnect();
+        btn.disabled = false;
+        btn.textContent = 'Tap to Start';
+        let msg = 'Camera access denied. Please allow camera permission and try again.';
+        if (err.name === 'NotFoundError')    msg = 'No camera found on this device.';
+        if (err.name === 'NotReadableError') msg = 'Camera is in use by another app. Close it and try again.';
+        errEl.textContent = msg;
+        errEl.style.display = 'block';
+        screen.classList.remove('hidden');
+      });
     }
 
     // map each target to its video
