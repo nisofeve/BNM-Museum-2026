@@ -1,12 +1,11 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ms" translate="no">
 <head>
-<link rel="stylesheet" href="../_fonts/fonts.css">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Pengalaman Pembayaran QR Rentas Sempadan | Cross-Border QR Payment Experience</title>
-
-<script src="../_vendor/gsap.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script>
 // Minimal GSAP polyfill — activates only if CDN was blocked
 if(typeof gsap==='undefined'){
@@ -1235,6 +1234,96 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;b
   transition: all 0.3s;
 }
 #nav-home:hover { background: var(--bg); transform: translateX(-4px); }
+
+/* ── Quiz home button (top-left, quiz section only) ── */
+#quiz-home-btn {
+  position: fixed;
+  top: 2rem;
+  left: 2rem;
+  z-index: 200;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 6.75rem;
+  height: 6.75rem;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  font-size: 2.8125rem;
+  cursor: pointer;
+  background: rgba(255,255,255,0.82);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.9);
+  box-shadow: var(--card-shadow);
+  transition: background 0.2s, transform 0.2s;
+}
+#quiz-home-btn:hover { background: var(--bg); transform: scale(1.04); }
+
+/* ── Confirmation modal ── */
+#quiz-home-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0,0,0,0.55);
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+#quiz-home-modal.open { display: flex; }
+#quiz-home-modal-box {
+  background: #fff;
+  border-radius: 1.5rem;
+  padding: 2.5rem 2.25rem 2rem;
+  max-width: 36rem;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+#quiz-home-modal-box .modal-icon {
+  font-size: 3rem;
+  margin-bottom: 0.75rem;
+}
+#quiz-home-modal-box h3 {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 800;
+  font-size: 1.625rem;
+  color: var(--text-dark);
+  margin-bottom: 2rem;
+}
+.modal-btns {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.modal-btn-yes {
+  padding: 0.875rem 2.25rem;
+  border: none;
+  border-radius: 3rem;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 1.25rem;
+  cursor: pointer;
+  background: var(--blue);
+  color: #fff;
+  transition: opacity 0.2s;
+}
+.modal-btn-yes:hover { opacity: 0.88; }
+.modal-btn-no {
+  padding: 0.875rem 2.25rem;
+  border: 2px solid #ccc;
+  border-radius: 3rem;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 1.25rem;
+  cursor: pointer;
+  background: #fff;
+  color: #555;
+  transition: background 0.2s;
+}
+.modal-btn-no:hover { background: #f5f5f5; }
 </style>
 </head>
 <body>
@@ -1243,6 +1332,21 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;b
 <!-- Nav buttons -->
 <button id="nav-back" onclick="navigate(-1)">← <span id="nav-back-txt">Kembali / Back</span></button>
 <button id="nav-home" onclick="goToMenu()">🏠 <span id="nav-home-txt">Menu Utama</span></button>
+
+<!-- Quiz top-left home button -->
+<button id="quiz-home-btn" onclick="openQuizHomeModal()">🏠</button>
+
+<!-- Confirmation modal -->
+<div id="quiz-home-modal" role="dialog" aria-modal="true" onclick="if(event.target===this)closeQuizHomeModal()">
+  <div id="quiz-home-modal-box">
+    <div class="modal-icon">🏠</div>
+    <h3>Kembali ke Menu Utama?</h3>
+    <div class="modal-btns">
+      <button class="modal-btn-yes" onclick="confirmQuizHome()">Ya, Keluar</button>
+      <button class="modal-btn-no" onclick="closeQuizHomeModal()">Tidak, Teruskan</button>
+    </div>
+  </div>
+</div>
 
 <div id="app">
 
@@ -2004,6 +2108,7 @@ function updateDots() {
 function updateNav() {
   var back = document.getElementById('nav-back');
   var home = document.getElementById('nav-home');
+  var quizHomeBtn = document.getElementById('quiz-home-btn');
   if (back) back.style.display = 'none';
   var hideHome = (currentSection === 0 || currentSection === 1 || currentSection === 'wallet' || currentSection === 'menu');
   if (home) {
@@ -2011,6 +2116,24 @@ function updateNav() {
     var homeTxtEl = document.getElementById('nav-home-txt');
     if (homeTxtEl) homeTxtEl.textContent = '← Situasi';
   }
+  if (quizHomeBtn) {
+    quizHomeBtn.style.display = (currentSection === 5) ? 'flex' : 'none';
+  }
+}
+
+function openQuizHomeModal() {
+  var modal = document.getElementById('quiz-home-modal');
+  if (modal) modal.classList.add('open');
+}
+
+function closeQuizHomeModal() {
+  var modal = document.getElementById('quiz-home-modal');
+  if (modal) modal.classList.remove('open');
+}
+
+function confirmQuizHome() {
+  closeQuizHomeModal();
+  goToStart();
 }
 
 function onSectionEnter(idx) {
@@ -2829,6 +2952,7 @@ function goToStart() {
   if (payTimer) { clearTimeout(payTimer); payTimer = null; }
   if (payConvInterval) { clearInterval(payConvInterval); payConvInterval = null; }
   if (convInterval) { clearInterval(convInterval); convInterval = null; }
+  closeQuizHomeModal();
   quizScore = 0;
   quizAnswered = [null, null, null, null];
   currentQuestion = 0;
@@ -2876,6 +3000,5 @@ gsap.from('#section-0',{opacity:0,y:36,duration:0.9,ease:'power2.out',delay:0.3}
 initSlider();
 (function(){var cont=document.createElement('div');cont.className='p6-particles';document.body.appendChild(cont);for(var pi=0;pi<18;pi++){var pp=document.createElement('div');pp.className='p6-part';var sz=2+Math.random()*4;pp.style.cssText='width:'+sz+'px;height:'+sz+'px;left:'+(Math.random()*100)+'vw;top:'+(Math.random()*100)+'vh;opacity:'+(0.04+Math.random()*0.07)+';animation:p6a'+pi+' '+(9+Math.random()*11)+'s ease-in-out infinite alternate';var st=document.createElement('style');st.textContent='@keyframes p6a'+pi+'{from{transform:translate(0,0)}to{transform:translate('+((Math.random()-0.5)*130)+'px,'+((Math.random()-0.5)*90)+'px)}}';document.head.appendChild(st);cont.appendChild(pp);}})();
 </script>
-<style id="kiosk-hardening">html,body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;}a{pointer-events:none;}</style><script id="kiosk-block">document.addEventListener("contextmenu",function(e){e.preventDefault();},true);document.addEventListener("dragstart",function(e){e.preventDefault();},true);</script>
 </body>
 </html>

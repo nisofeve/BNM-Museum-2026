@@ -279,6 +279,30 @@
     font-size:1.1vmin;color:#4a3c18;letter-spacing:.25em;
     text-transform:uppercase;}
 
+  /* P3 3D metallic arrow */
+  @keyframes p3ArrowFloat{
+    0%,100%{transform:rotate(10deg) perspective(600px) rotateX(-14deg) rotateY(10deg) translate(0,0);}
+    40%{transform:rotate(10deg) perspective(600px) rotateX(-14deg) rotateY(10deg) translate(-3.5vmin,-2vmin);}
+    70%{transform:rotate(10deg) perspective(600px) rotateX(-14deg) rotateY(10deg) translate(1vmin,0.8vmin);}
+  }
+  .p3-arrow-wrap{display:flex;justify-content:center;align-items:center;margin:3vmin 0 2vmin;}
+  .p3-arrow-svg{
+    width:clamp(180px,48vmin,360px);
+    overflow:visible;
+    animation:p3ArrowFloat 2.4s ease-in-out infinite;
+    filter:drop-shadow(0 8px 28px rgba(180,130,0,.9)) drop-shadow(0 0 55px rgba(212,168,50,.4));
+  }
+  /* reduce bottom padding offset so P3 content centres on actual screen */
+  #narr.p3-layout{padding-bottom:6vmin;}
+
+  /* P3 sequential entrance */
+  @keyframes p3FadeUp{from{opacity:0;transform:translateY(28px);}to{opacity:1;transform:translateY(0);}}
+  @keyframes p3ScaleIn{from{opacity:0;transform:scale(0.7) translateY(18px);}to{opacity:1;transform:scale(1) translateY(0);}}
+  #narr.p3-layout>.nline:nth-child(1){opacity:0;animation:p3FadeUp .7s cubic-bezier(.22,1,.36,1) .2s forwards;}
+  #narr.p3-layout>.nline:nth-child(2){opacity:0;animation:p3FadeUp .7s cubic-bezier(.22,1,.36,1) .65s forwards;}
+  #narr.p3-layout>.p3-arrow-wrap{opacity:0;animation:p3ScaleIn .75s cubic-bezier(.34,1.56,.64,1) 1.15s forwards;}
+  #narr.p3-layout>#p3-cd{opacity:0;animation:p3FadeUp .65s cubic-bezier(.22,1,.36,1) 3.3s forwards;}
+
 </style>
 </head>
 <body>
@@ -847,7 +871,8 @@ void main(){
     narr.classList.remove('show');
     later(()=>{
       narrToken++;
-      narr.innerHTML='<div class="nline first">Pengembaraan anda bermula sekarang!</div><div class="nline accent" id="p3-cd" style="font-size:12vmin;font-weight:900;letter-spacing:0;margin-top:2vmin;margin-bottom:2vmin;color:#d4a832;text-shadow:0 0 30px rgba(212,168,50,.6)"></div><div class="nline first">Tekan butang merah di pintu masuk</div>';
+      narr.classList.add('p3-layout');
+      narr.innerHTML='<div class="nline first">Sila ambil jurnal pengembaraan anda</div><div class="nline first">dan tekan butang merah di pintu masuk!</div><div class="p3-arrow-wrap"><svg class="p3-arrow-svg" viewBox="0 0 220 110" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="p3mg1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#f7e878"/><stop offset="28%" stop-color="#d4a832"/><stop offset="55%" stop-color="#8a6010"/><stop offset="78%" stop-color="#c89828"/><stop offset="100%" stop-color="#e8c040"/></linearGradient><linearGradient id="p3mg2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="rgba(255,252,180,0.55)"/><stop offset="100%" stop-color="rgba(255,230,80,0)"/></linearGradient></defs><rect x="78" y="38" width="138" height="34" fill="url(#p3mg1)" rx="4"/><rect x="82" y="70" width="134" height="6" rx="2" fill="rgba(0,0,0,0.32)"/><polygon points="2,55 88,4 88,106" fill="url(#p3mg1)"/><polygon points="20,55 88,95 88,106 2,55" fill="rgba(0,0,0,0.28)"/><rect x="82" y="38" width="130" height="11" fill="url(#p3mg2)" rx="4"/><polygon points="2,55 88,4 88,24 26,55" fill="rgba(255,248,150,0.28)"/></svg></div><div class="nline accent" id="p3-cd" style="font-size:12vmin;font-weight:900;letter-spacing:0;color:#d4a832;text-shadow:0 0 30px rgba(212,168,50,.6)"></div>';
       narr.classList.add('show');
       state='P3'; locked=false;
       tween('spin',1.0,13000,easeInCubic);
@@ -868,7 +893,7 @@ void main(){
     fadeBgmOut(2000);
     fadeWhite(1,800);
     later(()=>{
-      narrToken++; narr.innerHTML=''; narr.classList.remove('show');
+      narrToken++; narr.innerHTML=''; narr.classList.remove('show'); narr.classList.remove('p3-layout');
       tween('spin',0,1,t=>t);
       U.haloOn=0; U.blob=1; U.halo=1;
       setPosterFront(); showPoster();
