@@ -122,15 +122,11 @@
     .a-enter-vr-button { display: none !important; }
     canvas { display: block; }
 
-    /* MindAR injects a camera <video> directly into the scene — ensure it's visible */
-    a-scene > video {
+    /* MindAR injects a camera <video> — ensure it's never hidden */
+    a-scene video:not([id]) {
       display: block !important;
       visibility: visible !important;
       opacity: 1 !important;
-    }
-    /* Canvas must not paint an opaque background over the camera video */
-    #arscene canvas {
-      background: transparent !important;
     }
 
     /* ── Start screen ── */
@@ -228,8 +224,7 @@
 
   <a-scene
     mindar-image="imageTargetSrc: Assets/targets.mind; autoStart: false;"
-    renderer="colorManagement: true; alpha: true; precision: medium;"
-    background="color: transparent; transparent: true"
+    renderer="colorManagement: true; precision: medium;"
     vr-mode-ui="enabled: false"
     device-orientation-permission-ui="enabled: false"
     loading-screen="enabled: false"
@@ -320,9 +315,21 @@
       // Kick asset videos (muted autoplay)
       document.querySelectorAll('video').forEach(v => { v.muted = true; v.play().catch(() => {}); });
 
-      // ── Race-condition fix: some phones haven't fully released the camera yet.
-      // Wait 400ms before MindAR opens its own stream.
-      await new Promise(r => setTimeout(r, 400));
+      // Some phones need longer to release camera hardware before MindAR can reopen it
+      await new Promise(r => setTimeout(r, 800));
+
+      // Watch for MindAR's camera video being injected anywhere in the DOM and force-play it.
+      // MutationObserver fires exactly when the element appears — more reliable than polling.
+      const camObserver = new MutationObserver(() => {
+        document.querySelectorAll('video:not([id])').forEach(v => {
+          v.muted = true;
+          v.setAttribute('playsinline', '');
+          v.setAttribute('webkit-playsinline', '');
+          v.play().catch(() => {});
+        });
+      });
+      camObserver.observe(document.body, { childList: true, subtree: true });
+      setTimeout(() => camObserver.disconnect(), 8000);
 
       const scene = document.getElementById('arscene');
 
@@ -330,22 +337,6 @@
         const arSystem = scene.systems['mindar-image-system'];
         if (!arSystem) return;
         arSystem.start();
-
-        // MindAR injects a camera <video> with no id after start().
-        // On some phones it won't autoplay — find it and force play.
-        function kickCamVideo() {
-          scene.querySelectorAll('video').forEach(v => {
-            if (!v.id) {           // our asset videos all have ids; camera video doesn't
-              v.muted = true;
-              v.setAttribute('playsinline', '');
-              v.setAttribute('webkit-playsinline', '');
-              v.play().catch(() => {});
-            }
-          });
-        }
-        // Try at 600ms and again at 1800ms as a safety net
-        setTimeout(kickCamVideo, 600);
-        setTimeout(kickCamVideo, 1800);
       }
 
       if (scene.hasLoaded) {
