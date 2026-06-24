@@ -281,21 +281,24 @@
     const flash = document.getElementById('found-flash');
     const badge = document.getElementById('status-badge');
 
-    // ── Disable the start button until A-Frame + MindAR system is ready.
-    // This ensures startAR() is never called before scene.systems is populated,
-    // so we never need an async scene-load wait inside startAR() that would
-    // break the browser's user-gesture context chain.
+    // ── Keep the start button disabled until BOTH A-Frame has loaded AND
+    // MindAR's system is registered in scene.systems. On some phones the
+    // 'loaded' event fires before MindAR finishes registering, so we poll
+    // every 100ms rather than relying solely on the event.
     (function () {
       const scene = document.getElementById('arscene');
       const btn   = document.getElementById('start-btn');
-      if (!scene.hasLoaded) {
-        btn.disabled = true;
-        btn.textContent = 'Loading…';
-        scene.addEventListener('loaded', () => {
+      btn.disabled = true;
+      btn.textContent = 'Loading…';
+      function checkReady() {
+        if (scene.hasLoaded && scene.systems['mindar-image-system']) {
           btn.disabled = false;
           btn.textContent = 'Tap to Start';
-        }, { once: true });
+        } else {
+          setTimeout(checkReady, 100);
+        }
       }
+      checkReady();
     })();
 
     // ── Show a retry prompt. Page reload is the most reliable recovery —
@@ -351,14 +354,6 @@
 
       const scene    = document.getElementById('arscene');
       const arSystem = scene.systems['mindar-image-system'];
-
-      if (!arSystem) {
-        errEl.textContent = 'AR engine not ready. Please refresh the page.';
-        errEl.style.display = 'block';
-        btn.disabled = false;
-        btn.textContent = 'Tap to Start';
-        return;
-      }
 
       // Watch for any id-less video MindAR injects and force-play it (needed on some Android)
       const camObserver = new MutationObserver(() => {
