@@ -1,0 +1,20 @@
+{
+  "name": "islamic-finance-kiosk",
+  "version": "1.0.0",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --win dir --x64"
+  },
+  "build": {
+    "appId": "my.museum.islamicfinance",
+    "productName": "Islamic Finance",
+    "win": { "target": "dir" },
+    "files": ["index.html", "main.js", "lib/**", "fonts/**", "Assets/**"],
+    "directories": { "output": "dist" }
+  },
+  "devDependencies": {
+    "electron": "^31.0.0",
+    "electron-builder": "^24.0.0"
+  }
+}
