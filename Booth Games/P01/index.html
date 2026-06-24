@@ -1406,7 +1406,7 @@ const drive = {
       _ws.onerror   = () => { _wsRetries++; };
     } catch {}
   }
-  _connectWS();
+  if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') _connectWS();
 })();
 
 /* ---- Keyboard steering (A / D only) ---- */
