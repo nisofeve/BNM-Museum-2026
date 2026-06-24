@@ -1396,13 +1396,14 @@ const drive = {
   _bc.onmessage = e => { try { handleMsg(e.data); } catch {} };
 
   // WebSocket (cross-browser)
-  let _ws = null;
+  let _ws = null, _wsRetries = 0;
   function _connectWS() {
+    if (_wsRetries >= 3) return;
     try {
       _ws = new WebSocket('ws://localhost:8765');
       _ws.onmessage = e => { try { handleMsg(JSON.parse(e.data)); } catch {} };
-      _ws.onclose   = () => { _ws = null; setTimeout(_connectWS, 3000); };
-      _ws.onerror   = () => {};
+      _ws.onclose   = () => { _ws = null; if (_wsRetries < 3) setTimeout(_connectWS, 3000); };
+      _ws.onerror   = () => { _wsRetries++; };
     } catch {}
   }
   _connectWS();
