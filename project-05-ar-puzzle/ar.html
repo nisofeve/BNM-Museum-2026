@@ -235,12 +235,12 @@
     <a-assets>
       <video id="ar-video"
         src="Assets/Animated-1399.mp4"
-        autoplay loop muted playsinline webkit-playsinline
+        loop playsinline webkit-playsinline
         crossorigin="anonymous"
       ></video>
       <video id="ar-video-2"
         src="Assets/Animated-1883.mp4"
-        autoplay loop muted playsinline webkit-playsinline
+        loop playsinline webkit-playsinline
         crossorigin="anonymous"
       ></video>
     </a-assets>
@@ -347,8 +347,21 @@
       btn.textContent = 'Opening camera…';
       errEl.style.display = 'none';
 
-      // Kick asset video autoplay while gesture is still active
-      document.querySelectorAll('video').forEach(v => { v.muted = true; v.play().catch(() => {}); });
+      // Use the tap gesture to unlock audio on asset videos.
+      // Correct unlock sequence: play() MUTED first (always allowed), then unmute on success.
+      // Setting muted=false before play() can cause the play() itself to be blocked on some
+      // browsers, and breaks the safety-net check below.
+      const needsUnlock = new Set(document.querySelectorAll('video[id]'));
+      needsUnlock.forEach(v => {
+        v.muted = true; // keep muted so play() is guaranteed to be allowed
+        const p = v.play();
+        if (p) p.then(() => {
+          v.muted = false;       // unmute AFTER play() succeeds — audio is now unlocked
+          v.pause();
+          v.currentTime = 0;
+          needsUnlock.delete(v); // mark as done so safety net skips it
+        }).catch(() => { /* video not loaded yet — safety net will retry */ });
+      });
 
       const scene    = document.getElementById('arscene');
       const arSystem = scene.systems['mindar-image-system'];
@@ -392,9 +405,17 @@
       screen.classList.add('hidden');
       camObserver.disconnect();
 
-      // Re-kick asset videos now that start() resolved — ensures they're playing
-      // on iOS where the gesture context may have expired before this point.
-      document.querySelectorAll('video[id]').forEach(v => { v.muted = true; v.play().catch(() => {}); });
+      // Safety net: retry unlock for any videos whose play() failed above
+      // (e.g. video hadn't loaded yet when the gesture fired).
+      needsUnlock.forEach(v => {
+        v.muted = true;
+        const p = v.play();
+        if (p) p.then(() => {
+          v.muted = false;
+          v.pause();
+          v.currentTime = 0;
+        }).catch(() => {});
+      });
 
       // Secondary watchdog: on some Android phones the stream opens but the
       // camera video never gets valid dimensions. Check once after 6s.
