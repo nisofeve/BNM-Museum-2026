@@ -347,20 +347,13 @@
       btn.textContent = 'Opening camera…';
       errEl.style.display = 'none';
 
-      // Use the tap gesture to unlock audio on asset videos.
-      // Correct unlock sequence: play() MUTED first (always allowed), then unmute on success.
-      // Setting muted=false before play() can cause the play() itself to be blocked on some
-      // browsers, and breaks the safety-net check below.
-      const needsUnlock = new Set(document.querySelectorAll('video[id]'));
-      needsUnlock.forEach(v => {
-        v.muted = true; // keep muted so play() is guaranteed to be allowed
-        const p = v.play();
-        if (p) p.then(() => {
-          v.muted = false;       // unmute AFTER play() succeeds — audio is now unlocked
-          v.pause();
-          v.currentTime = 0;
-          needsUnlock.delete(v); // mark as done so safety net skips it
-        }).catch(() => { /* video not loaded yet — safety net will retry */ });
+      // Gesture unlock: start all asset videos muted and keep them playing.
+      // We intentionally do NOT pause them after the gesture — targetFound then only
+      // needs to unmute, not call play(). This avoids iOS/Android autoplay policy
+      // blocking a play() call that arrives outside a user gesture context.
+      document.querySelectorAll('video[id]').forEach(v => {
+        v.muted = true;
+        v.play().catch(() => {});
       });
 
       const scene    = document.getElementById('arscene');
@@ -409,18 +402,6 @@
       screen.classList.add('hidden');
       camObserver.disconnect();
 
-      // Safety net: retry unlock for any videos whose play() failed above
-      // (e.g. video hadn't loaded yet when the gesture fired).
-      needsUnlock.forEach(v => {
-        v.muted = true;
-        const p = v.play();
-        if (p) p.then(() => {
-          v.muted = false;
-          v.pause();
-          v.currentTime = 0;
-        }).catch(() => {});
-      });
-
       // Secondary watchdog: on some Android phones the stream opens but the
       // camera video never gets valid dimensions. Check once after 6s.
       setTimeout(() => {
@@ -444,14 +425,18 @@
         badge.textContent = 'AR TRACKING';
         badge.style.borderColor = 'rgba(0,229,255,0.8)';
         setTimeout(() => flash.classList.remove('active'), 400);
-        if (v) { v.currentTime = 0; v.play().catch(() => {}); }
+        // Video is already playing (muted) from the gesture in startAR().
+        // Seek to start and unmute — no play() call needed, so iOS/Android
+        // autoplay policy can never block this.
+        if (v) { v.currentTime = 0; v.muted = false; }
       });
 
       m.addEventListener('targetLost', () => {
         hint.textContent = 'Point camera at the target image';
         badge.textContent = 'AR SCANNER';
         badge.style.borderColor = 'rgba(0,229,255,0.3)';
-        if (v) v.pause();
+        // Mute but keep playing so the next targetFound only needs to unmute.
+        if (v) { v.muted = true; }
       });
     });
 
