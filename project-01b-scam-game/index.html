@@ -2168,7 +2168,7 @@ function tick(ts) {
   lastT = ts;
   try {
       G29.poll();
-  if (gameState === 'GAME' || gameState === 'CHECKPOINT') {
+  if (gameState === 'GAME') {
     step(dt);
     if (W3.renderer) W3.renderer.render(W3.scene, W3.camera);
   }
