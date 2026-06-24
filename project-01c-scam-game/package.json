@@ -1,0 +1,32 @@
+{
+  "name": "scam-game-kiosk",
+  "version": "1.0.0",
+  "description": "P01 Scam Game — offline kiosk executable",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --win dir --x64"
+  },
+  "build": {
+    "appId": "my.museum.scamgame",
+    "productName": "Scam Game",
+    "win": {
+      "target": "dir"
+    },
+    "files": [
+      "index.html",
+      "main.js",
+      "lib/**",
+      "fonts/**",
+      "Assets/**",
+      "SportsCar2.glb"
+    ],
+    "directories": {
+      "output": "dist"
+    }
+  },
+  "devDependencies": {
+    "electron": "^31.0.0",
+    "electron-builder": "^24.0.0"
+  }
+}
