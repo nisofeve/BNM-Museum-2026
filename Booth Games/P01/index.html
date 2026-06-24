@@ -1274,7 +1274,6 @@ function startGame() {
       MAT.carCabin.color.set(0x1a6fe0);
       if (W3.damageParts) W3.damageParts.forEach(p => { p.visible = false; });
     }
-    W3.smokePool.forEach(p => { p.active = false; p.mesh.visible = false; });
     W3.sparkPool.forEach(p => { p.active = false; p.mesh.visible = false; });
   }
   gameState = 'GAME';
@@ -1335,7 +1334,7 @@ const W3 = {
   renderer: null, scene: null, camera: null,
   car: null, wheels: [], segments: [], gantries: [],
   farGroup: null, clouds: [],
-  obstruction: null, smokePool: [], sparkPool: [], damageParts: [],
+  obstruction: null, sparkPool: [], damageParts: [],
 };
 
 // Driving model
@@ -1646,6 +1645,8 @@ function initShared() {
   MAT.hill      = new THREE.MeshLambertMaterial({ color: 0x6fae84 });
   MAT.hillFar   = new THREE.MeshLambertMaterial({ color: 0x8fc3a4 });
   MAT.cloud     = new THREE.MeshLambertMaterial({ color: 0xffffff });
+  MAT.cliff     = new THREE.MeshBasicMaterial({ color: 0x7a6e5a });
+  MAT.cliffTop  = new THREE.MeshBasicMaterial({ color: 0x4a7a40 });
   MAT.gantryFrame = new THREE.MeshLambertMaterial({ color: 0x7d8a96 });
   MAT.carBody   = new THREE.MeshLambertMaterial({ color: 0x0047AB });
   MAT.carCabin  = new THREE.MeshLambertMaterial({ color: 0x1a6fe0 });
@@ -1765,7 +1766,7 @@ function buildSegment(index) {
 
   // dashed lane markings (3 lanes → boundaries at x = ±2)
   for (let lx of [-2, 2]) {
-    for (let z = -SEG_LEN / 2 + 4; z < SEG_LEN / 2; z += 8) {
+    for (let z = -SEG_LEN / 2 + 4; z < SEG_LEN / 2; z += 16) {
       const d = new THREE.Mesh(GEO.dash, MAT.lineWhite);
       d.position.set(lx, 0.02, z);
       g.add(d);
@@ -1777,7 +1778,7 @@ function buildSegment(index) {
     const rail = new THREE.Mesh(GEO.railH, MAT.rail);
     rail.position.set(side * 9.5, 0.72, 0);
     g.add(rail);
-    for (let z = -SEG_LEN / 2 + 6; z < SEG_LEN / 2; z += 16) {
+    for (let z = -SEG_LEN / 2 + 6; z < SEG_LEN / 2; z += 32) {
       const p = new THREE.Mesh(GEO.railP, MAT.post);
       p.position.set(side * 9.5, 0.4, z);
       g.add(p);
@@ -1786,9 +1787,9 @@ function buildSegment(index) {
 
   // trees (palms + rain trees) off the shoulder
   for (let side of [-1, 1]) {
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < 2; i++) {
       const t = buildTree(Math.random() < 0.6 ? 'palm' : 'rain');
-      t.position.set(side * (24 + Math.random() * 10), 0, -SEG_LEN / 2 + Math.random() * SEG_LEN);
+      t.position.set(side * (24 + Math.random() * 10), 0, -SEG_LEN / 4 + i * SEG_LEN / 2 + (Math.random() - 0.5) * 8);
       g.add(t);
     }
   }
@@ -1800,31 +1801,16 @@ function buildSegment(index) {
 
   // ── Forest cliffside ────────────────────────────────────────────────────
   // Rock cliff face on both sides (starts beyond tree line)
-  const cliffMat = new THREE.MeshLambertMaterial({ color: 0x7a6e5a });
-  const cliffTopMat = new THREE.MeshLambertMaterial({ color: 0x4a7a40 });
   for (let side of [-1, 1]) {
-    // Cliff rock wall
-    const cliff = new THREE.Mesh(
-      new THREE.BoxGeometry(10, 22, SEG_LEN),
-      cliffMat
-    );
+    const cliff = new THREE.Mesh(new THREE.BoxGeometry(10, 22, SEG_LEN), MAT.cliff);
     cliff.position.set(side * 58.5, 11, 0);
     g.add(cliff);
-    // Green top cap (earth/grass on top of cliff)
-    const cap = new THREE.Mesh(
-      new THREE.BoxGeometry(14, 2.5, SEG_LEN),
-      cliffTopMat
-    );
+    const cap = new THREE.Mesh(new THREE.BoxGeometry(14, 2.5, SEG_LEN), MAT.cliffTop);
     cap.position.set(side * 55.9, 22.5, 0);
     g.add(cap);
-    // Dense forest on cliff top — 4 trees per side
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < 2; i++) {
       const ct = buildTree('rain');
-      ct.position.set(
-        side * (50.7 + Math.random() * 10),
-        23,
-        -SEG_LEN / 2 + (i + 0.5) * (SEG_LEN / 4) + (Math.random() - 0.5) * 6
-      );
+      ct.position.set(side * (50.7 + Math.random() * 10), 23, -SEG_LEN / 2 + (i + 0.5) * (SEG_LEN / 2) + (Math.random() - 0.5) * 6);
       g.add(ct);
     }
   }
@@ -2108,16 +2094,8 @@ function initThree() {
 
   window.addEventListener('resize', onResize);
 
-  // Pre-allocate particle pools — no GPU alloc during gameplay
-  const _smokeGeo = new THREE.SphereGeometry(0.15, 5, 4);
+  // Pre-allocate spark particle pool — no GPU alloc during gameplay
   const _sparkGeo = new THREE.BoxGeometry(0.07, 0.07, 0.07);
-  for (let i = 0; i < 60; i++) {
-    const mat = new THREE.MeshBasicMaterial({ color: 0xcccccc, transparent: true, opacity: 0 });
-    const mesh = new THREE.Mesh(_smokeGeo, mat);
-    mesh.visible = false;
-    W3.scene.add(mesh);
-    W3.smokePool.push({ mesh, active: false, life: 0, maxLife: 1, vx: 0, vy: 0, vz: 0 });
-  }
   for (let i = 0; i < 24; i++) {
     const mat = new THREE.MeshBasicMaterial({ color: 0xFFDD00, transparent: true, opacity: 0 });
     const mesh = new THREE.Mesh(_sparkGeo, mat);
@@ -2223,23 +2201,9 @@ function step(dt) {
     const b = smooth(clamp01((traveled - 42) / 26));   // return to centre
     targetX = -6.4 * (a - b);  // hard left, well clear of bollards
 
-    // Fire screech + initial tire smoke burst the moment swerving starts
     if (!drive.evadeStarted && traveled > -27) {
       drive.evadeStarted = true;
       SFX.screech();
-      spawnTireSmoke(8);
-      // Dense exhaust burst on hard swerve
-      for (let _i = 0; _i < 12; _i++) spawnExhaustPuff();
-    }
-    // Continuous tire smoke + exhaust while turning
-    if (drive.evadeStarted && a < 0.98 && b < 0.1) {
-      drive.tireSmokeTimer += dt;
-      if (drive.tireSmokeTimer > 0.07) {
-        drive.tireSmokeTimer = 0;
-        spawnTireSmoke(3);
-        spawnExhaustPuff();
-        spawnExhaustPuff();
-      }
     }
 
     if (traveled > 74) finishObstaclePass();
@@ -2249,10 +2213,7 @@ function step(dt) {
     if (drive.hitTriggered) {
       const chaos = smooth(clamp01(1 - Math.max(0, traveled) / 18));  // fades over 18 units (half of original)
       targetX = Math.sin(traveled * 0.92) * 2.6 * chaos;              // frequency halved
-      if (chaos > 0.05) {
-        drive.tireSmokeTimer += dt;
-        if (drive.tireSmokeTimer > 0.12) { drive.tireSmokeTimer = 0; spawnTireSmoke(2); }
-      }
+
     }
     if (!drive.hitTriggered && traveled > -1 && traveled < 3) {
       drive.hitTriggered = true;
@@ -2310,25 +2271,6 @@ function step(dt) {
     if (cl.position.x > 200) cl.position.x = -200;
   }
 
-  /* --- exhaust trail while moving --- */
-  if ((drive.phase === 'approach' || drive.phase === 'finish' || drive.phase === 'evade') && drive.speed > 2 && W3.car) {
-    drive.exhaustTimer += dt;
-    const exhaustRate = 14;   // puffs per second at cruise speed
-    if (drive.exhaustTimer > 1 / exhaustRate) {
-      drive.exhaustTimer = 0;
-      spawnExhaustPuff();
-    }
-  }
-
-  /* --- smoke from damaged car --- */
-  if (hitCount > 0 && W3.car) {
-    drive.smokeTimer += dt;
-    const emitRate = 0.5 + hitCount * 0.4;
-    if (drive.smokeTimer > 1 / emitRate) {
-      drive.smokeTimer = 0;
-      spawnSmokePuff();
-    }
-  }
   updateParticles(dt);
 }
 
@@ -2353,57 +2295,8 @@ function endJourney() {
   showScreen('screen-result');
 }
 
-function _acquireSmoke() {
-  return W3.smokePool.find(p => !p.active) || null;
-}
 function _acquireSpark() {
   return W3.sparkPool.find(p => !p.active) || null;
-}
-
-function spawnExhaustPuff() {
-  const p = _acquireSmoke(); if (!p) return;
-  p.active = true; p.life = 0; p.maxLife = 0.9 + Math.random() * 0.5;
-  const grey = 0.78 + Math.random() * 0.18;
-  p.mesh.material.color.setRGB(grey, grey, grey);
-  p.mesh.material.opacity = 0.32 + Math.random() * 0.18;
-  p.mesh.scale.setScalar(1);
-  const pipeX = Math.random() < 0.5 ? -0.35 : 0.35;
-  p.mesh.position.set(W3.car.position.x + pipeX, W3.car.position.y + 0.28, W3.car.position.z + 2.2);
-  p.mesh.visible = true;
-  p.vx = (Math.random() - 0.5) * 0.6;
-  p.vy = 0.8 + Math.random() * 0.5;
-  p.vz = 1.2 + Math.random() * 0.8;
-}
-
-function spawnSmokePuff() {
-  const p = _acquireSmoke(); if (!p) return;
-  p.active = true; p.life = 0; p.maxLife = 1.2 + Math.random() * 0.8;
-  const d = Math.min(0.38 + hitCount * 0.1, 0.82);
-  p.mesh.material.color.setRGB(d, d, d);
-  p.mesh.material.opacity = 0.55 + Math.random() * 0.2;
-  p.mesh.scale.setScalar(1);
-  p.mesh.position.set(W3.car.position.x + (Math.random() - 0.5) * 0.4, W3.car.position.y + 1.1, W3.car.position.z - 1.4 + (Math.random() - 0.5) * 0.5);
-  p.mesh.visible = true;
-  p.vx = (Math.random() - 0.5) * 0.6;
-  p.vy = 0.9 + Math.random() * 0.8;
-  p.vz = (Math.random() - 0.5) * 0.4;
-}
-
-function spawnTireSmoke(count) {
-  for (let i = 0; i < (count || 4); i++) {
-    const p = _acquireSmoke(); if (!p) return;
-    p.active = true; p.life = 0; p.maxLife = 0.55 + Math.random() * 0.35;
-    const side = i % 2 === 0 ? -0.92 : 0.92;
-    const v = 0.88 + Math.random() * 0.1;
-    p.mesh.material.color.setRGB(v, v, v);
-    p.mesh.material.opacity = 0.78;
-    p.mesh.scale.setScalar(1);
-    p.mesh.position.set(W3.car.position.x + side + (Math.random() - 0.5) * 0.35, 0.22 + Math.random() * 0.12, W3.car.position.z + 1.15 + (Math.random() - 0.5) * 0.5);
-    p.mesh.visible = true;
-    p.vx = (Math.random() - 0.5) * 1.4 + side * 0.25;
-    p.vy = 0.5 + Math.random() * 0.7;
-    p.vz = 1.0 + Math.random() * 1.8;
-  }
 }
 
 function spawnSparks(pos) {
@@ -2423,16 +2316,6 @@ function spawnSparks(pos) {
 }
 
 function updateParticles(dt) {
-  for (const p of W3.smokePool) {
-    if (!p.active) continue;
-    p.life += dt;
-    p.mesh.position.x += p.vx * dt;
-    p.mesh.position.y += p.vy * dt;
-    p.mesh.position.z += p.vz * dt;
-    p.mesh.scale.setScalar(1 + p.life * 1.4);
-    p.mesh.material.opacity = (1 - p.life / p.maxLife) * 0.55;
-    if (p.life >= p.maxLife) { p.active = false; p.mesh.visible = false; }
-  }
   for (const p of W3.sparkPool) {
     if (!p.active) continue;
     p.life += dt;
