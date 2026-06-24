@@ -314,9 +314,8 @@
         return;
       }
 
-      // Hide start screen; body goes transparent so it can't bleed through the camera feed
+      // Hide start screen
       document.getElementById('start-screen').classList.add('hidden');
-      document.body.style.background = 'transparent';
 
       // Kick asset videos (muted autoplay)
       document.querySelectorAll('video').forEach(v => { v.muted = true; v.play().catch(() => {}); });
