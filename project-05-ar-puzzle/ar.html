@@ -298,24 +298,8 @@
       }
     })();
 
-    // ── Returns true when the centre of the WebGL canvas is still solid black.
-    // Used to detect that MindAR's camera feed has not yet rendered a frame.
-    function isCameraBlack() {
-      try {
-        const canvas = document.querySelector('#arscene canvas');
-        if (!canvas) return true;
-        const gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
-        if (!gl) return false;          // can't read pixels — assume ok
-        const px = new Uint8Array(4);
-        gl.readPixels(canvas.width >> 1, canvas.height >> 1, 1, 1,
-                      gl.RGBA, gl.UNSIGNED_BYTE, px);
-        return px[0] < 8 && px[1] < 8 && px[2] < 8;
-      } catch (e) { return false; }
-    }
-
-    // ── Show a retry prompt. Reloading is the most reliable recovery because the
-    // browser already has camera permission, so the second load always gets it
-    // without a race condition.
+    // ── Show a retry prompt. Page reload is the most reliable recovery —
+    // camera permission is already stored so the second load is clean.
     function showRetry(msg) {
       const screen = document.getElementById('start-screen');
       screen.classList.remove('hidden');
@@ -328,9 +312,32 @@
       errEl.style.display = msg ? 'block' : 'none';
     }
 
-    // ── Main start function — called directly from button onclick.
-    // No awaited delays inside so the browser's user-gesture context is never broken.
-    function startAR() {
+    // ── Returns true only when we can CONFIRM the canvas centre is black.
+    // Returns false (assume ok) whenever readPixels is unreliable (e.g. iOS).
+    function confirmBlack() {
+      try {
+        const canvas = document.querySelector('#arscene canvas');
+        if (!canvas || canvas.width === 0) return false;
+        const gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
+        if (!gl) return false;
+        const corner = new Uint8Array(4);
+        // iOS Safari returns all-zero including alpha when readPixels is blocked.
+        // A valid WebGL context always writes alpha ≥ 1 for opaque pixels.
+        // If alpha is 0 at a corner that should have rendered something, readPixels
+        // is unreliable — bail out and assume camera is fine.
+        gl.readPixels(2, 2, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, corner);
+        if (corner[3] === 0) return false; // readPixels not trustworthy on this device
+        const mid = new Uint8Array(4);
+        gl.readPixels(canvas.width >> 1, canvas.height >> 1, 1, 1,
+                      gl.RGBA, gl.UNSIGNED_BYTE, mid);
+        return mid[0] < 8 && mid[1] < 8 && mid[2] < 8;
+      } catch (e) { return false; }
+    }
+
+    // ── Main start — async so we can await arSystem.start(), but contains
+    // NO macrotask delays (no setTimeout awaits). The microtask chain keeps
+    // the browser's user-gesture context alive on both iOS and Android.
+    async function startAR() {
       const btn    = document.getElementById('start-btn');
       const errEl  = document.getElementById('start-error');
       const screen = document.getElementById('start-screen');
@@ -339,7 +346,7 @@
       btn.textContent = 'Opening camera…';
       errEl.style.display = 'none';
 
-      // Kick asset video autoplay while the gesture is still hot
+      // Kick asset video autoplay while gesture is still active
       document.querySelectorAll('video').forEach(v => { v.muted = true; v.play().catch(() => {}); });
 
       const scene    = document.getElementById('arscene');
@@ -353,7 +360,7 @@
         return;
       }
 
-      // ── Watch for any no-id video MindAR injects and force-play it
+      // Watch for any id-less video MindAR injects and force-play it (needed on some Android)
       const camObserver = new MutationObserver(() => {
         document.querySelectorAll('video:not([id])').forEach(v => {
           v.muted = true;
@@ -364,33 +371,11 @@
       });
       camObserver.observe(document.body, { childList: true, subtree: true });
 
-      // ── Pixel watchdog: poll the canvas every 500ms.
-      // As soon as a non-black frame appears, hide the start screen.
-      // If still black after 8s, show the retry prompt.
-      let cameraOk = false;
-      const pollId = setInterval(() => {
-        if (!isCameraBlack()) {
-          cameraOk = true;
-          clearInterval(pollId);
-          clearTimeout(giveUpId);
-          camObserver.disconnect();
-          screen.classList.add('hidden');
-        }
-      }, 500);
-
-      const giveUpId = setTimeout(() => {
-        if (!cameraOk) {
-          clearInterval(pollId);
-          camObserver.disconnect();
-          showRetry('Camera not responding. Tap to try again.');
-        }
-      }, 8000);
-
-      // ── Fire MindAR. No pre-test stream, no delay — single camera open,
-      // called within the user-gesture context. Async errors are caught below.
-      Promise.resolve(arSystem.start()).catch(err => {
-        clearInterval(pollId);
-        clearTimeout(giveUpId);
+      try {
+        // await preserves microtask chain — iOS gesture context stays intact.
+        // MindAR's getUserMedia fires here, within the user gesture.
+        await arSystem.start();
+      } catch (err) {
         camObserver.disconnect();
         btn.disabled = false;
         btn.textContent = 'Tap to Start';
@@ -399,8 +384,23 @@
         if (err.name === 'NotReadableError') msg = 'Camera is in use by another app. Close it and try again.';
         errEl.textContent = msg;
         errEl.style.display = 'block';
-        screen.classList.remove('hidden');
-      });
+        return;
+      }
+
+      // start() resolved = camera stream is open. Hide the start screen now.
+      screen.classList.add('hidden');
+      camObserver.disconnect();
+
+      // Secondary watchdog: on some Android phones the stream opens but the
+      // canvas stays black. Poll for 6s; skip if readPixels is unreliable (iOS).
+      let checks = 0;
+      const pollId = setInterval(() => {
+        checks++;
+        if (checks >= 12) {                  // 12 × 500ms = 6s
+          clearInterval(pollId);
+          if (confirmBlack()) showRetry('Camera feed not showing. Tap to try again.');
+        }
+      }, 500);
     }
 
     // map each target to its video
