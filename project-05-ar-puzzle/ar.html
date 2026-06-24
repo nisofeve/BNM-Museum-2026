@@ -122,6 +122,17 @@
     .a-enter-vr-button { display: none !important; }
     canvas { display: block; }
 
+    /* MindAR injects a camera <video> directly into the scene — ensure it's visible */
+    a-scene > video {
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+    }
+    /* Canvas must not paint an opaque background over the camera video */
+    #arscene canvas {
+      background: transparent !important;
+    }
+
     /* ── Start screen ── */
     #start-screen {
       position: fixed;
@@ -303,23 +314,45 @@
         return;
       }
 
-      // Hide start screen
+      // Hide start screen; body goes transparent so it can't bleed through the camera feed
       document.getElementById('start-screen').classList.add('hidden');
+      document.body.style.background = 'transparent';
 
-      // Kick muted video autoplay (some browsers defer without gesture)
+      // Kick asset videos (muted autoplay)
       document.querySelectorAll('video').forEach(v => { v.muted = true; v.play().catch(() => {}); });
 
-      // Start MindAR manually now that we have camera permission
+      // ── Race-condition fix: some phones haven't fully released the camera yet.
+      // Wait 400ms before MindAR opens its own stream.
+      await new Promise(r => setTimeout(r, 400));
+
       const scene = document.getElementById('arscene');
-      const arSystem = scene.systems['mindar-image-system'];
-      if (arSystem) {
+
+      function launchMindAR() {
+        const arSystem = scene.systems['mindar-image-system'];
+        if (!arSystem) return;
         arSystem.start();
+
+        // MindAR injects a camera <video> with no id after start().
+        // On some phones it won't autoplay — find it and force play.
+        function kickCamVideo() {
+          scene.querySelectorAll('video').forEach(v => {
+            if (!v.id) {           // our asset videos all have ids; camera video doesn't
+              v.muted = true;
+              v.setAttribute('playsinline', '');
+              v.setAttribute('webkit-playsinline', '');
+              v.play().catch(() => {});
+            }
+          });
+        }
+        // Try at 600ms and again at 1800ms as a safety net
+        setTimeout(kickCamVideo, 600);
+        setTimeout(kickCamVideo, 1800);
+      }
+
+      if (scene.hasLoaded) {
+        launchMindAR();
       } else {
-        // Fallback: wait for scene to be ready then start
-        scene.addEventListener('loaded', () => {
-          const sys = scene.systems['mindar-image-system'];
-          if (sys) sys.start();
-        }, { once: true });
+        scene.addEventListener('loaded', launchMindAR, { once: true });
       }
     }
 
