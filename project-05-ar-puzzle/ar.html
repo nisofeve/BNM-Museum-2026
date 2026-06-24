@@ -217,7 +217,8 @@
 
   <a-scene
     mindar-image="imageTargetSrc: Assets/targets.mind; autoStart: false;"
-    renderer="colorManagement: true; logarithmicDepthBuffer: true; precision: medium;"
+    renderer="colorManagement: true; alpha: true; precision: medium;"
+    background="color: transparent; transparent: true"
     vr-mode-ui="enabled: false"
     device-orientation-permission-ui="enabled: false"
     loading-screen="enabled: false"
@@ -248,7 +249,7 @@
         height="1.2179"
         position="0 0 0"
         rotation="0 0 0"
-        material="shader: flat; transparent: true;"
+        material="shader: flat; side: double; depthTest: false; transparent: false;"
       ></a-plane>
     </a-entity>
 
@@ -261,7 +262,7 @@
         height="0.6984"
         position="0 0 0"
         rotation="0 0 0"
-        material="shader: flat; transparent: true;"
+        material="shader: flat; side: double; depthTest: false; transparent: false;"
       ></a-plane>
     </a-entity>
 
