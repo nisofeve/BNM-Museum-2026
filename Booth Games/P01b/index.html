@@ -1444,9 +1444,10 @@ const G29 = (() => {
   // Quiz answer selection: ANY connected gamepad's horizontal axis (joystick left stick,
   // wheel, or right stick) — a left/right edge moves the cursor. Even axis indices are
   // horizontal in the standard mapping (0=LX, 2=RX); odd are vertical and ignored.
-  const CURSOR_AXES = [0, 2];
+  const CURSOR_AXES = [0, 1, 2, 3];
   const CURSOR_AXIS_DZ = 0.5;
   const _cursorAxisPrev = {};   // "padIndex:axisIndex" -> -1|0|1 edge state
+  const _altBtnPrev    = {};   // "padIndex:btnIndex" -> pressed state for non-idx pads
 
   function initFromGamepad(gp) {
     idx = gp.index;
@@ -1568,6 +1569,7 @@ const G29 = (() => {
     // Cursor selection works off ANY connected gamepad's horizontal axis (runs before the
     // single-device early-return below so a separate joystick is also read).
     scanCursorAxes();
+    scanAltPadButtons();
     if (idx === null) return;
     const gp = navigator.getGamepads()[idx];
     if (!gp) return;
@@ -1608,9 +1610,24 @@ const G29 = (() => {
     });
   }
 
+  // Scan buttons from every non-idx pad so custom controllers work alongside G29
+  function scanAltPadButtons() {
+    const pads = navigator.getGamepads ? navigator.getGamepads() : [];
+    for (const p of pads) {
+      if (!p || p.index === idx) continue;
+      p.buttons.forEach((btn, i) => {
+        const key = p.index * 64 + i;
+        if (btn.pressed && !_altBtnPrev[key]) onBtn(i);
+        _altBtnPrev[key] = btn.pressed;
+      });
+    }
+  }
+
   function onBtn(i) {
-    // Joystick clicks (10=L3, 11=R3) and D-pad (12=up, 13=down, 14=left, 15=right) — not confirm
-    if (i === 10 || i === 11 || i === 12 || i === 13) return;
+    // Joystick clicks (10=L3, 11=R3) — not confirm; D-pad up/down navigate cursor
+    if (i === 10 || i === 11) return;
+    if (i === 12) { moveCursor(-1); return; }
+    if (i === 13) { moveCursor(1);  return; }
     if (i === 14) { moveCursor(-1); return; }
     if (i === 15) { moveCursor(1);  return; }
     // All other buttons (face, bumpers, triggers, paddles, share, options, home) → confirm
