@@ -2168,7 +2168,7 @@ function tick(ts) {
   G29.poll();
   if (gameState === 'GAME' || gameState === 'CHECKPOINT') {
     step(dt);
-    if (W3.renderer && gameState === 'GAME') W3.renderer.render(W3.scene, W3.camera);
+    if (W3.renderer) W3.renderer.render(W3.scene, W3.camera);
   }
 }
 
